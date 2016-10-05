@@ -1,0 +1,16 @@
+Package: RBioML
+Type: Package
+Title: A simple to use wrapper for implementing machine learning in biological and biomedical research.
+Version: 0.1.0
+Author: Jing Zhang
+Maintainer: Jing Zhang <jzhangcad@gmail.com>
+Description: RBioML contains an array of functions addresssing popular machine learning algorithms such as random forest, as well as PCA, ROC, clustering analyses for non-bioinformatician users to implement machine learning into their projects.
+License: GPL-3
+LazyData: TRUE
+Imports:
+    ggplot2 (>= 2.1.0),
+    reshape2 (>= 1.4.1),
+    gtable (>= 0.2.0), grid (>= 3.2.4),
+    randomForest (>= 4.6.12), ROCR (>= 1.0-7),
+    gplots (>= 3.0.1), limma (>= 3.28.21), edgeR (>= 3.14.0)
+RoxygenNote: 5.0.1
