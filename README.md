@@ -4,4 +4,4 @@ A simple to use package for implementing machine learning in biological and bioc
 
 Installation:
     
-    devtools::install_github("jzhangc/git_RBioML/RBioML", repos = BiocInstaller::biocinstallRepos())
+    devtools::install_github("jzhangc/git_RBioMachine/RBioMachine", repos = BiocInstaller::biocinstallRepos())
