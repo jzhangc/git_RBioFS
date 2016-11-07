@@ -4,13 +4,21 @@
 \alias{rbioRF_viplot}
 \title{rbioRF_viplot}
 \usage{
-rbioRF_viplot(fsdfm, n = "all", errorbar = "SEM", errorbarWidth = 0.2,
-  xTxtSize = 10, yTxtSize = 10, plotWidth = 170, plotHeight = 150)
+rbioRF_viplot(fsdfm, n = "all", Title = NULL,
+  xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
+  errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
 \item{fsdfm}{Input data frame.}
 
-\item{n}{Number of features to show. Takes integer numbers. Default is \code{"all"}.}
+\item{n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
+
+\item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
 
 \item{errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
 

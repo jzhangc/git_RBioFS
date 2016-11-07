@@ -20,7 +20,6 @@
 #' }
 #' @export
 rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = TRUE, nTree = 1001){
-
   ### load the dataframe/matrix
   if (transpo == TRUE){
     training <- t(dfm) # load the dataframe/matrix and transpose
@@ -43,9 +42,17 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = TRUE, nTree = 1001
 
   tmpFunc <- function(n, m, mtx, tmpTraining, tmpTgt,
                       tmpTree, tmpSize){
+
+    loclEnv <- environment() # save the environment local to tmpFunc
+
     if (n == 0){
       rownames(mtx) <- colnames(tmpTraining)
       colnames(mtx) <- c(paste("accuracy", seq(m - 1), sep = "_"))
+      output <- data.frame(feature = rownames(mtx), mtx)
+      write.csv(output,
+                file = paste(deparse(substitute(dfm, env = parent.env(loclEnv))),
+                             "_vi.csv", sep = ""),
+                row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
       return(mtx)
     } else {
       rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
@@ -61,12 +68,14 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = TRUE, nTree = 1001
 
 }
 
-
 #' @title rbioRF_viplot
 #'
 #' @description Generate bargraph for vi values obtained from itarative random forest
 #' @param fsdfm Input data frame.
-#' @param n Number of features to show. Takes integer numbers. Default is \code{"all"}.
+#' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param errorbar The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.
 #' @param errorbarWidth The width of the errorbar. Default is \code{0.2}.
 #' @param xTxtSize Font size for the x-axis text. Default is \code{10}.
@@ -83,6 +92,8 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = TRUE, nTree = 1001
 #' }
 #' @export
 rbioRF_viplot <- function(fsdfm, n = "all",
+                          Title = NULL, xLabel = "Mean Decrease in Accuracy",
+                          yLabel = NULL,
                           errorbar = "SEM", errorbarWidth = 0.2,
                           xTxtSize = 10, yTxtSize =10,
                           plotWidth = 170, plotHeight = 150){
@@ -100,15 +111,16 @@ rbioRF_viplot <- function(fsdfm, n = "all",
     pltdfm <- tail(pltdfm, n)
   }
 
-  ## boxplot
+  ## Histogram
   # prepare plotting dataframe (draft only)
   loclEnv <- environment()
   baseplt <- ggplot(pltdfm, aes(x = Targets, y = Mean), environment = loclEnv) +
     geom_bar(position="dodge", stat="identity", color="black")+
-    scale_x_discrete(expand = c(0.005, 0)) +
-    ggtitle(NULL) +
-    xlab(NULL) + # we can hide it using NULL
-    ylab("Mean Decrease in Accuracy") +
+    scale_x_discrete(expand = c(0.01, 0)) +
+    scale_y_continuous(expand = c(0.01, 0)) +
+    ggtitle(Title) +
+    xlab(yLabel) + # the arguments for x and y labls are switched as the figure is rotated
+    ylab(xLabel) + # the arguments for x and y labls are switched as the figure is rotated
     geom_hline(yintercept = 0) +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
@@ -121,13 +133,11 @@ rbioRF_viplot <- function(fsdfm, n = "all",
   if (errorbar == "SEM"){
     plt <- baseplt +
       geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth,
-                    position = position_dodge(0.9)) +
-      scale_y_continuous(limits = c(with(pltdfm, min(Mean - SEM) * 1.1), with(pltdfm, max(Mean + SEM) * 1.1)))
+                    position = position_dodge(0.9))
   } else if (errorbar == "SD") {
     plt <- baseplt +
       geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth,
-                    position = position_dodge(0.9)) +
-      scale_y_continuous(limits = c(with(pltdfm, min(Mean - SD) * 1.1), with(pltdfm, max(Mean + SD) * 1.1)))
+                    position = position_dodge(0.9))
   }
 
 
