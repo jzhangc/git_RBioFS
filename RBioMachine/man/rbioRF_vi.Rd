@@ -4,16 +4,16 @@
 \alias{rbioRF_vi}
 \title{rbioRF_vi}
 \usage{
-rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = TRUE, nTree = 1001)
+rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001)
 }
 \arguments{
 \item{dfm}{Input data frame.}
 
-\item{targetVar}{The target variable for random forest feature selection.}
+\item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
 
 \item{nTimes}{Number of iteration of random forest vi computation. Default is \code{50} times.}
 
-\item{transpo}{If the dataframe needs to be transposed before random forest. Default is \code{TRUE}.}
+\item{transpo}{If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.}
 
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
 }
@@ -22,6 +22,9 @@ Outputs a \code{matrix} object with vi values for all the random forest iteratio
 }
 \description{
 Iterative random froest variable importance (vi) computation.
+}
+\details{
+If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).
 }
 \examples{
 \dontrun{

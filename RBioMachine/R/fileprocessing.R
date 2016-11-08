@@ -31,21 +31,38 @@ singleIMP <- function(tgtVar, methd = "mean"){
 
 #' @title rbioIMP
 #'
-#' @description data imputation for raw data.
-#' @param fileName Inpule file name. Case sensitive and be sure to type with quotation marks. Currently only takes \code{.csv} files.
+#' @description data imputation for raw data based on the factor.
+#' @param dfm Input dataframe. Case sensitive and be sure to type with quotation marks.
+#' @param fct Input factor variable, based on the which the missing data is imputed.
+#' @param annot Input variable or character string used for variable name for the transposed dataframe.
 #' @param method Imputation method. Options are \code{"mean"}, \code{"random"} and \code{"regression"}. Default is \code{"mean"}.
 #' @param transpo If the output file is transposed. Default is \code{TRUE}.
 #' @return Outputs a \code{dataframe} object with all the missing value imputed.
 #' @details Make sure to make the input the data with only the tagert variable columns, meaning no annotation or index variables. The format would be target variables only (column). \code{transpo} arugment is particularly useful for the upcoming data normalization and random forest operations.
 #' @examples
 #' \dontrun{
-#' mydfm <- rbioIMP("mydata.csv", method = "mean") # make sure no aannotation variable present in the data file.
+#' mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "mean", transpo = TRUE) # make sure no annotation variable present in the data file.
 #' }
 #' @export
-rbioIMP <- function(fileName, method = "mean", transpo = TRUE){
-  raw <- read.csv(file = fileName, na.strings = " ", stringsAsFactors = FALSE)
-  impdata <- as.data.frame(sapply(raw, singleImp, methd = method)) # impute the missing values
-  return(impdata)
+rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = TRUE){
+
+  out <- dfm
+
+  # ave() function applies a function to a dataframe by factor. Make sure to use write out FUN
+  # by some R magical property, use [] preserves the dataframe format for object when using lapply()
+  out[] <- lapply(out,
+                  function(i)ave(i, fct,
+                                 FUN = function(j)singleIMP(j, methd = method))
+  )
+
+  if (transpo == TRUE){
+    out <- t(out)
+    colnames(out) <- annot
+  }
+
+  out <- as.data.frame(out)
+
+  return(out)
 }
 
 #' @title rbioNorm

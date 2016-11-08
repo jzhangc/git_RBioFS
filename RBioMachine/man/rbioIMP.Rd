@@ -4,10 +4,14 @@
 \alias{rbioIMP}
 \title{rbioIMP}
 \usage{
-rbioIMP(fileName, method = "mean", transpo = TRUE)
+rbioIMP(dfm, fct, annot, method = "mean", transpo = TRUE)
 }
 \arguments{
-\item{fileName}{Inpule file name. Case sensitive and be sure to type with quotation marks. Currently only takes \code{.csv} files.}
+\item{dfm}{Input dataframe. Case sensitive and be sure to type with quotation marks.}
+
+\item{fct}{Input factor variable, based on the which the missing data is imputed.}
+
+\item{annot}{Input variable or character string used for variable name for the transposed dataframe.}
 
 \item{method}{Imputation method. Options are \code{"mean"}, \code{"random"} and \code{"regression"}. Default is \code{"mean"}.}
 
@@ -17,14 +21,14 @@ rbioIMP(fileName, method = "mean", transpo = TRUE)
 Outputs a \code{dataframe} object with all the missing value imputed.
 }
 \description{
-data imputation for raw data.
+data imputation for raw data based on the factor.
 }
 \details{
 Make sure to make the input the data with only the tagert variable columns, meaning no annotation or index variables. The format would be target variables only (column). \code{transpo} arugment is particularly useful for the upcoming data normalization and random forest operations.
 }
 \examples{
 \dontrun{
-mydfm <- rbioIMP("mydata.csv", method = "mean") # make sure no aannotation variable present in the data file.
+mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "mean", transpo = TRUE) # make sure no annotation variable present in the data file.
 }
 }
 

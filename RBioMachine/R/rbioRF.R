@@ -8,21 +8,23 @@
 #'
 #' @description Iterative random froest variable importance (vi) computation.
 #' @param dfm Input data frame.
-#' @param targetVar The target variable for random forest feature selection.
+#' @param targetVar The target variable for random forest feature selection. This is a factor object.
 #' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
-#' @param transpo If the dataframe needs to be transposed before random forest. Default is \code{TRUE}.
+#' @param transpo If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.
 #' @param nTree Number of trees generated for each random forest iteration. Default is \code{1001} trees.
 #' @return Outputs a \code{matrix} object with vi values for all the random forest iterations for each feature.
+#' @details If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).
 #' @importFrom randomForest randomForest importance
 #' @examples
 #' \dontrun{
 #' rbioRF(dataframe, tgtvar_CntlvsStress, transpo = FLASE, nTree = 501)
 #' }
 #' @export
-rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = TRUE, nTree = 1001){
+rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 1001){
   ### load the dataframe/matrix
   if (transpo == TRUE){
     training <- t(dfm) # load the dataframe/matrix and transpose
+    colnames(training) <- rownames(dfm)
   } else {
     training <- dfm
   }
