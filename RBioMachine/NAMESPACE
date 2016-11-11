@@ -3,7 +3,6 @@
 export(rbioIMP)
 export(rbioNorm)
 export(rbioRF_vi)
-export(rbioRF_viplot)
 export(singleIMP)
 import(ggplot2)
 importFrom(grid,grid.draw)

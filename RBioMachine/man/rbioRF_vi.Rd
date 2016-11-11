@@ -4,7 +4,11 @@
 \alias{rbioRF_vi}
 \title{rbioRF_vi}
 \usage{
-rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001)
+rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
+  plot = TRUE, n = "all", Title = NULL,
+  xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
+  errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
 \item{dfm}{Input data frame.}
@@ -16,9 +20,31 @@ rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001)
 \item{transpo}{If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.}
 
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
+
+\item{plot}{If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}}
+
+\item{n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
+
+\item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+
+\item{errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
+
+\item{errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
+
+\item{xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+
+\item{yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+
+\item{plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
+
+\item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
-Outputs a \code{matrix} object with vi values for all the random forest iterations for each feature.
+Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi value.
 }
 \description{
 Iterative random froest variable importance (vi) computation.
@@ -28,7 +54,7 @@ If not using \code{transpo} argument. Make sure to arrange data (dfm) with featu
 }
 \examples{
 \dontrun{
-rbioRF(dataframe, tgtvar_CntlvsStress, transpo = FLASE, nTree = 501)
+rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 }
 }
 
