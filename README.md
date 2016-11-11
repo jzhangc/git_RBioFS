@@ -1,4 +1,4 @@
-# git_RBioML
+# git_RBioMachine
 A simple to use package for implementing machine learning in biological and biochemical research
 
 
