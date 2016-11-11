@@ -44,7 +44,7 @@ rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
-Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi value.
+Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi value.
 }
 \description{
 Iterative random froest variable importance (vi) computation.

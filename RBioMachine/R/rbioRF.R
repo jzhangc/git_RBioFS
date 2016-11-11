@@ -22,7 +22,7 @@
 #' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @return Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi value.
+#' @return Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi value.
 #' @details If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
@@ -72,7 +72,7 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
       output <- data.frame(feature = rownames(mtx), mtx)
       write.csv(output,
                 file = paste(deparse(substitute(dfm, env = parent.env(loclEnv))),
-                             "_recursive_vi.csv", sep = ""),
+                             "_iter_vi.csv", sep = ""),
                 row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
       return(mtx)
     } else {
