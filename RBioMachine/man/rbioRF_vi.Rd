@@ -5,10 +5,10 @@
 \title{rbioRF_vi}
 \usage{
 rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
-  multicore = TRUE, plot = TRUE, n = "all", Title = NULL,
-  xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
-  errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
-  plotHeight = 150)
+  mTry = max(ceiling(ncol(dfm)/3), 2), multicore = TRUE, plot = TRUE,
+  n = "all", Title = NULL, xLabel = "Mean Decrease in Accuracy",
+  yLabel = NULL, errorbar = "SEM", errorbarWidth = 0.2, xTxtSize = 10,
+  yTxtSize = 10, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{dfm}{Input data frame.}
@@ -20,6 +20,8 @@ rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
 \item{transpo}{If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.}
 
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
+
+\item{mTry}{Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.}
 
 \item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
 

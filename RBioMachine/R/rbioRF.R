@@ -11,6 +11,7 @@
 #' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
 #' @param transpo If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.
 #' @param nTree Number of trees generated for each random forest iteration. Default is \code{1001} trees.
+#' @param mTry Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.
 #' @param multicore If to use parallel computing. Default is \code{TRUE}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -35,7 +36,9 @@
 #' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 1001, multicore = TRUE,
+rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE,
+                      nTree = 1001, mTry = max(ceiling(ncol(dfm) / 3), 2),
+                      multicore = TRUE,
                       plot = TRUE, n = "all",
                       Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
                       errorbar = "SEM", errorbarWidth = 0.2,
@@ -67,21 +70,21 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
 
     ## signle core computing: recursive structure
     tmpFunc <- function(n, m, mtx, tmpTraining, tmpTgt,
-                        tmpTree, tmpSize){
+                        tmpTree, tmpTry, tmpSize){
 
-      loclEnv <- environment() # save the environment local to tmpFunc
+      tmploclEnv <- environment() # save the environment local to tmpFunc
 
       if (n == 0){
         rownames(mtx) <- colnames(tmpTraining)
         colnames(mtx) <- c(paste("vi", seq(m - 1), sep = "_"))
         output <- data.frame(feature = rownames(mtx), mtx)
         write.csv(output,
-                  file = paste(deparse(substitute(dfm, env = parent.env(loclEnv))),
+                  file = paste(deparse(substitute(dfm, env = parent.env(tmploclEnv))),
                                "_recursive_vi.csv", sep = ""),
                   row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
         return(mtx)
       } else {
-        rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
+        rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = tmpTry, importance = TRUE,
                            proximity = TRUE, drawSize = tmpSize)
         impt <- importance(rf, type = 1)
         mtx[, m] <- impt[, 1]
@@ -90,7 +93,7 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
     }
 
     phase0mtx <- tmpFunc(n = nTimes, m = 1, mtx = tmpMtx, tmpTraining = training, tmpTgt = tgt,
-                         tmpTree = nTree, tmpSize = drawSize)
+                         tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
 
   } else {
 
@@ -102,7 +105,7 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
 
     # iterative RF using par-apply functions
     phase0mtx <- parApply(cl, tmpMtx, 2, function(i){
-      rf <- randomForest(x = training, y = tgt, ntree = nTree, importance = TRUE, proximity = TRUE, drawSize = drawSize)
+      rf <- randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE, proximity = TRUE, drawSize = drawSize)
       impt <- importance(rf, type = 1)
       i <- impt[, 1]
       return(i)
@@ -152,6 +155,7 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
       geom_hline(yintercept = 0) +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(hjust = 0.5),
             legend.position = "bottom",
             legend.title = element_blank(),
             axis.text.x = element_text(size = xTxtSize, angle = 90, hjust = 1),
