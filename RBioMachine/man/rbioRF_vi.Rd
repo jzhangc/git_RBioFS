@@ -5,7 +5,7 @@
 \title{rbioRF_vi}
 \usage{
 rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
-  plot = TRUE, n = "all", Title = NULL,
+  multicore = TRUE, plot = TRUE, n = "all", Title = NULL,
   xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
   errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
   plotHeight = 150)

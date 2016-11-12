@@ -33,7 +33,7 @@
 #' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
+rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 1001, multicore = TRUE,
                       plot = TRUE, n = "all",
                       Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
                       errorbar = "SEM", errorbarWidth = 0.2,
@@ -61,31 +61,61 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
   # note that nrow is the number of features, hence the ncol of the traning set
   tmpMtx <- matrix(nrow = ncol(training), ncol = nTimes)
 
-  tmpFunc <- function(n, m, mtx, tmpTraining, tmpTgt,
-                      tmpTree, tmpSize){
+  if (!multicore){
 
-    loclEnv <- environment() # save the environment local to tmpFunc
+    ## signle core computing: recursive structure
+    tmpFunc <- function(n, m, mtx, tmpTraining, tmpTgt,
+                        tmpTree, tmpSize){
 
-    if (n == 0){
-      rownames(mtx) <- colnames(tmpTraining)
-      colnames(mtx) <- c(paste("accuracy", seq(m - 1), sep = "_"))
-      output <- data.frame(feature = rownames(mtx), mtx)
-      write.csv(output,
-                file = paste(deparse(substitute(dfm, env = parent.env(loclEnv))),
-                             "_iter_vi.csv", sep = ""),
-                row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
-      return(mtx)
-    } else {
-      rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
-                         proximity = TRUE, drawSize = tmpSize)
-      impt <- importance(rf, type = 1)
-      mtx[, m] <- impt[, 1]
-      tmpFunc(n - 1, m + 1, mtx, tmpTraining, tmpTgt, tmpTree, tmpSize)
+      loclEnv <- environment() # save the environment local to tmpFunc
+
+      if (n == 0){
+        rownames(mtx) <- colnames(tmpTraining)
+        colnames(mtx) <- c(paste("vi", seq(m - 1), sep = "_"))
+        output <- data.frame(feature = rownames(mtx), mtx)
+        write.csv(output,
+                  file = paste(deparse(substitute(dfm, env = parent.env(loclEnv))),
+                               "_recursive_vi.csv", sep = ""),
+                  row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
+        return(mtx)
+      } else {
+        rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
+                           proximity = TRUE, drawSize = tmpSize)
+        impt <- importance(rf, type = 1)
+        mtx[, m] <- impt[, 1]
+        tmpFunc(n - 1, m + 1, mtx, tmpTraining, tmpTgt, tmpTree, tmpSize)
+      }
     }
-  }
 
-  phase0mtx <- tmpFunc(n = nTimes, m = 1, mtx = tmpMtx, tmpTraining = training, tmpTgt = tgt,
-                       tmpTree = nTree, tmpSize = drawSize)
+    phase0mtx <- tmpFunc(n = nTimes, m = 1, mtx = tmpMtx, tmpTraining = training, tmpTgt = tgt,
+                         tmpTree = nTree, tmpSize = drawSize)
+
+  } else {
+
+    ## parallel computing
+    # set up cpu cluster
+    n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # iterative RF using par-apply functions
+    phase0mtx <- parApply(cl, tmpMtx, 2, function(i){
+      rf <- randomForest(x = training, y = tgt, ntree = nTree, importance = TRUE, proximity = TRUE, drawSize = drawSize)
+      impt <- importance(rf, type = 1)
+      i <- impt[, 1]
+      return(i)
+    })
+
+    rownames(phase0mtx) <- colnames(training)
+    colnames(phase0mtx) <- c(paste("vi", seq(nTimes), sep = "_"))
+
+    # write into a csv file
+    output <- data.frame(feature = rownames(phase0mtx), phase0mtx)
+    write.csv(output,
+              file = paste(deparse(substitute(dfm)),
+                           "_iter_vi.csv", sep = ""),
+              row.names = FALSE)
+  }
 
   ###### vi_ranking dataframe output and plotting
   ## prepare the dataframe
