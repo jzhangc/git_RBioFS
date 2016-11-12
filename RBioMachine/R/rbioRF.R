@@ -187,7 +187,7 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE, nTree = 100
     pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
     # export the file and draw a preview
-    ggsave(filename = paste(deparse(substitute(fsdfm)),".plot.pdf", sep = ""), plot = pltgtb,
+    ggsave(filename = paste(deparse(substitute(dfm)),".plot.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(dfm)) converts object name into a character string
     grid.draw(pltgtb) # preview
   }
