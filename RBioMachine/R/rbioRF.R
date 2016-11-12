@@ -11,6 +11,7 @@
 #' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
 #' @param transpo If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.
 #' @param nTree Number of trees generated for each random forest iteration. Default is \code{1001} trees.
+#' @param multicore If to use parallel computing. Default is \code{TRUE}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -28,6 +29,7 @@
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
+#' @importFrom parallel detectCores makeCluster stopCluster parApply
 #' @examples
 #' \dontrun{
 #' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)

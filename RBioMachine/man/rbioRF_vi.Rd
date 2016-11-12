@@ -21,6 +21,8 @@ rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
 
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
 
+\item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
+
 \item{plot}{If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}}
 
 \item{n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
