@@ -48,10 +48,10 @@ rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
-Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi value.
+Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi and OOB error rate value.
 }
 \description{
-Iterative random froest variable importance (vi) computation.
+Iterative random froest variable importance (vi) and OOB error rate computation.
 }
 \details{
 If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).

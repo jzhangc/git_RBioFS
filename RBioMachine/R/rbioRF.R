@@ -5,7 +5,7 @@
 
 #' @title rbioRF_vi
 #'
-#' @description Iterative random froest variable importance (vi) computation.
+#' @description Iterative random froest variable importance (vi) and OOB error rate computation.
 #' @param dfm Input data frame.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
 #' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
@@ -24,7 +24,7 @@
 #' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @return Outputs a \code{dataframe} object with vi values for each feature. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi value.
+#' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi and OOB error rate value.
 #' @details If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
