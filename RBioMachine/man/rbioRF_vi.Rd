@@ -4,20 +4,18 @@
 \alias{rbioRF_vi}
 \title{rbioRF_vi}
 \usage{
-rbioRF_vi(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001,
-  mTry = max(ceiling(ncol(dfm)/3), 2), multicore = TRUE, plot = TRUE,
+rbioRF_vi(x, targetVar, nTimes = 50, nTree = 1001,
+  mTry = max(ceiling(ncol(x)/3), 2), multicore = TRUE, plot = TRUE,
   n = "all", Title = NULL, xLabel = "Mean Decrease in Accuracy",
   yLabel = NULL, errorbar = "SEM", errorbarWidth = 0.2, xTxtSize = 10,
   yTxtSize = 10, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
-\item{dfm}{Input data frame.}
+\item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names.}
 
 \item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
 
 \item{nTimes}{Number of iteration of random forest vi computation. Default is \code{50} times.}
-
-\item{transpo}{If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.}
 
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
 
@@ -54,7 +52,7 @@ Outputs a \code{list} object with vi values for each feature and OOB error rate.
 Iterative random froest variable importance (vi) and OOB error rate computation.
 }
 \details{
-If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).
+If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 }
 \examples{
 \dontrun{

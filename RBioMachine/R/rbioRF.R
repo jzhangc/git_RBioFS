@@ -6,10 +6,9 @@
 #' @title rbioRF_vi
 #'
 #' @description Iterative random froest variable importance (vi) and OOB error rate computation.
-#' @param dfm Input data frame.
+#' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
 #' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
-#' @param transpo If the dataframe needs to be transposed before random forest. Default is \code{FALSE}.
 #' @param nTree Number of trees generated for each random forest iteration. Default is \code{1001} trees.
 #' @param mTry Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.
 #' @param multicore If to use parallel computing. Default is \code{TRUE}.
@@ -25,32 +24,31 @@
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi and OOB error rate value.
-#' @details If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names. If using the \code{transpo} arugment, make sure to have rownames as featrues (e.g., gene names).
+#' @details If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
+#' @importFrom rpart rpart prune
 #' @examples
 #' \dontrun{
 #' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001, mTry = max(ceiling(ncol(dfm) / 3), 2),
+rbioRF_vi <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceiling(ncol(x) / 3), 2),
                       multicore = TRUE,
                       plot = TRUE, n = "all",
                       Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
                       errorbar = "SEM", errorbarWidth = 0.2,
                       xTxtSize = 10, yTxtSize =10,
                       plotWidth = 170, plotHeight = 150){
+
+  start <- Sys.time()
+
   #### recursive RF
   ### load the dataframe/matrix
-  if (transpo == TRUE){
-    training <- t(dfm) # load the dataframe/matrix and transpose
-    colnames(training) <- rownames(dfm)
-  } else {
-    training <- dfm
-  }
+  training <- as.matrix(x)
 
   ### pepare the target variable
   tgt <- factor(as.character(targetVar), levels = unique(targetVar))
@@ -86,11 +84,11 @@ rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001
         raw_OOB_err_output <- as.data.frame(tmperrmtx)
 
         write.csv(raw_vi_output,
-                  file = paste(deparse(substitute(dfm, env = parent.env(tmploclEnv))),
+                  file = paste(deparse(substitute(x, env = parent.env(tmploclEnv))),
                                "_iter_vi.csv", sep = ""),
                   row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
         write.csv(raw_OOB_err_output,
-                  file = paste(deparse(substitute(dfm, env = parent.env(tmploclEnv))),
+                  file = paste(deparse(substitute(x, env = parent.env(tmploclEnv))),
                                "_iter_OOB_err.csv", sep = ""),
                   row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
 
@@ -151,11 +149,11 @@ rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001
     raw_OOB_err_output <- as.data.frame(errmtx)
 
     write.csv(raw_vi_output,
-              file = paste(deparse(substitute(dfm)),
+              file = paste(deparse(substitute(x)),
                            "_iter_vi.csv", sep = ""),
               row.names = FALSE)
     write.csv(raw_OOB_err_output,
-              file = paste(deparse(substitute(dfm)),
+              file = paste(deparse(substitute(x)),
                            "_iter_OOB_err.csv", sep = ""),
               row.names = FALSE)
 
@@ -164,7 +162,7 @@ rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001
 
   }
 
-  ###### vi_ranking dataframe output and plotting
+  ####prepare output vi and OOB error dataframes
   ## prepare the vi dataframe
   fName_vi <- rownames(phase0mtx_vi)
   fMean_vi <- rowMeans(phase0mtx_vi)
@@ -173,6 +171,37 @@ rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001
   tmpdfm_vi <- data.frame(Targets = fName_vi, Mean = fMean_vi, SD = fSD_vi, SEM = fSEM_vi, stringsAsFactors = FALSE)
   tmpdfm_vi <- tmpdfm_vi[order(tmpdfm_vi$Mean), ]
   tmpdfm_vi$Targets <- factor(tmpdfm_vi$Targets, levels = unique(tmpdfm_vi$Targets))
+
+  fMean_OOB_err <- rowMeans(phase0mtx_OOB_err)
+  fSD_OOB_err <- apply(phase0mtx_OOB_err, 1, sd)
+  fSEM_OOB_err <- fSD_OOB_err/sqrt(ncol(phase0mtx_OOB_err))
+
+  # ranked vi dataframe
+  outdfm_vi <- data.frame(tmpdfm_vi[order(tmpdfm_vi$Mean, decreasing = TRUE), ],
+                          Rank = c(1:nrow(tmpdfm_vi))) # make sure to resort the dataframe in descenting order.
+
+  # OOB dtaframe
+  outdfm_OOB_err <- data.frame(Mean = fMean_OOB_err, SD = fSD_OOB_err, SEM = fSEM_OOB_err, stringsAsFactors = FALSE)
+  rownames(outdfm_OOB_err) <- paste(nTimes, "trees_OOB_err", sep = "_")
+
+  ## initial feature elimination
+  if (ncol(x) == 1){
+    thsd <- ncol(x)
+  } else {
+    cartTree <- rpart(SD ~ Rank, data = outdfm_vi, cp = 0, minsplit = 2) # CART modelling: classify Rank by SD. Using ANOVA (regression) method.
+    mincp <- cartTree$cptable[which(cartTree$cptable[, 4] == min(cartTree$cptable[, 4])) ,1] # extract the minimum cp value
+    cartprune <- prune(cartTree, cp = mincp) # prune the tree so that SD values that won't impact Rank classfication are discarded
+    minpredv <- min(predict(cartprune)) # obatain the minimum prediciton value (predicted SD) as the SD threshold for Mean
+
+    if (length(which(outdfm_vi$Mean < minpredv)) == 0){
+      thsd <- ncol(x)
+    } else {
+      thsd <- min(which(outdfm_vi$Mean < minpredv)) - 1 # compare Mean and SD. Discard all the features with a mean < minimum predicted SD.
+    }
+  }
+
+  feature_initFS <- as.character(outdfm_vi$Targets[1:thsd]) # extract selected features
+  training_initFS <- training[, feature_initFS] # subsetting the input matrix
 
   ## vi plotting
   if (plot){
@@ -233,23 +262,20 @@ rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001
     pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
     # export the file and draw a preview
-    ggsave(filename = paste(deparse(substitute(dfm)),".plot.pdf", sep = ""), plot = pltgtb,
-           width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(dfm)) converts object name into a character string
+    ggsave(filename = paste(deparse(substitute(x)),".plot.pdf", sep = ""), plot = pltgtb,
+           width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
     grid.draw(pltgtb) # preview
   }
 
-  ## prepare output vi and OOB error dataframes
-  outdfm_vi <- data.frame(tmpdfm_vi[order(tmpdfm_vi$Mean, decreasing = TRUE), ],
-                          Rank = c(1:nrow(tmpdfm_vi))) # make sure to resort the dataframe in descenting order.
+  end <- Sys.time()
 
-  fMean_OOB_err <- rowMeans(phase0mtx_OOB_err)
-  fSD_OOB_err <- apply(phase0mtx_OOB_err, 1, sd)
-  fSEM_OOB_err <- fSD_OOB_err/sqrt(ncol(phase0mtx_OOB_err))
-  outdfm_OOB_err <- data.frame(Mean = fMean_OOB_err, SD = fSD_OOB_err, SEM = fSEM_OOB_err, stringsAsFactors = FALSE)
-  rownames(outdfm_OOB_err) <- paste(nTimes, "trees_OOB_err", sep = "_")
 
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
-  outlst <- list(iter_vi_summary = outdfm_vi, iter_OOB_err_summary = outdfm_OOB_err)
+  outlst <- list(matrix_initial_FS = training_initFS,
+                 feature_initial_FS = feature_initFS,
+                 iter_vi_summary = outdfm_vi,
+                 iter_OOB_err_summary = outdfm_OOB_err,
+                 runtime = end - start)
 
-  return(assign(paste(deparse(substitute(dfm)), "_phase0_summary", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
+  return(assign(paste(deparse(substitute(x)), "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
 }
