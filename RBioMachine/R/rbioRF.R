@@ -36,8 +36,7 @@
 #' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE,
-                      nTree = 1001, mTry = max(ceiling(ncol(dfm) / 3), 2),
+rbioRF_vi <- function(dfm, targetVar, nTimes = 50, transpo = FALSE, nTree = 1001, mTry = max(ceiling(ncol(dfm) / 3), 2),
                       multicore = TRUE,
                       plot = TRUE, n = "all",
                       Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
@@ -64,36 +63,56 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE,
   ### repeating random forest - iterative approach
   # pre-set an empty matrix with the number of columns same as the number of RF iterations
   # note that nrow is the number of features, hence the ncol of the traning set
-  tmpMtx <- matrix(nrow = ncol(training), ncol = nTimes)
+  vimtx <- matrix(nrow = ncol(training), ncol = nTimes)
+  errmtx <- matrix(nrow = 1, ncol = nTimes)
+
 
   if (!multicore){
 
     ## signle core computing: recursive structure
-    tmpFunc <- function(n, m, mtx, tmpTraining, tmpTgt,
+    tmpFunc <- function(n, m, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
                         tmpTree, tmpTry, tmpSize){
 
       tmploclEnv <- environment() # save the environment local to tmpFunc
 
       if (n == 0){
-        rownames(mtx) <- colnames(tmpTraining)
-        colnames(mtx) <- c(paste("vi", seq(m - 1), sep = "_"))
-        output <- data.frame(feature = rownames(mtx), mtx)
-        write.csv(output,
+        rownames(tmpvimtx) <- colnames(tmpTraining)
+        colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
+        rownames(tmperrmtx) <- "OOB_error_rate"
+        colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
+
+
+        raw_vi_output <- data.frame(feature = rownames(tmpvimtx), tmpvimtx)
+        raw_OOB_err_output <- as.data.frame(tmperrmtx)
+
+        write.csv(raw_vi_output,
                   file = paste(deparse(substitute(dfm, env = parent.env(tmploclEnv))),
-                               "_recursive_vi.csv", sep = ""),
+                               "_iter_vi.csv", sep = ""),
                   row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
-        return(mtx)
+        write.csv(raw_OOB_err_output,
+                  file = paste(deparse(substitute(dfm, env = parent.env(tmploclEnv))),
+                               "_iter_OOB_err.csv", sep = ""),
+                  row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
+
+        tmplst <- list(raw_vi = tmpvimtx, raw_OOB_error = tmperrmtx)
+        return(tmplst)
+
       } else {
         rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = tmpTry, importance = TRUE,
                            proximity = TRUE, drawSize = tmpSize)
         impt <- importance(rf, type = 1)
-        mtx[, m] <- impt[, 1]
-        tmpFunc(n - 1, m + 1, mtx, tmpTraining, tmpTgt, tmpTree, tmpSize)
+        tmpvimtx[, m] <- impt[, 1] # fill the vi matrix
+        tmperrmtx[, m] <- rf$err.rate[tmptimes, 1] # fill the OOB error rate
+        tmpFunc(n - 1, m + 1, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
+                tmpTree, tmpTry, tmpSize)
       }
     }
 
-    phase0mtx <- tmpFunc(n = nTimes, m = 1, mtx = tmpMtx, tmpTraining = training, tmpTgt = tgt,
-                         tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
+    lst <- tmpFunc(n = nTimes, m = 1, tmptimes = nTimes, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
+                   tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
+
+    phase0mtx_vi <- lst$raw_vi
+    phase0mtx_OOB_err <- lst$raw_OOB_error
 
   } else {
 
@@ -104,44 +123,67 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE,
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     # iterative RF using par-apply functions
-    phase0mtx <- parApply(cl, tmpMtx, 2, function(i){
-      rf <- randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE, proximity = TRUE, drawSize = drawSize)
-      impt <- importance(rf, type = 1)
-      i <- impt[, 1]
-      return(i)
-    })
+    tmpfunc2 <- function(i, ...){
+      rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
+                                       proximity = TRUE, drawSize = drawSize)
 
-    rownames(phase0mtx) <- colnames(training)
-    colnames(phase0mtx) <- c(paste("vi", seq(nTimes), sep = "_"))
+      impt <- randomForest::importance(rf, type = 1)
+      tmpvimtx <- impt[, 1] # fill the vi matrix
+      tmperrmtx <- rf$err.rate[nTimes, 1] # fill the OOB error rate
+      lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
+    }
 
-    # write into a csv file
-    output <- data.frame(feature = rownames(phase0mtx), phase0mtx)
-    write.csv(output,
+    tmp <- parLapply(cl, X = 1:nTimes, fun = tmpfunc2, tmpTraining = training, tmpTgt = tgt,
+                     tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
+
+    for (j in 1:nTimes){
+      vimtx[, j] <- tmp[[j]]$tmpvimtx
+      errmtx[, j] <- tmp[[j]]$tmperrmtx
+    }
+
+    rownames(vimtx) <- colnames(training)
+    colnames(vimtx) <- c(paste("vi", seq(nTimes), sep = "_"))
+
+    rownames(errmtx) <- "OOB_error_rate"
+    colnames(errmtx) <- c(paste("OOB_error_tree", seq(nTimes), sep = "_"))
+
+    raw_vi_output <- data.frame(feature = rownames(vimtx), vimtx)
+    raw_OOB_err_output <- as.data.frame(errmtx)
+
+    write.csv(raw_vi_output,
               file = paste(deparse(substitute(dfm)),
                            "_iter_vi.csv", sep = ""),
               row.names = FALSE)
+    write.csv(raw_OOB_err_output,
+              file = paste(deparse(substitute(dfm)),
+                           "_iter_OOB_err.csv", sep = ""),
+              row.names = FALSE)
+
+    phase0mtx_vi <- vimtx
+    phase0mtx_OOB_err <- errmtx
+
   }
 
   ###### vi_ranking dataframe output and plotting
-  ## prepare the dataframe
-  fName <- rownames(phase0mtx)
-  fMean <- rowMeans(phase0mtx)
-  fSD <- apply(phase0mtx, 1, sd)
-  fSEM <- sapply(fSD, function(x)x/sqrt(ncol(phase0mtx)))
-  tmpdfm <- data.frame(Targets = fName, Mean = fMean, SD = fSD, SEM = fSEM, stringsAsFactors = FALSE)
-  tmpdfm <- tmpdfm[order(tmpdfm$Mean), ]
-  tmpdfm$Targets <- factor(tmpdfm$Targets, levels = unique(tmpdfm$Targets))
+  ## prepare the vi dataframe
+  fName_vi <- rownames(phase0mtx_vi)
+  fMean_vi <- rowMeans(phase0mtx_vi)
+  fSD_vi <- apply(phase0mtx_vi, 1, sd)
+  fSEM_vi <- sapply(fSD_vi, function(x)x/sqrt(ncol(phase0mtx_vi)))
+  tmpdfm_vi <- data.frame(Targets = fName_vi, Mean = fMean_vi, SD = fSD_vi, SEM = fSEM_vi, stringsAsFactors = FALSE)
+  tmpdfm_vi <- tmpdfm_vi[order(tmpdfm_vi$Mean), ]
+  tmpdfm_vi$Targets <- factor(tmpdfm_vi$Targets, levels = unique(tmpdfm_vi$Targets))
 
-  ## plotting
+  ## vi plotting
   if (plot){
 
     loclEnv <- environment()
 
     # prepare plotting dataframe
     if (n != "all"){
-      pltdfm <- tail(tmpdfm, n)
+      pltdfm <- tail(tmpdfm_vi, n)
     } else {
-      pltdfm <- tmpdfm
+      pltdfm <- tmpdfm_vi
     }
 
     # plotting
@@ -196,9 +238,18 @@ rbioRF_vi <- function(dfm,  targetVar, nTimes = 50, transpo = FALSE,
     grid.draw(pltgtb) # preview
   }
 
-  ## return the vi ranking dataframe for the initial feature elimination
-  outdfm <- data.frame(tmpdfm[order(tmpdfm$Mean, decreasing = TRUE), ],
-                       Rank = c(1:nrow(tmpdfm))) # make sure to resort the dataframe in descenting order.
+  ## prepare output vi and OOB error dataframes
+  outdfm_vi <- data.frame(tmpdfm_vi[order(tmpdfm_vi$Mean, decreasing = TRUE), ],
+                          Rank = c(1:nrow(tmpdfm_vi))) # make sure to resort the dataframe in descenting order.
 
-  return(assign(paste(deparse(substitute(dfm)), "_vi_ranking", sep = ""), outdfm, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
+  fMean_OOB_err <- rowMeans(phase0mtx_OOB_err)
+  fSD_OOB_err <- apply(phase0mtx_OOB_err, 1, sd)
+  fSEM_OOB_err <- fSD_OOB_err/sqrt(ncol(phase0mtx_OOB_err))
+  outdfm_OOB_err <- data.frame(Mean = fMean_OOB_err, SD = fSD_OOB_err, SEM = fSEM_OOB_err, stringsAsFactors = FALSE)
+  rownames(outdfm_OOB_err) <- paste(nTimes, "trees_OOB_err", sep = "_")
+
+  ## return the vi ranking and OOB err dataframes for the initial feature elimination
+  outlst <- list(iter_vi_summary = outdfm_vi, iter_OOB_err_summary = outdfm_OOB_err)
+
+  return(assign(paste(deparse(substitute(dfm)), "_phase0_summary", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
 }
