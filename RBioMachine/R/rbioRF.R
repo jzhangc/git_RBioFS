@@ -30,7 +30,7 @@
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
-#' @importFrom parallel detectCores makeCluster stopCluster parApply
+#' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @examples
 #' \dontrun{
 #' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
