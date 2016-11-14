@@ -3,7 +3,7 @@
   return(TRUE)
 }
 
-#' @title rbioRF_vi
+#' @title rbioRF_initialFS
 #'
 #' @description Iterative random froest variable importance (vi) and OOB error rate computation.
 #' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
@@ -24,7 +24,7 @@
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi and OOB error rate value.
-#' @details If not using \code{transpo} argument. Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
+#' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
@@ -33,10 +33,10 @@
 #' @importFrom rpart rpart prune
 #' @examples
 #' \dontrun{
-#' rbioRF_vi(training_HCvTC, tgtVar_HCvTC, transpo = FALSE, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
+#' rbioRF_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioRF_vi <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceiling(ncol(x) / 3), 2),
+rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceiling(ncol(x) / 3), 2),
                       multicore = TRUE,
                       plot = TRUE, n = "all",
                       Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
@@ -77,7 +77,7 @@ rbioRF_vi <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceilin
         rownames(tmpvimtx) <- colnames(tmpTraining)
         colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
         rownames(tmperrmtx) <- "OOB_error_rate"
-        colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
+        colnames(tmperrmtx) <- c(paste("OOB_error_tree_rep", seq(m - 1), sep = "_"))
 
 
         raw_vi_output <- data.frame(feature = rownames(tmpvimtx), tmpvimtx)
@@ -106,7 +106,7 @@ rbioRF_vi <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceilin
       }
     }
 
-    lst <- tmpFunc(n = nTimes, m = 1, tmptimes = nTimes, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
+    lst <- tmpFunc(n = nTimes, m = 1, tmptimes = nTree, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
                    tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
 
     phase0mtx_vi <- lst$raw_vi
@@ -127,12 +127,11 @@ rbioRF_vi <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceilin
 
       impt <- randomForest::importance(rf, type = 1)
       tmpvimtx <- impt[, 1] # fill the vi matrix
-      tmperrmtx <- rf$err.rate[nTimes, 1] # fill the OOB error rate
+      tmperrmtx <- rf$err.rate[nTree, 1] # fill the OOB error rate
       lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
     }
 
-    tmp <- parLapply(cl, X = 1:nTimes, fun = tmpfunc2, tmpTraining = training, tmpTgt = tgt,
-                     tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
+    tmp <- parLapply(cl, X = 1:nTimes, fun = tmpfunc2)
 
     for (j in 1:nTimes){
       vimtx[, j] <- tmp[[j]]$tmpvimtx
