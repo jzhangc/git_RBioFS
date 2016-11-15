@@ -60,7 +60,7 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
 
   ### repeating random forest - iterative approach
   # pre-set an empty matrix with the number of columns same as the number of RF iterations
-  # note that nrow is the number of features, hence the ncol of the traning set
+  # note that nrow is the number of features, hence the ncol of the training set
   vimtx <- matrix(nrow = ncol(training), ncol = nTimes)
   errmtx <- matrix(nrow = 1, ncol = nTimes)
 
@@ -126,16 +126,16 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
                                        proximity = TRUE, drawSize = drawSize)
 
       impt <- randomForest::importance(rf, type = 1)
-      tmpvimtx <- impt[, 1] # fill the vi matrix
-      tmperrmtx <- rf$err.rate[nTree, 1] # fill the OOB error rate
+      tmpvimtx <- impt[, 1] # obtain the vi matrix
+      tmperrmtx <- rf$err.rate[nTree, 1] # obtain the OOB error rate
       lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
     }
 
     tmp <- parLapply(cl, X = 1:nTimes, fun = tmpfunc2)
 
     for (j in 1:nTimes){
-      vimtx[, j] <- tmp[[j]]$tmpvimtx
-      errmtx[, j] <- tmp[[j]]$tmperrmtx
+      vimtx[, j] <- tmp[[j]]$tmpvimtx # fill the final vi matrix
+      errmtx[, j] <- tmp[[j]]$tmperrmtx # fill the final OOB error rate matrix
     }
 
     rownames(vimtx) <- colnames(training)

@@ -4,7 +4,10 @@
 \alias{rbioRF_iterOOB}
 \title{rbioRF_iterOOB}
 \usage{
-rbioRF_iterOOB(x, targetVar, nTimes = 50, nTree = 1001, multicore = TRUE)
+rbioRF_iterOOB(x, targetVar, nTimes = 50, nTree = 1001, multicore = TRUE,
+  plot = TRUE, n = "all", Title = NULL, xLabel = NULL, yLabel = NULL,
+  errorbar = "SEM", errorbarWidth = 0.2, symbolSize = 2, xTxtSize = 10,
+  yTxtSize = 10, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names.}
@@ -16,9 +19,33 @@ rbioRF_iterOOB(x, targetVar, nTimes = 50, nTree = 1001, multicore = TRUE)
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
 
 \item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
+
+\item{plot}{If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}}
+
+\item{n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
+
+\item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+
+\item{errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
+
+\item{errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
+
+\item{symbolSize}{Size of the symbol. Default is \code{2}.}
+
+\item{xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+
+\item{yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+
+\item{plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
+
+\item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
-Outputs a \code{matrix} object with  OOB error rates.
+Outputs a \code{list} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
 }
 \description{
 Iterative nested random froest variable importance (vi) and OOB error rate computation. (to be completed)

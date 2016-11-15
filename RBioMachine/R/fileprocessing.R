@@ -55,12 +55,12 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = TRUE){
                                  FUN = function(j)singleIMP(j, methd = method))
   )
 
+  out <- as.data.frame(out)
+
   if (transpo == TRUE){
     out <- t(out)
     colnames(out) <- annot
   }
-
-  out <- as.data.frame(out)
 
   return(out)
 }
