@@ -60,7 +60,7 @@ rbioRF_iterOOB <- function(x, targetVar, nTimes = 50, nTree = 1001,
   if (!multicore){
 
     ## signle core computing: recursive structure
-    tmpFunc <- function(n, m, tmptimes, tmperrmtx, tmpTraining, tmpTgt,
+    tmpFunc <- function(n, m, tmperrmtx, tmpTraining, tmpTgt,
                         tmpTree, tmpSize){
 
 
@@ -77,23 +77,23 @@ rbioRF_iterOOB <- function(x, targetVar, nTimes = 50, nTree = 1001,
                              proximity = TRUE, drawSize = tmpSize)
         }
 
-        tmperrmtx[, m] <- rf$err.rate[tmptimes, 1] # fill the OOB error rate
-        tmpFunc(n - 1, m + 1, tmptimes, tmperrmtx, tmpTraining, tmpTgt,
+        tmperrmtx[, m] <- tail(rf$err.rate[, 1], n = 1) # fill the OOB error rate
+        tmpFunc(n - 1, m + 1, tmperrmtx, tmpTraining, tmpTgt,
                 tmpTree, tmpSize)
       }
     }
 
-    tmpFunc2 <- function(i, j, tmp2mtx){
+    tmpFunc2 <- function(i, j, tmp2mtx, ...){
       if (i == 0){
         rownames(tmp2mtx) <- seq(j - 1)
         colnames(tmp2mtx) <- c(paste("OOB_error_tree_rep", seq(nTimes), sep = "_"))
 
         return(tmp2mtx)
       } else {
-        tmp2mtx[j, ] <- tmpFunc(n =nTimes, m = 1, tmptimes = nTree, tmperrmtx = singleerrmtx,
+        tmp2mtx[j, ] <- tmpFunc(n = nTimes, m = 1, tmperrmtx = singleerrmtx,
                                 tmpTraining = training[1:j], tmpTgt = tgt, tmpTree = nTree,
                                 tmpSize = drawSize)
-        tmpFunc2(i - 1, j + 1, tmp2mtx)
+        tmpFunc2(i - 1, j + 1, tmp2mtx, ...)
       }
     }
 
@@ -109,28 +109,37 @@ rbioRF_iterOOB <- function(x, targetVar, nTimes = 50, nTree = 1001,
     cl <- makeCluster(n_cores)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
+    # iterative RF using par-apply functions
     tmpfunc4 <- function(j, ...){
 
       n_cores2 <- parallel::detectCores() - 1
       cl2 <- parallel::makeCluster(n_cores2)
       on.exit(parallel::stopCluster(cl2)) # close connect when exiting the function
 
-
-      errmtx <- matrix(nrow = 1, ncol = nTimes) # for the iterative OOB error rates from a single tree
-
-      # iterative RF using par-apply functions
       tmpfunc3 <- function(i, ...){
-        rf <- randomForest::randomForest(x = training[1:j], y = tgt, ntree = nTree, importance = TRUE,
-                                         proximity = TRUE, drawSize = drawSize)
 
-        tmperrmtx <- rf$err.rate[nTree, 1] # compute the OOB error rate
+        if (j < 4){
+          rf <- randomForest::randomForest(x = training[1:j], y = tgt, ntree = nTree, importance = TRUE,
+                                           proximity = TRUE, drawSize = drawSize)
+
+        } else {
+          rf <- randomForest::randomForest(x = training[1:j], y = tgt, ntree = nTree, mtry = max(ceiling(ncol(training[1:j]) / 3), 2),
+                                           importance = TRUE,
+                                           proximity = TRUE, drawSize = drawSize)
+        }
+
+
+
+        tmperrmtx <- tail(rf$err.rate[, 1], n = 1) # compute the OOB error rate
         lst <- list(tmperrmtx = tmperrmtx)
       }
 
+
+      errmtx <- matrix(nrow = 1, ncol = nTimes) # for the iterative OOB error rates from a single tree
       tmp <- parallel::parLapply(cl2, X = 1:nTimes, fun = tmpfunc3)
 
-      for (i in 1:nTimes){
-        errmtx[, i] <- tmp[[i]]$tmperrmtx # fill the OOB error rate
+      for (p in 1:nTimes){
+        errmtx[, p] <- tmp[[p]]$tmperrmtx # fill the OOB error rate
       }
 
       list = list(errmtx = errmtx)
@@ -138,8 +147,8 @@ rbioRF_iterOOB <- function(x, targetVar, nTimes = 50, nTree = 1001,
 
     l <- parLapply(cl, X = 1:ncol(training), tmpfunc4)
 
-    for (p in 1:ncol(training)){
-      ooberrmtx[p, ] <- l[[p]]$errmtx
+    for (q in 1:ncol(training)){
+      ooberrmtx[q, ] <- l[[q]]$errmtx
     }
 
     rownames(ooberrmtx) <- seq(ncol(training))
