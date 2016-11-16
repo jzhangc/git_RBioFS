@@ -193,7 +193,7 @@ rbioRF_iterOOB <- function(x, targetVar, nTimes = 50, nTree = 1001,
             legend.position = "bottom",
             legend.title = element_blank(),
             axis.text.x = element_text(size = xTxtSize),
-            axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+            axis.text.y = element_text(size = yTxtSize, hjust = 0.5, angle = 90))
 
     if (errorbar == "SEM"){
       plt <- baseplt +

@@ -228,7 +228,7 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
             plot.title = element_text(hjust = 0.5),
             legend.position = "bottom",
             legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize, angle = 90, hjust = 1),
+            axis.text.x = element_text(size = xTxtSize, angle = 0, hjust = 0.5),
             axis.text.y = element_text(size = yTxtSize, hjust = 0.5)) +
       coord_flip()
 
