@@ -4,13 +4,16 @@
 \alias{rbioRF_initialFS}
 \title{rbioRF_initialFS}
 \usage{
-rbioRF_initialFS(x, targetVar, nTimes = 50, nTree = 1001,
-  mTry = max(ceiling(ncol(x)/3), 2), multicore = TRUE, plot = TRUE,
-  n = "all", Title = NULL, xLabel = "Mean Decrease in Accuracy",
-  yLabel = NULL, errorbar = "SEM", errorbarWidth = 0.2, xTxtSize = 10,
-  yTxtSize = 10, plotWidth = 170, plotHeight = 150)
+rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
+  nTree = 1001, mTry = max(ceiling(ncol(x)/3), 2), multicore = TRUE,
+  plot = TRUE, n = "all", Title = NULL,
+  xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
+  errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
+\item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
+
 \item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names.}
 
 \item{targetVar}{The target variable for random forest feature selection. This is a factor object.}

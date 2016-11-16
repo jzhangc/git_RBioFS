@@ -4,12 +4,15 @@
 \alias{rbioRF_iterOOB}
 \title{rbioRF_iterOOB}
 \usage{
-rbioRF_iterOOB(x, targetVar, nTimes = 50, nTree = 1001, multicore = TRUE,
-  plot = TRUE, n = "all", Title = NULL, xLabel = NULL, yLabel = NULL,
+rbioRF_iterOOB(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
+  nTree = 1001, mTry = "iter_default", multicore = TRUE, plot = TRUE,
+  n = "all", Title = NULL, xLabel = NULL, yLabel = NULL,
   errorbar = "SEM", errorbarWidth = 0.2, symbolSize = 2, xTxtSize = 10,
   yTxtSize = 10, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
+\item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
+
 \item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names.}
 
 \item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
@@ -17,6 +20,8 @@ rbioRF_iterOOB(x, targetVar, nTimes = 50, nTree = 1001, multicore = TRUE,
 \item{nTimes}{Number of iteration of random forest vi computation. Default is \code{50} times.}
 
 \item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
+
+\item{mTry}{Number of randomly selected featurs for constructing trees. When \code{"iter_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"iter_default"}.}
 
 \item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
 

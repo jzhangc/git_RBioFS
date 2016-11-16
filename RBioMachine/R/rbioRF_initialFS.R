@@ -6,6 +6,7 @@
 #' @title rbioRF_initialFS
 #'
 #' @description Iterative random froest variable importance (vi) and OOB error rate computation.
+#' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
 #' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
 #' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
@@ -36,13 +37,14 @@
 #' rbioRF_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceiling(ncol(x) / 3), 2),
-                      multicore = TRUE,
-                      plot = TRUE, n = "all",
-                      Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
-                      errorbar = "SEM", errorbarWidth = 0.2,
-                      xTxtSize = 10, yTxtSize =10,
-                      plotWidth = 170, plotHeight = 150){
+rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
+                             x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceiling(ncol(x) / 3), 2),
+                             multicore = TRUE,
+                             plot = TRUE, n = "all",
+                             Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
+                             errorbar = "SEM", errorbarWidth = 0.2,
+                             xTxtSize = 10, yTxtSize =10,
+                             plotWidth = 170, plotHeight = 150){
 
   start <- Sys.time()
 
@@ -77,7 +79,7 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
         rownames(tmpvimtx) <- colnames(tmpTraining)
         colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
         rownames(tmperrmtx) <- "OOB_error_rate"
-        colnames(tmperrmtx) <- c(paste("OOB_error_tree_rep", seq(m - 1), sep = "_"))
+        colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
 
 
         raw_vi_output <- data.frame(feature = rownames(tmpvimtx), tmpvimtx)
@@ -126,16 +128,16 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
                                        proximity = TRUE, drawSize = drawSize)
 
       impt <- randomForest::importance(rf, type = 1)
-      tmpvimtx <- impt[, 1] # obtain the vi matrix
-      tmperrmtx <- rf$err.rate[nTree, 1] # obtain the OOB error rate
+      tmpvimtx <- impt[, 1] # fill the vi matrix
+      tmperrmtx <- rf$err.rate[nTree, 1] # fill the OOB error rate
       lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
     }
 
     tmp <- parLapply(cl, X = 1:nTimes, fun = tmpfunc2)
 
     for (j in 1:nTimes){
-      vimtx[, j] <- tmp[[j]]$tmpvimtx # fill the final vi matrix
-      errmtx[, j] <- tmp[[j]]$tmperrmtx # fill the final OOB error rate matrix
+      vimtx[, j] <- tmp[[j]]$tmpvimtx
+      errmtx[, j] <- tmp[[j]]$tmperrmtx
     }
 
     rownames(vimtx) <- colnames(training)
@@ -200,7 +202,7 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
   }
 
   feature_initFS <- as.character(outdfm_vi$Targets[1:thsd]) # extract selected features
-  training_initFS <- training[, feature_initFS] # subsetting the input matrix
+  training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
 
   ## vi plotting
   if (plot){
@@ -261,7 +263,7 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
     pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
     # export the file and draw a preview
-    ggsave(filename = paste(deparse(substitute(x)),".plot.pdf", sep = ""), plot = pltgtb,
+    ggsave(filename = paste(objTitle,".vi.plot.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
     grid.draw(pltgtb) # preview
   }
@@ -276,5 +278,5 @@ rbioRF_initialFS <- function(x, targetVar, nTimes = 50, nTree = 1001, mTry = max
                  iter_OOB_err_summary = outdfm_OOB_err,
                  runtime = end - start)
 
-  return(assign(paste(deparse(substitute(x)), "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
+  return(assign(paste(objTitle, "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
 }
