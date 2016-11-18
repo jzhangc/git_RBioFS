@@ -1,6 +1,6 @@
 Package: RBioFS
 Type: Package
-Title: A simple to use wrapper for implementing machine learning feature selection in biological and biomedical research.
+Title: A simple to use wrapper for implementing machine learning feature selection for biological and biomedical research.
 Version: 0.1.8
 Author: Jing Zhang
 Maintainer: Jing Zhang <jzhangcad@gmail.com>
