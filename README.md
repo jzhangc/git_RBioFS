@@ -1,5 +1,5 @@
-# git_RBioMachine
-A simple to use package for implementing machine learning in biological and biochemical research
+# git_RBioFS
+A simple to use package for implementing machine learning feature selection in biological and biochemical research
 
 
 Installation:
