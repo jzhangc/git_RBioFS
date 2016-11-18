@@ -1,7 +1,7 @@
-Package: RBioMachine
+Package: RBioFS
 Type: Package
-Title: A simple to use wrapper for implementing machine learning in biological and biomedical research.
-Version: 0.1.7
+Title: A simple to use wrapper for implementing machine learning feature selection in biological and biomedical research.
+Version: 0.1.8
 Author: Jing Zhang
 Maintainer: Jing Zhang <jzhangcad@gmail.com>
 Description: RBioMachine contains an array of functions addresssing popular machine learning algorithms such as random forest, as well as PCA, ROC, clustering analyses for non-bioinformatician users to implement machine learning into their projects.
