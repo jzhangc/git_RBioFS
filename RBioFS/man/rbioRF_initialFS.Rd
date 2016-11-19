@@ -18,9 +18,9 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 
 \item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
 
-\item{nTimes}{Number of iteration of random forest vi computation. Default is \code{50} times.}
+\item{nTimes}{Number of random forest vi computation runs. Default is \code{50} times.}
 
-\item{nTree}{Number of trees generated for each random forest iteration. Default is \code{1001} trees.}
+\item{nTree}{Number of trees generated for each random forest run. Default is \code{1001} trees.}
 
 \item{mTry}{Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.}
 
@@ -49,10 +49,10 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
-Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi and OOB error rate value.
+Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi and OOB error rate value.
 }
 \description{
-Iterative random froest variable importance (vi) and OOB error rate computation.
+Recursive random froest variable importance (vi) and OOB error rate computation.
 }
 \details{
 Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.

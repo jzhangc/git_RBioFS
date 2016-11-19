@@ -1,12 +1,12 @@
-#' @title rbioRF_iterOOB
+#' @title rbioRF_recurOOB
 #'
-#' @description Iterative nested random froest variable importance (vi) and OOB error rate computation. (to be completed)
+#' @description Recursive nested random froest variable importance (vi) and OOB error rate computation. (to be completed)
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
 #' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
-#' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
-#' @param nTree Number of trees generated for each random forest iteration. Default is \code{1001} trees.
-#' @param mTry Number of randomly selected featurs for constructing trees. When \code{"iter_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"iter_default"}.
+#' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
+#' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
+#' @param mTry Number of randomly selected featurs for constructing trees. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.
 #' @param multicore If to use parallel computing. Default is \code{TRUE}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -27,11 +27,11 @@
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @examples
 #' \dontrun{
-#' rbioRF_iterOOB(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
+#' rbioRF_recurOOB(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
 #' }
 #' @export
-rbioRF_iterOOB <- function(objTitle = "x_vs_tgt",
-                           x, targetVar, nTimes = 50, nTree = 1001, mTry = "iter_default",
+rbioRF_recurOOB <- function(objTitle = "x_vs_tgt",
+                           x, targetVar, nTimes = 50, nTree = 1001, mTry = "recur_default",
                            multicore = TRUE,
                            plot = TRUE, n = "all",
                            Title = NULL, xLabel = NULL, yLabel = NULL,
@@ -57,8 +57,8 @@ rbioRF_iterOOB <- function(objTitle = "x_vs_tgt",
 
 
   ## prepare blank tree OOB error matrics
-  singleerrmtx <- matrix(nrow = 1, ncol = nTimes) # for the iterative OOB error rates from a single tree
-  ooberrmtx <- matrix(nrow = ncol(training), ncol = nTimes) # for the iterative OOB error rates from all trees.
+  singleerrmtx <- matrix(nrow = 1, ncol = nTimes) # for the recursive OOB error rates from a single tree
+  ooberrmtx <- matrix(nrow = ncol(training), ncol = nTimes) # for the recursive OOB error rates from all trees.
 
 
   if (!multicore){
@@ -72,7 +72,7 @@ rbioRF_iterOOB <- function(objTitle = "x_vs_tgt",
         return(tmperrmtx)
 
       } else {
-        if (tmpTry == "iter_default"){
+        if (tmpTry == "recur_default"){
 
           if (ncol(tmpTraining) < 4){
             rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
@@ -123,7 +123,7 @@ rbioRF_iterOOB <- function(objTitle = "x_vs_tgt",
     cl <- makeCluster(n_cores)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    # iterative RF using par-apply functions
+    # recursive RF using par-apply functions
     tmpfunc4 <- function(j, ...){
 
       n_cores2 <- parallel::detectCores() - 1
@@ -132,7 +132,7 @@ rbioRF_iterOOB <- function(objTitle = "x_vs_tgt",
 
       tmpfunc3 <- function(i, ...){
 
-        if (mTry == "iter_default"){
+        if (mTry == "recur_default"){
           if (j < 4){
             rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, importance = TRUE,
                                              proximity = TRUE, drawSize = drawSize)
@@ -154,7 +154,7 @@ rbioRF_iterOOB <- function(objTitle = "x_vs_tgt",
       }
 
 
-      errmtx <- matrix(nrow = 1, ncol = nTimes) # for the iterative OOB error rates from a single tree
+      errmtx <- matrix(nrow = 1, ncol = nTimes) # for the recursive OOB error rates from a single tree
       tmp <- parallel::parLapply(cl2, X = 1:nTimes, fun = tmpfunc3)
 
       for (p in 1:nTimes){

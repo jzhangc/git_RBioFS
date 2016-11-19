@@ -3,7 +3,7 @@
 export(rbioIMP)
 export(rbioNorm)
 export(rbioRF_initialFS)
-export(rbioRF_iterOOB)
+export(rbioRF_recurOOB)
 export(singleIMP)
 import(ggplot2)
 importFrom(grid,grid.draw)

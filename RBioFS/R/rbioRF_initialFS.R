@@ -5,12 +5,12 @@
 
 #' @title rbioRF_initialFS
 #'
-#' @description Iterative random froest variable importance (vi) and OOB error rate computation.
+#' @description Recursive random froest variable importance (vi) and OOB error rate computation.
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
 #' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
-#' @param nTimes Number of iteration of random forest vi computation. Default is \code{50} times.
-#' @param nTree Number of trees generated for each random forest iteration. Default is \code{1001} trees.
+#' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
+#' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
 #' @param mTry Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.
 #' @param multicore If to use parallel computing. Default is \code{TRUE}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
@@ -24,7 +24,7 @@
 #' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the iteratively generated raw vi and OOB error rate value.
+#' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi and OOB error rate value.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
@@ -60,8 +60,8 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
   size <- min(as.vector(table(tgt))) # down-sampling
   drawSize <- rep(size, nlvl)
 
-  ### repeating random forest - iterative approach
-  # pre-set an empty matrix with the number of columns same as the number of RF iterations
+  ### repeating random forest - recursive approach
+  # pre-set an empty matrix with the number of columns same as the number of RF runs
   # note that nrow is the number of features, hence the ncol of the training set
   vimtx <- matrix(nrow = ncol(training), ncol = nTimes)
   errmtx <- matrix(nrow = 1, ncol = nTimes)
@@ -87,11 +87,11 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
         write.csv(raw_vi_output,
                   file = paste(deparse(substitute(x, env = parent.env(tmploclEnv))),
-                               "_iter_vi.csv", sep = ""),
+                               "_recur_vi.csv", sep = ""),
                   row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
         write.csv(raw_OOB_err_output,
                   file = paste(deparse(substitute(x, env = parent.env(tmploclEnv))),
-                               "_iter_OOB_err.csv", sep = ""),
+                               "_recur_OOB_err.csv", sep = ""),
                   row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
 
         tmplst <- list(raw_vi = tmpvimtx, raw_OOB_error = tmperrmtx)
@@ -122,7 +122,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     cl <- makeCluster(n_cores)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    # iterative RF using par-apply functions
+    # recursive RF using par-apply functions
     tmpfunc2 <- function(i, ...){
       rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
                                        proximity = TRUE, drawSize = drawSize)
@@ -151,11 +151,11 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
     write.csv(raw_vi_output,
               file = paste(deparse(substitute(x)),
-                           "_iter_vi.csv", sep = ""),
+                           "_recur_vi.csv", sep = ""),
               row.names = FALSE)
     write.csv(raw_OOB_err_output,
               file = paste(deparse(substitute(x)),
-                           "_iter_OOB_err.csv", sep = ""),
+                           "_recur_OOB_err.csv", sep = ""),
               row.names = FALSE)
 
     phase0mtx_vi <- vimtx
@@ -274,8 +274,8 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   outlst <- list(matrix_initial_FS = training_initFS,
                  feature_initial_FS = feature_initFS,
-                 iter_vi_summary = outdfm_vi,
-                 iter_OOB_err_summary = outdfm_OOB_err,
+                 recur_vi_summary = outdfm_vi,
+                 recur_OOB_err_summary = outdfm_OOB_err,
                  runtime = end - start)
 
   return(assign(paste(objTitle, "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
