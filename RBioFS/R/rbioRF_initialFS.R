@@ -24,7 +24,7 @@
 #' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi and OOB error rate value.
+#' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
@@ -80,19 +80,6 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
         colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
         rownames(tmperrmtx) <- "OOB_error_rate"
         colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
-
-
-        raw_vi_output <- data.frame(feature = rownames(tmpvimtx), tmpvimtx)
-        raw_OOB_err_output <- as.data.frame(tmperrmtx)
-
-        write.csv(raw_vi_output,
-                  file = paste(deparse(substitute(x, env = parent.env(tmploclEnv))),
-                               "_recur_vi.csv", sep = ""),
-                  row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
-        write.csv(raw_OOB_err_output,
-                  file = paste(deparse(substitute(x, env = parent.env(tmploclEnv))),
-                               "_recur_OOB_err.csv", sep = ""),
-                  row.names = FALSE) # parent.env() to access to the parent environment. but be sure to create a local environment first.
 
         tmplst <- list(raw_vi = tmpvimtx, raw_OOB_error = tmperrmtx)
         return(tmplst)

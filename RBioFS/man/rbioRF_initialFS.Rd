@@ -49,7 +49,7 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
-Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file. The function also exports a \code{.csv} file with all the recursively generated raw vi and OOB error rate value.
+Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
 }
 \description{
 Recursive random froest variable importance (vi) and OOB error rate computation.
