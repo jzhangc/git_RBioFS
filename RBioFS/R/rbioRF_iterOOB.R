@@ -1,6 +1,6 @@
-#' @title rbioRF_recurOOB
+#' @title rbioRF_SFS
 #'
-#' @description Recursive nested random froest variable importance (vi) and OOB error rate computation. (to be completed)
+#' @description Recursive nested random froest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
 #' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
@@ -27,10 +27,10 @@
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @examples
 #' \dontrun{
-#' rbioRF_recurOOB(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
+#' rbioRF_SFS(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
 #' }
 #' @export
-rbioRF_recurOOB <- function(objTitle = "x_vs_tgt",
+rbioRF_SFS <- function(objTitle = "x_vs_tgt",
                            x, targetVar, nTimes = 50, nTree = 1001, mTry = "recur_default",
                            multicore = TRUE,
                            plot = TRUE, n = "all",
@@ -39,11 +39,6 @@ rbioRF_recurOOB <- function(objTitle = "x_vs_tgt",
                            symbolSize = 2, xTxtSize = 10, yTxtSize =10,
                            plotWidth = 170, plotHeight = 150
 ){
-
-  ## mark time
-  start <- Sys.time()
-
-
   ## prepare the dataframe
   training <- data.frame(x)
 
@@ -78,7 +73,7 @@ rbioRF_recurOOB <- function(objTitle = "x_vs_tgt",
             rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
                                proximity = TRUE, drawSize = tmpSize)
           } else {
-            rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = max(ceiling(ncol(tmpTraining) / 3), 2),
+            rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = max(floor(ncol(tmpTraining) / 3), 2),
                                importance = TRUE,
                                proximity = TRUE, drawSize = tmpSize)
           }
@@ -138,7 +133,7 @@ rbioRF_recurOOB <- function(objTitle = "x_vs_tgt",
                                              proximity = TRUE, drawSize = drawSize)
 
           } else {
-            rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, mtry = max(ceiling(ncol(training[1:j]) / 3), 2),
+            rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, mtry = max(floor(ncol(training[1:j]) / 3), 2),
                                              importance = TRUE,
                                              proximity = TRUE, drawSize = drawSize)
           }
@@ -244,26 +239,23 @@ rbioRF_recurOOB <- function(objTitle = "x_vs_tgt",
     pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
     # export the file and draw a preview
-    ggsave(filename = paste(objTitle,".OOBplot.pdf", sep = ""), plot = pltgtb,
+    ggsave(filename = paste(objTitle,".OOB.plot.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
     grid.draw(pltgtb) # preview
 
 
   }
 
-
-  ## mark time
-  end <- Sys.time()
-
   ## output
   minerrsd <- with(ooberrsummary, which(Mean <= min(Mean + SD)))
-  minfeatures <- colnames(x)[1:min(minerrsd)]
+  minfeatures <- colnames(training)[1:min(minerrsd)]
+  sfsmatrix <- training[, 1:min(minerrsd), drop = FALSE]
 
   outlst <- list(selected_features = minfeatures,
                  features_with_min_OOBerror_w_1SD = minerrsd,
                  OOB_error_rate_summary = ooberrsummary,
-                 runtime = end - start)
+                 SFS_matrix = sfsmatrix)
 
-  return(assign(paste(objTitle, "_itrOOB_FS", sep = ""), outlst, envir = .GlobalEnv))
+  return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
 
 }

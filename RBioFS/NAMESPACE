@@ -2,8 +2,8 @@
 
 export(rbioIMP)
 export(rbioNorm)
+export(rbioRF_SFS)
 export(rbioRF_initialFS)
-export(rbioRF_recurOOB)
 export(singleIMP)
 import(ggplot2)
 importFrom(grid,grid.draw)

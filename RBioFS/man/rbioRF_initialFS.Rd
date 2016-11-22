@@ -5,7 +5,7 @@
 \title{rbioRF_initialFS}
 \usage{
 rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
-  nTree = 1001, mTry = max(ceiling(ncol(x)/3), 2), multicore = TRUE,
+  nTree = 1001, mTry = max(floor(ncol(x)/3), 2), multicore = TRUE,
   plot = TRUE, n = "all", Title = NULL,
   xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
   errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
@@ -22,7 +22,7 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 
 \item{nTree}{Number of trees generated for each random forest run. Default is \code{1001} trees.}
 
-\item{mTry}{Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.}
+\item{mTry}{Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)}.}
 
 \item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
 

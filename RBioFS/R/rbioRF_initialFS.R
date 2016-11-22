@@ -11,7 +11,7 @@
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
 #' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
-#' @param mTry Number of random feature pick when building the tree. Default is \code{max(ceiling(ncol(dfm) / 3), 2)}.
+#' @param mTry Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)}.
 #' @param multicore If to use parallel computing. Default is \code{TRUE}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -38,15 +38,13 @@
 #' }
 #' @export
 rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
-                             x, targetVar, nTimes = 50, nTree = 1001, mTry = max(ceiling(ncol(x) / 3), 2),
+                             x, targetVar, nTimes = 50, nTree = 1001, mTry = max(floor(ncol(x) / 3), 2),
                              multicore = TRUE,
                              plot = TRUE, n = "all",
                              Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
                              errorbar = "SEM", errorbarWidth = 0.2,
                              xTxtSize = 10, yTxtSize =10,
                              plotWidth = 170, plotHeight = 150){
-
-  start <- Sys.time()
 
   #### recursive RF
   ### load the dataframe/matrix
@@ -255,15 +253,11 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     grid.draw(pltgtb) # preview
   }
 
-  end <- Sys.time()
-
-
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   outlst <- list(matrix_initial_FS = training_initFS,
                  feature_initial_FS = feature_initFS,
                  recur_vi_summary = outdfm_vi,
-                 recur_OOB_err_summary = outdfm_OOB_err,
-                 runtime = end - start)
+                 recur_OOB_err_summary = outdfm_OOB_err)
 
   return(assign(paste(objTitle, "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
 }
