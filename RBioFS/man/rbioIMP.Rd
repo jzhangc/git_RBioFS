@@ -4,7 +4,7 @@
 \alias{rbioIMP}
 \title{rbioIMP}
 \usage{
-rbioIMP(dfm, fct, annot, method = "mean", transpo = TRUE)
+rbioIMP(dfm, fct, annot, method = "mean", transpo = TRUE, ...)
 }
 \arguments{
 \item{dfm}{Input dataframe. Case sensitive and be sure to type with quotation marks.}
@@ -13,9 +13,11 @@ rbioIMP(dfm, fct, annot, method = "mean", transpo = TRUE)
 
 \item{annot}{Input variable or character string used for variable name for the transposed dataframe.}
 
-\item{method}{Imputation method. Options are \code{"mean"}, \code{"random"} and \code{"regression"}. Default is \code{"mean"}.}
+\item{method}{Imputation method. Options are \code{"mean"}, \code{"random"} and \code{"rf"}. Default is \code{"mean"}. When \code{rf}, it uses the data impute function from \code{randomForest} pacakge.}
 
 \item{transpo}{If the output file is transposed. Default is \code{TRUE}.}
+
+\item{...}{See \code{rfImpute()} funtion in \code{randomForest} package for details.}
 }
 \value{
 Outputs a \code{dataframe} object with all the missing value imputed.
@@ -28,7 +30,7 @@ Make sure to make the input the data with only the tagert variable columns, mean
 }
 \examples{
 \dontrun{
-mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "mean", transpo = TRUE) # make sure no annotation variable present in the data file.
+mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "rf", transpo = TRUE, iter = 10, ntree = 501) # make sure no annotation variable present in the data file.
 }
 }
 

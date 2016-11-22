@@ -40,7 +40,7 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
                            plotWidth = 170, plotHeight = 150
 ){
   ## prepare the dataframe
-  training <- data.frame(x)
+  training <- data.frame(x, check.names = FALSE)
 
   ### pepare the target variable
   tgt <- factor(as.character(targetVar), levels = unique(targetVar))
