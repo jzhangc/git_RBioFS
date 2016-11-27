@@ -179,6 +179,22 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
                               SEM = ooberrSEM, stringsAsFactors = FALSE)
   ooberrsummary$Features <- factor(ooberrsummary$Features, levels = unique(ooberrsummary$Features))
 
+  ## output
+  minerrsd <- with(ooberrsummary, which(Mean <= min(Mean + SD)))
+  minfeatures <- colnames(training)[1:min(minerrsd)]
+  sfsmatrix <- training[, 1:min(minerrsd), drop = FALSE]
+
+  outlst <- list(selected_features = minfeatures,
+                 feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
+                 OOB_error_rate_summary = ooberrsummary,
+                 SFS_matrix = sfsmatrix)
+
+  sink(file = paste(objTitle,".SFS.txt",sep = ""), append = FALSE) # dump the results to a file
+  print(outlst)
+  sink() # end dump
+
+
+
   ## plot
   if (plot){
 
@@ -199,7 +215,7 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
       ggtitle(Title) +
       xlab(xLabel) + # the arguments for x and y labls are switched as the figure is rotated
       ylab(yLabel) + # the arguments for x and y labls are switched as the figure is rotated
-      geom_hline(yintercept = 0) +
+      geom_vline(xintercept = min(minerrsd), linetype = "dashed") +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(hjust = 0.5),
@@ -210,13 +226,13 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
 
     if (errorbar == "SEM"){
       plt <- baseplt +
-        geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth) +
+        geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth, position = position_dodge(0.9)) +
         scale_y_continuous(expand = c(0, 0),
                            limits = c(with(ooberrsummary, min(Mean - SEM) * 0.6),
                                       with(ooberrsummary, max(Mean + SEM) * 1.2)))
     } else if (errorbar == "SD") {
       plt <- baseplt +
-        geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth) +
+        geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth, position = position_dodge(0.9)) +
         scale_y_continuous(expand = c(0, 0),
                            limits = c(with(ooberrsummary, min(Mean - SD) * 0.6),
                                       with(ooberrsummary, max(Mean + SD) * 1.2)))
@@ -246,16 +262,7 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
 
   }
 
-  ## output
-  minerrsd <- with(ooberrsummary, which(Mean <= min(Mean + SD)))
-  minfeatures <- colnames(training)[1:min(minerrsd)]
-  sfsmatrix <- training[, 1:min(minerrsd), drop = FALSE]
-
-  outlst <- list(selected_features = minfeatures,
-                 features_with_min_OOBerror_w_1SD = minerrsd,
-                 OOB_error_rate_summary = ooberrsummary,
-                 SFS_matrix = sfsmatrix)
-
+  ## output to env
   return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
 
 }

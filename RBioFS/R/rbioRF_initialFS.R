@@ -131,18 +131,6 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     rownames(errmtx) <- "OOB_error_rate"
     colnames(errmtx) <- c(paste("OOB_error_tree", seq(nTimes), sep = "_"))
 
-    raw_vi_output <- data.frame(feature = rownames(vimtx), vimtx)
-    raw_OOB_err_output <- as.data.frame(errmtx)
-
-    write.csv(raw_vi_output,
-              file = paste(deparse(substitute(x)),
-                           "_recur_vi.csv", sep = ""),
-              row.names = FALSE)
-    write.csv(raw_OOB_err_output,
-              file = paste(deparse(substitute(x)),
-                           "_recur_OOB_err.csv", sep = ""),
-              row.names = FALSE)
-
     phase0mtx_vi <- vimtx
     phase0mtx_OOB_err <- errmtx
 
@@ -154,9 +142,9 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
   fMean_vi <- rowMeans(phase0mtx_vi)
   fSD_vi <- apply(phase0mtx_vi, 1, sd)
   fSEM_vi <- sapply(fSD_vi, function(x)x/sqrt(ncol(phase0mtx_vi)))
-  tmpdfm_vi <- data.frame(Targets = fName_vi, Mean = fMean_vi, SD = fSD_vi, SEM = fSEM_vi, stringsAsFactors = FALSE)
+  tmpdfm_vi <- data.frame(Target = fName_vi, Mean = fMean_vi, SD = fSD_vi, SEM = fSEM_vi, stringsAsFactors = FALSE)
   tmpdfm_vi <- tmpdfm_vi[order(tmpdfm_vi$Mean), ]
-  tmpdfm_vi$Targets <- factor(tmpdfm_vi$Targets, levels = unique(tmpdfm_vi$Targets))
+  tmpdfm_vi$Target <- factor(tmpdfm_vi$Target, levels = unique(tmpdfm_vi$Target))
 
   fMean_OOB_err <- rowMeans(phase0mtx_OOB_err)
   fSD_OOB_err <- apply(phase0mtx_OOB_err, 1, sd)
@@ -186,7 +174,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     }
   }
 
-  feature_initFS <- as.character(outdfm_vi$Targets[1:thsd]) # extract selected features
+  feature_initFS <- as.character(outdfm_vi$Target[1:thsd]) # extract selected features
   training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
 
   ## vi plotting
@@ -202,20 +190,20 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     }
 
     # plotting
-    baseplt <- ggplot(pltdfm, aes(x = Targets, y = Mean), environment = loclEnv) +
+    baseplt <- ggplot(pltdfm, aes(x = Target, y = Mean), environment = loclEnv) +
       geom_bar(position="dodge", stat="identity", color="black")+
       scale_x_discrete(expand = c(0.01, 0)) +
       scale_y_continuous(expand = c(0.01, 0)) +
       ggtitle(Title) +
-      xlab(yLabel) + # the arguments for x and y labls are switched as the figure is rotated
-      ylab(xLabel) + # the arguments for x and y labls are switched as the figure is rotated
+      xlab(yLabel) + # the arguments for x and y labls are switched as the figure will be rotated
+      ylab(xLabel) + # the arguments for x and y labls are switched as the figure will be rotated
       geom_hline(yintercept = 0) +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(hjust = 0.5),
             legend.position = "bottom",
             legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize, angle = 0, hjust = 0.5),
+            axis.text.x = element_text(size = xTxtSize, angle = 0, hjust = 0.5), # x and y not reversed as they are not associated with the roation of the axes.
             axis.text.y = element_text(size = yTxtSize, hjust = 0.5)) +
       coord_flip()
 
@@ -249,7 +237,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
     # export the file and draw a preview
     ggsave(filename = paste(objTitle,".vi.plot.pdf", sep = ""), plot = pltgtb,
-           width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
+           width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
     grid.draw(pltgtb) # preview
   }
 
@@ -258,6 +246,10 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
                  feature_initial_FS = feature_initFS,
                  recur_vi_summary = outdfm_vi,
                  recur_OOB_err_summary = outdfm_OOB_err)
+
+  sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
+  print(outlst)
+  sink() # end dump
 
   return(assign(paste(objTitle, "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
 }
