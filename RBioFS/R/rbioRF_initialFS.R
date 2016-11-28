@@ -191,7 +191,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
     # plotting
     baseplt <- ggplot(pltdfm, aes(x = Target, y = Mean), environment = loclEnv) +
-      geom_bar(position="dodge", stat="identity", color="black")+
+      geom_bar(position="dodge", stat="identity", color="black", fill = "gray66")+
       scale_x_discrete(expand = c(0.01, 0)) +
       scale_y_continuous(expand = c(0.01, 0)) +
       ggtitle(Title) +
