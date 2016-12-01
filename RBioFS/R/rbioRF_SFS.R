@@ -31,13 +31,13 @@
 #' }
 #' @export
 rbioRF_SFS <- function(objTitle = "x_vs_tgt",
-                           x, targetVar, nTimes = 50, nTree = 1001, mTry = "recur_default",
-                           multicore = TRUE,
-                           plot = TRUE, n = "all",
-                           Title = NULL, xLabel = NULL, yLabel = NULL,
-                           errorbar = "SEM", errorbarWidth = 0.2,
-                           symbolSize = 2, xTxtSize = 10, yTxtSize =10,
-                           plotWidth = 170, plotHeight = 150
+                       x, targetVar, nTimes = 50, nTree = 1001, mTry = "recur_default",
+                       multicore = TRUE,
+                       plot = TRUE, n = "all",
+                       Title = NULL, xLabel = NULL, yLabel = NULL,
+                       errorbar = "SEM", errorbarWidth = 0.2,
+                       symbolSize = 2, xTxtSize = 10, yTxtSize =10,
+                       plotWidth = 170, plotHeight = 150
 ){
   ## prepare the dataframe
   training <- data.frame(x, check.names = FALSE)
@@ -198,68 +198,79 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
   ## plot
   if (plot){
 
-    loclEnv <- environment()
+    # check the feature number
 
-    # prepare plotting dataframe
-    if (n != "all"){
-      pltdfm <- head(ooberrsummary, n)
+    if (nrow(ooberrsummary) == 1){
+
+      ## print msg
+      print("Only single feature subset detected. No need to plot.")
+
+      ## output to env
+      return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
+
     } else {
-      pltdfm <- ooberrsummary
+
+      loclEnv <- environment()
+
+      # prepare plotting dataframe
+      if (n != "all"){
+        pltdfm <- head(ooberrsummary, n)
+      } else {
+        pltdfm <- ooberrsummary
+      }
+
+      # plotting
+      baseplt <- ggplot(ooberrsummary, aes(x = Features, y = Mean, group = 1), environment = loclEnv) +
+        geom_line() +
+        geom_point(size = symbolSize) +
+        scale_x_discrete(expand = c(0.01, 0)) +
+        ggtitle(Title) +
+        xlab(xLabel) + # the arguments for x and y labls are switched as the figure is rotated
+        ylab(yLabel) + # the arguments for x and y labls are switched as the figure is rotated
+        geom_vline(xintercept = min(minerrsd), linetype = "dashed") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "bottom",
+              legend.title = element_blank(),
+              axis.text.x = element_text(size = xTxtSize),
+              axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+      if (errorbar == "SEM"){
+        plt <- baseplt +
+          geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth, position = position_dodge(0.9)) +
+          scale_y_continuous(expand = c(0, 0),
+                             limits = c(with(ooberrsummary, min(Mean - SEM) * 0.6),
+                                        with(ooberrsummary, max(Mean + SEM) * 1.2)))
+      } else if (errorbar == "SD") {
+        plt <- baseplt +
+          geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth, position = position_dodge(0.9)) +
+          scale_y_continuous(expand = c(0, 0),
+                             limits = c(with(ooberrsummary, min(Mean - SD) * 0.6),
+                                        with(ooberrsummary, max(Mean + SD) * 1.2)))
+      }
+
+      grid.newpage()
+
+      # extract gtable
+      pltgtb <- ggplot_gtable(ggplot_build(plt))
+
+      # add the right side y axis
+      Aa <- which(pltgtb$layout$name == "axis-l")
+      pltgtb_a <- pltgtb$grobs[[Aa]]
+      axs <- pltgtb_a$children[[2]]
+      axs$widths <- rev(axs$widths)
+      axs$grobs <- rev(axs$grobs)
+      axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+      Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+      pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+      pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+      # export the file and draw a preview
+      ggsave(filename = paste(objTitle,".OOB.plot.pdf", sep = ""), plot = pltgtb,
+             width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
+      grid.draw(pltgtb) # preview
     }
-
-    # plotting
-    baseplt <- ggplot(ooberrsummary, aes(x = Features, y = Mean, group = 1), environment = loclEnv) +
-      geom_line() +
-      geom_point(size = symbolSize) +
-      scale_x_discrete(expand = c(0.01, 0)) +
-      ggtitle(Title) +
-      xlab(xLabel) + # the arguments for x and y labls are switched as the figure is rotated
-      ylab(yLabel) + # the arguments for x and y labls are switched as the figure is rotated
-      geom_vline(xintercept = min(minerrsd), linetype = "dashed") +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(hjust = 0.5),
-            legend.position = "bottom",
-            legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize),
-            axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
-
-    if (errorbar == "SEM"){
-      plt <- baseplt +
-        geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth, position = position_dodge(0.9)) +
-        scale_y_continuous(expand = c(0, 0),
-                           limits = c(with(ooberrsummary, min(Mean - SEM) * 0.6),
-                                      with(ooberrsummary, max(Mean + SEM) * 1.2)))
-    } else if (errorbar == "SD") {
-      plt <- baseplt +
-        geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth, position = position_dodge(0.9)) +
-        scale_y_continuous(expand = c(0, 0),
-                           limits = c(with(ooberrsummary, min(Mean - SD) * 0.6),
-                                      with(ooberrsummary, max(Mean + SD) * 1.2)))
-    }
-
-    grid.newpage()
-
-    # extract gtable
-    pltgtb <- ggplot_gtable(ggplot_build(plt))
-
-    # add the right side y axis
-    Aa <- which(pltgtb$layout$name == "axis-l")
-    pltgtb_a <- pltgtb$grobs[[Aa]]
-    axs <- pltgtb_a$children[[2]]
-    axs$widths <- rev(axs$widths)
-    axs$grobs <- rev(axs$grobs)
-    axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-    Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-    pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-    pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
-
-    # export the file and draw a preview
-    ggsave(filename = paste(objTitle,".OOB.plot.pdf", sep = ""), plot = pltgtb,
-           width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
-    grid.draw(pltgtb) # preview
-
-
   }
 
   ## output to env

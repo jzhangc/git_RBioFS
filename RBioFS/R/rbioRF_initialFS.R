@@ -46,6 +46,11 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
                              xTxtSize = 10, yTxtSize =10,
                              plotWidth = 170, plotHeight = 150){
 
+  #### check the variables
+  if (ncol(x) == 1){
+    stop("only one feature detected. No need to select.")
+  }
+
   #### recursive RF
   ### load the dataframe/matrix
   training <- as.matrix(x)
@@ -159,20 +164,17 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
   rownames(outdfm_OOB_err) <- paste(nTimes, "trees_OOB_err", sep = "_")
 
   ## initial feature elimination
-  if (ncol(x) == 1){
-    thsd <- ncol(x)
-  } else {
-    cartTree <- rpart(SD ~ Rank, data = outdfm_vi, cp = 0, minsplit = 2) # CART modelling: classify Rank by SD. Using ANOVA (regression) method.
-    mincp <- cartTree$cptable[which(cartTree$cptable[, 4] == min(cartTree$cptable[, 4])) ,1] # extract the minimum cp value
-    cartprune <- prune(cartTree, cp = mincp) # prune the tree so that SD values that won't impact Rank classfication are discarded
-    minpredv <- min(predict(cartprune)) # obatain the minimum prediciton value (predicted SD) as the SD threshold for Mean
+  cartTree <- rpart(SD ~ Rank, data = outdfm_vi, cp = 0, minsplit = 2) # CART modelling: classify Rank by SD. Using ANOVA (regression) method.
+  mincp <- cartTree$cptable[which(cartTree$cptable[, 4] == min(cartTree$cptable[, 4])) ,1] # extract the minimum cp value
+  cartprune <- prune(cartTree, cp = mincp) # prune the tree so that SD values that won't impact Rank classfication are discarded
+  minpredv <- min(predict(cartprune)) # obatain the minimum prediciton value (predicted SD) as the SD threshold for Mean
 
-    if (length(which(outdfm_vi$Mean < minpredv)) == 0){
-      thsd <- ncol(x)
-    } else {
-      thsd <- min(which(outdfm_vi$Mean < minpredv)) - 1 # compare Mean and SD. Discard all the features with a mean < minimum predicted SD.
-    }
+  if (length(which(outdfm_vi$Mean < minpredv)) == 0){ # in the case of VI values don't meet the cut.
+    thsd <- ncol(training)
+  } else {
+    thsd <- min(which(outdfm_vi$Mean < minpredv)) - 1 # compare Mean and SD. Discard all the features with a mean < minimum predicted SD.
   }
+
 
   feature_initFS <- as.character(outdfm_vi$Target[1:thsd]) # extract selected features
   training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
