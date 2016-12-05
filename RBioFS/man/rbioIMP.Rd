@@ -4,7 +4,7 @@
 \alias{rbioIMP}
 \title{rbioIMP}
 \usage{
-rbioIMP(dfm, fct, annot, method = "mean", transpo = TRUE, ...)
+rbioIMP(dfm, fct, annot, method = "mean", transpo = FALSE, ...)
 }
 \arguments{
 \item{dfm}{Input dataframe. Case sensitive and be sure to type with quotation marks.}

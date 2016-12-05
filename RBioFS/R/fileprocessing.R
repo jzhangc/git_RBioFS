@@ -46,7 +46,7 @@ singleIMP <- function(tgtVar, methd = "mean"){
 #' mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "rf", transpo = TRUE, iter = 10, ntree = 501) # make sure no annotation variable present in the data file.
 #' }
 #' @export
-rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = TRUE, ...){
+rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
 
   out <- dfm
   if (method == "rf"){
