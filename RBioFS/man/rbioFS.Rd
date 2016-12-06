@@ -7,11 +7,11 @@
 rbioFS(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10,
   imputeNtree = 501, quantileNorm = FALSE, nTimes = 50, nTree = 1001,
   SFS_mTry = "recur_default", multicore = TRUE, plot = TRUE,
-  initalFS_n = "all", initalFS_Title = NULL,
-  initalFS_xLabel = "Mean Decrease in Accuracy", initalFS_yLabel = NULL,
-  initalFS_errorbar = "SEM", initalFS_errorbarWidth = 0.2,
-  initalFS_xTxtSize = 10, initalFS_yTxtSize = 10,
-  initalFS_plotWidth = 170, initalFS_plotHeight = 150, SFS_n = "all",
+  initialFS_n = "all", initialFS_Title = NULL,
+  initialFS_xLabel = "Mean Decrease in Accuracy", initialFS_yLabel = NULL,
+  initialFS_errorbar = "SEM", initialFS_errorbarWidth = 0.2,
+  initialFS_xTxtSize = 10, initialFS_yTxtSize = 10,
+  initialFS_plotWidth = 170, initialFS_plotHeight = 150, SFS_n = "all",
   SFS_Title = NULL, SFS_xLabel = NULL, SFS_yLabel = NULL,
   SFS_errorbar = "SEM", SFS_errorbarWidth = 0.2, SFS_symbolSize = 2,
   SFS_xTxtSize = 10, SFS_yTxtSize = 10, SFS_plotWidth = 170,
@@ -40,25 +40,25 @@ rbioFS(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10,
 
 \item{plot}{If to plot results, bar graph for initial FS and joint-point curve for SFS-like FS. Default is \code{TRUE}}
 
-\item{initalFS_n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
+\item{initialFS_n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
 
-\item{initalFS_Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+\item{initialFS_Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
-\item{initalFS_xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+\item{initialFS_xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
-\item{initalFS_yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+\item{initialFS_yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
 
-\item{initalFS_errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
+\item{initialFS_errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
 
-\item{initalFS_errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
+\item{initialFS_errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
 
-\item{initalFS_xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+\item{initialFS_xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
 
-\item{initalFS_yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+\item{initialFS_yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
 
-\item{initalFS_plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
+\item{initialFS_plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 
-\item{initalFS_plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
+\item{initialFS_plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 
 \item{SFS_n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
 
@@ -83,7 +83,7 @@ rbioFS(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10,
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
 }
 \value{
-Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for inital FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
+Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
 }
 \description{
 Recursive nested random froest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
