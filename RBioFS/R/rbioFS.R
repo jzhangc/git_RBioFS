@@ -65,7 +65,7 @@ rbioFS <- function(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10, i
                              fct = tgt, annot = raw[[1]], transpo = FALSE)
     input <- data.frame(input, check.names = FALSE)
 
-    out <- data.frame(raw[, c(1:2)], input)
+    out <- data.frame(raw[, c(1:2)], input, check.names = FALSE)
     write.csv(out, file = paste(substr(noquote(file), 1, nchar(file) - 4), "_imputed.csv", sep = ""), row.names = FALSE)
   } else {
     input <- data.frame(raw[, -c(1:2)], check.names = FALSE)
