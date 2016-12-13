@@ -253,5 +253,5 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
   print(outlst)
   sink() # end dump
 
-  return(assign(paste(objTitle, "_inital_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
+  return(assign(paste(objTitle, "_initial_FS", sep = ""), outlst, envir = .GlobalEnv)) # return a dataframe with the vi ranking dataframe
 }
