@@ -23,6 +23,8 @@
 #' @return Outputs a \code{list} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @examples
