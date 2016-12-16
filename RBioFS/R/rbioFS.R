@@ -1,6 +1,6 @@
 #' @title rbioFS
 #'
-#' @description Recursive nested random froest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
+#' @description Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
 #' @param file Input file. Only takes \code{.csv} format.
 #' @param impute Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.

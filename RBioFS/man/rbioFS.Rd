@@ -86,7 +86,7 @@ rbioFS(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10,
 Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
 }
 \description{
-Recursive nested random froest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
+Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 }
 \details{
 Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
