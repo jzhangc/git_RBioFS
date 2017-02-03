@@ -74,7 +74,7 @@ rbioFS_PCA.default <- function(plotTitle = "data", input, idx, scaleData = TRUE,
           axis.text.x = element_text(size = xTickLblSize, family = fontType),
           axis.text.y = element_text(size = yTickLblSize, family = fontType, hjust = 0.5))
 
-  ggsave(filename = paste(plotTitle,".boxplot.pdf", sep = ""), plot = boxplt,
+  ggsave(filename = paste(plotTitle,".PCA.boxplot.pdf", sep = ""), plot = boxplt,
          width = boxplotWidth, height = boxplotHeight, units = "mm",dpi = 600)
 
   grid.draw(boxplt) # preview
@@ -134,12 +134,14 @@ rbioFS_PCA.default <- function(plotTitle = "data", input, idx, scaleData = TRUE,
     }
 
 
-    ggsave(filename = paste(plotTitle,".biplot.pdf", sep = ""), plot = biplt,
+    ggsave(filename = paste(plotTitle,".PCA.biplot.pdf", sep = ""), plot = biplt,
            width = biplotWidth, height = biplotHeight, units = "mm",dpi = 600)
 
     grid.draw(biplt) # preview
 
   }
+
+  return(assign(paste(objTitle, "_PCA", sep = ""), PCA, envir = .GlobalEnv)) # output PCA object
 
 }
 
