@@ -8,7 +8,7 @@
 \usage{
 rbioFS_PCA(...)
 
-\method{rbioFS_PCA}{default}(plotTitle = "data", input, idx,
+\method{rbioFS_PCA}{default}(objTitle = "data", input, idx,
   scaleData = TRUE, boxplotTitle = NULL, boxplotWidth = 170,
   boxplotHeight = 150, biplotPC = c("PC1", "PC2"), biplotTitle = NULL,
   biplotSymbolSize = 2, ellipse = FALSE, ellipse_conf = 0.93,
@@ -19,6 +19,8 @@ rbioFS_PCA(...)
 \method{rbioFS_PCA}{file}(file, ...)
 }
 \arguments{
+\item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}
+
 \item{input}{Input data, data frame.}
 
 \item{idx}{Sample index. It is a factor object.}
@@ -52,8 +54,6 @@ rbioFS_PCA(...)
 \item{fontType}{Font for the figure texts.}
 
 \item{file}{Input file name. Format is \code{csv}.}
-
-\item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}
 
 \item{xLabel_biplot}{X-axis label for the biplot. Default is NULL.}
 

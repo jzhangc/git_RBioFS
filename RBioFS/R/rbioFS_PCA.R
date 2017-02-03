@@ -34,7 +34,7 @@ rbioFS_PCA <- function(...) UseMethod("rbioFS_PCA")
 #' @rdname rbioFS_PCA
 #' @export
 #' @method rbioFS_PCA default
-rbioFS_PCA.default <- function(plotTitle = "data", input, idx, scaleData = TRUE,
+rbioFS_PCA.default <- function(objTitle = "data", input, idx, scaleData = TRUE,
                                boxplotTitle = NULL,
                                boxplotWidth = 170, boxplotHeight = 150,
                                biplotPC = c("PC1", "PC2"),
@@ -74,7 +74,7 @@ rbioFS_PCA.default <- function(plotTitle = "data", input, idx, scaleData = TRUE,
           axis.text.x = element_text(size = xTickLblSize, family = fontType),
           axis.text.y = element_text(size = yTickLblSize, family = fontType, hjust = 0.5))
 
-  ggsave(filename = paste(plotTitle,".PCA.boxplot.pdf", sep = ""), plot = boxplt,
+  ggsave(filename = paste(objTitle,".PCA.boxplot.pdf", sep = ""), plot = boxplt,
          width = boxplotWidth, height = boxplotHeight, units = "mm",dpi = 600)
 
   grid.draw(boxplt) # preview
@@ -134,7 +134,7 @@ rbioFS_PCA.default <- function(plotTitle = "data", input, idx, scaleData = TRUE,
     }
 
 
-    ggsave(filename = paste(plotTitle,".PCA.biplot.pdf", sep = ""), plot = biplt,
+    ggsave(filename = paste(objTitle,".PCA.biplot.pdf", sep = ""), plot = biplt,
            width = biplotWidth, height = biplotHeight, units = "mm",dpi = 600)
 
     grid.draw(biplt) # preview
