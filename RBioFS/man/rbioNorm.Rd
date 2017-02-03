@@ -29,4 +29,3 @@ Data normalization. This is a shell function using limma package.
 normdata <- rbioNorm(rawT, correctBG = FLASE)
 }
 }
-

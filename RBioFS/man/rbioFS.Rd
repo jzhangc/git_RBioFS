@@ -96,4 +96,3 @@ Make sure to arrange input \code{.csv} file with first two columns for smaple ID
 rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
 }
 }
-

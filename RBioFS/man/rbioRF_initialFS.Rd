@@ -62,4 +62,3 @@ Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., co
 rbioRF_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 }
 }
-

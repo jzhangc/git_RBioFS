@@ -33,4 +33,3 @@ Make sure to make the input the data with only the tagert variable columns, mean
 mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "rf", transpo = TRUE, iter = 10, ntree = 501) # make sure no annotation variable present in the data file.
 }
 }
-

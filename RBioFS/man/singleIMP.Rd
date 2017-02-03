@@ -22,4 +22,3 @@ data imputation for a vector of values.
 mydfm <- singleIMP(myVector, methd = "mean")
 }
 }
-

@@ -63,4 +63,3 @@ Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., co
 rbioRF_SFS(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
 }
 }
-

@@ -1,6 +1,10 @@
 # git_RBioFS
 A simple to use package for implementing machine learning feature selection in biological and biochemical research
 
+To cite in publication
+  
+    Zhang J, Hadj-Moussa H, Storey KB. 2016. Current progress of high-throughput microRNA differential expression analysis and random forest gene selection for model and non-model systems: an R implementation. J Integr Bioinform. 13: 306.
+
 
 Installation
 
@@ -14,6 +18,13 @@ Installation
         
 
 Change log
+
+  0.3.0 (Feb. 2. 2017)
+    
+    - Principal Component Analysis (PCA) and visualization function rbioFS_PCA() added
+    - Citation information added
+    - Bug fixes
+  
   
   0.2.1 - 0.2.5
     
