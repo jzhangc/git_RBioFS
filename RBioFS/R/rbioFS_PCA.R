@@ -80,7 +80,7 @@ rbioFS_PCA.default <- function(plotTitle = "data", input, idx, scaleData = TRUE,
   grid.draw(boxplt) # preview
 
 
-  # biplot
+  # biplot. Inspired by ggord package.
   # argument check
   if (length(biplotPC) != 2){
 

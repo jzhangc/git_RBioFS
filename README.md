@@ -19,7 +19,11 @@ Installation
 
 Change log
 
-  0.3.0 (Feb. 2. 2017)
+  0.3.1 (Feb. 2. 2017)
+    
+    - Bug fixes
+
+  0.3.0
     
     - Principal Component Analysis (PCA) and visualization function rbioFS_PCA() added
     - Citation information added
