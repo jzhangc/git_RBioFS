@@ -101,7 +101,7 @@ rbioFS_PCA.default <- function(objTitle = "data", input, idx, scaleData = TRUE,
     loadingValuePlot <- loadingValue * loadingScale
     loadingValuePlot$lbl <- rownames(loadingValuePlot)
 
-    # perpare for
+    # perpare for the axis labels
     varpp_biplot <- varpp[biplotPC] # extract the proportion of variance for the selected PCs
     pc_axis_lbl <- paste(biplotPC, " (", round(varpp_biplot, digits = 2), "%)", sep = "")
 
