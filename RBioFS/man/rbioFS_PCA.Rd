@@ -2,18 +2,14 @@
 % Please edit documentation in R/rbioFS_PCA.R
 \name{rbioFS_PCA}
 \alias{rbioFS_PCA}
-\alias{rbioFS_PCA.default}
 \title{rbioFS_PCA}
 \usage{
-rbioFS_PCA(...)
-
-\method{rbioFS_PCA}{default}(objTitle = "data", input, idx,
-  scaleData = TRUE, boxplotTitle = NULL, boxplotWidth = 170,
-  boxplotHeight = 150, biplotPC = c("PC1", "PC2"), biplotTitle = NULL,
-  biplotSymbolSize = 2, ellipse = FALSE, ellipse_conf = 0.93,
-  loadingPlot = TRUE, loadingSize = 3, biplotWidth = 170,
-  biplotHeight = 150, fontType = "sans", xTickLblSize = 10,
-  yTickLblSize = 10)
+rbioFS_PCA(objTitle = "data", input, idx, scaleData = TRUE,
+  boxplotTitle = NULL, boxplotWidth = 170, boxplotHeight = 150,
+  biplotPC = c("PC1", "PC2"), biplotTitle = NULL, biplotSymbolSize = 2,
+  ellipse = FALSE, ellipse_conf = 0.93, loadingPlot = TRUE,
+  loadingSize = 3, biplotWidth = 170, biplotHeight = 150,
+  fontType = "sans", xTickLblSize = 10, yTickLblSize = 10)
 }
 \arguments{
 \item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}
@@ -49,8 +45,6 @@ rbioFS_PCA(...)
 \item{biplotHeight}{The biplot height. Default is \code{150}.}
 
 \item{fontType}{Font for the figure texts.}
-
-\item{file}{Input file name. Format is \code{csv}.}
 
 \item{xLabel_biplot}{X-axis label for the biplot. Default is NULL.}
 

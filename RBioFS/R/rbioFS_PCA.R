@@ -2,7 +2,6 @@
 #'
 #' @description A simple to use wrapper for PCA (Principal Component Analysis) and visualization
 #' @param objTitle File name prefix for output files and the PCA object. Default is \code{"data"}.
-#' @param file Input file name. Format is \code{csv}.
 #' @param input Input data, data frame.
 #' @param idx Sample index. It is a factor object.
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
@@ -29,12 +28,7 @@
 #' rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, ellipse = TRUE, loadingPlot = TRUE, biplotWidth = 200, biplotHeight = 170)
 #' }
 #' @export
-rbioFS_PCA <- function(...) UseMethod("rbioFS_PCA")
-
-#' @rdname rbioFS_PCA
-#' @export
-#' @method rbioFS_PCA default
-rbioFS_PCA.default <- function(objTitle = "data", input, idx, scaleData = TRUE,
+rbioFS_PCA <- function(objTitle = "data", input, idx, scaleData = TRUE,
                                boxplotTitle = NULL,
                                boxplotWidth = 170, boxplotHeight = 150,
                                biplotPC = c("PC1", "PC2"),

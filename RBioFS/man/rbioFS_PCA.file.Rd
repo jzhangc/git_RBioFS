@@ -4,7 +4,7 @@
 \alias{rbioFS_PCA.file}
 \title{rbioFS_PCA.file}
 \usage{
-\method{rbioFS_PCA}{file}(file, ...)
+rbioFS_PCA.file(file, ...)
 }
 \arguments{
 \item{file}{Input file name. Format is \code{csv}.}
