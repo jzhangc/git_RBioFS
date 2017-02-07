@@ -19,7 +19,7 @@ Installation
 
 Change log
 
-  0.3.1 (Feb. 2. 2017)
+  0.3.1 - 0.3.2 (Feb. 6. 2017)
     
     - Bug fixes
 

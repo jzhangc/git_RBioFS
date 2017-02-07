@@ -3,7 +3,6 @@
 \name{rbioFS_PCA}
 \alias{rbioFS_PCA}
 \alias{rbioFS_PCA.default}
-\alias{rbioFS_PCA.file}
 \title{rbioFS_PCA}
 \usage{
 rbioFS_PCA(...)
@@ -15,8 +14,6 @@ rbioFS_PCA(...)
   loadingPlot = TRUE, loadingSize = 3, biplotWidth = 170,
   biplotHeight = 150, fontType = "sans", xTickLblSize = 10,
   yTickLblSize = 10)
-
-\method{rbioFS_PCA}{file}(file, ...)
 }
 \arguments{
 \item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}

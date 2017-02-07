@@ -146,9 +146,19 @@ rbioFS_PCA.default <- function(objTitle = "data", input, idx, scaleData = TRUE,
 }
 
 
-#' @rdname rbioFS_PCA
+#' @title rbioFS_PCA.file
+#'
+#' @description A simple to use wrapper for PCA (Principal Component Analysis) and visualization. This is the version that loads \code{csv} file directly.
+#' @param file Input file name. Format is \code{csv}.
+#' @param ... Augument for \code{\link{rbioFS_PCA}}.
+#' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+#' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+#' @import ggplot2
+#' @examples
+#' \dontrun{
+#' rbioFS_PCA.file(file = "data.csv", ellipse = TRUE, loadingPlot = TRUE, biplotWidth = 200, biplotHeight = 170)
+#' }
 #' @export
-#' @method rbioFS_PCA file
 rbioFS_PCA.file <- function(file, ...){
 
   ## import file
@@ -156,5 +166,5 @@ rbioFS_PCA.file <- function(file, ...){
   tgt <- factor(raw[[2]], levels = unique(raw[[2]])) # target variable
 
   ## PCA
-  rbioFS_PCA.default(input = raw, idx = tgt, ...)
+  rbioFS_PCA(input = raw, idx = tgt, ...)
 }
