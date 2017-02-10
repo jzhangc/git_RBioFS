@@ -10,7 +10,13 @@ Installation
 
   - Install devtools (if not already done)
   
-        install.package("devtools")
+        install.packages("devtools")
+        
+  - Install bioconductor (if not already done)
+        
+        source("https://bioconductor.org/biocLite.R")
+      
+        biocLite()
         
   - Install the package
         
