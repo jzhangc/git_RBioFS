@@ -2,6 +2,7 @@
 #'
 #' @description The web app version of \code{\link{rbioFS}}.
 #' @import ggplot2
+#' @import shiny
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
