@@ -222,7 +222,7 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
       }
 
       # plotting
-      baseplt <- ggplot(ooberrsummary, aes(x = Features, y = Mean, group = 1), environment = loclEnv) +
+      baseplt <- ggplot(pltdfm, aes(x = Features, y = Mean, group = 1), environment = loclEnv) +
         geom_line() +
         geom_point(size = symbolSize) +
         scale_x_discrete(expand = c(0.01, 0)) +
@@ -242,14 +242,14 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
         plt <- baseplt +
           geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth, position = position_dodge(0.9)) +
           scale_y_continuous(expand = c(0, 0),
-                             limits = c(with(ooberrsummary, min(Mean - SEM) * 0.6),
-                                        with(ooberrsummary, max(Mean + SEM) * 1.2)))
+                             limits = c(with(pltdfm, min(Mean - SEM) * 0.6),
+                                        with(pltdfm, max(Mean + SEM) * 1.2)))
       } else if (errorbar == "SD") {
         plt <- baseplt +
           geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth, position = position_dodge(0.9)) +
           scale_y_continuous(expand = c(0, 0),
-                             limits = c(with(ooberrsummary, min(Mean - SD) * 0.6),
-                                        with(ooberrsummary, max(Mean + SD) * 1.2)))
+                             limits = c(with(pltdfm, min(Mean - SD) * 0.6),
+                                        with(pltdfm, max(Mean + SD) * 1.2)))
       }
 
       grid.newpage()

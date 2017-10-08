@@ -25,7 +25,12 @@ Installation
 
 Change log
 
-    0.3.3 (May.12.2017)
+    0.4.0 (Oct.7.2017)
+        - Web app version of the main fuction rbioFS() added: rbioFS_app()
+        - A bug fixed for the plot subsetting functionality for rbioRF_SFS()
+        - Other minor bug fixes
+
+    0.3.3
         - zzz.R file added
     
     0.3.1 - 0.3.2 
