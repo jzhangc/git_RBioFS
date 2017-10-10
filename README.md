@@ -25,7 +25,16 @@ Installation
 
 Change log
 
-    0.4.0 (Oct.7.2017)
+    0.4.1 (Oct.10.2017)
+        - Progress bar added for rbioFS_app()
+        - Plotting buttons added for rbioFS_app() 
+        - UI elements re-arranged for a better presentation for rbioFS_app()
+        - Small icons added for the buttons for rbioFS_app()
+        - "Summary" tabs re-labelled as "Results" tabs for rbioFS_app()
+        - NA check added for the initial FS module in rbioFS_app()
+        - Other minor bug fixes
+
+    0.4.0
         - Web app version of the main fuction rbioFS() added: rbioFS_app()
         - A bug fixed for the plot subsetting functionality for rbioRF_SFS()
         - Other minor bug fixes

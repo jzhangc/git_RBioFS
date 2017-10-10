@@ -96,20 +96,19 @@ rbioFS_app <- function(){
           numericInput(inputId = "nTree", label = "ntree", value = 1001, step = 100),
           numericInput(inputId = "nTimes", label = "RF iteration",
                        value = 50, step = 10),
-          actionButton("run_initial_FS", "Run Initial FS"),
-          actionButton("run_SFS", "Run SFS"),
-
 
           # Horizontal line
           tags$hr(),
           h2("Inital selection"),
-          div(style = "display:inline-block", downloadButton("dlInitial", "Save initial selection results")),
+          div(style = "display:inline-block", actionButton("run_initial_FS", "Run Initial FS", icon = icon("space-shuttle"))),
+          div(style = "display:inline-block", downloadButton("dlInitial", "Save results")),
 
           h3("Inital selection plot"),
           # column number for group varible
           numericInput(inputId = "initalFS_n", label = "Number of features to plot",
                        value = 1, step = 1, min = 1),
           # Button
+          div(style = "display:inline-block",  actionButton("run_initial_FS_plot", "Generate plot", icon = icon("bar-chart"))),
           div(style = "display:inline-block", downloadButton("initialFS_dlPlot", "Save plot")),
 
           # title
@@ -147,11 +146,13 @@ rbioFS_app <- function(){
                        "mtry method",
                        choices = c(Recursion = "recur_default", RF = "rf_default"),
                        selected = "recur_default"),
-          div(style = "display:inline-block", downloadButton("dlSFS", "Save SFS results")),
+          div(style = "display:inline-block",  actionButton("run_SFS", "Run SFS", icon = icon("space-shuttle"))),
+          div(style = "display:inline-block", downloadButton("dlSFS", "Save results")),
 
           h3("SFS plot"),
 
           # Button
+          div(style = "display:inline-block", actionButton("run_SFS_plot", "Generate plot", icon = icon("line-chart"))),
           div(style = "display:inline-block", downloadButton("SFS_dlPlot", "Save plot")),
 
           # title
@@ -192,16 +193,15 @@ rbioFS_app <- function(){
           tabsetPanel(type = "tabs",
                       tabPanel("Raw data", tableOutput("contents")), # "contents" means go to output to find the variable output$contents
                       tabPanel("Impuated data (if applicable)", tableOutput("impt")),
+                      tabPanel("Initial FS results", verbatimTextOutput("initalFSsum")),
                       tabPanel("Initial FS plot", plotOutput("initalFSplot", height = 480, width = 550)),
-                      tabPanel("Initial FS summary", verbatimTextOutput("initalFSsum")),
-                      tabPanel("SFS plot", plotOutput("SFSplot", height = 480, width = 550)),
-                      tabPanel("SFS Summary", verbatimTextOutput("SFSsum")))
+                      tabPanel("SFS results", verbatimTextOutput("SFSsum")),
+                      tabPanel("SFS plot", plotOutput("SFSplot", height = 480, width = 550)))
         ), fluid = FALSE
       )
     ),
 
     server = function(input, output, session){
-
       ## input data check
       # input$file1 will be NULL initially.
       data <- reactive({
@@ -228,7 +228,6 @@ rbioFS_app <- function(){
         }
 
         out <- list(raw = df, imputed = impt)
-
         return(out)
       })
 
@@ -286,17 +285,42 @@ rbioFS_app <- function(){
 
       ## initial FS
       initialFS_data <- eventReactive(input$run_initial_FS, {
-        # pepare the target variable
+        ## progress bar
+        #Create a Progress object
+        progress <- Progress$new() # from Shiny package
+        progress$set(message = "Computing data", value = 0)
+        # Close the progress when this reactive exits (even if there's an error)
+        on.exit(progress$close())
+
+        # Create a callback function to update progress.
+        # Each time this is called:
+        # - If `value` is NULL, it will move the progress bar 1/5 of the remaining
+        #   distance. If non-NULL, it will set the progress to that value.
+        # - It also accepts optional detail text.
+        updateProgress <- function(value = NULL, detail = NULL) {
+          if (is.null(value)) {
+            value <- progress$getValue()
+            value <- value + (progress$getMax() - value) / 5
+          }
+          progress$set(value = value, detail = detail)
+        }
+
+        ## pepare the target variable
         tgt <- factor(as.character(data()$imputed[, input$targetVar]), levels = unique(data()$imputed[, input$targetVar]))
 
         # subset
         x <- data()$imputed[, -c(input$annoVar[1]:input$annoVar[2])] # slider has [1] for min and [2] for max
 
-        # validate
+        ## validate
+        # check numbers of features
         validate(need(ncol(x) > 1, "Error: \n
                       Only one feature found in input data. No need to select.\n")) # feature count check
 
-        # FS
+        # check NAs
+        validate(need(!TRUE %in% apply(data()$imputed, 2, function(x) any(is.na(x))), "Error: \n
+                      NA found in the input data. Try imputation.\n")) # feature count check
+
+        ## FS
         # prepare the data
         training <- as.matrix(x)
 
@@ -313,7 +337,8 @@ rbioFS_app <- function(){
         # RF
         if (!input$multicore){
           tmpFunc <- function(n, m, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
-                              tmpTree, tmpTry, tmpSize){ # temp function for recursive RF
+                              tmpTree, tmpTry, tmpSize,
+                              updateProgress = NULL){ # temp function for recursive RF
             tmploclEnv <- environment() # save the environment local to tmpFunc
 
             if (n == 0){
@@ -331,12 +356,21 @@ rbioFS_app <- function(){
               impt <- importance(rf, type = 1)
               tmpvimtx[, m] <- impt[, 1] # fill the vi matrix
               tmperrmtx[, m] <- rf$err.rate[tmptimes, 1] # fill the OOB error rate
+
+              # update progress bar
+              # If we were passed a progress update function, call it
+              if (is.function(updateProgress)){
+                text <- paste("Processing RF iteration: ", m, sep = "")
+                updateProgress(detail = text)
+              }
+
               tmpFunc(n - 1, m + 1, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
-                      tmpTree, tmpTry, tmpSize)
+                      tmpTree, tmpTry, tmpSize, updateProgress = updateProgress)
             }
           }
           lst <- tmpFunc(n = input$nTimes, m = 1, tmptimes = input$nTree, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
-                         tmpTree = input$nTree, tmpTry = max(floor(ncol(x)/3), 2), tmpSize = drawSize)
+                         tmpTree = input$nTree, tmpTry = max(floor(ncol(x)/3), 2), tmpSize = drawSize,
+                         updateProgress = updateProgress)
           phase0mtx_vi <- lst$raw_vi
           phase0mtx_OOB_err <- lst$raw_OOB_error
 
@@ -411,7 +445,7 @@ rbioFS_app <- function(){
         feature_initFS <- as.character(outdfm_vi$Target[1:thsd]) # extract selected features
         training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
 
-        # return the vi ranking and OOB err dataframes for the initial feature elimination
+        ## return the vi ranking and OOB err dataframes for the initial feature elimination
         outlst <- list(matrix_initial_FS = training_initFS,
                        feature_initial_FS = feature_initFS,
                        recur_vi_summary = outdfm_vi,
@@ -441,7 +475,7 @@ rbioFS_app <- function(){
                            value = nrow(initialFS_data()$recur_vi_summary))
       })
 
-      ggplotdata_initialFS <- eventReactive(input$run_initial_FS, {
+      ggplotdata_initialFS <- eventReactive(input$run_initial_FS_plot, {
         loclEnv <- environment()
 
         pltdfm <- initialFS_data()$recur_vi_summary[order(initialFS_data()$recur_vi_summary$Rank, decreasing = TRUE), ]
@@ -496,7 +530,7 @@ rbioFS_app <- function(){
       observe({
         output$initalFSplot <- renderPlot({
           grid.draw(ggplotdata_initialFS())
-        }, height = input$plotHeight, width = input$plotWidth)
+        }, width = input$plotWidth, height = input$plotHeight)
       })
 
       output$initialFS_dlPlot <- downloadHandler(
@@ -509,7 +543,27 @@ rbioFS_app <- function(){
 
       ## SFS
       SFS_data <- eventReactive(input$run_SFS, {
-        # pepare the target variable
+        ## progress bar
+        #Create a Progress object
+        progress <- Progress$new() # from Shiny package
+        progress$set(message = "Computing data", value = 0)
+        # Close the progress when this reactive exits (even if there's an error)
+        on.exit(progress$close())
+
+        # Create a callback function to update progress.
+        # Each time this is called:
+        # - If `value` is NULL, it will move the progress bar 1/5 of the remaining
+        #   distance. If non-NULL, it will set the progress to that value.
+        # - It also accepts optional detail text.
+        updateProgress <- function(value = NULL, detail = NULL) {
+          if (is.null(value)) {
+            value <- progress$getValue()
+            value <- value + (progress$getMax() - value) / 5
+          }
+          progress$set(value = value, detail = detail)
+        }
+
+        ## pepare the target variable
         tgt <- factor(as.character(data()$imputed[, input$targetVar]), levels = unique(data()$imputed[, input$targetVar]))
 
         # subset
@@ -528,10 +582,7 @@ rbioFS_app <- function(){
         singleerrmtx <- matrix(nrow = 1, ncol = input$nTimes) # for the recursive OOB error rates from a single tree
         ooberrmtx <- matrix(nrow = ncol(trainingsfs), ncol = input$nTimes) # for the recursive OOB error rates from all trees.
 
-
-        if (!input$multicore){
-
-          ## signle core computing: recursive structure
+        if (!input$multicore){ ## signle core computing: recursive structure
           tmpFunc <- function(n, m, tmperrmtx, tmpTraining, tmpTgt,
                               tmpTree, tmpTry, tmpSize){
             if (n == 0){
@@ -561,7 +612,8 @@ rbioFS_app <- function(){
             }
           }
 
-          tmpFunc2 <- function(i, j, tmp2mtx, ...){
+          tmpFunc2 <- function(i, j, tmp2mtx, updateProgress = NULL,
+                               ...){
             if (i == 0){
               rownames(tmp2mtx) <- seq(j - 1)
               colnames(tmp2mtx) <- c(paste("OOB_error_tree_rep", seq(input$nTimes), sep = "_"))
@@ -571,12 +623,18 @@ rbioFS_app <- function(){
               tmp2mtx[j, ] <- tmpFunc(n = input$nTimes, m = 1, tmperrmtx = singleerrmtx,
                                       tmpTraining = trainingsfs[, 1:j, drop = FALSE], tmpTgt = tgt, tmpTree = input$nTree, tmpTry = input$SFS_mTry,
                                       tmpSize = drawSize)
-              tmpFunc2(i - 1, j + 1, tmp2mtx, ...)
+
+              if (is.function(updateProgress)){  # update progress bar
+                text <- paste("Processing SFS iteration: ", j, sep = "")
+                updateProgress(detail = text)
+              }
+
+              tmpFunc2(i - 1, j + 1, tmp2mtx, updateProgress = updateProgress, ...)
             }
           }
 
           mtxforfunc2 <- ooberrmtx
-          ooberrmtx <- tmpFunc2(i = ncol(trainingsfs), j = 1, tmp2mtx = mtxforfunc2) # j is the tree index
+          ooberrmtx <- tmpFunc2(i = ncol(trainingsfs), j = 1, tmp2mtx = mtxforfunc2, updateProgress = updateProgress) # j is the tree index
 
         } else { # parallel computing. TBC
           # set up cpu cluster
@@ -668,7 +726,7 @@ rbioFS_app <- function(){
       )
 
       ## SFS Plot
-      ggplotdata_SFS <- eventReactive(input$run_SFS, {
+      ggplotdata_SFS <- eventReactive(input$run_SFS_plot, {
         # validate
         validate(need(nrow(SFS_data()$OOB_error_rate_summary) > 1, "Error: \n
                       Only one feature found in input data. No need to plot.\n")) # feature count check
@@ -729,7 +787,7 @@ rbioFS_app <- function(){
       observe({
         output$SFSplot <- renderPlot({
           grid.draw(ggplotdata_SFS())
-        }, height = input$SFS_plotWidth, width = input$SFS_plotHeight)
+        }, width = input$SFS_plotWidth, height = input$SFS_plotHeight)
       })
 
       output$SFS_dlPlot <- downloadHandler(
