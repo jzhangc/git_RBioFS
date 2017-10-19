@@ -25,7 +25,10 @@ Installation
 
 Change log
 
-    0.4.1 (Oct.10.2017)
+    0.4.2 (Oct.18.2017)
+        - Bug fixes for rbioFS_app()
+
+    0.4.1
         - Progress bar added for rbioFS_app()
         - Plotting buttons added for rbioFS_app() 
         - UI elements re-arranged for a better presentation for rbioFS_app()
