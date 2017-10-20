@@ -23,10 +23,12 @@
 #' @return Outputs a \code{list} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
+#' @import foreach
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
-#' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
 #' @examples
 #' \dontrun{
 #' rbioRF_SFS(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
@@ -118,16 +120,12 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores)
+    registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     # recursive RF using par-apply functions
-    tmpfunc4 <- function(j, ...){
-
-      n_cores2 <- parallel::detectCores() - 1
-      cl2 <- parallel::makeCluster(n_cores2)
-      on.exit(parallel::stopCluster(cl2)) # close connect when exiting the function
-
-      tmpfunc3 <- function(i, ...){
+    tmpfunc4 <- function(j){
+      tmpfunc3 <- function(i){
 
         if (mTry == "recur_default"){
           if (j < 4){
@@ -150,22 +148,14 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
         lst <- list(tmperrmtx = tmperrmtx)
       }
 
-
-      errmtx <- matrix(nrow = 1, ncol = nTimes) # for the recursive OOB error rates from a single tree
-      tmp <- parallel::parLapply(cl2, X = 1:nTimes, fun = tmpfunc3)
-
-      for (p in 1:nTimes){
-        errmtx[, p] <- tmp[[p]]$tmperrmtx # fill the OOB error rate
-      }
+      tmp <- foreach(i = 1:nTimes, .export = c("training", "tgt", "drawSize", "cl")) %dopar% tmpfunc3(i)
+      errmtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
 
       list = list(errmtx = errmtx)
     }
 
-    l <- parLapply(cl, X = 1:ncol(training), tmpfunc4)
-
-    for (q in 1:ncol(training)){
-      ooberrmtx[q, ] <- l[[q]]$errmtx
-    }
+    l <- foreach(j = 1:ncol(training), .packages = c("foreach")) %dopar% tmpfunc4(j)
+    ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
 
     rownames(ooberrmtx) <- seq(ncol(training))
     colnames(ooberrmtx) <- c(paste("OOB_error_tree_rep", seq(nTimes), sep = "_"))

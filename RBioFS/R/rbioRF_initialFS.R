@@ -22,11 +22,13 @@
 #' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
+#' @import foreach
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom randomForest randomForest importance
-#' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @importFrom rpart rpart prune
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
 #' @examples
 #' \dontrun{
 #' rbioRF_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
@@ -105,10 +107,11 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores)
+    registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     # recursive RF using par-apply functions
-    tmpfunc2 <- function(i, ...){
+    tmpfunc2 <- function(i){
       rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
                                        proximity = TRUE, drawSize = drawSize)
 
@@ -118,12 +121,10 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
       lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
     }
 
-    tmp <- parLapply(cl, X = 1:nTimes, fun = tmpfunc2)
-
-    for (j in 1:nTimes){
-      vimtx[, j] <- tmp[[j]]$tmpvimtx
-      errmtx[, j] <- tmp[[j]]$tmperrmtx
-    }
+    # foreach parallel
+    tmp <- foreach(i = 1:nTimes) %dopar% tmpfunc2(i)
+    vimtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmpvimtx
+    errmtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
 
     rownames(vimtx) <- colnames(training)
     colnames(vimtx) <- c(paste("vi", seq(nTimes), sep = "_"))

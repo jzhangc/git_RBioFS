@@ -25,7 +25,16 @@ Installation
 
 Change log
 
-    0.4.2 (Oct.18.2017)
+    0.4.3 (Oct.19.2017)
+        - Web app verion of rbioFS_PCA() added: rbioFS_PCA_app()
+        - Parallel computing functionality added for rbioFS_app()
+        - Quantile normalization functionality added for rbioFS_app()
+        - Default display message added for the SFS tab for rbioFS_app()
+        - Clear screen button added for rbioFS_app()
+        - Parallel computing modules updated with the more efficient foreach method for rbioFS(), rbioRF_initialFS() and rbioRF_SDFS()
+        - Bug fixes
+
+    0.4.2
         - Bug fixes for rbioFS_app()
 
     0.4.1
