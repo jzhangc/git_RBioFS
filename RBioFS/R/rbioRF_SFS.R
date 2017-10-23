@@ -124,37 +124,33 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     # recursive RF using par-apply functions
-    tmpfunc4 <- function(j){
-      tmpfunc3 <- function(i){
-
-        if (mTry == "recur_default"){
-          if (j < 4){
-            rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, importance = TRUE,
-                                             proximity = TRUE, drawSize = drawSize)
-
-          } else {
-            rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, mtry = max(floor(ncol(training[1:j]) / 3), 2),
-                                             importance = TRUE,
-                                             proximity = TRUE, drawSize = drawSize)
-          }
-        } else if (mTry == "rf_default"){
+    tmpfunc3 <- function(j){
+      if (mTry == "recur_default"){
+        if (j < 4){
           rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, importance = TRUE,
                                            proximity = TRUE, drawSize = drawSize)
-        } else {
-          stop("Please select a proper mtry setting")
-        }
 
-        tmperrmtx <- tail(rf$err.rate[, 1], n = 1) # compute the OOB error rate
-        lst <- list(tmperrmtx = tmperrmtx)
+        } else {
+          rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, mtry = max(floor(ncol(training[1:j]) / 3), 2),
+                                           importance = TRUE,
+                                           proximity = TRUE, drawSize = drawSize)
+        }
+      } else if (mTry == "rf_default"){
+        rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree, importance = TRUE,
+                                         proximity = TRUE, drawSize = drawSize)
+      } else {
+        stop("Please select a proper mtry setting")
       }
 
-      tmp <- foreach(i = 1:nTimes, .export = c("training", "tgt", "drawSize", "cl")) %dopar% tmpfunc3(i)
-      errmtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
-
-      list = list(errmtx = errmtx)
+      tmperrmtx <- tail(rf$err.rate[, 1], n = 1) # compute the OOB error rate
+      lst <- list(tmperrmtx = tmperrmtx)
     }
 
-    l <- foreach(j = 1:ncol(training), .packages = c("foreach")) %dopar% tmpfunc4(j)
+    l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
+      tmp <- foreach(j = 1:nTimes) %dopar% tmpfunc3(i)
+      errmtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
+      lst <- list(errmtx = errmtx)
+    }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
 
     rownames(ooberrmtx) <- seq(ncol(training))

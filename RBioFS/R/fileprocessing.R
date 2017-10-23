@@ -87,7 +87,7 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
 #' normdata <- rbioNorm(rawT, correctBG = FLASE)
 #' }
 #' @export
-rbioNorm<-function(RawData, NormMtd = "quantile",
+rbioNorm <- function(RawData, NormMtd = "quantile",
                       correctBG = TRUE,
                       BgMtd = "normexp", BgOffst = 0){
 
@@ -95,7 +95,7 @@ rbioNorm<-function(RawData, NormMtd = "quantile",
     BgC <- backgroundCorrect(RawData,method = BgMtd, offset = BgOffst) #background correction
     Norm <- normalizeBetweenArrays(BgC, method = NormMtd) # quantile normalization
   } else if (correctBG == FALSE){
-    Norm<-normalizeBetweenArrays(RawData, method = NormMtd) # quantile normalization
+    Norm <- normalizeBetweenArrays(RawData, method = NormMtd) # quantile normalization
   } else {
     stop("Please check the arguments")
   }

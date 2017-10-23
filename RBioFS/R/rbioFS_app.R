@@ -42,6 +42,9 @@ rbioFS_app <- function(){
                     multiple = TRUE,
                     accept = c("text/csv", "text/comma-separated-values, text/plain", ".csv")),
 
+          # clear screen
+          actionButton("clear_ui", "Clear", icon = icon("refresh")),
+
           # exit
           actionButton("close", "Close App", icon = icon("exclamation"),
                        onclick = "setTimeout(function(){window.close();}, 100);"),
@@ -92,6 +95,7 @@ rbioFS_app <- function(){
 
           ## FS
           h2("Overall FS settings"),
+          checkboxInput("multicore", "Parallel computing", FALSE),
           numericInput(inputId = "nTree", label = "ntree", value = 1001, step = 100),
           numericInput(inputId = "nTimes", label = "RF iteration",
                        value = 50, step = 10),
@@ -333,44 +337,80 @@ rbioFS_app <- function(){
         vimtx <- matrix(nrow = ncol(training), ncol = input$nTimes)
         errmtx <- matrix(nrow = 1, ncol = input$nTimes)
 
-        # single core
-        tmpFunc <- function(n, m, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
-                            tmpTree, tmpTry, tmpSize,
-                            updateProgress = NULL){ # temp function for recursive RF
-          tmploclEnv <- environment() # save the environment local to tmpFunc
+        # RF
+        if (!input$multicore){
+          tmpFunc <- function(n, m, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
+                              tmpTree, tmpTry, tmpSize,
+                              updateProgress = NULL){ # temp function for recursive RF
+            tmploclEnv <- environment() # save the environment local to tmpFunc
 
-          if (n == 0){
-            rownames(tmpvimtx) <- colnames(tmpTraining)
-            colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
-            rownames(tmperrmtx) <- "OOB_error_rate"
-            colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
+            if (n == 0){
+              rownames(tmpvimtx) <- colnames(tmpTraining)
+              colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
+              rownames(tmperrmtx) <- "OOB_error_rate"
+              colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
 
-            tmplst <- list(raw_vi = tmpvimtx, raw_OOB_error = tmperrmtx)
-            return(tmplst)
+              tmplst <- list(raw_vi = tmpvimtx, raw_OOB_error = tmperrmtx)
+              return(tmplst)
 
-          } else {
-            rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = tmpTry, importance = TRUE,
-                               proximity = TRUE, drawSize = tmpSize)
-            impt <- importance(rf, type = 1)
-            tmpvimtx[, m] <- impt[, 1] # fill the vi matrix
-            tmperrmtx[, m] <- rf$err.rate[tmptimes, 1] # fill the OOB error rate
+            } else {
+              rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = tmpTry, importance = TRUE,
+                                 proximity = TRUE, drawSize = tmpSize)
+              impt <- importance(rf, type = 1)
+              tmpvimtx[, m] <- impt[, 1] # fill the vi matrix
+              tmperrmtx[, m] <- rf$err.rate[tmptimes, 1] # fill the OOB error rate
 
-            # update progress bar
-            # If we were passed a progress update function, call it
-            if (is.function(updateProgress)){
-              text <- paste("Processing RF iteration: ", m, sep = "")
-              updateProgress(detail = text)
+              # update progress bar
+              # If we were passed a progress update function, call it
+              if (is.function(updateProgress)){
+                text <- paste("Processing RF iteration: ", m, sep = "")
+                updateProgress(detail = text)
+              }
+
+              tmpFunc(n - 1, m + 1, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
+                      tmpTree, tmpTry, tmpSize, updateProgress = updateProgress)
             }
-
-            tmpFunc(n - 1, m + 1, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
-                    tmpTree, tmpTry, tmpSize, updateProgress = updateProgress)
           }
+          lst <- tmpFunc(n = input$nTimes, m = 1, tmptimes = input$nTree, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
+                         tmpTree = input$nTree, tmpTry = max(floor(ncol(x)/3), 2), tmpSize = drawSize,
+                         updateProgress = updateProgress)
+          phase0mtx_vi <- lst$raw_vi
+          phase0mtx_OOB_err <- lst$raw_OOB_error
+
+        } else { # parallel computing
+          # recursive RF using par-apply functions
+          tmpfunc2 <- function(i){
+            rf <- randomForest::randomForest(x = training, y = tgt, ntree = input$nTree, mtry = max(floor(ncol(x)/3), 2), importance = TRUE,
+                                             proximity = TRUE, drawSize = drawSize)
+
+            impt <- randomForest::importance(rf, type = 1)
+            tmpvimtx <- impt[, 1] # fill the vi matrix
+            tmperrmtx <- rf$err.rate[input$nTree, 1] # fill the OOB error rate
+            lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
+          }
+
+          ## parallel computing
+          # set up cpu cluster
+          n_cores <- detectCores() - 1
+          cl <- makeCluster(n_cores)
+          registerDoParallel(cl)
+
+          # foreach parallel
+          tmp <- foreach(i = 1:input$nTimes, .export = c("input", "isolate")) %dopar% isolate(tmpfunc2(i))
+          vimtx <- foreach(i = 1:input$nTimes, .combine = cbind) %dopar% tmp[[i]]$tmpvimtx
+          errmtx <- foreach(i = 1:input$nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
+
+          stopCluster(cl) # close connect when done
+
+          rownames(vimtx) <- colnames(training)
+          colnames(vimtx) <- c(paste("vi", seq(input$nTimes), sep = "_"))
+
+          rownames(errmtx) <- "OOB_error_rate"
+          colnames(errmtx) <- c(paste("OOB_error_tree", seq(input$nTimes), sep = "_"))
+
+          phase0mtx_vi <- vimtx
+          phase0mtx_OOB_err <- errmtx
         }
-        lst <- tmpFunc(n = input$nTimes, m = 1, tmptimes = input$nTree, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
-                       tmpTree = input$nTree, tmpTry = max(floor(ncol(x)/3), 2), tmpSize = drawSize,
-                       updateProgress = updateProgress)
-        phase0mtx_vi <- lst$raw_vi
-        phase0mtx_OOB_err <- lst$raw_OOB_error
 
         ## prepare the vi dataframe
         fName_vi <- rownames(phase0mtx_vi)
@@ -418,9 +458,11 @@ rbioFS_app <- function(){
       })
 
       ## display initial FS resutls
-      output$initalFSsum <- renderPrint(
-        initialFS_data()
-      )
+      observeEvent(input$run_initial_FS, {
+        output$initalFSsum <- renderPrint(
+          initialFS_data()
+        )
+      })
 
       # download the initial FS summary
       output$dlInitial <- downloadHandler(
@@ -438,7 +480,7 @@ rbioFS_app <- function(){
                            value = nrow(initialFS_data()$recur_vi_summary))
       })
 
-      ggplotdata_initialFS <- eventReactive(input$run_initial_FS_plot, {
+      ggplotdata_initialFS <- reactive({
         loclEnv <- environment()
 
         pltdfm <- initialFS_data()$recur_vi_summary[order(initialFS_data()$recur_vi_summary$Rank, decreasing = TRUE), ]
@@ -490,7 +532,7 @@ rbioFS_app <- function(){
         return(pltgtb)
       })
 
-      observe({
+      observeEvent(input$run_initial_FS_plot, {
         output$initalFSplot <- renderPlot({
           grid.draw(ggplotdata_initialFS())
         }, width = input$plotWidth, height = input$plotHeight)
@@ -545,59 +587,82 @@ rbioFS_app <- function(){
         singleerrmtx <- matrix(nrow = 1, ncol = input$nTimes) # for the recursive OOB error rates from a single tree
         ooberrmtx <- matrix(nrow = ncol(trainingsfs), ncol = input$nTimes) # for the recursive OOB error rates from all trees.
 
-        ## signle core computing: recursive structure
-        tmpFunc <- function(n, m, tmperrmtx, tmpTraining, tmpTgt,
-                            tmpTree, tmpTry, tmpSize){
-          if (n == 0){
-            return(tmperrmtx)
+        if (!input$multicore){ ## signle core computing: recursive structure
+          tmpFunc <- function(n, m, tmperrmtx, tmpTraining, tmpTgt,
+                              tmpTree, tmpTry, tmpSize){
+            if (n == 0){
+              return(tmperrmtx)
 
-          } else {
-            if (tmpTry == "recur_default"){
+            } else {
+              if (tmpTry == "recur_default"){
 
-              if (ncol(tmpTraining) < 4){
-                rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
-                                   proximity = TRUE, drawSize = tmpSize)
-              } else {
-                rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = max(floor(ncol(tmpTraining) / 3), 2),
+                if (ncol(tmpTraining) < 4){
+                  rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, importance = TRUE,
+                                     proximity = TRUE, drawSize = tmpSize)
+                } else {
+                  rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = max(floor(ncol(tmpTraining) / 3), 2),
+                                     importance = TRUE,
+                                     proximity = TRUE, drawSize = tmpSize)
+                }
+
+              } else if (tmpTry == "rf_default"){
+                rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree,
                                    importance = TRUE,
                                    proximity = TRUE, drawSize = tmpSize)
               }
 
-            } else if (tmpTry == "rf_default"){
-              rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree,
-                                 importance = TRUE,
-                                 proximity = TRUE, drawSize = tmpSize)
+              tmperrmtx[, m] <- tail(rf$err.rate[, 1], n = 1) # fill the OOB error rate
+              tmpFunc(n - 1, m + 1, tmperrmtx, tmpTraining, tmpTgt,
+                      tmpTree, tmpTry, tmpSize)
             }
-
-            tmperrmtx[, m] <- tail(rf$err.rate[, 1], n = 1) # fill the OOB error rate
-            tmpFunc(n - 1, m + 1, tmperrmtx, tmpTraining, tmpTgt,
-                    tmpTree, tmpTry, tmpSize)
           }
-        }
 
-        tmpFunc2 <- function(i, j, tmp2mtx, updateProgress = NULL,
-                             ...){
-          if (i == 0){
-            rownames(tmp2mtx) <- seq(j - 1)
-            colnames(tmp2mtx) <- c(paste("OOB_error_tree_rep", seq(input$nTimes), sep = "_"))
+          tmpFunc2 <- function(i, j, tmp2mtx, updateProgress = NULL,
+                               ...){
+            if (i == 0){
+              rownames(tmp2mtx) <- seq(j - 1)
+              colnames(tmp2mtx) <- c(paste("OOB_error_tree_rep", seq(input$nTimes), sep = "_"))
 
-            return(tmp2mtx)
-          } else {
-            tmp2mtx[j, ] <- tmpFunc(n = input$nTimes, m = 1, tmperrmtx = singleerrmtx,
-                                    tmpTraining = trainingsfs[, 1:j, drop = FALSE], tmpTgt = tgt, tmpTree = input$nTree, tmpTry = input$SFS_mTry,
-                                    tmpSize = drawSize)
+              return(tmp2mtx)
+            } else {
+              tmp2mtx[j, ] <- tmpFunc(n = input$nTimes, m = 1, tmperrmtx = singleerrmtx,
+                                      tmpTraining = trainingsfs[, 1:j, drop = FALSE], tmpTgt = tgt, tmpTree = input$nTree, tmpTry = input$SFS_mTry,
+                                      tmpSize = drawSize)
 
-            if (is.function(updateProgress)){  # update progress bar
-              text <- paste("Processing SFS iteration: ", j, sep = "")
-              updateProgress(detail = text)
+              if (is.function(updateProgress)){  # update progress bar
+                text <- paste("Processing SFS iteration: ", j, sep = "")
+                updateProgress(detail = text)
+              }
+
+              tmpFunc2(i - 1, j + 1, tmp2mtx, updateProgress = updateProgress, ...)
             }
-
-            tmpFunc2(i - 1, j + 1, tmp2mtx, updateProgress = updateProgress, ...)
           }
-        }
-        mtxforfunc2 <- ooberrmtx
-        ooberrmtx <- tmpFunc2(i = ncol(trainingsfs), j = 1, tmp2mtx = mtxforfunc2, updateProgress = updateProgress) # j is the tree index
 
+          mtxforfunc2 <- ooberrmtx
+          ooberrmtx <- tmpFunc2(i = ncol(trainingsfs), j = 1, tmp2mtx = mtxforfunc2, updateProgress = updateProgress) # j is the tree index
+
+        } else { # parallel computing. TBC
+          # set up cpu cluster
+          n_cores <- detectCores() - 1
+          cl <- makeCluster(n_cores)
+          registerDoParallel(cl)
+
+          # recursive RF using par-apply functions
+          ooberrmtx <- foreach(i = 1:ncol(trainingsfs), .combine = rbind, .export = c("isolate", "input")) %dopar% isolate({
+            vct <- vector(length = input$nTimes)
+            for (o in 1:input$nTimes){
+              rf <- randomForest::randomForest(x = trainingsfs[, 1:i, drop = FALSE], y = tgt, ntree = input$nTree, importance = TRUE,
+                                               proximity = TRUE, drawSize = drawSize)
+              vct[o] <- tail(rf$err.rate[, 1], n = 1) # compute the OOB error rate
+            }
+            vct
+          })
+
+          rownames(ooberrmtx) <- seq(ncol(trainingsfs))
+          colnames(ooberrmtx) <- c(paste("OOB_error_tree_rep", seq(50), sep = "_"))
+
+          stopCluster(cl) # close connect when exiting the function
+        }
 
         ## perpare the summary dataframe for OOB error rates
         ooberrnames <- rownames(ooberrmtx)
@@ -621,9 +686,11 @@ rbioFS_app <- function(){
       })
 
       ## display SFS resutls
-      output$SFSsum <- renderPrint(
-        SFS_data()
-      )
+      observeEvent(input$run_SFS, {
+        output$SFSsum <- renderPrint(
+          SFS_data()
+        )
+      })
 
       # download the SFS summary
       output$dlSFS <- downloadHandler(
@@ -636,7 +703,7 @@ rbioFS_app <- function(){
       )
 
       ## SFS Plot
-      ggplotdata_SFS <- eventReactive(input$run_SFS_plot, {
+      ggplotdata_SFS <- reactive({
         # validate
         validate(need(nrow(SFS_data()$OOB_error_rate_summary) > 1, "Error: \n
                       Only one feature found in input data. No need to plot.\n")) # feature count check
@@ -694,7 +761,7 @@ rbioFS_app <- function(){
         return(pltgtb)
       })
 
-      observe({
+      observeEvent(input$run_SFS_plot, {
         output$SFSplot <- renderPlot({
           grid.draw(ggplotdata_SFS())
         }, width = input$SFS_plotWidth, height = input$SFS_plotHeight)
@@ -707,6 +774,22 @@ rbioFS_app <- function(){
                  width = (input$SFS_plotWidth * 25.4) / 72, height = (input$SFS_plotHeight * 25.4) / 72, units = "mm", dpi = 600, device = "pdf")
         }
       )
+
+      # clear button
+      observeEvent(input$clear_ui, {
+        output$initalFSplot <- renderPlot({})
+      })
+
+      observeEvent(input$clear_ui, {
+        output$initalFSsum <- renderPrint({cat("")})
+      })
+
+      observeEvent(input$clear_ui, {
+        output$SFSplot <- renderPlot({})
+      })
+      observeEvent(input$clear_ui, {
+        output$SFSsum <- renderPrint({cat("")})
+      })
 
       # stop and close window
       observe({
