@@ -66,10 +66,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
   vimtx <- matrix(nrow = ncol(training), ncol = nTimes)
   errmtx <- matrix(nrow = 1, ncol = nTimes)
 
-
-  if (!multicore){
-
-    ## signle core computing: recursive structure
+  if (!multicore){ ## signle core computing: recursive structure
     tmpFunc <- function(n, m, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
                         tmpTree, tmpTry, tmpSize){
 
@@ -101,9 +98,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     phase0mtx_vi <- lst$raw_vi
     phase0mtx_OOB_err <- lst$raw_OOB_error
 
-  } else {
-
-    ## parallel computing
+  } else { ## parallel computing
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores)
@@ -134,7 +129,6 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
     phase0mtx_vi <- vimtx
     phase0mtx_OOB_err <- errmtx
-
   }
 
   ####prepare output vi and OOB error dataframes
@@ -171,13 +165,11 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
     thsd <- min(which(outdfm_vi$Mean < minpredv)) - 1 # compare Mean and SD. Discard all the features with a mean < minimum predicted SD.
   }
 
-
   feature_initFS <- as.character(outdfm_vi$Target[1:thsd]) # extract selected features
   training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
 
   ## vi plotting
   if (plot){
-
     loclEnv <- environment()
 
     # prepare plotting dataframe
@@ -214,7 +206,6 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
         geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth,
                       position = position_dodge(0.9))
     }
-
 
     ## add the right-side y axis
     grid.newpage()

@@ -54,18 +54,15 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
   size <- min(as.vector(table(tgt))) # down-sampling
   drawSize <- rep(size, nlvl)
 
-
   ## prepare blank tree OOB error matrics
   singleerrmtx <- matrix(nrow = 1, ncol = nTimes) # for the recursive OOB error rates from a single tree
   ooberrmtx <- matrix(nrow = ncol(training), ncol = nTimes) # for the recursive OOB error rates from all trees.
-
 
   if (!multicore){
 
     ## signle core computing: recursive structure
     tmpFunc <- function(n, m, tmperrmtx, tmpTraining, tmpTgt,
                         tmpTree, tmpTry, tmpSize){
-
 
       if (n == 0){
         return(tmperrmtx)
@@ -114,9 +111,7 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
 
     ooberrmtx <- tmpFunc2(i = ncol(training), j = 1, tmp2mtx = mtxforfunc2) # j is the tree index
 
-  } else {
-
-    ## parallel computing
+  } else { ## parallel computing
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores)
@@ -181,13 +176,9 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
   print(outlst)
   sink() # end dump
 
-
-
   ## plot
   if (plot){
-
     # check the feature number
-
     if (nrow(ooberrsummary) == 1){
 
       ## print msg
@@ -263,5 +254,4 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
 
   ## output to env
   return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
-
 }
