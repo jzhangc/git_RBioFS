@@ -480,7 +480,7 @@ rbioFS_app <- function(){
                            value = nrow(initialFS_data()$recur_vi_summary))
       })
 
-      ggplotdata_initialFS <- reactive({
+      ggplotdata_initialFS <- eventReactive(input$run_initial_FS_plot, {
         loclEnv <- environment()
 
         pltdfm <- initialFS_data()$recur_vi_summary[order(initialFS_data()$recur_vi_summary$Rank, decreasing = TRUE), ]
@@ -532,7 +532,7 @@ rbioFS_app <- function(){
         return(pltgtb)
       })
 
-      observeEvent(input$run_initial_FS_plot, {
+      observe({
         output$initalFSplot <- renderPlot({
           grid.draw(ggplotdata_initialFS())
         }, width = input$plotWidth, height = input$plotHeight)
@@ -703,7 +703,7 @@ rbioFS_app <- function(){
       )
 
       ## SFS Plot
-      ggplotdata_SFS <- reactive({
+      ggplotdata_SFS <- eventReactive(input$run_SFS_plot, {
         # validate
         validate(need(nrow(SFS_data()$OOB_error_rate_summary) > 1, "Error: \n
                       Only one feature found in input data. No need to plot.\n")) # feature count check
@@ -761,7 +761,7 @@ rbioFS_app <- function(){
         return(pltgtb)
       })
 
-      observeEvent(input$run_SFS_plot, {
+      observe({
         output$SFSplot <- renderPlot({
           grid.draw(ggplotdata_SFS())
         }, width = input$SFS_plotWidth, height = input$SFS_plotHeight)
