@@ -180,17 +180,13 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
   if (plot){
     # check the feature number
     if (nrow(ooberrsummary) == 1){
-
       ## print msg
       print("Only single feature subset detected. No need to plot.")
-
       ## output to env
       return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
 
     } else {
-
       loclEnv <- environment()
-
       # prepare plotting dataframe
       if (n != "all"){
         pltdfm <- head(ooberrsummary, n)
