@@ -3,7 +3,8 @@
 #' @description A simple to use wrapper for PCA (Principal Component Analysis) and visualization
 #' @param objTitle File name prefix for output files and the PCA object. Default is \code{"data"}.
 #' @param input Input data, data frame.
-#' @param idx Sample index. It is a factor object.
+#' @param sampleIDVar Sample variable name. It's a character string.
+#' @param groupIDVar Group variable name. It's a character string.
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
 #' @param boxplotTitle The boxplot title. Default is \code{NULL}.
 #' @param boxplotWidth The boxplot width. Default is \code{170}.
@@ -28,7 +29,7 @@
 #' rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, ellipse = TRUE, loadingPlot = TRUE, biplotWidth = 200, biplotHeight = 170)
 #' }
 #' @export
-rbioFS_PCA <- function(objTitle = "data", input, idx, scaleData = TRUE,
+rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE,
                                boxplotTitle = NULL,
                                boxplotWidth = 170, boxplotHeight = 150,
                                biplotPC = c("PC1", "PC2"),
@@ -41,12 +42,10 @@ rbioFS_PCA <- function(objTitle = "data", input, idx, scaleData = TRUE,
 
 
   ## PCA
-  PCA <- prcomp(input[, -c(1:2)], scale. = scaleData)
-
+  PCA <- prcomp(input[, ! names(input) %in% c(sampleIDVar, groupIDVar)], scale. = scaleData)
 
   ## plotting
   grid.newpage()
-
 
   # boxplot
   varpp <- 100 * summary(PCA)$importance[2, ] # extract and calcualte the proportion of variance
@@ -81,10 +80,9 @@ rbioFS_PCA <- function(objTitle = "data", input, idx, scaleData = TRUE,
     stop("Please properly set biplotPC argument so that two and only two PCs are used for biplot.")
 
   } else {
-
     # prepare for scatter plot values (i.e. sample score)
     sampleScore <- data.frame(PCA$x[, biplotPC], check.names = FALSE) # extract rotated sample scores
-    sampleScore$Group <- idx
+    sampleScore$Group <- factor(input[, groupIDVar], levels = unique(input[, groupIDVar]))
     names(sampleScore)[1:2] <- c("axis1", "axis2")
 
     # prepare for loading plot values (i.e. loading value for variables)
@@ -157,8 +155,7 @@ rbioFS_PCA.file <- function(file, ...){
 
   ## import file
   raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
-  tgt <- factor(raw[[2]], levels = unique(raw[[2]])) # target variable
 
   ## PCA
-  rbioFS_PCA(input = raw, idx = tgt, ...)
+  rbioFS_PCA(input = raw, ...)
 }

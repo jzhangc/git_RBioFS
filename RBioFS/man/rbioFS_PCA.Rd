@@ -4,19 +4,22 @@
 \alias{rbioFS_PCA}
 \title{rbioFS_PCA}
 \usage{
-rbioFS_PCA(objTitle = "data", input, idx, scaleData = TRUE,
-  boxplotTitle = NULL, boxplotWidth = 170, boxplotHeight = 150,
-  biplotPC = c("PC1", "PC2"), biplotTitle = NULL, biplotSymbolSize = 2,
-  ellipse = FALSE, ellipse_conf = 0.93, loadingPlot = TRUE,
-  loadingSize = 3, biplotWidth = 170, biplotHeight = 150,
-  fontType = "sans", xTickLblSize = 10, yTickLblSize = 10)
+rbioFS_PCA(objTitle = "data", input = NULL, sampleIDVar = NULL,
+  groupIDVar = NULL, scaleData = TRUE, boxplotTitle = NULL,
+  boxplotWidth = 170, boxplotHeight = 150, biplotPC = c("PC1", "PC2"),
+  biplotTitle = NULL, biplotSymbolSize = 2, ellipse = FALSE,
+  ellipse_conf = 0.93, loadingPlot = TRUE, loadingSize = 3,
+  biplotWidth = 170, biplotHeight = 150, fontType = "sans",
+  xTickLblSize = 10, yTickLblSize = 10)
 }
 \arguments{
 \item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}
 
 \item{input}{Input data, data frame.}
 
-\item{idx}{Sample index. It is a factor object.}
+\item{sampleIDVar}{Sample variable name. It's a character string.}
+
+\item{groupIDVar}{Group variable name. It's a character string.}
 
 \item{scaleData}{If to scale the data when performing PCA. Default is \code{TRUE}.}
 

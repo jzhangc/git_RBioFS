@@ -66,7 +66,7 @@ rbioFS_app <- function(){
                        selected = "head"),
 
           # column number for group varible
-          numericInput(inputId = "targetVar", label = "Column number for group variable (integer)",
+          numericInput(inputId = "targetVar", label = "Column number for group variable",
                        value = 1, step = 1, min = 1),
 
           # column range for annotatin varibles
@@ -75,9 +75,10 @@ rbioFS_app <- function(){
 
           # Horizontal line
           tags$hr(),
-          h2("Data imputation"),
+          h2("Data imputation and normalization"),
           checkboxInput("impute", "Data imputation", FALSE),
-          numericInput(inputId = "impt_anno", label = "Column number for sample variable (integer)",
+          checkboxInput("quantile", "Quantile normalization", FALSE),
+          numericInput(inputId = "impt_anno", label = "Column number for sample variable",
                        value = 1, step = 1, min = 1),   # column number for smaple varible
           radioButtons("imputeMethod",
                        "Data imputation method (if applicable)",
@@ -88,7 +89,7 @@ rbioFS_app <- function(){
           numericInput(inputId = "imputeNtree", label = "Imputation ntree (for Random Forest method)",
                        value = 501, step = 10),
 
-          div(style = "display:inline-block", downloadButton("dlImp", "Save imputed data")),
+          div(style = "display:inline-block", downloadButton("dlImp", "Save processed data")),
 
           # Horizontal line
           tags$hr(),
@@ -215,7 +216,7 @@ rbioFS_app <- function(){
         df[[1]] <- factor(df[[1]], levels = c(unique(df[[1]]))) # avoid R's automatic re-ordering the factors automatically - it will keep the "typed-in" order
 
         tgt <- factor(as.character(df[, input$targetVar]), levels = unique(df[, input$targetVar]))
-        if (input$impute){
+        if (input$impute){ # imputation
 
           if (TRUE %in% apply(df, 2, function(x) any(is.na(x)))){
             impt <- RBioFS::rbioIMP(dfm = df[, -c(input$annoVar[1]:input$annoVar[2])], method = input$imputeMethod,
@@ -228,6 +229,11 @@ rbioFS_app <- function(){
           }
         } else {
           impt <- df
+        }
+
+        if (input$quantile){ # normalization
+          impt[, -c(input$annoVar[1]:input$annoVar[2])] <- t(rbioNorm(RawData = t(impt[, -c(input$annoVar[1]:input$annoVar[2])]),
+                                                                      correctBG = FALSE))
         }
 
         out <- list(raw = df, imputed = impt)
@@ -267,7 +273,7 @@ rbioFS_app <- function(){
       }, digits = 5)
 
       output$dlImp <- downloadHandler(
-        filename = function(){paste(substr(noquote(input$file1), 1, nchar(input$file1) - 4),".imputed.csv", sep = "")},
+        filename = function(){paste(substr(noquote(input$file1), 1, nchar(input$file1) - 4),".processed.csv", sep = "")},
         content = function(file){
           write.csv(data()$imputed, file, quote = FALSE, na = "NA", row.names = FALSE)
         }
