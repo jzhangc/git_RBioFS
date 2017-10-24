@@ -30,7 +30,7 @@ Change log
         - Parallel computing functionality added for rbioFS_app()
         - Quantile normalization functionality added for rbioFS_app()
         - Clear screen button added for rbioFS_app()
-        - Parallel computing modules updated with the more efficient foreach method for rbioFS(), rbioRF_initialFS() and rbioRF_SDFS()
+        - Parallel computing modules updated with the more efficient foreach method for rbioFS(), rbioRF_initialFS() and rbioRF_SFS()
         - Bug fixes
 
     0.4.2
