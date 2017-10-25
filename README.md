@@ -25,7 +25,7 @@ Installation
 
 Change log
 
-    0.4.3
+    0.4.3 (Oct. 25. 2017)
         - Web app verion of rbioFS_PCA() added: rbioFS_PCA_app()
         - Code update for rbioFS_PCA() for better input data compatibility
         - Parallel computing functionality added for rbioFS_app()
