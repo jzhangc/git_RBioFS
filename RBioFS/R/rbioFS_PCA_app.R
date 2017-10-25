@@ -166,7 +166,7 @@ rbioFS_PCA_app <- function(){
                          check.names = FALSE)
         df[[1]] <- factor(df[[1]], levels = c(unique(df[[1]]))) # avoid R's automatic re-ordering the factors automatically - it will keep the "typed-in" order
 
-        tgt <- factor(as.character(df[, input$targetVar]), levels = unique(df[, input$targetVar]))
+        tgt <- factor(as.character(df[, input$groupIDVar]), levels = unique(df[, input$groupIDVar]))
         if (input$impute){ # imputation
 
           if (TRUE %in% apply(df, 2, function(x) any(is.na(x)))){
