@@ -3,6 +3,7 @@
 export(rbioFS)
 export(rbioFS_PCA)
 export(rbioFS_PCA.file)
+export(rbioFS_PCA_app)
 export(rbioFS_app)
 export(rbioIMP)
 export(rbioNorm)

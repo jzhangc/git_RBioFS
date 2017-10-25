@@ -171,7 +171,7 @@ rbioFS_app <- function(){
           numericInput(inputId = "SFS_errorbarWidth", label = "Width",
                        value = 0.2, step = 0.05),
 
-          # Plot: x-axis
+          # Plot
           h4("Axis"),
           textInput("SFS_xLabel", "x-axis label", value = NULL, width = NULL, placeholder = NULL),
           numericInput(inputId = "SFS_xTxtSize", label = "x-axis font size",
@@ -196,7 +196,7 @@ rbioFS_app <- function(){
           # set up tabs
           tabsetPanel(type = "tabs",
                       tabPanel("Raw data", tableOutput("contents")), # "contents" means go to output to find the variable output$contents
-                      tabPanel("Impuated data (if applicable)", tableOutput("impt")),
+                      tabPanel("Processed data (if applicable)", tableOutput("impt")),
                       tabPanel("Initial FS results", verbatimTextOutput("initalFSsum")),
                       tabPanel("Initial FS plot", plotOutput("initalFSplot", height = 480, width = 550)),
                       tabPanel("SFS results", verbatimTextOutput("SFSsum")),
@@ -217,12 +217,10 @@ rbioFS_app <- function(){
 
         tgt <- factor(as.character(df[, input$targetVar]), levels = unique(df[, input$targetVar]))
         if (input$impute){ # imputation
-
           if (TRUE %in% apply(df, 2, function(x) any(is.na(x)))){
             impt <- RBioFS::rbioIMP(dfm = df[, -c(input$annoVar[1]:input$annoVar[2])], method = input$imputeMethod,
                                     iter = input$imputeIter, ntree = input$imputeNtree,
                                     fct = tgt, annot = df[, input$impt_anno], transpo = FALSE)
-
             impt <- data.frame(df[, c(input$annoVar[1]:input$annoVar[2])], impt, check.names = FALSE)
           } else {
             impt <- df

@@ -10,7 +10,7 @@ rbioFS_PCA(objTitle = "data", input = NULL, sampleIDVar = NULL,
   biplotTitle = NULL, biplotSymbolSize = 2, ellipse = FALSE,
   ellipse_conf = 0.93, loadingPlot = TRUE, loadingSize = 3,
   biplotWidth = 170, biplotHeight = 150, fontType = "sans",
-  xTickLblSize = 10, yTickLblSize = 10)
+  xLblSize = 10, yLblSize = 10)
 }
 \arguments{
 \item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}
@@ -49,9 +49,9 @@ rbioFS_PCA(objTitle = "data", input = NULL, sampleIDVar = NULL,
 
 \item{fontType}{Font for the figure texts.}
 
-\item{xLabel_biplot}{X-axis label for the biplot. Default is NULL.}
+\item{xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
-\item{yLabel_biplot}{Y-axis label for the biplot. Default is NULL.}
+\item{yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 }
 \value{
 Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.

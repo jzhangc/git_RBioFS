@@ -19,8 +19,8 @@
 #' @param biplotWidth	The biplot width. Default is \code{170}.
 #' @param biplotHeight The biplot height. Default is \code{150}.
 #' @param fontType Font for the figure texts.
-#' @param xLabel_biplot	X-axis label for the biplot. Default is NULL.
-#' @param yLabel_biplot	Y-axis label for the biplot. Default is NULL.
+#' @param xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
 #' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2
@@ -38,7 +38,7 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
                                ellipse = FALSE, ellipse_conf = 0.93,
                                loadingPlot = TRUE, loadingSize = 3,
                                biplotWidth = 170, biplotHeight = 150,
-                               fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
+                               fontType = "sans", xLblSize = 10, yLblSize = 10){
 
 
   ## PCA
