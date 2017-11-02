@@ -25,7 +25,7 @@ Installation
 
 Change log
 
-    0.4.4 (Oct. 25. 2017)
+    0.4.4 (Nov.1.2017)
         - Bug fixes
 
     0.4.3
