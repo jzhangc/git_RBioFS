@@ -10,7 +10,7 @@ rbioFS_PCA(objTitle = "data", input = NULL, sampleIDVar = NULL,
   biplotTitle = NULL, biplotSymbolSize = 2, ellipse = FALSE,
   ellipse_conf = 0.93, loadingPlot = TRUE, loadingSize = 3,
   biplotWidth = 170, biplotHeight = 150, fontType = "sans",
-  xLblSize = 10, yLblSize = 10)
+  xTickLblSize = 10, yTickLblSize = 10)
 }
 \arguments{
 \item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}

@@ -38,7 +38,7 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
                                ellipse = FALSE, ellipse_conf = 0.93,
                                loadingPlot = TRUE, loadingSize = 3,
                                biplotWidth = 170, biplotHeight = 150,
-                               fontType = "sans", xLblSize = 10, yLblSize = 10){
+                               fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
 
 
   ## PCA
