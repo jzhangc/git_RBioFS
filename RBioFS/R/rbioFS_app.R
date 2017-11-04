@@ -122,7 +122,7 @@ rbioFS_app <- function(){
           h4("Error bar"),
           radioButtons("initialFS_errorbar", "Type", choices = c(SEM = "sem", SD = "sd"),
                        selected = "sem"),
-          numericInput(inputId = "initialFS_errorbarWidth", label = "Width",
+          numericInput(inputId = "initialFS_errorbarWidth", label = "Error bar width",
                        value = 0.2, step = 0.05),
 
           # axis
@@ -168,7 +168,7 @@ rbioFS_app <- function(){
           h4("Error bar"),
           radioButtons("SFS_errorbar", "Type", choices = c(SEM = "sem", SD = "sd"),
                        selected = "sem"),
-          numericInput(inputId = "SFS_errorbarWidth", label = "Width",
+          numericInput(inputId = "SFS_errorbarWidth", label = "Error bar width",
                        value = 0.2, step = 0.05),
 
           # Plot

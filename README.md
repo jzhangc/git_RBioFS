@@ -25,7 +25,11 @@ Installation
 
 Change log
 
-    0.4.4 (Nov.1.2017)
+    0.4.5 (Nov.3.2017)
+        - fs_csv_generator() added
+        - Bug fixes
+
+    0.4.4
         - Bug fixes
 
     0.4.3

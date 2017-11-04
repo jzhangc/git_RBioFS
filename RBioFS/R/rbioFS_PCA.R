@@ -125,18 +125,12 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
 
     }
 
-
     ggsave(filename = paste(objTitle,".PCA.biplot.pdf", sep = ""), plot = biplt,
            width = biplotWidth, height = biplotHeight, units = "mm",dpi = 600)
-
     grid.draw(biplt) # preview
-
   }
-
   return(assign(paste(objTitle, "_PCA", sep = ""), PCA, envir = .GlobalEnv)) # output PCA object
-
 }
-
 
 #' @title rbioFS_PCA.file
 #'
@@ -152,7 +146,6 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
 #' }
 #' @export
 rbioFS_PCA.file <- function(file, ...){
-
   ## import file
   raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
 

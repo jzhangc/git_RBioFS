@@ -71,7 +71,6 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
                         tmpTree, tmpTry, tmpSize){
 
       tmploclEnv <- environment() # save the environment local to tmpFunc
-
       if (n == 0){
         rownames(tmpvimtx) <- colnames(tmpTraining)
         colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
