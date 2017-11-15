@@ -25,7 +25,12 @@ Installation
 
 Change log
 
-    0.4.5 (Nov.3.2017)
+    0.4.6 (Nov.14.2017)
+        - All the settings return to default upon "clear"
+        - A bug is fixed for rbioFS_app() when plots can't be regenerated on a new dataset upon "clear"
+        - Other bug fixes
+
+    0.4.5
         - fs_csv_generator() added
         - Bug fixes
 

@@ -536,7 +536,7 @@ rbioFS_app <- function(){
         return(pltgtb)
       })
 
-      observe({
+      observeEvent(input$run_initial_FS_plot, {
         output$initalFSplot <- renderPlot({
           grid.draw(ggplotdata_initialFS())
         }, width = input$plotWidth, height = input$plotHeight)
@@ -765,7 +765,7 @@ rbioFS_app <- function(){
         return(pltgtb)
       })
 
-      observe({
+      observeEvent(input$run_SFS_plot, {
         output$SFSplot <- renderPlot({
           grid.draw(ggplotdata_SFS())
         }, width = input$SFS_plotWidth, height = input$SFS_plotHeight)
@@ -783,7 +783,6 @@ rbioFS_app <- function(){
       observeEvent(input$clear_ui, {
         output$initalFSplot <- renderPlot({})
       })
-
       observeEvent(input$clear_ui, {
         output$initalFSsum <- renderPrint({cat("")})
       })
@@ -793,6 +792,115 @@ rbioFS_app <- function(){
       })
       observeEvent(input$clear_ui, {
         output$SFSsum <- renderPrint({cat("")})
+      })
+
+      observeEvent(input$clear_ui, {
+        updateRadioButtons(session = session, inputId = "sep", choices = c(Comma = ",", Semicolon = ";", Tab = "\t"),
+                           selected = ",")
+      })
+      observeEvent(input$clear_ui, {
+        updateRadioButtons(session = session, inputId = "disp", choices = c(Head = "head", All = "all"),
+                           selected = "head")
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "targetVar", min = 1, value = 1)
+      })
+      observeEvent(input$clear_ui, {
+        updateSliderInput(session = session, inputId = "annoVar", min = 1, max = 100, value = c(1, 2))
+      })
+      observeEvent(input$clear_ui, {
+        updateCheckboxInput(session = session, inputId = "impute", value = FALSE)
+      })
+      observeEvent(input$clear_ui, {
+        updateCheckboxInput(session = session, inputId = "quantile", value = FALSE)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "impt_anno", min = 1, value = 1)
+      })
+      observeEvent(input$clear_ui, {
+        updateRadioButtons(session = session, inputId = "imputeMethod", choices = c(`Random Forest` = "rf", Mean = "mean", `Random` = "random"),
+                           selected = "rf")
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "imputeIter", value = 50, step = 5)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "imputeNtree", value = 501, step = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateCheckboxInput(session = session, inputId = "multicore", value = FALSE)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "nTree", value = 1001, step = 100)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "nTimes", value = 50, step = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "initalFS_n", value = 1, step = 1, min = 1)
+      })
+      observeEvent(input$clear_ui, {
+        updateTextInput(session = session, inputId = "initalFS_Title", value = "", placeholder = NULL)
+      })
+      observeEvent(input$clear_ui, {
+        updateRadioButtons(session = session, inputId = "initialFS_errorbar", choices = c(SEM = "sem", SD = "sd"),
+                           selected = "sem")
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "initialFS_errorbarWidth", value = 0.2, step = 0.05)
+      })
+      observeEvent(input$clear_ui, {
+        updateTextInput(session = session, inputId = "initialFS_xLabel", value = "", placeholder = NULL)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "initialFS_xTxtSize", value = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateTextInput(session = session, inputId = "initialFS_yLabel", value = "", placeholder = NULL)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "initialFS_yTxtSize", value = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "plotWidth", value = 800, step = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "plotWidth", value = 600, step = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateRadioButtons(session = session, inputId = "SFS_mTry", choices = c(Recursion = "recur_default", RF = "rf_default"),
+                           selected = "recur_default")
+      })
+      observeEvent(input$clear_ui, {
+        updateTextInput(session = session, inputId = "SFS_Title", value = "", placeholder = NULL)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "SFS_symbolSize", value = 2, step = 1)
+      })
+      observeEvent(input$clear_ui, {
+        updateRadioButtons(session = session, inputId = "SFS_errorbar", choices = c(SEM = "sem", SD = "sd"),
+                           selected = "sem")
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "SFS_errorbarWidth", value = 0.2, step = 0.05)
+      })
+      observeEvent(input$clear_ui, {
+        updateTextInput(session = session, inputId = "SFS_xLabel", value = "", placeholder = NULL)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "SFS_xTxtSize", value = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateTextInput(session = session, inputId = "SFS_yLabel", value = "", placeholder = NULL)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "SFS_yTxtSize", value = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "SFS_plotWidth", value = 800, step = 10)
+      })
+      observeEvent(input$clear_ui, {
+        updateNumericInput(session = session, inputId = "SFS_plotWidth", value = 600, step = 10)
       })
 
       # stop and close window
