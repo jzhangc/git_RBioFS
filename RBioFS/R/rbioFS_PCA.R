@@ -42,7 +42,7 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
 
 
   ## PCA
-  PCA <- prcomp(input[, ! names(input) %in% c(sampleIDVar, groupIDVar)], scale. = scaleData)
+  PCA <- prcomp(input[, !names(input) %in% c(sampleIDVar, groupIDVar)], scale. = scaleData)
 
   ## plotting
   grid.newpage()
