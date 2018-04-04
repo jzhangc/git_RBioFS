@@ -26,6 +26,12 @@ Installation
 Change log
 
     0.4.7 (update preview)
+        - sPLS-DA functions added (non-Shiny)
+          - rbioFS_splsda()
+          - rbioFS_splsda.plot()
+          - rbioFS_splsda.cv()
+          - rbioFS_splsda.cv.plot()
+        - All shiny apps' interface updated with a new look
         - Bug fixes
 
     0.4.6
