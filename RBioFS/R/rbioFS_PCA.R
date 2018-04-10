@@ -55,7 +55,7 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
     geom_bar(position = "dodge", stat = "identity", color = "black", fill = "gray66") +
     scale_x_continuous() +
     scale_y_continuous(expand = c(0, 0),
-                       limits = c(0, with(boxdfm, ceiling(max(varpp))))) +
+                       limits = c(0, with(boxdfm, ceiling(max(varpp))) * 1.1)) +
     ggtitle(boxplotTitle) +
     xlab("PC") +
     ylab("Proportion of variance (%)") +

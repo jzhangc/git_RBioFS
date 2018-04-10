@@ -25,25 +25,31 @@ Installation
 
 Change log
 
-    0.4.7 (update preview)
-        - sPLS-DA functions added (non-Shiny)
+    0.5.0 (feature preview)
+        - PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda()
+          - rbioFS_plsda_plot()
+          - rbioFS_plsda_cv()
+          - rbioFS_plsda_cv_plot()
+        - sPLS-DA functions added (non-Shiny):
           - rbioFS_splsda()
-          - rbioFS_splsda.plot()
-          - rbioFS_splsda.cv()
-          - rbioFS_splsda.cv.plot()
+          - rbioFS_splsda_plot()
+        - Updates to PCA functions:
+          - 3D score plot option for rbioFS_PCA (non-shiny)
+          - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
+          - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
+          - PCA score plot now supports sample names for the plot shape
+          - PCA function rbioFS_PCA() updated with S3 method
         - All shiny apps' interface updated with a new look
         - Bug fixes
 
     0.4.6
         - All the settings return to default upon "clear"
-        - A bug is fixed for rbioFS_app() when plots can't be regenerated on a new dataset upon "clear"
+        - A bug fixed for rbioFS_app() where plots can't be regenerated on a new dataset upon "clear"
         - Other bug fixes
 
-    0.4.5
+    0.4.4 - 0.4.5
         - fs_csv_generator() added
-        - Bug fixes
-
-    0.4.4
         - Bug fixes
 
     0.4.3
@@ -55,16 +61,14 @@ Change log
         - Parallel computing modules updated with the more efficient foreach method for rbioFS(), rbioRF_initialFS() and rbioRF_SFS()
         - Bug fixes
 
-    0.4.2
-        - Bug fixes for rbioFS_app()
-
-    0.4.1
+    0.4.1 - 0.4.2
         - Progress bar added for rbioFS_app()
         - Plotting buttons added for rbioFS_app() 
         - UI elements re-arranged for a better presentation for rbioFS_app()
         - Small icons added for the buttons for rbioFS_app()
         - "Summary" tabs re-labelled as "Results" tabs for rbioFS_app()
         - NA check added for the initial FS module in rbioFS_app()
+        - Bug fixes for rbioFS_app()
         - Other minor bug fixes
 
     0.4.0
@@ -74,27 +78,19 @@ Change log
 
     0.3.3
         - zzz.R file added
-    
-    0.3.1 - 0.3.2 
-        - Bug fixes
   
-    0.3.0
+    0.3.0 - 0.3.2
         - Principal Component Analysis (PCA) and visualization function rbioFS_PCA() added
         - Citation information added
         - Bug fixes
     
-    0.2.1 - 0.2.5
-        - Bug fixes
-    
-    0.2.0
+    0.2.0 - 0.2.5
         - All-in-one FS function added
         - Bug fixes
     
-    0.1.12
-        - Bug fixes
-    
-    0.1.11
+    0.1.11 - 0.1.12
         - Output results as txt files functionality added
+        - Bug fixes
     
     0.1.10
         - Random Forest data imputation method added to the data imputation function
@@ -103,10 +99,8 @@ Change log
     0.1.9
         - Text fixes
     
-    0.1.8
+    0.1.7 - 0.1.8
         - Name changed to RBioFS
-    
-    0.1.7
         - Bug fixes
     
     0.1.6
