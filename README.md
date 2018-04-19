@@ -30,7 +30,7 @@ Change log
           - rbioFS_plsda()
           - rbioFS_plsda_plot()
           - rbioFS_plsda_cv()
-          - rbioFS_plsda_cv_plot()
+          - rbioFS_plsda_jackknife()
         - sPLS-DA functions added (non-Shiny):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
