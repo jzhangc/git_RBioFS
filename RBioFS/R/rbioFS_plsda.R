@@ -1,6 +1,6 @@
 #' @title rbioFS_plsda_jackknife
 #'
-#' @description Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \coee{PLS-R}.
+#' @description Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-R}.
 #' @param object A \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ncomp Defaults is all the components the \code{mvr} object has.
 #' @param use.mean Defaults is \code{FALSE}.
@@ -31,11 +31,6 @@
 #' @param legendTtlSize Set when \code{legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
 #' @param plotWidth The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plotHeight The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @param y_custom_tick_range To initiate setting the custom \code{y_upper_limit}, \code{y_lower_limit}, \code{y_major_tick_range}, \code{y_n_minor_ticks}. Default is \code{FALSE}.
-#' @param y_upper_limit Can only be set when \code{y_custom_tick_range = TRUE}. Set custom upper limt for y axis. Value can be obtained from \code{\link{autorange_bar_y}}.
-#' @param y_lower_limit Can only be set when \code{y_custom_tick_range = TRUE}. Set custom lower limt for y axis. Default is \code{0}. Value can be obtained from \code{\link{autorange_bar_y}}.
-#' @param y_major_tick_range Can only be set when \code{y_custom_tick_range = TRUE}. Set custom major tick range for y axis.  Value can be obtained from \code{\link{autorange_bar_y}}.
-#' @param y_n_minor_ticks Can only be set when \code{y_custom_tick_range = TRUE}. Set custom numbers of minor ticks. Default is \code{4}. Value can be obtained from \code{\link{autorange_bar_y}}.
 #' @return Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
@@ -64,7 +59,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]
   sdjack <- sqrt(var.jack(object, ncomp = ncomp, covariance = FALSE,
-                          use.mean = use.mean))
+                          use.mean = use.mean))  # var.jack from pls pacakge
   sem <- sdjack / sqrt(length(object$validation$segments))
   B <- coef(object, ncomp = ncomp)
   df <- length(object$validation$segments) - 1

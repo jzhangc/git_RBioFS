@@ -75,22 +75,12 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
 \item{plotHeight}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 
 \item{greyScale}{To set the graph in grey scale. Default is \code{TRUE}.}
-
-\item{y_custom_tick_range}{To initiate setting the custom \code{y_upper_limit}, \code{y_lower_limit}, \code{y_major_tick_range}, \code{y_n_minor_ticks}. Default is \code{FALSE}.}
-
-\item{y_upper_limit}{Can only be set when \code{y_custom_tick_range = TRUE}. Set custom upper limt for y axis. Value can be obtained from \code{\link{autorange_bar_y}}.}
-
-\item{y_lower_limit}{Can only be set when \code{y_custom_tick_range = TRUE}. Set custom lower limt for y axis. Default is \code{0}. Value can be obtained from \code{\link{autorange_bar_y}}.}
-
-\item{y_major_tick_range}{Can only be set when \code{y_custom_tick_range = TRUE}. Set custom major tick range for y axis.  Value can be obtained from \code{\link{autorange_bar_y}}.}
-
-\item{y_n_minor_ticks}{Can only be set when \code{y_custom_tick_range = TRUE}. Set custom numbers of minor ticks. Default is \code{4}. Value can be obtained from \code{\link{autorange_bar_y}}.}
 }
 \value{
 Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
 }
 \description{
-Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \coee{PLS-R}.
+Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-R}.
 }
 \details{
 \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
