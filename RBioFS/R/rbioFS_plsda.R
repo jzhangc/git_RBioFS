@@ -27,6 +27,59 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 }
 
 
+#' @title rbioFS_plsda
+#'
+#' @description PLS-DA modelling
+#' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
+#' @param y Input response variable (e.g.,)
+#' @param ncomp Number of components to be used for modelling.
+#' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm ("oscorespls"). Default is the popular \code{"simpls}.
+#' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
+#' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
+#' @param segments Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.
+#' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}.Default is \code{"random"}.
+#' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
+#' @return Returns a PLS-DA model object, with class "mvr".
+#' @details For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#' @importFrom pls plsr
+#' @examples
+#' \dontrun{
+#' y <- dummy(y)
+#' }
+#' @export
+rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
+                         segments = 10, segments.type = "random",
+                         jackknife = TRUE){
+  ## check arguments
+  if (!class(x) %in% c("matrix", "data.frame")){
+    stop(cat("x has to be either a matrix or data frame."))
+  }
+  if (class(x) == "data.frame"){
+    message(cat("data frame x converted to a matrix object."))
+    x <- as.matrix(x)
+  }
+  if (!is.factor(y))stop("y has to be a factor object.")
+  if (is.null(ncomp))stop("please set the ncomp number.")
+
+  ## data processing
+  # X
+  centered_X <- center_scale(x, scale = scale)  # center data with the option of scaling
+  X <- centered_X$centerX
+  # Y
+  Y <- dummy(y)
+  # constract dataframe for modelling
+  model_dfm <- data.frame(n = paste("row", 1:nrow(Y), sep = ""))
+  model_dfm$Y <- Y  # y is the y matrix as a whole, not the content of y
+  model_dfm$X <- X  # x is the x matrix as a whole, not the content of x
+
+  ## modelling
+  out_model <- plsr(Y ~ X, data = model_dfm, ncomp = ncomp,
+                    method = method, scale = FALSE,
+                    validation = validation, segments = segments, segments.type = segments.type, jackknife = TRUE, ...)
+
+  return(out_model)
+}
+
 
 #' @title rbioFS_plsda_jackknife
 #'
@@ -97,6 +150,9 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
                                    yLabel = NULL, yLabelSize = 10, yTickLblSize = 10, yTickItalic = FALSE, yTickBold = FALSE,
                                    legendSize = 9, legendTtl = FALSE, legendTtlSize = 9,
                                    plotWidth = 170, plotHeight = 150){
+  # check arguments
+  if (class(object) != "mvr")stop("object has to be a mvr class.")
+
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]
   sdjack <- sqrt(var.jack(object, ncomp = ncomp, covariance = FALSE,

@@ -30,22 +30,26 @@ Installation
 Change log
 
     0.5.0 (feature preview)
-        - PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda()
+    (wishlist)
+      - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
-          - center_scale() (can also be used for other purposes, e.g. sPLS-DA, PCA, SVM)
-          - dummy() (can also be used for other purposes, e.g. sPLS-DA)
-          - rbioFS_plsda_jackknife()
-        - sPLS-DA functions added (non-Shiny):
+      - sPLS-DA functions added (non-Shiny):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
-        - Updates to PCA functions:
+      - Updates to PCA functions:
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
           - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
           - PCA score plot now supports sample names for the plot shape
           - PCA function rbioFS_PCA() updated with S3 method
-        - All shiny apps' interface updated with a new look
+      - All shiny apps' interface updated with a new look
+      
+    (added)
+        - PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda()
+          - center_scale() (can also be used for other purposes, e.g. sPLS-DA, PCA, SVM)
+          - dummy() (can also be used for other purposes, e.g. sPLS-DA)
+          - rbioFS_plsda_jackknife()
         - Bug fixes
 
     0.4.6
