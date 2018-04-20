@@ -14,10 +14,8 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
   if (!is.factor(x)){  # use this one for the arugments
     stop("'x' should be a factor")
   }
-
   y <- model.matrix(~x - 1)
-
-  # below: remove unecessary array
+  # below: remove unecessary array attributes
   colnames(y) <- gsub("^x", "", colnames(y))
   attributes(y)$assign <- NULL
   attributes(y)$contrasts <- NULL
@@ -25,7 +23,6 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
   if (length(levels(x)) == 2 & drop2nd) { # if to only keep the factor binary
     y <- y[, 1]
   }
-
   return(y)
 }
 

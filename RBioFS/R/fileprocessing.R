@@ -63,7 +63,6 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
   }
 
   out <- as.data.frame(out, check.names = FALSE)
-
   if (transpo == TRUE){
     out <- t(out)
     colnames(out) <- annot
@@ -90,7 +89,6 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
 rbioNorm <- function(RawData, NormMtd = "quantile",
                       correctBG = TRUE,
                       BgMtd = "normexp", BgOffst = 0){
-
   if (correctBG == TRUE){
     BgC <- backgroundCorrect(RawData,method = BgMtd, offset = BgOffst) #background correction
     Norm <- normalizeBetweenArrays(BgC, method = NormMtd) # quantile normalization
@@ -101,7 +99,6 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
   }
 
   out <- as.data.frame(Norm, check.names = FALSE)
-
   return(out)
 }
 
