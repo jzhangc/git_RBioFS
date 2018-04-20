@@ -22,7 +22,7 @@ Installation
         
         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocInstaller::biocinstallRepos())
         
-  - Install development package
+  - Install development build
         
         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocInstaller::biocinstallRepos(), ref = "beta"")
         
