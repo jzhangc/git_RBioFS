@@ -33,7 +33,8 @@ Change log
         - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda()
           - rbioFS_plsda_plot()
-          - center_scale() (can also be used for other purposes, e.g. sPLS-DA, PCA, SVM.)
+          - center_scale() (can also be used for other purposes, e.g. sPLS-DA, PCA, SVM)
+          - dummy() (can also be used for other purposes, e.g. sPLS-DA)
           - rbioFS_plsda_jackknife()
         - sPLS-DA functions added (non-Shiny):
           - rbioFS_splsda()
