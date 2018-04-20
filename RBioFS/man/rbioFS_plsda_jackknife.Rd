@@ -9,8 +9,8 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
   outlineCol = "black", errorbar = "SEM", errorbarWidth = 0.2,
   errorbarLblSize = 6, fontType = "sans", xLabel = NULL,
   xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE,
-  xTickBold = FALSE, xAngle = 0, xAlign = 0.5, rightsideY = TRUE,
-  yLabel = NULL, yLabelSize = 10, yTickLblSize = 10,
+  xTickBold = FALSE, xAngle = 0, xhAlign = 0.5, xvAlign = 0.5,
+  rightsideY = TRUE, yLabel = NULL, yLabelSize = 10, yTickLblSize = 10,
   yTickItalic = FALSE, yTickBold = FALSE, legendSize = 9,
   legendTtl = FALSE, legendTtlSize = 9, plotWidth = 170,
   plotHeight = 150)
@@ -50,7 +50,9 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
 
 \item{xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
 
-\item{xAlign}{The alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+
+\item{xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
 \item{rightsideY}{If to display the right side y-axis. Default is \code{TRUE}.}
 
@@ -92,7 +94,7 @@ rbioFS_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
                        outlineCol = "black", errorbar = "SEM", errorbarWidth = 0.2,
                        errorbarLblSize = 6, fontType = "sans", xLabel = "Features",
                        xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE,
-                       xTickBold = FALSE, xAngle = 90, xAlign = 1, rightsideY = TRUE,
+                       xTickBold = FALSE, xAngle = 90, xhAlign = 1, xvAligh = 0.2, rightsideY = TRUE,
                        yLabel = "Coefficients", yLabelSize = 10, yTickLblSize = 10,
                        yTickItalic = FALSE, yTickBold = FALSE, legendSize = 9,
                        legendTtl = FALSE, legendTtlSize = 9, plotWidth = 170,
