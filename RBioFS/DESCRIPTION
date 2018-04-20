@@ -13,5 +13,5 @@ Imports:
     gtable (>= 0.2.0), grid (>= 3.2.4),
     randomForest (>= 4.6.12), ROCR (>= 1.0-7), rpart (>= 4.1-10),
     gplots (>= 3.0.1), limma (>= 3.28.21), edgeR (>= 3.14.0), parallel (>= 3.3.2),
-    shiny (>= 1.0.5), doParallel (>= 1.0.11), foreach (>= 1.4.3), pls (>= 2.6-0)
+    shiny (>= 1.0.5), doParallel (>= 1.0.11), foreach (>= 1.4.3), pls (>= 2.6-0), matrixStats (>= 0.53.1)
 RoxygenNote: 6.0.1

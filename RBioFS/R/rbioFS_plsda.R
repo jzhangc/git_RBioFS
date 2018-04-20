@@ -43,7 +43,16 @@
 #' @import ggplot2
 #' @examples
 #' \dontrun{
-#' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
+#' rbioFS_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
+#'                        sig.p = 0.05, plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+#'                        outlineCol = "black", errorbar = "SEM", errorbarWidth = 0.2,
+#'                        errorbarLblSize = 6, fontType = "sans", xLabel = "Features",
+#'                        xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE,
+#'                        xTickBold = FALSE, xAngle = 90, xAlign = 1, rightsideY = TRUE,
+#'                        yLabel = "Coefficients", yLabelSize = 10, yTickLblSize = 10,
+#'                        yTickItalic = FALSE, yTickBold = FALSE, legendSize = 9,
+#'                        legendTtl = FALSE, legendTtlSize = 9, plotWidth = 170,
+#'                        plotHeight = 150)
 #' }
 #' @export
 rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALSE, sig.p = 0.05,
@@ -111,6 +120,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
                            oob = rescale_none) +
         xlab(xLabel) +
         ylab(yLabel) +
+        geom_hline(yintercept = 0) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", size = plot.titleSize, family = fontType),

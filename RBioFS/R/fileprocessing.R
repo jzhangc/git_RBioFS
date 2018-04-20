@@ -106,6 +106,36 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
 }
 
 
+#' @title center_scale
+#'
+#' @description data centering function with scale opiton
+#' @param x Input matrix. Make sure it is a matrix
+#' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
+#' @return Outputs a list containing centered matrix.
+#' @details This function is needed to pre-process data when conducting plsda analysis. And the function can also be used for other purposes when needed. With the colSds function from matrixStats pacakge to calcualte column standard deviation, this function is faster than the native \code{scale} function when \code{scale = TRUE}.
+#' @importFrom matrixStats colSds
+#' @examples
+#' \dontrun{
+#' centerX <- center_scale(data, scale = TRUE)
+#' }
+#' @export
+center_scale <- function(x, scale = TRUE){
+  if (!is.matrix(x)){
+    stop("x needs to be a matrix")
+  }
+  col.mean <- colMeans(x, na.rm = TRUE)
+  if (scale){
+    col.sd <- colSds(x, center = col.mean, na.rm = TRUE) # matrixStats::colSds
+    temp <- t((t(x) - col.mean) / col.sd)  # centre + scale
+  } else {
+    col.sd <- NULL
+    temp <- t((t(x) - col.mean)) # centre
+  }
+  out <- list(centerX = temp, meanX = col.mean, scale = ifelse(scale, "yes", "no"), columnSD = col.sd)
+  return(out)
+}
+
+
 #' @title fs_csv_generator
 #'
 #' @description Creat CSV file from microarray or RNAseq experiments ready for RBioFS

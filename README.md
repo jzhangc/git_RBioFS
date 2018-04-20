@@ -18,9 +18,13 @@ Installation
       
         biocLite()
         
-  - Install the package
+  - Install stable release
         
         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocInstaller::biocinstallRepos())
+        
+  - Install development package
+        
+        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocInstaller::biocinstallRepos(), ref = "beta"")
         
 
 Change log
@@ -29,7 +33,7 @@ Change log
         - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda()
           - rbioFS_plsda_plot()
-          - rbioFS_plsda_cv()
+          - center_scale() (can also be used for other purposes, e.g. sPLS-DA, PCA, SVM.)
           - rbioFS_plsda_jackknife()
         - sPLS-DA functions added (non-Shiny):
           - rbioFS_splsda()
