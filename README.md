@@ -45,10 +45,12 @@ Change log
       - All shiny apps' interface updated with a new look
       
     (added)
+        - Data preprocessing functions added for modelling precedures such as PLS-DA, sPLS-DA, PCA, SVM, etc.
+          - center_scale()
+          - dummy()
         - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda()
-          - center_scale() (can also be used for other purposes, e.g. sPLS-DA, PCA, SVM)
-          - dummy() (can also be used for other purposes, e.g. sPLS-DA)
+          - rbioFS_plsda_scoreplot()
           - rbioFS_plsda_jackknife()
         - Bug fixes
 

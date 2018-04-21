@@ -39,6 +39,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param segments Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.
 #' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}.Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
+#' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
 #' @return Returns a PLS-DA model object, with class "mvr".
 #' @details For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 #' @importFrom pls plsr
@@ -49,7 +50,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @export
 rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
                          segments = 10, segments.type = "random",
-                         jackknife = TRUE){
+                         jackknife = TRUE, ...){
   ## check arguments
   if (!class(x) %in% c("matrix", "data.frame")){
     stop(cat("x has to be either a matrix or data frame."))
@@ -63,7 +64,9 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 
   ## data processing
   # X
+  cat(paste0("data centered with the scale option ", ifelse(scale, "\"ON\" ", "\"OFF\" "), "prior to modelling..."))
   centered_X <- center_scale(x, scale = scale)  # center data with the option of scaling
+  cat("DONE!\n")
   X <- centered_X$centerX
   # Y
   Y <- dummy(y)
@@ -77,6 +80,7 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
                     method = method, scale = FALSE,
                     validation = validation, segments = segments, segments.type = segments.type, jackknife = TRUE, ...)
 
+  out_model$centerX <- centered_X
   return(out_model)
 }
 

@@ -6,7 +6,7 @@
 \usage{
 rbioFS_plsda(x, y, ncomp, method = "simpls", scale = TRUE,
   validation = c("none", "CV", "LOO"), segments = 10,
-  segments.type = "random", jackknife = TRUE)
+  segments.type = "random", jackknife = TRUE, ...)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
@@ -26,6 +26,8 @@ rbioFS_plsda(x, y, ncomp, method = "simpls", scale = TRUE,
 \item{segments.type}{Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}.Default is \code{"random"}.}
 
 \item{jackknife}{If to use jack-knife procedure. Default is \code{TRUE}.}
+
+\item{...}{Additional arguments for \code{mvr} function from \code{pls} pacakge.}
 }
 \value{
 Returns a PLS-DA model object, with class "mvr".

@@ -117,12 +117,13 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
 #' }
 #' @export
 center_scale <- function(x, scale = TRUE){
-  if (!is.matrix(x)){
-    stop("x needs to be a matrix")
-  }
+  if (!is.matrix(x))stop("x needs to be a matrix")
+
   col.mean <- colMeans(x, na.rm = TRUE)
   if (scale){
     col.sd <- colSds(x, center = col.mean, na.rm = TRUE) # matrixStats::colSds
+    # check zero values
+    if (any(abs(col.sd) < .Machine$double.eps^0.5))warning("Scaling with (near) zero standard deviation")
     temp <- t((t(x) - col.mean) / col.sd)  # centre + scale
   } else {
     col.sd <- NULL
