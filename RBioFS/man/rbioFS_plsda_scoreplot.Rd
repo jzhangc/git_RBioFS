@@ -54,6 +54,9 @@ Returns a pdf file for scoreplot.
 \description{
 scoreplot function for PLS-DA models.
 }
+\details{
+When \code{length(comps) == 1}, the function generates a scatter plot plotting sample vs score for the comp of interest. When \code{length(comps) == 2}, the function generates a scatter plot plotting the two comps of interest against each other. When \code{length(comps) > 2}, the function generates a multi-panel correlation scoreplot matrix for the comps of interest - might be slow if the there are many comps.
+}
 \examples{
 \dontrun{
 rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)

@@ -106,7 +106,7 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' @param scoreplot.Width Scoreplot width. Default is \code{170}.
 #' @param scoreplot.Height Scoreplot height. Default is \code{150}.
 #' @return Returns a pdf file for scoreplot.
-#' @details
+#' @details When \code{length(comps) == 1}, the function generates a scatter plot plotting sample vs score for the comp of interest. When \code{length(comps) == 2}, the function generates a scatter plot plotting the two comps of interest against each other. When \code{length(comps) > 2}, the function generates a multi-panel correlation scoreplot matrix for the comps of interest - might be slow if the there are many comps.
 #' @import ggplot2
 #' @importFrom GGally ggpairs
 #' @importFrom grid grid.newpage grid.draw
@@ -173,6 +173,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
     } else { # no right side y-axis
       pltgtb <- scoreplt
     }
+
   } else if (length(comps) == 2){  # two components plot
     names(score_x)[1:2] <- c("axis1", "axis2")
 
@@ -212,6 +213,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
     } else { # no right side y-axis
       pltgtb <- scoreplt
     }
+
   } else if (length(comps) > 2){  # over two components plot matrix
     # custom functions for the paired scoreplot
     if (scoreplot.ellipse){  # ellipse
@@ -221,6 +223,10 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
       }
     } else {
+      if (rightsideY){
+        cat("Right side y-axis ignored for comps more than 2...")
+      }
+
       ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
         ggplot(data = data, mapping = mapping) +
           geom_point(...)
@@ -259,13 +265,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
             axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType))
 
     grid.newpage()
-    if (rightsideY){
-      cat("Right side y-axis ignored for comps more than 2...")
-      pltgtb <- scoreplt
-    } else {
-      pltgtb <- scoreplt
-    }
-
+    pltgtb <- scoreplt
   }
   ggsave(filename = paste(deparse(substitute(object)),".plsda.scoreplot.pdf", sep = ""), plot = pltgtb,
          width = scoreplot.Width, height = scoreplot.Height, units = "mm",dpi = 600)
