@@ -233,12 +233,12 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
       }
     }
     if (cor.scoreplot.densityplot){  # diag densityplot
-      densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1){
         ggplot(data = data, mapping = mapping) +
           geom_density(alpha = alpha)
       }
     } else {
-      densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1){
         ggplot(data = data, mapping = mapping)
       }
     }
