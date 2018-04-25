@@ -274,7 +274,6 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
 }
 
 
-
 #' @title rbioFS_plsda_jackknife
 #'
 #' @description Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-R}.
