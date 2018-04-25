@@ -52,6 +52,9 @@ Change log
           - rbioFS_plsda()
           - rbioFS_plsda_scoreplot()
           - rbioFS_plsda_jackknife()
+        - Updates to PCA functions:
+          - PCA scoreplot now supports single component curve
+          - PCA scoreplot now supports paired matrix, i.e. more than two components
         - Bug fixes
 
     0.4.6

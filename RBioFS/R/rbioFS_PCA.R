@@ -12,11 +12,11 @@
 #' @param biplotPC The two PCs to plot for the biplot. Default is \code{c("PC1", "PC2")}.
 #' @param biplotTitle The biplot title. Default is \code{NULL}.
 #' @param biplotSymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
-#' @param ellipse	If to draw ellipses. Default is \code{FALSE}.
+#' @param ellipse If to draw ellipses. Default is \code{FALSE}.
 #' @param ellipse_conf The confidence value for the ellipses. Default is \code{0.93}.
-#' @param loadingPlot	If to superimpose loading plot. Default is \code{TRUE}.
-#' @param loadingSize	The font size of the loading plot labels. Default is \code{3}.
-#' @param biplotWidth	The biplot width. Default is \code{170}.
+#' @param loadingPlot If to superimpose loading plot. Default is \code{TRUE}.
+#' @param loadingSize The font size of the loading plot labels. Default is \code{3}.
+#' @param biplotWidth The biplot width. Default is \code{170}.
 #' @param biplotHeight The biplot height. Default is \code{150}.
 #' @param fontType Font for the figure texts.
 #' @param xTickLblSize X-axis tick label size. Default is \code{10}.

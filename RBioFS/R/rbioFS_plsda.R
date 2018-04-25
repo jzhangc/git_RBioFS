@@ -85,6 +85,196 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 }
 
 
+#' @title rbioFS_plsda_scoreplot
+#'
+#' @description scoreplot function for PLS-DA models.
+#' @param object A \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
+#' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
+#' @param scoreplot.Title Scoreplot title. Default is \code{NULL}.
+#' @param scoreplot.SymbolSize Symbol size. Default is \code{2}.
+#' @param scoreplot.ellipse If to draw ellipses. Default is \code{FALSE}.
+#' @param scoreplot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
+#' @param cor.scoreplot.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
+#' @param cor.scoreplot.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
+#' @param scoreplot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param scoreplot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param scoreplot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param scoreplot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param scoreplot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param scoreplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param scoreplot.Width Scoreplot width. Default is \code{170}.
+#' @param scoreplot.Height Scoreplot height. Default is \code{150}.
+#' @return Returns a pdf file for scoreplot.
+#' @details
+#' @import ggplot2
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
+#' }
+#' @export
+rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
+                                   rightsideY = FALSE,
+                                   scoreplot.Title = NULL,
+                                   scoreplot.SymbolSize = 2,
+                                   scoreplot.ellipse = FALSE, scoreplot.ellipse_conf = 0.95,
+                                   cor.scoreplot.densityplot = FALSE, cor.scoreplot.stripLblSize = 10,
+                                   scoreplot.xAngle = 0, scoreplot.xhAlign = 0.5, scoreplot.xvAlign = 0.5,
+                                   scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10, scoreplot.yTickLblSize = 10,
+                                   scoreplot.Width = 170, scoreplot.Height = 150){
+  ## check variables
+  if (class(object) != "mvr")stop("object needs to be \"mvr\" class, e.g. created from RBioFS_plsda() function.")
+  if (length(comps) > object$ncomp)stop("comps value exceeded the maximum length.")
+
+  ## extract information
+  score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
+  score_x$group <- y
+  varpp_x <- 100 * object$Xvar / object$Xtotvar
+  boxdfm_x <- data.frame(comp_x = as.numeric(gsub("Comp", "", names(varpp_x))), varpp_x = varpp_x)
+  var_percentage_x <- varpp_x[paste0("Comp ", comps)] # extract the proportion of variance for the selected PCs
+  comp_axis_lbl <- paste("comp ", comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
+
+  ## scoreplot plotting
+  if (length(comps) == 1){  # one component plot
+    score_x$sample <- as.numeric(rownames(score_x))
+    names(score_x)[1] <- "axis1"
+
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
+    scoreplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
+      geom_point(aes(shape = group, colour = group), size = scoreplot.SymbolSize) + # plot the sample score scatter plot
+      ggtitle(scoreplot.Title) +
+      ylab(comp_axis_lbl[1]) +
+      theme_bw() +
+      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = scoreplot.fontType),
+            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xhAlign),
+            axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType, hjust = 0.5))
+
+    grid.newpage()
+    if (rightsideY){ # add the right-side y axis
+      # extract gtable
+      pltgtb <- ggplot_gtable(ggplot_build(scoreplt))
+      # add the right side y axis
+      Aa <- which(pltgtb$layout$name == "axis-l")
+      pltgtb_a <- pltgtb$grobs[[Aa]]
+      axs <- pltgtb_a$children[[2]]
+      axs$widths <- rev(axs$widths)
+      axs$grobs <- rev(axs$grobs)
+      axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+      Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+      pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+      pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+    } else { # no right side y-axis
+      pltgtb <- scoreplt
+    }
+  } else if (length(comps) == 2){  # two components plot
+    names(score_x)[1:2] <- c("axis1", "axis2")
+
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
+    scoreplt <- ggplot(score_x, aes(x = axis1, y = axis2)) +
+      geom_point(aes(shape = group, colour = group), size = scoreplot.SymbolSize) + # plot the sample score scatter plot
+      ggtitle(scoreplot.Title) +
+      ylab(comp_axis_lbl[1]) +
+      ylab(comp_axis_lbl[2]) +
+      theme_bw() +
+      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = scoreplot.fontType),
+            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xhAlign),
+            axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType, hjust = 0.5))
+    if (scoreplot.ellipse){ # circles
+      scoreplt <- scoreplt +
+        stat_ellipse(aes(colour = group, group = group), type = "norm", level = scoreplot.ellipse_conf)
+    }
+
+    grid.newpage()
+    if (rightsideY){ # add the right-side y axis
+      # extract gtable
+      pltgtb <- ggplot_gtable(ggplot_build(scoreplt))
+      # add the right side y axis
+      Aa <- which(pltgtb$layout$name == "axis-l")
+      pltgtb_a <- pltgtb$grobs[[Aa]]
+      axs <- pltgtb_a$children[[2]]
+      axs$widths <- rev(axs$widths)
+      axs$grobs <- rev(axs$grobs)
+      axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+      Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+      pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+      pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+    } else { # no right side y-axis
+      pltgtb <- scoreplt
+    }
+  } else if (length(comps) > 2){  # over two components plot matrix
+    # custom functions for the paired scoreplot
+    if (scoreplot.ellipse){  # ellipse
+      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
+        ggplot(data = data, mapping = mapping) +
+          geom_point(...) +
+          stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+      }
+    } else {
+      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
+        ggplot(data = data, mapping = mapping) +
+          geom_point(...)
+      }
+    }
+    if (cor.scoreplot.densityplot){  # diag densityplot
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
+        ggplot(data = data, mapping = mapping) +
+          geom_density(alpha = alpha)
+      }
+    } else {
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
+        ggplot(data = data, mapping = mapping)
+      }
+    }
+
+    # matrx scoreplot
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...\n", sep = ""))  # initial message
+    scoreplt <- ggpairs(score_x, columns = comps, aes(colour = group, shape = group),
+                        axisLabels = "show", columnLabels = comp_axis_lbl,
+                        showStrips = NULL,
+                        lower = list(continuous = ellipsefunc),
+                        upper = list(continuous = ellipsefunc),
+                        diag = list(continuous = densityfunc),
+                        legend = 2)
+    scoreplt <- scoreplt +
+      ggtitle(scoreplot.Title) +
+      theme(plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = scoreplot.fontType),
+            strip.background = element_blank(),  # no strip background colour
+            strip.text = element_text(face = "bold", size = cor.scoreplot.stripLblSize),
+            panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xhAlign),
+            axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType))
+
+    grid.newpage()
+    if (rightsideY){
+      cat("Right side y-axis ignored for comps more than 2...")
+      pltgtb <- scoreplt
+    } else {
+      pltgtb <- scoreplt
+    }
+
+  }
+  ggsave(filename = paste(deparse(substitute(object)),".plsda.scoreplot.pdf", sep = ""), plot = pltgtb,
+         width = scoreplot.Width, height = scoreplot.Height, units = "mm",dpi = 600)
+  cat("Done!\n") # final message
+  grid.draw(pltgtb)
+}
+
+
+
 #' @title rbioFS_plsda_jackknife
 #'
 #' @description Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-R}.
@@ -122,8 +312,6 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' @return Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
-#' @importFrom multcompView multcompLetters
-#' @importFrom multcomp glht mcp
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @importFrom scales rescale_none
