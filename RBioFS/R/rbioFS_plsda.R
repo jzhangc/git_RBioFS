@@ -224,7 +224,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
       }
     } else {
       if (rightsideY){
-        cat("Right side y-axis ignored for comps more than 2...")
+        cat("Right side y-axis ignored for comps more than 2...\n")
       }
 
       ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
@@ -244,7 +244,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
     }
 
     # matrx scoreplot
-    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...\n", sep = ""))  # initial message
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
     scoreplt <- ggpairs(score_x, columns = comps, aes(colour = group, shape = group),
                         axisLabels = "show", columnLabels = comp_axis_lbl,
                         showStrips = NULL,
