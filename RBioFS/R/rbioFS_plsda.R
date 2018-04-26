@@ -110,7 +110,7 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' @import ggplot2
 #' @importFrom GGally ggpairs
 #' @importFrom grid grid.newpage grid.draw
-#' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
 #' rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
@@ -127,7 +127,8 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
                                    scoreplot.Width = 170, scoreplot.Height = 150){
   ## check variables
   if (class(object) != "mvr")stop("object needs to be \"mvr\" class, e.g. created from RBioFS_plsda() function.")
-  if (length(comps) > object$ncomp)stop("comps value exceeded the maximum length.")
+  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
+  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
 
   ## extract information
   score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
@@ -144,6 +145,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
 
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
     scoreplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
+      geom_line(aes(colour = group, linetype = group)) +
       geom_point(aes(shape = group, colour = group), size = scoreplot.SymbolSize) + # plot the sample score scatter plot
       ggtitle(scoreplot.Title) +
       ylab(comp_axis_lbl[1]) +
@@ -153,23 +155,13 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
             plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = scoreplot.fontType),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xhAlign),
+            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xvAlign),
             axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType, hjust = 0.5))
 
     grid.newpage()
     if (rightsideY){ # add the right-side y axis
       # extract gtable
-      pltgtb <- ggplot_gtable(ggplot_build(scoreplt))
-      # add the right side y axis
-      Aa <- which(pltgtb$layout$name == "axis-l")
-      pltgtb_a <- pltgtb$grobs[[Aa]]
-      axs <- pltgtb_a$children[[2]]
-      axs$widths <- rev(axs$widths)
-      axs$grobs <- rev(axs$grobs)
-      axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-      Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-      pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-      pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+      pltgtb <- rightside_y(scoreplt)
     } else { # no right side y-axis
       pltgtb <- scoreplt
     }
@@ -189,7 +181,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
             plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = scoreplot.fontType),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xhAlign),
+            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xvAlign),
             axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType, hjust = 0.5))
     if (scoreplot.ellipse){ # circles
       scoreplt <- scoreplt +
@@ -198,23 +190,16 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
 
     grid.newpage()
     if (rightsideY){ # add the right-side y axis
-      # extract gtable
-      pltgtb <- ggplot_gtable(ggplot_build(scoreplt))
-      # add the right side y axis
-      Aa <- which(pltgtb$layout$name == "axis-l")
-      pltgtb_a <- pltgtb$grobs[[Aa]]
-      axs <- pltgtb_a$children[[2]]
-      axs$widths <- rev(axs$widths)
-      axs$grobs <- rev(axs$grobs)
-      axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-      Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-      pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-      pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+      pltgtb <- rightside_y(scoreplt)
     } else { # no right side y-axis
       pltgtb <- scoreplt
     }
 
   } else if (length(comps) > 2){  # over two components plot matrix
+    if (rightsideY){
+      cat("Right side y-axis ignored for comps more than 2...\n")
+    }
+
     # custom functions for the paired scoreplot
     if (scoreplot.ellipse){  # ellipse
       ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
@@ -223,10 +208,6 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
       }
     } else {
-      if (rightsideY){
-        cat("Right side y-axis ignored for comps more than 2...\n")
-      }
-
       ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
         ggplot(data = data, mapping = mapping) +
           geom_point(...)
@@ -235,7 +216,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
     if (cor.scoreplot.densityplot){  # diag densityplot
       densityfunc <- function(data = score_x, mapping, alpha = 0.1){
         ggplot(data = data, mapping = mapping) +
-          geom_density(alpha = alpha)
+          geom_density(alpha = alpha, aes(colour = group, linetype = group))
       }
     } else {
       densityfunc <- function(data = score_x, mapping, alpha = 0.1){
@@ -261,7 +242,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
             panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xhAlign),
+            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xvAlign),
             axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType))
 
     grid.newpage()
@@ -312,7 +293,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
-#' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @importFrom RBioplot rightside_y
 #' @importFrom scales rescale_none
 #' @import pls
 #' @import ggplot2
@@ -449,18 +430,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       ## finalize the plot
       grid.newpage()
       if (rightsideY){ # add the right-side y axis
-        # extract gtable
-        pltgtb <- ggplot_gtable(ggplot_build(plt))
-        # add the right side y axis
-        Aa <- which(pltgtb$layout$name == "axis-l")
-        pltgtb_a <- pltgtb$grobs[[Aa]]
-        axs <- pltgtb_a$children[[2]]
-        axs$widths <- rev(axs$widths)
-        axs$grobs <- rev(axs$grobs)
-        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+        pltgtb <- rightside_y(plt)
       } else { # no right side y-axis
         pltgtb <- plt
       }

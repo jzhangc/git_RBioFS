@@ -110,13 +110,13 @@ rbioFS_PCA_app <- function(){
 
           # other settings
           h4("Detailed settings"),
-          textInput("boxplotTitle", "Plot title", value = NULL, width = NULL, placeholder = NULL),
-          numericInput(inputId = "boxplotWidth", label = "Plot width", value = 800, step = 10),
-          numericInput(inputId = "boxplotHeight", label = "Plot height", value = 600, step = 10),
+          textInput("boxplot.Title", "Plot title", value = NULL, width = NULL, placeholder = NULL),
+          numericInput(inputId = "boxplot.Width", label = "Plot width", value = 800, step = 10),
+          numericInput(inputId = "boxplot.Height", label = "Plot height", value = 600, step = 10),
 
           ## biplot
           h3("Biplot"),
-          checkboxInput("loadingPlot", "Superimpose loading plot", TRUE),
+          checkboxInput("loadingplot", "Superimpose loading plot", TRUE),
           numericInput(inputId = "PC_1st", label = "First PC to plot", value = 1, step = 1, min = 1),
           numericInput(inputId = "PC_2nd", label = "Second PC to plot", value = 2, step = 1, min = 1),
           checkboxInput("ellipse", "ellipase", FALSE),
@@ -128,18 +128,18 @@ rbioFS_PCA_app <- function(){
 
           # other settings
           h4("Detailed settings"),
-          textInput("biplotTitle", "Plot title", value = NULL, width = NULL, placeholder = NULL),
+          textInput("biplot.Title", "Plot title", value = NULL, width = NULL, placeholder = NULL),
           numericInput(inputId = "loadingSize", label = "loading plot label size",
                        value = 3, step = 1, max = 1, min = 0),
-          numericInput(inputId = "biplotSymbolSize", label = "biplot symbol size",
+          numericInput(inputId = "biplot.SymbolSize", label = "biplot symbol size",
                        value = 2, step = 0.5, min = 1),
 
           # Space
           tags$br(),
           # Plot: size
-          numericInput(inputId = "biplotWidth", label = "Plot width",
+          numericInput(inputId = "biplot.Width", label = "Plot width",
                        value = 800, step = 10),
-          numericInput(inputId = "biplotHeight", label = "Plot height",
+          numericInput(inputId = "biplot.Height", label = "Plot height",
                        value = 600, step = 10)
 
         ),
@@ -270,7 +270,7 @@ rbioFS_PCA_app <- function(){
           scale_x_continuous() +
           scale_y_continuous(expand = c(0, 0),
                              limits = c(0, with(boxdfm, ceiling(max(varpp))) *1.1)) +
-          ggtitle(input$boxplotTitle) +
+          ggtitle(input$boxplot.Title) +
           xlab("PC") +
           ylab("Proportion of variance (%)") +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
@@ -287,14 +287,14 @@ rbioFS_PCA_app <- function(){
       observe({
         output$PCAboxplot <- renderPlot({
           grid.draw(ggplotdata_boxplot())
-        }, width = input$boxplotWidth, height = input$boxplotHeight)
+        }, width = input$boxplot.Width, height = input$boxplot.Height)
       })
 
       output$boxplot_dlPlot <- downloadHandler(
         filename = function(){paste(substr(noquote(input$file1), 1, nchar(input$file1) - 4),".boxplot.pdf", sep = "")},
         content = function(file) {
           ggsave(file, plot = ggplotdata_boxplot(),
-                 width = (input$boxplotWidth * 25.4) / 72, height = (input$boxplotHeight * 25.4) / 72,
+                 width = (input$boxplot.Width * 25.4) / 72, height = (input$boxplot.Height * 25.4) / 72,
                  units = "mm", dpi = 600, device = "pdf")
         }
       )
@@ -323,8 +323,8 @@ rbioFS_PCA_app <- function(){
         pc_axis_lbl <- paste(c(paste0("PC", as.character(input$PC_1st)), paste0("PC", as.character(input$PC_2nd))), " (", round(varpp_biplot, digits = 2), "%)", sep = "")
 
         biplt <- ggplot(sampleScore, aes(x = axis1, y = axis2)) +
-          geom_point(aes(shape = Group, colour = Group), size = input$biplotSymbolSize) + # plot the sample score scatter plot
-          ggtitle(input$biplotTitle) +
+          geom_point(aes(shape = Group, colour = Group), size = input$biplot.SymbolSize) + # plot the sample score scatter plot
+          ggtitle(input$biplot.Title) +
           xlab(pc_axis_lbl[1]) +
           ylab(pc_axis_lbl[2]) +
           theme_bw() +
@@ -344,7 +344,7 @@ rbioFS_PCA_app <- function(){
             stat_ellipse(aes(colour = Group, group = Group), type = "norm", level = input$ellipse_conf)
         }
 
-        if (input$loadingPlot){ # superimpose loading plot
+        if (input$loadingplot){ # superimpose loading plot
           biplt <- biplt +
             geom_vline(xintercept = 0, linetype = "dashed") +
             geom_hline(yintercept = 0, linetype = "dashed") +
@@ -358,14 +358,14 @@ rbioFS_PCA_app <- function(){
       observe({
         output$PCAbiplot <- renderPlot({
           grid.draw(ggplotdata_biplot())
-        }, width = input$biplotWidth, height = input$biplotHeight)
+        }, width = input$biplot.Width, height = input$biplot.Height)
       })
 
       output$biplot_dlPlot <- downloadHandler(
         filename = function(){paste(substr(noquote(input$file1), 1, nchar(input$file1) - 4),".biplot.pdf", sep = "")},
         content = function(file) {
           ggsave(file, plot = ggplotdata_biplot(),
-                 width = (input$biplotWidth * 25.4) / 72, height = (input$biplotHeight * 25.4) / 72,
+                 width = (input$biplot.Width * 25.4) / 72, height = (input$biplot.Height * 25.4) / 72,
                  units = "mm", dpi = 600, device = "pdf")
         }
       )

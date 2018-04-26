@@ -39,8 +39,6 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
                                loadingPlot = TRUE, loadingSize = 3,
                                biplotWidth = 170, biplotHeight = 150,
                                fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
-
-
   ## PCA
   PCA <- prcomp(input[, !names(input) %in% c(sampleIDVar, groupIDVar)], scale. = scaleData)
 
@@ -71,12 +69,9 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
          width = boxplotWidth, height = boxplotHeight, units = "mm",dpi = 600)
 
   grid.draw(boxplt) # preview
-
-
   # biplot. Inspired by ggord package.
   # argument check
   if (length(biplotPC) != 2){
-
     stop("Please properly set biplotPC argument so that two and only two PCs are used for biplot.")
 
   } else {
@@ -96,7 +91,6 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
     # perpare for the axis labels
     varpp_biplot <- varpp[biplotPC] # extract the proportion of variance for the selected PCs
     pc_axis_lbl <- paste(biplotPC, " (", round(varpp_biplot, digits = 2), "%)", sep = "")
-
 
     biplt <- ggplot(sampleScore, aes(x = axis1, y = axis2)) +
       geom_point(aes(shape = Group, colour = Group), size = biplotSymbolSize) + # plot the sample score scatter plot
@@ -122,7 +116,6 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
         geom_vline(xintercept = 0, linetype = "dashed") +
         geom_hline(yintercept = 0, linetype = "dashed") +
         geom_text(data = loadingValuePlot, aes(x = axis1, y = axis2), label = loadingValuePlot$lbl, colour = "gray30", size = loadingSize)
-
     }
 
     ggsave(filename = paste(objTitle,".PCA.biplot.pdf", sep = ""), plot = biplt,
@@ -131,6 +124,7 @@ rbioFS_PCA <- function(objTitle = "data", input = NULL, sampleIDVar = NULL, grou
   }
   return(assign(paste(objTitle, "_PCA", sep = ""), PCA, envir = .GlobalEnv)) # output PCA object
 }
+
 
 #' @title rbioFS_PCA.file
 #'

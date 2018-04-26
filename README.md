@@ -30,7 +30,7 @@ Installation
 Change log
 
     0.5.0 (feature preview)
-    (wishlist)
+    (ICEBOX)
       - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
       - sPLS-DA functions added (non-Shiny):
@@ -39,7 +39,6 @@ Change log
       - Updates to PCA functions:
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
-          - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
           - PCA score plot now supports sample names for the plot shape
           - PCA function rbioFS_PCA() updated with S3 method
       - All shiny apps' interface updated with a new look
@@ -52,9 +51,12 @@ Change log
           - rbioFS_plsda()
           - rbioFS_plsda_scoreplot()
           - rbioFS_plsda_jackknife()
-        - Updates to PCA functions:
+        - Updates to rbioFS_PCA(:
           - PCA scoreplot now supports single component curve
           - PCA scoreplot now supports paired matrix, i.e. more than two components
+          - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
+          - The function now outputs a PCA object to the environment
+        - Rightside y-axis now uses a function from RBioplot pakcage, which now is a dependency
         - Bug fixes
 
     0.4.6
