@@ -33,7 +33,8 @@ Change log
     (ICEBOX)
       - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
-      - sPLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_scoreplot(): y score projection
+      - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.1):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
       - rbioFS_PCA() written with the follwoing new functionalities:
