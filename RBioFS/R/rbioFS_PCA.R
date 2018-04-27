@@ -7,7 +7,7 @@
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
 #' @param boxplot.Title The boxplot title. Default is \code{NULL}.
 #' @param boxplot.Width The boxplot width. Default is \code{170}.
-#' @param boxplot.Height	The boxplot height. Default is \code{150}.
+#' @param boxplot.Height The boxplot height. Default is \code{150}.
 #' @param biplot.comps
 #' @param biplot.Title The biplot title. Default is \code{NULL}.
 #' @param biplot.SymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
@@ -47,7 +47,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        biplot.mtx.densityplot = FALSE, biplot.mtx.stripLblSize = 10,
                        biplot.Width = 170, biplot.Height = 150,
                        rightsideY = FALSE,
-                       fontType = "sans", xTickLblSize = 10, yTickLblSize = 1){
+                       fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
   ## set up input
   x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar)]
 

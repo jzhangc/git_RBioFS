@@ -13,7 +13,7 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   biplot.loadingplot.textsize = 3, biplot.mtx.densityplot = FALSE,
   biplot.mtx.stripLblSize = 10, biplot.Width = 170, biplot.Height = 150,
   rightsideY = FALSE, fontType = "sans", xTickLblSize = 10,
-  yTickLblSize = 1)
+  yTickLblSize = 10)
 }
 \arguments{
 \item{input}{Input data, data frame.}
