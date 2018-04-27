@@ -7,7 +7,7 @@
 rbioFS_plsda_scoreplot(object, comps = c(1, 2), rightsideY = FALSE,
   scoreplot.Title = NULL, scoreplot.SymbolSize = 2,
   scoreplot.ellipse = FALSE, scoreplot.ellipse_conf = 0.95,
-  cor.scoreplot.densityplot = FALSE, cor.scoreplot.stripLblSize = 10,
+  scoreplot.mtx.densityplot = FALSE, scoreplot.mtx.stripLblSize = 10,
   scoreplot.xAngle = 0, scoreplot.xhAlign = 0.5, scoreplot.xvAlign = 0.5,
   scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10,
   scoreplot.yTickLblSize = 10, scoreplot.Width = 170,
@@ -28,9 +28,9 @@ rbioFS_plsda_scoreplot(object, comps = c(1, 2), rightsideY = FALSE,
 
 \item{scoreplot.ellipse_conf}{The confidence value for the ellipses. Default is \code{0.95}.}
 
-\item{cor.scoreplot.densityplot}{If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.}
+\item{scoreplot.mtx.densityplot}{If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.}
 
-\item{cor.scoreplot.stripLblSize}{The label font size for the correlation scoreplot matrix strips. Default is \code{10}.}
+\item{scoreplot.mtx.stripLblSize}{The label font size for the correlation scoreplot matrix strips. Default is \code{10}.}
 
 \item{scoreplot.xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
 

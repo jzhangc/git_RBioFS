@@ -36,7 +36,7 @@ Change log
       - sPLS-DA functions added (non-Shiny):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
-      - Updates to PCA functions:
+      - rbioFS_PCA() written with the follwoing new functionalities:
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
           - PCA score plot now supports sample names for the plot shape
@@ -51,7 +51,7 @@ Change log
           - rbioFS_plsda()
           - rbioFS_plsda_scoreplot()
           - rbioFS_plsda_jackknife()
-        - Updates to rbioFS_PCA(:
+        - rbioFS_PCA() written with the follwoing new functionalities:
           - PCA scoreplot now supports single component curve
           - PCA scoreplot now supports paired matrix, i.e. more than two components
           - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions

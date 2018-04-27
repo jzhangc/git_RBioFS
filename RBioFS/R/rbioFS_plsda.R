@@ -95,8 +95,8 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' @param scoreplot.SymbolSize Symbol size. Default is \code{2}.
 #' @param scoreplot.ellipse If to draw ellipses. Default is \code{FALSE}.
 #' @param scoreplot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
-#' @param cor.scoreplot.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
-#' @param cor.scoreplot.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
+#' @param scoreplot.mtx.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
+#' @param scoreplot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
 #' @param scoreplot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
 #' @param scoreplot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param scoreplot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
@@ -121,7 +121,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
                                    scoreplot.Title = NULL,
                                    scoreplot.SymbolSize = 2,
                                    scoreplot.ellipse = FALSE, scoreplot.ellipse_conf = 0.95,
-                                   cor.scoreplot.densityplot = FALSE, cor.scoreplot.stripLblSize = 10,
+                                   scoreplot.mtx.densityplot = FALSE, scoreplot.mtx.stripLblSize = 10,
                                    scoreplot.xAngle = 0, scoreplot.xhAlign = 0.5, scoreplot.xvAlign = 0.5,
                                    scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10, scoreplot.yTickLblSize = 10,
                                    scoreplot.Width = 170, scoreplot.Height = 150){
@@ -213,10 +213,10 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
           geom_point(...)
       }
     }
-    if (cor.scoreplot.densityplot){  # diag densityplot
-      densityfunc <- function(data = score_x, mapping, alpha = 0.1){
+    if (scoreplot.mtx.densityplot){  # diag densityplot
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
         ggplot(data = data, mapping = mapping) +
-          geom_density(alpha = alpha, aes(colour = group, linetype = group))
+          geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
       }
     } else {
       densityfunc <- function(data = score_x, mapping, alpha = 0.1){
@@ -238,7 +238,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
       theme(plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = scoreplot.fontType),
             strip.background = element_blank(),  # no strip background colour
-            strip.text = element_text(face = "bold", size = cor.scoreplot.stripLblSize),
+            strip.text = element_text(face = "bold", size = scoreplot.mtx.stripLblSize),
             panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),

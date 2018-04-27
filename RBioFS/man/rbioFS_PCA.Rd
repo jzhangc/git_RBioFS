@@ -4,17 +4,18 @@
 \alias{rbioFS_PCA}
 \title{rbioFS_PCA}
 \usage{
-rbioFS_PCA(objTitle = "data", input = NULL, sampleIDVar = NULL,
-  groupIDVar = NULL, scaleData = TRUE, boxplotTitle = NULL,
-  boxplotWidth = 170, boxplotHeight = 150, biplotPC = c("PC1", "PC2"),
-  biplotTitle = NULL, biplotSymbolSize = 2, ellipse = FALSE,
-  ellipse_conf = 0.93, loadingPlot = TRUE, loadingSize = 3,
-  biplotWidth = 170, biplotHeight = 150, fontType = "sans",
-  xTickLblSize = 10, yTickLblSize = 10)
+rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
+  scaleData = TRUE, boxplot = TRUE, boxplot.Title = NULL,
+  boxplot.Width = 170, boxplot.Height = 150, biplot = TRUE,
+  biplot.comps = c(1:2), biplot.Title = NULL, biplot.SymbolSize = 2,
+  biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95, biplot.xAngle = 0,
+  biplot.xhAlign = 0.5, biplot.xvAlign = 0.5, biplot.loadingplot = FALSE,
+  biplot.loadingplot.textsize = 3, biplot.mtx.densityplot = FALSE,
+  biplot.mtx.stripLblSize = 10, biplot.Width = 170, biplot.Height = 150,
+  rightsideY = FALSE, fontType = "sans", xTickLblSize = 10,
+  yTickLblSize = 1)
 }
 \arguments{
-\item{objTitle}{File name prefix for output files and the PCA object. Default is \code{"data"}.}
-
 \item{input}{Input data, data frame.}
 
 \item{sampleIDVar}{Sample variable name. It's a character string.}
@@ -23,29 +24,35 @@ rbioFS_PCA(objTitle = "data", input = NULL, sampleIDVar = NULL,
 
 \item{scaleData}{If to scale the data when performing PCA. Default is \code{TRUE}.}
 
-\item{boxplotTitle}{The boxplot title. Default is \code{NULL}.}
+\item{boxplot.Title}{The boxplot title. Default is \code{NULL}.}
 
-\item{boxplotWidth}{The boxplot width. Default is \code{170}.}
+\item{boxplot.Width}{The boxplot width. Default is \code{170}.}
 
-\item{boxplotHeight}{The boxplot height. Default is \code{150}.}
+\item{boxplot.Height}{The boxplot height. Default is \code{150}.}
 
-\item{biplotPC}{The two PCs to plot for the biplot. Default is \code{c("PC1", "PC2")}.}
+\item{biplot.Title}{The biplot title. Default is \code{NULL}.}
 
-\item{biplotTitle}{The biplot title. Default is \code{NULL}.}
+\item{biplot.SymbolSize}{The symbol size for the scatter plot portion of the biplot. Default is \code{2}.}
 
-\item{biplotSymbolSize}{The symbol size for the scatter plot portion of the biplot. Default is \code{2}.}
+\item{biplot.ellipse}{If to draw ellipses. Default is \code{FALSE}.}
 
-\item{ellipse}{If to draw ellipses. Default is \code{FALSE}.}
+\item{biplot.ellipse_conf}{The confidence value for the ellipses. Default is \code{0.93}.}
 
-\item{ellipse_conf}{The confidence value for the ellipses. Default is \code{0.93}.}
+\item{biplot.xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{loadingPlot}{If to superimpose loading plot. Default is \code{TRUE}.}
+\item{biplot.xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{loadingSize}{The font size of the loading plot labels. Default is \code{3}.}
+\item{biplot.loadingplot}{If to superimpose loading plot. Default is \code{FALSE}.}
 
-\item{biplotWidth}{The biplot width. Default is \code{170}.}
+\item{biplot.loadingplot.textsize}{The font size of the loading plot labels. Default is \code{3}.}
 
-\item{biplotHeight}{The biplot height. Default is \code{150}.}
+\item{biplot.mtx.densityplot}{If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.}
+
+\item{biplot.mtx.stripLblSize}{The label font size for the correlation scoreplot matrix strips. Default is \code{10}.}
+
+\item{biplot.Width}{The biplot width. Default is \code{170}.}
+
+\item{biplot.Height}{The biplot height. Default is \code{150}.}
 
 \item{fontType}{Font for the figure texts.}
 
@@ -64,6 +71,6 @@ Make sure to arrange input data with first two columns for smaple ID and conditi
 }
 \examples{
 \dontrun{
-rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, ellipse = TRUE, loadingPlot = TRUE, biplotWidth = 200, biplotHeight = 170)
+rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
 }
 }
