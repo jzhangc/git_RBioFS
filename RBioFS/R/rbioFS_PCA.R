@@ -143,7 +143,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       cat(paste("Biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = axis1, y = axis2)) +
         geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) + # plot the sample score scatter plot
-        ggtitle(bipplot.Title) +
+        ggtitle(biplot.Title) +
         xlab(pc_axis_lbl[1]) +
         ylab(pc_axis_lbl[2]) +
         theme_bw() +

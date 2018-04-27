@@ -173,7 +173,7 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
     scoreplt <- ggplot(score_x, aes(x = axis1, y = axis2)) +
       geom_point(aes(shape = group, colour = group), size = scoreplot.SymbolSize) + # plot the sample score scatter plot
       ggtitle(scoreplot.Title) +
-      ylab(comp_axis_lbl[1]) +
+      xlab(comp_axis_lbl[1]) +
       ylab(comp_axis_lbl[2]) +
       theme_bw() +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
