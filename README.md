@@ -56,7 +56,7 @@ Change log
           - rbioFS_plsda_tuplot()
           - rbioFS_plsda_scoreplot()
           - rbioFS_plsda_jackknife()
-        - rbioFS_PCA() written with the follwoing new functionalities:
+        - rbioFS_PCA() re-written with the follwoing new functionalities:
           - PCA scoreplot now supports single component curve
           - PCA scoreplot now supports paired matrix, i.e. more than two components
           - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
