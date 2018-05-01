@@ -4,8 +4,8 @@
 \alias{rbioFS_plsda_tuplot}
 \title{rbioFS_plsda_tuplot}
 \usage{
-rbioFS_plsda_tuplot(object, comps = 1, multi_tuplot.ncol = 2,
-  multi_tuplot.nrow = 2, rightsideY = TRUE, sampleLabel.type = "none",
+rbioFS_plsda_tuplot(object, comps = 1, multi_tuplot.ncol = length(comps),
+  multi_tuplot.nrow = 1, rightsideY = TRUE, sampleLabel.type = "none",
   sampleLabel.vector = NULL, sampleLabel.padding = 0.5,
   tuplot.SymbolSize = 5, tuplot.Title = NULL, tuplot.fontType = "sans",
   tuplot.xTickLblSize = 10, tuplot.yTickLblSize = 10, tuplot.Width = 170,
@@ -16,9 +16,9 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_tuplot.ncol = 2,
 
 \item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 
-\item{multi_tuplot.ncol}{Set only when \code{length(comps) > 1}, number of columns in one figure page. Default is \code{2}.}
+\item{multi_tuplot.ncol}{Set only when \code{length(comps) > 1}, number of columns in one figure page. Default is \code{length(comps)}.}
 
-\item{multi_tuplot.nrow}{Set only when \code{length(comps) > 1}, number of rows in one figure page. Default is \code{2}.}
+\item{multi_tuplot.nrow}{Set only when \code{length(comps) > 1}, number of rows in one figure page. Default is \code{1}.}
 
 \item{rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}}
 
@@ -39,8 +39,6 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_tuplot.ncol = 2,
 \item{tuplot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{tuplot.Height}{Scoreplot height. Default is \code{150}.}
-
-\item{y}{Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
 \item{tuplot..fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 }

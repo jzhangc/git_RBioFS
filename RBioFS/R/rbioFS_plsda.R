@@ -87,14 +87,14 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
   return(out_model)
 }
 
+
 #' @title rbioFS_plsda_tuplot
 #'
 #' @description T-U plot function for PLS-DA models.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
-#' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
-#' @param multi_tuplot.ncol Set only when \code{length(comps) > 1}, number of columns in one figure page. Default is \code{2}.
-#' @param multi_tuplot.nrow Set only when \code{length(comps) > 1}, number of rows in one figure page. Default is \code{2}.
+#' @param multi_tuplot.ncol Set only when \code{length(comps) > 1}, number of columns in one figure page. Default is \code{length(comps)}.
+#' @param multi_tuplot.nrow Set only when \code{length(comps) > 1}, number of rows in one figure page. Default is \code{1}.
 #' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
 #' @param sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param sampleLabel.vector Set only when \code{sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
@@ -119,7 +119,7 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' rbioFS_plsda_tuplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
 #' }
 #' @export
-rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = 2, multi_tuplot.nrow = 2,
+rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = length(comps), multi_tuplot.nrow = 1,
                                 rightsideY = TRUE,
                                 sampleLabel.type = "none", sampleLabel.vector = NULL, sampleLabel.padding = 0.5,
                                 tuplot.SymbolSize = 5, tuplot.Title = NULL,
