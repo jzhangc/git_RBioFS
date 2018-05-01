@@ -11,7 +11,7 @@ rbioFS_plsda(x, y, ncomp, method = "simpls", scale = TRUE,
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
 
-\item{y}{Input response variable (e.g.,)}
+\item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
 \item{ncomp}{Number of components to be used for modelling.}
 

@@ -5,10 +5,12 @@
 #' @param sampleIDVar Sample variable name. It's a character string.
 #' @param groupIDVar Group variable name. It's a character string.
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
+#' @param centerData If to center the data when performing PCA. Default is \code{TRUE}.
+#' @param ... Additional arguments passed to \code{prcomp} function.
 #' @param boxplot.Title The boxplot title. Default is \code{NULL}.
 #' @param boxplot.Width The boxplot width. Default is \code{170}.
 #' @param boxplot.Height The boxplot height. Default is \code{150}.
-#' @param biplot.comps
+#' @param biplot.comps Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.
 #' @param biplot.Title The biplot title. Default is \code{NULL}.
 #' @param biplot.SymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
 #' @param biplot.ellipse If to draw ellipses. Default is \code{FALSE}.
@@ -35,7 +37,7 @@
 #' rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
 #' }
 #' @export
-rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE,
+rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE, centerData = TRUE, ...,
                        boxplot = TRUE,
                        boxplot.Title = NULL,
                        boxplot.Width = 170, boxplot.Height = 150,
@@ -56,7 +58,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
   if (biplot & !all(biplot.comps %in% seq(ncol(x))))stop("biplot.comps contain non-existant PC.")
 
   ## PCA
-  PCA <- prcomp(x, scale. = scaleData)
+  PCA <- prcomp(x, scale. = scaleData, center = centerData, ...)
   varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calcualte the proportion of variance
   boxdfm_x <- data.frame(PC = as.numeric(gsub("PC", "", names(varpp_x))), varpp = varpp_x)
 

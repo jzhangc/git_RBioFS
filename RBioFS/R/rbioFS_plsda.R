@@ -31,7 +31,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'
 #' @description PLS-DA modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,)
+#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param ncomp Number of components to be used for modelling.
 #' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm ("oscorespls"). Default is the popular \code{"simpls}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
@@ -79,16 +79,137 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
   out_model <- plsr(Y ~ X, data = model_dfm, ncomp = ncomp,
                     method = method, scale = FALSE,
                     validation = validation, segments = segments, segments.type = segments.type, jackknife = TRUE, ...)
-
   out_model$centerX <- centered_X
+  out_model$inputX <- x
+  out_model$inputY <- y
+
+  class(out_model) <- c("rbiomvr", "mvr")
   return(out_model)
+}
+
+#' @title rbioFS_plsda_tuplot
+#'
+#' @description T-U plot function for PLS-DA models.
+#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
+#' @param multi_tuplot.ncol Set only when \code{length(comps) > 1}, number of columns in one figure page. Default is \code{2}.
+#' @param multi_tuplot.nrow Set only when \code{length(comps) > 1}, number of rows in one figure page. Default is \code{2}.
+#' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
+#' @param sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param sampleLabel.vector Set only when \code{sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param sampleLabel.padding Set only when \code{sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param tuplot.Title Scoreplot title. Default is \code{NULL}.
+#' @param tuplot.SymbolSize Symbol size. Default is \code{2}.
+#' @param tuplot..fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param tuplot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param tuplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param tuplot.Width Scoreplot width. Default is \code{170}.
+#' @param tuplot.Height Scoreplot height. Default is \code{150}.
+#' @return Returns a pdf file for scoreplot.
+#' @details The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
+#' @import ggplot2
+#' @import ggrepel
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_tuplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
+#' }
+#' @export
+rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = 2, multi_tuplot.nrow = 2,
+                                rightsideY = TRUE,
+                                sampleLabel.type = "none", sampleLabel.vector = NULL, sampleLabel.padding = 0.5,
+                                tuplot.SymbolSize = 5, tuplot.Title = NULL,
+                                tuplot.fontType = "sans", tuplot.xTickLblSize = 10, tuplot.yTickLblSize = 10,
+                                tuplot.Width = 170, tuplot.Height = 150){
+  ## check arguments
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.\n")
+  if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.\n")
+  if (!tolower(sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  if (rightsideY){
+    if (length(comps) > 1){
+      cat("right side y-axis ignored for multi-plot figure.\n")
+    }
+  }
+
+  ## extract and construt t-u score plot dataframe
+  tu_dfm <- data.frame(y = object$inputY)
+
+  varpp_x <- 100 * object$Xvar / object$Xtotvar
+  var_percentage_x <- varpp_x[paste0("Comp ", comps)] # extract the proportion of variance for the selected comps
+
+  ## plot
+  cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.tuplot.pdf...", sep = ""))  # initial message
+  plt_list <- vector(mode = "list", length = length(comps))  # list
+  plt_list[] <- foreach(i = comps) %do% {
+    tu_dfm <- data.frame(t = object$scores[, i], u = object$Yscores[, i], tu_dfm)
+    var_percentage_x <- varpp_x[paste0("Comp ", i)] # extract the proportion of variance for the selected comps
+    comp_axis_lbl <- paste("(comp ", i, ", ", round(var_percentage_x, digits = 2), "%)", sep = "")
+    lbl <- paste(c("t ", "u "), comp_axis_lbl, sep = "")
+    plt <- ggplot(data = tu_dfm)
+
+    if (sampleLabel.type != "none"){
+      if (is.null(sampleLabel.vector)){
+        cat("sampleLabel.vector not provided. proceed without sampole labels.\n")
+        plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
+      } else if (length(sampleLabel.vector) != nrow(tu_dfm)){
+        cat("sampleLabel.vector not the same length as the number of samples. proceed without sampole labels.\n")
+        plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
+      } else {
+        tu_dfm$samplelabel <- as.character(sampleLabel.vector)
+        if (tolower(sampleLabel.type) == "direct"){
+          plt <- plt + geom_text(data = tu_dfm, aes(x = t, y = u, colour = y, label = samplelabel), size = tuplot.SymbolSize)
+        } else if (tolower(sampleLabel.type) == "indirect") {
+          plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y)) +
+            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel), point.padding = unit(sampleLabel.padding, "lines"))
+        }
+      }
+    } else {
+      plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
+    }
+
+    plt <- plt +
+      ggtitle(tuplot.Title) +
+      xlab(lbl[1]) +
+      ylab(lbl[2]) +
+      theme_bw() +
+      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(face = "bold", family = tuplot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = tuplot.fontType),
+            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            axis.text.x = element_text(size = tuplot.xTickLblSize, family = tuplot.fontType),
+            axis.text.y = element_text(size = tuplot.yTickLblSize, family = tuplot.fontType, hjust = 0.5))
+
+    if (rightsideY & length(comps) == 1){
+      plt <- rightside_y(plt)
+    }
+    plt
+  }
+  names(plt_list) <- paste0("g", comps)
+
+  if (length(comps) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_tuplot.ncol, nrow = multi_tuplot.nrow, position = "bottom")
+
+  ## save
+  grid.newpage()
+  ggsave(filename = paste(deparse(substitute(object)),".plsda.tuplot.pdf", sep = ""), plot = plt,
+         width = tuplot.Width, height = tuplot.Height, units = "mm",dpi = 600)
+  grid.draw(plt)
+  cat("Done!\n")
+
+  ## return invinsible object
+  invisible(plt)
 }
 
 
 #' @title rbioFS_plsda_scoreplot
 #'
 #' @description scoreplot function for PLS-DA models.
-#' @param object A \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param scoreplot.Title Scoreplot title. Default is \code{NULL}.
@@ -116,7 +237,7 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
 #' }
 #' @export
-rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
+rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    rightsideY = FALSE,
                                    scoreplot.Title = NULL,
                                    scoreplot.SymbolSize = 2,
@@ -126,9 +247,15 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
                                    scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10, scoreplot.yTickLblSize = 10,
                                    scoreplot.Width = 170, scoreplot.Height = 150){
   ## check variables
-  if (class(object) != "mvr")stop("object needs to be \"mvr\" class, e.g. created from RBioFS_plsda() function.")
-  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
-  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
+  if (class(object) == "rbiomvr"){
+    y <- object$inputY
+  } else if (class(object) == "mvr"){
+    if (is.null(y))stop("for mvr class objects, please provide response factor vector y.\n")
+    if (!is.factor)stop("for mvr class objects, y has to be a factor vector.\n")
+    y <- response
+  } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from RBioFS_plsda() function.\n")
+  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.\n")
+  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.\n")
 
   ## extract information
   score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
@@ -252,13 +379,16 @@ rbioFS_plsda_scoreplot <- function(object, comps = c(1, 2),
          width = scoreplot.Width, height = scoreplot.Height, units = "mm",dpi = 600)
   cat("Done!\n") # final message
   grid.draw(pltgtb)
+
+  ## return invinsible object
+  invisible(pltgtb)
 }
 
 
 #' @title rbioFS_plsda_jackknife
 #'
 #' @description Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-R}.
-#' @param object A \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ncomp Defaults is all the components the \code{mvr} object has.
 #' @param use.mean Defaults is \code{FALSE}.
 #' @param sig.p Alpha value for the jack-knife coffecient p values. Defaults is \code{0.05}.
@@ -323,7 +453,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
                                    legendSize = 9, legendTtl = FALSE, legendTtlSize = 9,
                                    plotWidth = 170, plotHeight = 150){
   # check arguments
-  if (class(object) != "mvr")stop("object has to be a mvr class.")
+  if (!any(class(object) %in% c("mvr", "rbiomvr")))stop("object has to be a mvr or rbiomvr class.\n")
 
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]

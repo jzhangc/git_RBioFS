@@ -4,8 +4,8 @@
 \alias{rbioFS_plsda_scoreplot}
 \title{rbioFS_plsda_scoreplot}
 \usage{
-rbioFS_plsda_scoreplot(object, comps = c(1, 2), rightsideY = FALSE,
-  scoreplot.Title = NULL, scoreplot.SymbolSize = 2,
+rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
+  rightsideY = FALSE, scoreplot.Title = NULL, scoreplot.SymbolSize = 2,
   scoreplot.ellipse = FALSE, scoreplot.ellipse_conf = 0.95,
   scoreplot.mtx.densityplot = FALSE, scoreplot.mtx.stripLblSize = 10,
   scoreplot.xAngle = 0, scoreplot.xhAlign = 0.5, scoreplot.xvAlign = 0.5,
@@ -14,7 +14,9 @@ rbioFS_plsda_scoreplot(object, comps = c(1, 2), rightsideY = FALSE,
   scoreplot.Height = 150)
 }
 \arguments{
-\item{object}{A \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+
+\item{y}{Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
 \item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 

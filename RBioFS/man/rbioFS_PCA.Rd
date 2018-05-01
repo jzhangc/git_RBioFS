@@ -5,11 +5,12 @@
 \title{rbioFS_PCA}
 \usage{
 rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
-  scaleData = TRUE, boxplot = TRUE, boxplot.Title = NULL,
-  boxplot.Width = 170, boxplot.Height = 150, biplot = TRUE,
-  biplot.comps = c(1:2), biplot.Title = NULL, biplot.SymbolSize = 2,
-  biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95, biplot.xAngle = 0,
-  biplot.xhAlign = 0.5, biplot.xvAlign = 0.5, biplot.loadingplot = FALSE,
+  scaleData = TRUE, centerData = TRUE, ..., boxplot = TRUE,
+  boxplot.Title = NULL, boxplot.Width = 170, boxplot.Height = 150,
+  biplot = TRUE, biplot.comps = c(1:2), biplot.Title = NULL,
+  biplot.SymbolSize = 2, biplot.ellipse = FALSE,
+  biplot.ellipse_conf = 0.95, biplot.xAngle = 0, biplot.xhAlign = 0.5,
+  biplot.xvAlign = 0.5, biplot.loadingplot = FALSE,
   biplot.loadingplot.textsize = 3, biplot.mtx.densityplot = FALSE,
   biplot.mtx.stripLblSize = 10, biplot.Width = 170, biplot.Height = 150,
   rightsideY = FALSE, fontType = "sans", xTickLblSize = 10,
@@ -24,11 +25,17 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 
 \item{scaleData}{If to scale the data when performing PCA. Default is \code{TRUE}.}
 
+\item{centerData}{If to center the data when performing PCA. Default is \code{TRUE}.}
+
+\item{...}{Additional arguments passed to \code{prcomp} function.}
+
 \item{boxplot.Title}{The boxplot title. Default is \code{NULL}.}
 
 \item{boxplot.Width}{The boxplot width. Default is \code{170}.}
 
 \item{boxplot.Height}{The boxplot height. Default is \code{150}.}
+
+\item{biplot.comps}{Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.}
 
 \item{biplot.Title}{The biplot title. Default is \code{NULL}.}
 

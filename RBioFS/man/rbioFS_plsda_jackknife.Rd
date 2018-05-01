@@ -16,7 +16,7 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
   plotHeight = 150)
 }
 \arguments{
-\item{object}{A \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
 
 \item{ncomp}{Defaults is all the components the \code{mvr} object has.}
 
