@@ -7,14 +7,19 @@
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
 #' @param centerData If to center the data when performing PCA. Default is \code{TRUE}.
 #' @param ... Additional arguments passed to \code{prcomp} function.
+#' @param boxplot If to plot a boxplot for variance distribution. Default is \code{TRUE}.
 #' @param boxplot.Title The boxplot title. Default is \code{NULL}.
 #' @param boxplot.Width The boxplot width. Default is \code{170}.
 #' @param boxplot.Height The boxplot height. Default is \code{150}.
+#' @param biplot If to plot a scoreplot, with the option of superimpose a loading plot, i.e. biplot. Default is \code{TRUE}.
 #' @param biplot.comps Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.
 #' @param biplot.Title The biplot title. Default is \code{NULL}.
+#' @param biplot.sampleLabel.type  If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param biplot.sampleLabel.padding Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param biplot.SymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
 #' @param biplot.ellipse If to draw ellipses. Default is \code{FALSE}.
 #' @param biplot.ellipse_conf The confidence value for the ellipses. Default is \code{0.93}.
+#' @param biplot.xAngle The rotation angle (degrees) of the biplot x axis marks. Default is \code{0} - horizontal.
 #' @param biplot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param biplot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param biplot.loadingplot If to superimpose loading plot. Default is \code{FALSE}.
@@ -23,7 +28,8 @@
 #' @param biplot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
 #' @param biplot.Width The biplot width. Default is \code{170}.
 #' @param biplot.Height The biplot height. Default is \code{150}.
-#' @param fontType Font for the figure texts.
+#' @param rightsideY If to show the right side y-axis for both boxplot and biplot. For biplot, only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
+#' @param fontType Font for the figure texts. Default is \code{"sans"}.
 #' @param xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
@@ -42,7 +48,9 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        boxplot.Title = NULL,
                        boxplot.Width = 170, boxplot.Height = 150,
                        biplot = TRUE, biplot.comps = c(1:2),
-                       biplot.Title = NULL, biplot.SymbolSize = 2,
+                       biplot.Title = NULL,
+                       biplot.sampleLabel.type = "none", biplot.sampleLabel.padding = 0.5,
+                       biplot.SymbolSize = 2,
                        biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95,
                        biplot.xAngle = 0, biplot.xhAlign = 0.5, biplot.xvAlign = 0.5,
                        biplot.loadingplot  = FALSE, biplot.loadingplot.textsize = 3,
@@ -50,6 +58,9 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        biplot.Width = 170, biplot.Height = 150,
                        rightsideY = FALSE,
                        fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
+  ## check the argument
+  if (!all(c(sampleIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
+
   ## set up input
   x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar)]
 
@@ -96,6 +107,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
   # prepare for scatter plot values (i.e. sample score)
   score_x <- data.frame(PCA$x[, biplot.comps, drop = FALSE], check.names = FALSE) # extract rotated sample scores
   score_x$group <- factor(input[, groupIDVar], levels = unique(input[, groupIDVar]))
+  score_x$samplelabel <- input[, sampleIDVar]
   var_percentage_x <- varpp_x[paste0("PC", biplot.comps)] # extract the proportion of variance for the selected PCs
   pc_axis_lbl <- paste("PC ", biplot.comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
 
@@ -114,8 +126,22 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
       cat(paste("Single PC biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
-        geom_line(aes(colour = group, linetype = group)) +
-        geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) + # plot the sample score scatter plot
+        geom_line(aes(colour = group, linetype = group))
+
+      # sample labels
+      if (biplot.sampleLabel.type == "direct"){
+        biplt <- biplt +
+          geom_text(aes(colour = group, label = samplelabel), size = biplot.SymbolSize)
+      } else if (biplot.sampleLabel.type == "indirect"){
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
+          geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+      } else {
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
+      }
+
+      biplt <- biplt +
         ggtitle(biplot.Title) +
         ylab(pc_axis_lbl[1]) +
         theme_bw() +
@@ -133,7 +159,6 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       }
     } else if (length(biplot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
-
       # prepare for loading plot values (i.e. loading value for variables)
       loadingValue <- data.frame(PCA$rotation[, biplot.comps], check.names = FALSE) # extract loading/rotation/eigenvectors for variables
       names(loadingValue) <- c("axis1", "axis2") # give a generic variable name for the ratation dataframe
@@ -143,8 +168,22 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       loadingValuePlot$lbl <- rownames(loadingValuePlot)
 
       cat(paste("Biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
-      biplt <- ggplot(score_x, aes(x = axis1, y = axis2)) +
-        geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) + # plot the sample score scatter plot
+      biplt <- ggplot(score_x, aes(x = axis1, y = axis2))
+
+      # sample labels
+      if (biplot.sampleLabel.type == "direct"){
+        biplt <- biplt +
+          geom_text(aes(colour = group, label = samplelabel), size = biplot.SymbolSize)
+      } else if (biplot.sampleLabel.type == "indirect"){
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
+          geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+      } else {
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
+      }
+
+      biplt <- biplt +
         ggtitle(biplot.Title) +
         xlab(pc_axis_lbl[1]) +
         ylab(pc_axis_lbl[2]) +
@@ -181,15 +220,43 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
       # custom functions for the paired scoreplot
       if (biplot.ellipse){  # ellipse
-        ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-          ggplot(data = data, mapping = mapping) +
-            geom_point(...) +
-            stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+        if (biplot.sampleLabel.type == "direct"){
+          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
+            ggplot(data = data, mapping = mapping) +
+              geom_text(aes(colour = group, label = samplelabel), ...) +
+              stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+          }
+        } else if (biplot.sampleLabel.type == "indirect"){
+          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
+            ggplot(data = data, mapping = mapping) +
+              geom_point(...) +
+              geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines")) +
+              stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+          }
+        } else {
+          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
+            ggplot(data = data, mapping = mapping) +
+              geom_point(...) +
+              stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+          }
         }
       } else {
-        ellipsefunc <- function(data = score_x, mapping, ...){
-          ggplot(data = data, mapping = mapping) +
-            geom_point(...)
+        if (biplot.sampleLabel.type == "direct"){
+          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
+            ggplot(data = data, mapping = mapping) +
+              geom_text(aes(colour = group, label = samplelabel), ...)
+          }
+        } else if (biplot.sampleLabel.type == "indirect"){
+          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
+            ggplot(data = data, mapping = mapping) +
+              geom_point(...) +
+              geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+          }
+        } else {
+          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
+            ggplot(data = data, mapping = mapping) +
+              geom_point(...)
+          }
         }
       }
       if (biplot.mtx.densityplot){  # diag densityplot

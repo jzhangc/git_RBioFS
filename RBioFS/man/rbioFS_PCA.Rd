@@ -8,6 +8,7 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   scaleData = TRUE, centerData = TRUE, ..., boxplot = TRUE,
   boxplot.Title = NULL, boxplot.Width = 170, boxplot.Height = 150,
   biplot = TRUE, biplot.comps = c(1:2), biplot.Title = NULL,
+  biplot.sampleLabel.type = "none", biplot.sampleLabel.padding = 0.5,
   biplot.SymbolSize = 2, biplot.ellipse = FALSE,
   biplot.ellipse_conf = 0.95, biplot.xAngle = 0, biplot.xhAlign = 0.5,
   biplot.xvAlign = 0.5, biplot.loadingplot = FALSE,
@@ -29,21 +30,31 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 
 \item{...}{Additional arguments passed to \code{prcomp} function.}
 
+\item{boxplot}{If to plot a boxplot for variance distribution. Default is \code{TRUE}.}
+
 \item{boxplot.Title}{The boxplot title. Default is \code{NULL}.}
 
 \item{boxplot.Width}{The boxplot width. Default is \code{170}.}
 
 \item{boxplot.Height}{The boxplot height. Default is \code{150}.}
 
+\item{biplot}{If to plot a scoreplot, with the option of superimpose a loading plot, i.e. biplot. Default is \code{TRUE}.}
+
 \item{biplot.comps}{Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.}
 
 \item{biplot.Title}{The biplot title. Default is \code{NULL}.}
+
+\item{biplot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
+
+\item{biplot.sampleLabel.padding}{Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{biplot.SymbolSize}{The symbol size for the scatter plot portion of the biplot. Default is \code{2}.}
 
 \item{biplot.ellipse}{If to draw ellipses. Default is \code{FALSE}.}
 
 \item{biplot.ellipse_conf}{The confidence value for the ellipses. Default is \code{0.93}.}
+
+\item{biplot.xAngle}{The rotation angle (degrees) of the biplot x axis marks. Default is \code{0} - horizontal.}
 
 \item{biplot.xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
@@ -61,7 +72,9 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 
 \item{biplot.Height}{The biplot height. Default is \code{150}.}
 
-\item{fontType}{Font for the figure texts.}
+\item{rightsideY}{If to show the right side y-axis for both boxplot and biplot. For biplot, only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
+
+\item{fontType}{Font for the figure texts. Default is \code{"sans"}.}
 
 \item{xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 

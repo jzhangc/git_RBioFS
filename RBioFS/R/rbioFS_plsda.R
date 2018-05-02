@@ -150,7 +150,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = length(co
     var_percentage_x <- varpp_x[paste0("Comp ", i)] # extract the proportion of variance for the selected comps
     comp_axis_lbl <- paste("(comp ", i, ", ", round(var_percentage_x, digits = 2), "%)", sep = "")
     lbl <- paste(c("t ", "u "), comp_axis_lbl, sep = "")
-    plt <- ggplot(data = tu_dfm)
+    plt <- ggplot(data = tu_dfm)  # base plot
 
     if (sampleLabel.type != "none"){
       if (is.null(sampleLabel.vector)){
