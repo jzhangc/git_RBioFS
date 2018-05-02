@@ -61,7 +61,7 @@ Change log
           - PCA scoreplot now supports paired matrix, i.e. more than two components
           - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
           - The function now outputs a PCA object to the environment
-          - PCA score plot now supports sample names for the plot shape
+          - PCA score plot now supports sample names for the samples
         - Rightside y-axis now uses a function from RBioplot pakcage, which now is a dependency
         - Bug fixes
 
