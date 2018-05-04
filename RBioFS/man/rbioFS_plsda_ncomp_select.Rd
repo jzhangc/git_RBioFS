@@ -55,7 +55,7 @@ Prints the selected number of components for each y class. Returns RMSEP values 
 Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
 }
 \details{
-Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 }
 \examples{
 \dontrun{

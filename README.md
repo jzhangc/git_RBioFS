@@ -31,37 +31,48 @@ Change log
 
     0.5.1 (Feature preview)
     (ICEBOX)
-        - PLS-DA functions added (non-Shiny):
+        - New PLS-DA functions added (non-Shiny):
             - rbioFS_plsda_plot()
             - rbioFS_plsda_scoreplot(): y score projection
             - AUC and ROC analysis
             - Q-R plot
             - ncomp optimization
+            
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.1):
             - rbioFS_splsda()
             - rbioFS_splsda_plot()
+            
         - rbioFS_PCA() written with the follwoing new functionalities:
             - 3D score plot option for rbioFS_PCA (non-shiny)
             - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
             - PCA function rbioFS_PCA() updated with S3 method
+            
         - All shiny apps' interface updated with a new look
+        
+      (ADDED)
+        - Updates to PLS-DA functions (non-Shiny):
+            - More information added to the manual page for rbioFS_plsda_ncomp_select()
+      
 
     0.5.0 (May.3.2018)
         - Data preprocessing functions added for modelling precedures such as PLS-DA, sPLS-DA, PCA, SVM, etc.
           - center_scale()
           - dummy()
+          
         - PLS-DA functions added (non-Shiny):
           - rbioFS_plsda()
           - rbioFS_plsda_ncomp_select()
           - rbioFS_plsda_tuplot()
           - rbioFS_plsda_scoreplot()
           - rbioFS_plsda_jackknife()
+          
         - rbioFS_PCA() re-written with the follwoing new functionalities:
           - The function now outputs a PCA object to the environment
           - PCA scoreplot now supports single component curve
           - PCA scoreplot now supports paired matrix, i.e. more than two components
           - PCA boxplot y upper limited adjusted for both shiny and non-shiny versions
           - PCA score plot now supports sample names for the samples
+          
         - Rightside y-axis now uses a function from RBioplot pakcage, which now is a dependency
         - Bug fixes
 

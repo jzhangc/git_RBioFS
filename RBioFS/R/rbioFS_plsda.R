@@ -245,7 +245,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param rmsepplot.Width Scoreplot width. Default is \code{170}.
 #' @param rmsepplot.Height Scoreplot height. Default is \code{150}.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
-#' @details Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 #' @import ggplot2
 #' @import foreach
 #' @importFrom GGally ggpairs
