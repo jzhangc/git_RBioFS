@@ -678,7 +678,10 @@ rbioFS_app <- function(){
         ooberrsummary$Features <- factor(ooberrsummary$Features, levels = unique(ooberrsummary$Features))
 
         ## output
-        minerrsd <- with(ooberrsummary, which(Mean <= min(Mean + SD)))
+        mean_min_idx <- which.min(ooberrsummary$Mean)  # index for the minimum mean oob feature group
+        sd_min <- ooberrsummary$SD[mean_min_idx]  # oob SD for the feature group above
+        minerrsd <- with(ooberrsummary, which(Mean <= (Mean[mean_min_idx] + sd_min)))  # 1sd minimum selection
+
         minfeatures <- colnames(trainingsfs)[1:min(minerrsd)]
         sfsmatrix <- trainingsfs[, 1:min(minerrsd), drop = FALSE]
 

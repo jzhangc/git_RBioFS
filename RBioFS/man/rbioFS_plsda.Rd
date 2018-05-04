@@ -40,6 +40,6 @@ For sequencing data, the input x needs to be either tranformed with the function
 }
 \examples{
 \dontrun{
-y <- dummy(y)
+rbioFS_plsda(x, y, ncomp = 20)
 }
 }

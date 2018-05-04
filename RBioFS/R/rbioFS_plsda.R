@@ -45,7 +45,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @importFrom pls plsr
 #' @examples
 #' \dontrun{
-#' y <- dummy(y)
+#' rbioFS_plsda(x, y, ncomp = 20)
 #' }
 #' @export
 rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
@@ -80,6 +80,7 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
                     method = method, scale = FALSE,
                     validation = validation, segments = segments, segments.type = segments.type, jackknife = TRUE, ...)
   out_model$centerX <- centered_X
+  out_model$dummy_y <- Y
   out_model$inputX <- x
   out_model$inputY <- y
 
@@ -93,15 +94,15 @@ rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validatio
 #' @description T-U plot function for PLS-DA models.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
-#' @param multi_tuplot.ncol Set only when \code{length(comps) > 1}, number of columns in one figure page. Default is \code{length(comps)}.
-#' @param multi_tuplot.nrow Set only when \code{length(comps) > 1}, number of rows in one figure page. Default is \code{1}.
+#' @param multi_tuplot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
+#' @param multi_tuplot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
 #' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
 #' @param sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param sampleLabel.vector Set only when \code{sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param sampleLabel.padding Set only when \code{sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param tuplot.Title Scoreplot title. Default is \code{NULL}.
 #' @param tuplot.SymbolSize Symbol size. Default is \code{2}.
-#' @param tuplot..fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param tuplot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param tuplot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param tuplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param tuplot.Width Scoreplot width. Default is \code{170}.
@@ -206,6 +207,175 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = length(co
 }
 
 
+#' @title randomiz.test
+#'
+#' @description Randomization function from \code{pls} pacakge. For \code{\link{rbioFS_plsda_ncomp_select}} function.
+randomiz.test <- function(residualsNew, residualsReference, nperm){
+  d <- residualsNew^2 - residualsReference^2
+  md <- mean(d)
+  N <- length(d)
+
+  signs <- round(matrix(runif(N * nperm), N, nperm)) * 2 - 1
+  dsigns <- d * signs
+  mdsigns <- colMeans(dsigns)
+
+  count <- sum(mdsigns >= md) ## equality will never occur, right?
+  (count + 0.5) / (nperm + 1)
+}
+
+
+#' @title rbioFS_plsda_ncomp_select()
+#'
+#' @description Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
+#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param ... Additional argument for \code{RMSEP} function from \code{pls} package.
+#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1sd"}, and \code{"randomization"}. Default is \code{"1sd"}.
+#' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
+#' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
+#' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
+#' @param rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param rmsepplot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
+#' @param multi_rmsepplot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
+#' @param multi_rmsepplot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param rmsepplot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param rmsepplot.SymbolSize Symbol size. Default is \code{2}.
+#' @param rmsepplot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param rmsepplot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param rmsepplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param rmsepplot.Width Scoreplot width. Default is \code{170}.
+#' @param rmsepplot.Height Scoreplot height. Default is \code{150}.
+#' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
+#' @details Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+#' @import ggplot2
+#' @import foreach
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @importFrom pls RMSEP
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_ncomp_select(new_model,  multi_rmsepplot.ncol = 2, multi_rmsepplot.nrow = 2, min.rmsep.line = T,
+#'          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
+#' }
+#' @export
+rbioFS_plsda_ncomp_select <- function(object, ...,
+                                      ncomp.selection.method = "1sd", randomization.nperm = 999, randomization.alpha = 0.05,
+                                      rmsepplot = TRUE,
+                                      rightsideY = TRUE,
+                                      rmsepplot.optm.ncomp.line = TRUE,
+                                      multi_rmsepplot.ncol = length(dimnames(object$coefficients)[[2]]), multi_rmsepplot.nrow = 1,
+                                      rmsepplot.display.Title = TRUE,
+                                      rmsepplot.SymbolSize = 2,
+                                      rmsepplot.fontType = "sans", rmsepplot.xTickLblSize = 10, rmsepplot.yTickLblSize = 10,
+                                      rmsepplot.Width = 170, rmsepplot.Height = 150){
+  ## check arguments
+  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
+  if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.\n")
+
+  ## calcuate RMSEP
+  rmsep <- RMSEP(object, ...)
+
+  ## ncomp selection and plot
+  # prepare dataframe for ncomp selection and plotting
+  rmsep_dfm_list <- vector(mode = "list", length = dim(rmsep$val)[2])
+  plt_list <- vector(mode = "list", length = dim(rmsep$val)[2])
+  rmsep_dfm_list[] <- foreach(i = 1:dim(rmsep$val)[2]) %do% {
+    dfm <- as.data.frame(t(rmsep$val[,i,]))
+    dfm <- data.frame(comps = seq(0, dim(rmsep$val)[3] - 1), dfm, row.names = NULL)
+    dfm <- melt(dfm, id = "comps")
+  }
+  names(rmsep_dfm_list) <- dimnames(rmsep$val)[[2]]  # dimnames(tstrmsep$val)[2] is a list object. use [] to get the characters in string class.
+
+  # ncomp selection
+  ncompsel_mtx <- foreach(i = 1:length(rmsep_dfm_list), .combine = "rbind") %do% {
+    dfm_cv <- rmsep_dfm_list[[i]][rmsep_dfm_list[[i]]$variable == "CV", ]
+    dfm_adjcv <- rmsep_dfm_list[[i]][rmsep_dfm_list[[i]]$variable == "adjCV", ]
+
+    if (ncomp.selection.method == "min"){
+      cv_x <- dfm_cv$comps[which.min(dfm_cv$value)]
+      adjcv_x <- dfm_adjcv$comps[which.min(dfm_adjcv$value)]
+    } else {  # modified from pls::selectNcomp()
+      origResponse <- object$dummy_y[, i]
+      allresids <- cbind(origResponse - (sum(origResponse) - origResponse) / (length(origResponse) - 1),
+                         object$validation$pred[,i,] - origResponse)  # CV prediction for all the comps used
+      residsds <- apply(allresids, 2, sd) / sqrt(nrow(allresids))
+
+      if (ncomp.selection.method == "1sd"){
+        dfm_cv$SD <- residsds
+        min_rmsep_cv_idx <- which.min(dfm_cv$value)  # index for the minimum mean oob feature group
+        sd_min_cv <- dfm_cv$SD[min_rmsep_cv_idx]  # oob SD for the feature group above
+        cv_x <- min(with(dfm_cv, which(value <= (value[min_rmsep_cv_idx] + sd_min_cv))))  # 1sd minimum selection
+
+        dfm_adjcv$SD <- residsds
+        min_rmsep_adjcv_idx <- which.min(dfm_adjcv$value)  # index for the minimum mean oob feature group
+        sd_min_adjcv <- dfm_adjcv$SD[min_rmsep_adjcv_idx]  # oob SD for the feature group above
+        adjcv_x <- min(with(dfm_adjcv, which(value <= (value[min_rmsep_adjcv_idx] + sd_min_adjcv))))  # 1sd minimum selection
+      } else if (ncomp.selection.method == "randomization"){
+        absBest_cv <- which.min(dfm_cv$value)
+        pvals_cv <- sapply(seq_len(absBest_cv - 1), function(m) randomiz.test(allresids[, m], allresids[, absBest_cv], nperm = randomization.nperm))
+        idx_cv <- which(pvals_cv > randomization.alpha)
+        cv_x <- min(c(idx_cv, absBest_cv)) - 1
+
+        absBest_adjcv <- which.min(dfm_adjcv$value)
+        pvals_adjcv <- sapply(seq_len(absBest_adjcv - 1), function(m) randomiz.test(allresids[, m], allresids[, absBest_adjcv], nperm = randomization.nperm))
+        idx_adjcv <- which(pvals_cv > randomization.alpha)
+        adjcv_x <- min(c(idx_adjcv, absBest_adjcv)) - 1
+      }
+
+    }
+    c(cv_x, adjcv_x)
+  }
+  rownames(ncompsel_mtx) <- names(rmsep_dfm_list)
+  colnames(ncompsel_mtx) <- c("CV", "adjCV")
+  cat(paste0("Optimial ncomp (selection method: ", ncomp.selection.method, ") : \n", sep = ""))
+  print(ncompsel_mtx)
+
+  # plotting
+  if (rmsepplot){
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.rmsepplot.pdf...", sep = ""))  # initial message
+    plt_list[] <- foreach(i = 1:length(rmsep_dfm_list)) %do% {
+      plt <- ggplot(data = rmsep_dfm_list[[i]], aes(x = comps, y = value, colour = variable)) +
+        geom_line(aes(linetype = variable)) +
+        geom_point(aes(shape = variable), size = rmsepplot.SymbolSize) +
+        ggtitle(ifelse(rmsepplot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
+        ylab("RMSEP") +
+        xlab("Components") +
+        theme_bw() +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = rmsepplot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = rmsepplot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = rmsepplot.xTickLblSize, family = rmsepplot.fontType),
+              axis.text.y = element_text(size = rmsepplot.yTickLblSize, family = rmsepplot.fontType, hjust = 0.5))
+
+      if (rmsepplot.optm.ncomp.line){
+        plt <- plt +
+          geom_vline(xintercept = ncompsel_mtx[i, ], linetype = "dashed", colour = "red")
+      }
+
+      if (rightsideY & length(rmsep_dfm_list) == 1){
+        plt <- rightside_y(plt)
+      }
+      plt
+    }
+    names(plt_list) <- paste0("g_", names(rmsep_dfm_list))
+
+    if (length(rmsep_dfm_list) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_rmsepplot.ncol, nrow = multi_rmsepplot.nrow, position = "bottom")
+
+    ## save
+    grid.newpage()
+    ggsave(filename = paste(deparse(substitute(object)),".plsda.rmsepplot.pdf", sep = ""), plot = plt,
+           width = rmsepplot.Width, height = rmsepplot.Height, units = "mm",dpi = 600)
+    grid.draw(plt)
+    cat("Done!\n")
+  }
+
+  ## return RMSEP values
+  assign(paste(deparse(substitute(object)), "_rmsep_list", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
+}
+
+
 #' @title rbioFS_plsda_scoreplot
 #'
 #' @description scoreplot function for PLS-DA models.
@@ -248,12 +418,12 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10, scoreplot.yTickLblSize = 10,
                                    scoreplot.Width = 170, scoreplot.Height = 150){
   ## check variables
-  if (class(object) == "rbiomvr"){
+  if (any(class(object) == "rbiomvr")){
     y <- object$inputY
-  } else if (class(object) == "mvr"){
-    if (is.null(y))stop("for mvr class objects, please provide response factor vector y.\n")
-    if (!is.factor)stop("for mvr class objects, y has to be a factor vector.\n")
-    y <- response
+  } else if (!any(class(object) == "rbiomvr") & any(class(object) == "mvr")){
+    if (is.null(y)) stop("for mvr class objects, please provide response factor vector y.\n")
+    if (!is.factor(y)) stop("for mvr class objects, y has to be a factor vector.\n")
+    y <- y
   } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from RBioFS_plsda() function.\n")
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.\n")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.\n")
@@ -454,7 +624,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
                                    legendSize = 9, legendTtl = FALSE, legendTtlSize = 9,
                                    plotWidth = 170, plotHeight = 150){
   # check arguments
-  if (!any(class(object) %in% c("mvr", "rbiomvr")))stop("object has to be a mvr or rbiomvr class.\n")
+  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
 
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]

@@ -159,13 +159,6 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       }
     } else if (length(biplot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
-      # prepare for loading plot values (i.e. loading value for variables)
-      loadingValue <- data.frame(PCA$rotation[, biplot.comps], check.names = FALSE) # extract loading/rotation/eigenvectors for variables
-      names(loadingValue) <- c("axis1", "axis2") # give a generic variable name for the ratation dataframe
-      loadingScale <- max(max(abs(score_x$axis1)) / max(abs(loadingValue$axis1)),
-                          max(abs(score_x$axis2)) / max(abs(loadingValue$axis2))) * 0.85 # determine scaling for loading values
-      loadingValuePlot <- loadingValue * loadingScale
-      loadingValuePlot$lbl <- rownames(loadingValuePlot)
 
       cat(paste("Biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = axis1, y = axis2))
@@ -202,6 +195,15 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       }
 
       if (biplot.loadingplot){ # superimpose loading plot
+        # prepare for loading plot values (i.e. loading value for variables)
+        loadingValue <- data.frame(PCA$rotation[, biplot.comps], check.names = FALSE) # extract loading/rotation/eigenvectors for variables
+        names(loadingValue) <- c("axis1", "axis2") # give a generic variable name for the ratation dataframe
+        loadingScale <- max(max(abs(score_x$axis1)) / max(abs(loadingValue$axis1)),
+                            max(abs(score_x$axis2)) / max(abs(loadingValue$axis2))) * 0.85 # determine scaling for loading values
+        loadingValuePlot <- loadingValue * loadingScale
+        loadingValuePlot$lbl <- rownames(loadingValuePlot)
+
+        # plot
         biplt <- biplt +
           geom_vline(xintercept = 0, linetype = "dashed") +
           geom_hline(yintercept = 0, linetype = "dashed") +
@@ -219,55 +221,32 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       }
 
       # custom functions for the paired scoreplot
-      if (biplot.ellipse){  # ellipse
-        if (biplot.sampleLabel.type == "direct"){
-          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-            ggplot(data = data, mapping = mapping) +
-              geom_text(aes(colour = group, label = samplelabel), ...) +
-              stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
-          }
-        } else if (biplot.sampleLabel.type == "indirect"){
-          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-            ggplot(data = data, mapping = mapping) +
-              geom_point(...) +
-              geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines")) +
-              stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
-          }
+      ellipsefunc <- function(data = score_x, mapping, label.method = biplot.sampleLabel.type,
+                              ellipse = biplot.ellipse, ellipse_conf = biplot.ellipse_conf,
+                              ...){
+        g <- ggplot(data = data, mapping = mapping)
+
+        if (label.method == "direct"){
+          g <- g + geom_text(aes(colour = group, label = samplelabel), ...)
+        } else if (label.method == "indirect"){
+          g <- g +  geom_point(...) +
+            geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
         } else {
-          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-            ggplot(data = data, mapping = mapping) +
-              geom_point(...) +
-              stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
-          }
+          g <- g + geom_point(...)
         }
-      } else {
-        if (biplot.sampleLabel.type == "direct"){
-          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-            ggplot(data = data, mapping = mapping) +
-              geom_text(aes(colour = group, label = samplelabel), ...)
-          }
-        } else if (biplot.sampleLabel.type == "indirect"){
-          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-            ggplot(data = data, mapping = mapping) +
-              geom_point(...) +
-              geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
-          }
-        } else {
-          ellipsefunc <- function(data = score_x, mapping, ellipse_conf = biplot.ellipse_conf, ...){
-            ggplot(data = data, mapping = mapping) +
-              geom_point(...)
-          }
+        if (ellipse){
+          g <- g +
+            stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
         }
+        return(g)
       }
-      if (biplot.mtx.densityplot){  # diag densityplot
-        densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
-          ggplot(data = data, mapping = mapping) +
-            geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
+
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1, densityplot = biplot.mtx.densityplot, ...){
+        g <- ggplot(data = data, mapping = mapping)
+        if (densityplot){
+          g <- g + geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
         }
-      } else {
-        densityfunc <- function(data = score_x, mapping){
-          ggplot(data = data, mapping = mapping)
-        }
+        return(g)
       }
 
       # matrx scoreplot
