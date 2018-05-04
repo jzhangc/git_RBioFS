@@ -26,7 +26,7 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 
 \item{rmsepplot}{If to generate a RMSEP plot. Default is \code{TRUE}.}
 
-\item{rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}}
+\item{rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 
 \item{rmsepplot.optm.ncomp.line}{If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.}
 
