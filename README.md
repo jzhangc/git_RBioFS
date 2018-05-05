@@ -38,13 +38,13 @@ Change log
           - Q-R plot
           - ncomp optimization
             
-        - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.1):
+        - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.2):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
             
         - rbioFS_PCA() updated with the follwoing new functionalities:
           - 3D score plot option for rbioFS_PCA (non-shiny)
-          - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
+          - 3D socre plot option for rbioFS_PCA_app (shiny)
           - PCA function rbioFS_PCA() updated with S3 method
         
         - Updates to PLS-DA functions (non-Shiny):
