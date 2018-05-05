@@ -32,27 +32,37 @@ Change log
     0.5.1 (Feature preview)
     (ICEBOX)
         - New PLS-DA functions added (non-Shiny):
-            - rbioFS_plsda_plot()
-            - rbioFS_plsda_scoreplot(): y score projection
-            - AUC and ROC analysis
-            - Q-R plot
-            - ncomp optimization
+          - rbioFS_plsda_plot()
+          - rbioFS_plsda_scoreplot(): y score projection
+          - AUC and ROC analysis
+          - Q-R plot
+          - ncomp optimization
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.1):
-            - rbioFS_splsda()
-            - rbioFS_splsda_plot()
+          - rbioFS_splsda()
+          - rbioFS_splsda_plot()
             
-        - rbioFS_PCA() written with the follwoing new functionalities:
-            - 3D score plot option for rbioFS_PCA (non-shiny)
-            - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
-            - PCA function rbioFS_PCA() updated with S3 method
+        - rbioFS_PCA() updated with the follwoing new functionalities:
+          - 3D score plot option for rbioFS_PCA (non-shiny)
+          - 3D socre plot option for rbioFS_PCA_app (shiny) (tentative, may implement in 0.5.1)
+          - PCA function rbioFS_PCA() updated with S3 method
+        
+        - Updates to PLS-DA functions (non-Shiny):
+          - More information added to the manual page for rbioFS_plsda_ncomp_select()
+          - Small changes made to message display pattern in rbioFS_plsda_jackknife()
+          
+        - Updates to RF-FS functions:
+          - Function message display feature added to rbioFS()
+          - Group variable now customizable for rbioFS()
+          - rbioFS() now accepts R objects, in addition csv files
+          - Arugment check added for rbioFS()
             
         - All shiny apps' interface updated with a new look
         
       (ADDED)
         - Updates to PLS-DA functions (non-Shiny):
-            - More information added to the manual page for rbioFS_plsda_ncomp_select()
-            - Small changes made to message display pattern in rbioFS_plsda_jackknife()
+           - More information added to the manual page for rbioFS_plsda_ncomp_select()
+           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
       
 
     0.5.0 (May.3.2018)

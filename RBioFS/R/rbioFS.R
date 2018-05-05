@@ -80,7 +80,6 @@ rbioFS <- function(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10, i
 
   ## FS
   if (plot){
-
     RBioFS::rbioRF_initialFS(objTitle = substr(noquote(file), 1, nchar(file) - 4), x = input, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = TRUE, n = initialFS_n,
@@ -89,7 +88,6 @@ rbioFS <- function(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10, i
                              xLabel = initialFS_xLabel, yLabel = initialFS_yLabel,
                              xTxtSize = initialFS_xTxtSize, yTxtSize = initialFS_yTxtSize,
                              plotWidth = initialFS_plotWidth, plotHeight = initialFS_plotHeight) # initial FS
-
 
     RBioFS::rbioRF_SFS(objTitle = substr(noquote(file), 1, nchar(file) - 4),
                        x = get(paste(substr(noquote(file), 1, nchar(file) - 4), "_initial_FS", sep = ""))$matrix_initial_FS,
@@ -101,20 +99,15 @@ rbioFS <- function(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10, i
                        symbolSize = SFS_symbolSize, xTxtSize = SFS_xTxtSize, yTxtSize = SFS_yTxtSize,
                        plotWidth = SFS_plotWidth, plotHeight = SFS_plotHeight) # SFS
 
-
-
   } else {
-
     RBioFS::rbioRF_initialFS(objTitle = substr(noquote(file), 1, nchar(file) - 4), x = input, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = FALSE) # initial FS
-
 
     RBioFS::rbioRF_SFS(objTitle = substr(noquote(file), 1, nchar(file) - 4),
                        x = get(paste(substr(noquote(file), 1, nchar(file) - 4), "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = FALSE) # SFS
-
   }
 
 }
