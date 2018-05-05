@@ -737,8 +737,8 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       }
 
       ## export the file and draw a preview
-      cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".", ".jackknife.pdf...", sep = "")) # initial message
-      ggsave(filename = paste(deparse(substitute(object)), ".", names(plot_list)[i], ".", ".jackknife.pdf", sep = ""), plot = pltgtb,
+      cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
+      ggsave(filename = paste(deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf", sep = ""), plot = pltgtb,
              width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
       cat("Done!\n") # final message
       grid.draw(pltgtb) # preview
