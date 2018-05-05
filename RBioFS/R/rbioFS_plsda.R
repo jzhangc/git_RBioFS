@@ -657,6 +657,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
     names(plot_list) <- dimnames(object$coefficients)[[2]]
 
     for (i in 1:length(plot_list)){
+      cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
       DfPlt <- plot_list[[i]]
 
       if (tolower(errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
@@ -737,7 +738,6 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       }
 
       ## export the file and draw a preview
-      cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
       ggsave(filename = paste(deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf", sep = ""), plot = pltgtb,
              width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
       cat("Done!\n") # final message

@@ -52,6 +52,7 @@ Change log
       (ADDED)
         - Updates to PLS-DA functions (non-Shiny):
             - More information added to the manual page for rbioFS_plsda_ncomp_select()
+            - Small changes made to message display pattern in rbioFS_plsda_jackknife()
       
 
     0.5.0 (May.3.2018)
