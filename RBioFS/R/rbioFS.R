@@ -2,7 +2,10 @@
 #'
 #' @description Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
-#' @param file Input file. Only takes \code{.csv} format.
+#' @param file Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.
+#' @param input Input data frame. They type should be \code{data frame} or \code{matrix}. Set either this or \code{file}, but not both.
+#' @param sampleIDVar Sample variable name. It's a character string.
+#' @param groupIDVar Group variable name. It's a character string.
 #' @param impute Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.
 #' @param imputeMethod The method for data imputation, only set if \code{impute = TRUE}. Default is \code{"rf"}. See \code{\link{rbioIMP}} for details.
 #' @param imputeIter RF imputation iteration value. Default is \code{10}. See \code{\link{rbioIMP}} for details.
@@ -40,7 +43,8 @@
 #' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
 #' }
 #' @export
-rbioFS <- function(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
+rbioFS <- function(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
+                   impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
                    quantileNorm = FALSE,
                    nTimes = 50, nTree = 1001, SFS_mTry = "recur_default",
                    multicore = TRUE,
@@ -56,9 +60,22 @@ rbioFS <- function(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10, i
                    SFS_symbolSize = 2, SFS_xTxtSize = 10, SFS_yTxtSize =10,
                    SFS_plotWidth = 170, SFS_plotHeight = 150
                    ){
-  raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
+  ## argument check
+  if (!is.null(file) & !is.null(input)) stop("set only one of the \"file\" and \"input\"")
+  if (is.null(file) & is.null(input)) stop("set one of the \"file\" and \"input\"")
+  if (is.null(sampleIDVar) | is.null(groupIDVar)) stop("set both sampleIDVar and groupIDVar")
+
+  ## input constuction
+  if (is.null(input)){
+    raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
+  } else {
+    raw <- input
+  }
+  if (!all(c(sampleIDVar, groupIDVar) %in% colnames(raw))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
+
   tgt <- factor(raw[[2]], levels = unique(raw[[2]])) # target variable
 
+  ## imputation
   if (impute){
     input <- RBioFS::rbioIMP(dfm = raw[-c(1:2)], method = imputeMethod,
                              iter = imputeIter, ntree = imputeNtree,

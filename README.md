@@ -54,15 +54,17 @@ Change log
         - Updates to RF-FS functions:
           - Function message display feature added to rbioFS()
           - Group variable now customizable for rbioFS()
-          - rbioFS() now accepts R objects, in addition csv files
-          - Arugment check added for rbioFS()
             
         - All shiny apps' interface updated with a new look
         
       (ADDED)
         - Updates to PLS-DA functions (non-Shiny):
-           - More information added to the manual page for rbioFS_plsda_ncomp_select()
-           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
+          - More information added to the manual page for rbioFS_plsda_ncomp_select()
+          - Small changes made to message display pattern in rbioFS_plsda_jackknife()
+        
+        - Updates to RF-FS functions:
+          - Arugment check added for rbioFS()
+          - rbioFS() now accepts R objects, in addition to csv files
       
 
     0.5.0 (May.3.2018)

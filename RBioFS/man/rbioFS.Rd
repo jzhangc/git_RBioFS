@@ -4,7 +4,8 @@
 \alias{rbioFS}
 \title{rbioFS}
 \usage{
-rbioFS(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10,
+rbioFS(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
+  impute = FALSE, imputeMethod = "rf", imputeIter = 10,
   imputeNtree = 501, quantileNorm = FALSE, nTimes = 50, nTree = 1001,
   SFS_mTry = "recur_default", multicore = TRUE, plot = TRUE,
   initialFS_n = "all", initialFS_Title = NULL,
@@ -18,7 +19,13 @@ rbioFS(file, impute = FALSE, imputeMethod = "rf", imputeIter = 10,
   SFS_plotHeight = 150)
 }
 \arguments{
-\item{file}{Input file. Only takes \code{.csv} format.}
+\item{file}{Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.}
+
+\item{input}{Input data frame. They type should be \code{data frame} or \code{matrix}. Set either this or \code{file}, but not both.}
+
+\item{sampleIDVar}{Sample variable name. It's a character string.}
+
+\item{groupIDVar}{Group variable name. It's a character string.}
 
 \item{impute}{Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.}
 

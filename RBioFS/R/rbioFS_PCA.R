@@ -59,7 +59,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        rightsideY = FALSE,
                        fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
   ## check the argument
-  if (!all(c(sampleIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
+  if (!all(c(sampleIDVar, groupIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
 
   ## set up input
   x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar)]
