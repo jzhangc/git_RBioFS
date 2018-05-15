@@ -1,7 +1,7 @@
 #' @title rbioFS
 #'
 #' @description Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
-#' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
+#' @param objTitle The title for the output data frame. Default is \code{"data"}
 #' @param file Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.
 #' @param input Input data frame. They type should be \code{data frame} or \code{matrix}. Set either this or \code{file}, but not both.
 #' @param sampleIDVar Sample variable name. It's a character string.
@@ -43,7 +43,7 @@
 #' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
 #' }
 #' @export
-rbioFS <- function(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
+rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
                    impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
                    quantileNorm = FALSE,
                    nTimes = 50, nTree = 1001, SFS_mTry = "recur_default",
@@ -69,35 +69,37 @@ rbioFS <- function(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = N
   if (is.null(input)){
     raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
   } else {
-    raw <- input
+    raw <- as.data.frame(input)
   }
-  if (!all(c(sampleIDVar, groupIDVar) %in% colnames(raw))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
+  if (!all(c(sampleIDVar, groupIDVar) %in% names(raw))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
 
-  tgt <- factor(raw[[2]], levels = unique(raw[[2]])) # target variable
+  tgt <- factor(raw[, groupIDVar], levels = unique(raw[, groupIDVar])) # target variable
 
   ## imputation
   if (impute){
-    input <- RBioFS::rbioIMP(dfm = raw[-c(1:2)], method = imputeMethod,
+    imp_data <- RBioFS::rbioIMP(dfm = raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], method = imputeMethod,
                              iter = imputeIter, ntree = imputeNtree,
-                             fct = tgt, annot = raw[[1]], transpo = FALSE)
-    input <- data.frame(input, check.names = FALSE)
+                             fct = tgt, annot = raw[, sampleIDVar], transpo = FALSE)
+    imp_data <- data.frame(imp_data, check.names = FALSE)
+    fs_data <- imp_data
 
-    out <- data.frame(raw[, c(1:2)], input, check.names = FALSE)
+    # export imputation results
+    out <- data.frame(raw[, c(sampleIDVar, groupIDVar)], imp_data, check.names = FALSE)
     write.csv(out, file = paste(substr(noquote(file), 1, nchar(file) - 4), "_imputed.csv", sep = ""), row.names = FALSE)
   } else {
-    input <- data.frame(raw[, -c(1:2)], check.names = FALSE)
+    fs_data <- data.frame(raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], check.names = FALSE)
   }
 
   if (quantileNorm){ # normalization
-    input <- t(input)
-    input <- RBioFS::rbioNorm(input, correctBG = FALSE)
-    input <- t(input)
-    input <- data.frame(input, check.names = FALSE)
+    fs_data <- t(fs_data)
+    fs_data <- RBioFS::rbioNorm(fs_data, correctBG = FALSE)
+    fs_data <- t(fs_data)
+    fs_data <- data.frame(fs_data, check.names = FALSE)
   }
 
   ## FS
   if (plot){
-    RBioFS::rbioRF_initialFS(objTitle = substr(noquote(file), 1, nchar(file) - 4), x = input, targetVar = tgt,
+    RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = TRUE, n = initialFS_n,
                              Title = initialFS_Title,
@@ -106,8 +108,8 @@ rbioFS <- function(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = N
                              xTxtSize = initialFS_xTxtSize, yTxtSize = initialFS_yTxtSize,
                              plotWidth = initialFS_plotWidth, plotHeight = initialFS_plotHeight) # initial FS
 
-    RBioFS::rbioRF_SFS(objTitle = substr(noquote(file), 1, nchar(file) - 4),
-                       x = get(paste(substr(noquote(file), 1, nchar(file) - 4), "_initial_FS", sep = ""))$matrix_initial_FS,
+    RBioFS::rbioRF_SFS(objTitle = objTitle,
+                       x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = TRUE,
                        n = SFS_n,
@@ -117,14 +119,13 @@ rbioFS <- function(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = N
                        plotWidth = SFS_plotWidth, plotHeight = SFS_plotHeight) # SFS
 
   } else {
-    RBioFS::rbioRF_initialFS(objTitle = substr(noquote(file), 1, nchar(file) - 4), x = input, targetVar = tgt,
+    RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = FALSE) # initial FS
 
-    RBioFS::rbioRF_SFS(objTitle = substr(noquote(file), 1, nchar(file) - 4),
-                       x = get(paste(substr(noquote(file), 1, nchar(file) - 4), "_initial_FS", sep = ""))$matrix_initial_FS,
+    RBioFS::rbioRF_SFS(objTitle = objTitle,
+                       x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = FALSE) # SFS
   }
-
 }

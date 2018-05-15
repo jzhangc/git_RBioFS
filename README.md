@@ -46,10 +46,6 @@ Change log
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
           - PCA function rbioFS_PCA() updated with S3 method
-        
-        - Updates to PLS-DA functions (non-Shiny):
-          - More information added to the manual page for rbioFS_plsda_ncomp_select()
-          - Small changes made to message display pattern in rbioFS_plsda_jackknife()
           
         - Updates to RF-FS functions:
           - Function message display feature added to rbioFS()

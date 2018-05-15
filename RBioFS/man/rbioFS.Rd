@@ -4,11 +4,11 @@
 \alias{rbioFS}
 \title{rbioFS}
 \usage{
-rbioFS(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
-  impute = FALSE, imputeMethod = "rf", imputeIter = 10,
-  imputeNtree = 501, quantileNorm = FALSE, nTimes = 50, nTree = 1001,
-  SFS_mTry = "recur_default", multicore = TRUE, plot = TRUE,
-  initialFS_n = "all", initialFS_Title = NULL,
+rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
+  groupIDVar = NULL, impute = FALSE, imputeMethod = "rf",
+  imputeIter = 10, imputeNtree = 501, quantileNorm = FALSE, nTimes = 50,
+  nTree = 1001, SFS_mTry = "recur_default", multicore = TRUE,
+  plot = TRUE, initialFS_n = "all", initialFS_Title = NULL,
   initialFS_xLabel = "Mean Decrease in Accuracy", initialFS_yLabel = NULL,
   initialFS_errorbar = "SEM", initialFS_errorbarWidth = 0.2,
   initialFS_xTxtSize = 10, initialFS_yTxtSize = 10,
@@ -19,6 +19,8 @@ rbioFS(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   SFS_plotHeight = 150)
 }
 \arguments{
+\item{objTitle}{The title for the output data frame. Default is \code{"data"}}
+
 \item{file}{Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.}
 
 \item{input}{Input data frame. They type should be \code{data frame} or \code{matrix}. Set either this or \code{file}, but not both.}
@@ -86,8 +88,6 @@ rbioFS(file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 \item{SFS_plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 
 \item{SFS_plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
-
-\item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
 }
 \value{
 Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
