@@ -4,8 +4,8 @@
 \alias{rbioFS_plsda}
 \title{rbioFS_plsda}
 \usage{
-rbioFS_plsda(x, y, ncomp, method = "simpls", scale = TRUE,
-  validation = c("none", "CV", "LOO"), segments = 10,
+rbioFS_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
+  scale = TRUE, validation = c("none", "CV", "LOO"), segments = 10,
   segments.type = "random", jackknife = TRUE, ...)
 }
 \arguments{
@@ -13,7 +13,7 @@ rbioFS_plsda(x, y, ncomp, method = "simpls", scale = TRUE,
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{ncomp}{Number of components to be used for modelling.}
+\item{ncomp}{Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.}
 
 \item{method}{PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm ("oscorespls"). Default is the popular \code{"simpls}.}
 
@@ -36,7 +36,7 @@ Returns a PLS-DA model object, with class "mvr".
 PLS-DA modelling
 }
 \details{
-For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number. For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 }
 \examples{
 \dontrun{

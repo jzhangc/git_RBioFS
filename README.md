@@ -56,11 +56,14 @@ Change log
       (ADDED)
         - Updates to PLS-DA functions (non-Shiny):
           - More information added to the manual page for rbioFS_plsda_ncomp_select()
+          - Additional arugment checks added to rbioFS_plsda_ncomp_select()
+          - A bug fixed where rbioFS_plsda_jackknife() fails if no coefs are > (or <) 0
           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
         
         - Updates to RF-FS functions:
           - Arugment check added for rbioFS()
           - rbioFS() now accepts R objects, in addition to csv files
+          - rbioFS() output element "SFS_matrix" changed to "SFS_training_data_matrix"
       
 
     0.5.0 (May.3.2018)

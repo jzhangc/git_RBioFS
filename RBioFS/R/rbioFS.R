@@ -69,7 +69,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
   if (is.null(input)){
     raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
   } else {
-    raw <- as.data.frame(input)
+    raw <- data.frame(input, check.names = FALSE, stringsAsFactors = FALSE)
   }
   if (!all(c(sampleIDVar, groupIDVar) %in% names(raw))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
 
@@ -85,7 +85,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
     # export imputation results
     out <- data.frame(raw[, c(sampleIDVar, groupIDVar)], imp_data, check.names = FALSE)
-    write.csv(out, file = paste(substr(noquote(file), 1, nchar(file) - 4), "_imputed.csv", sep = ""), row.names = FALSE)
+    write.csv(out, file = paste(objTitle, "_imputed.csv", sep = ""), row.names = FALSE)
   } else {
     fs_data <- data.frame(raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], check.names = FALSE)
   }

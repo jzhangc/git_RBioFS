@@ -173,7 +173,7 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
                  OOB_error_rate_summary = ooberrsummary,
-                 SFS_matrix = sfsmatrix)
+                 SFS_training_data_matrix = sfsmatrix)
 
   sink(file = paste(objTitle,".SFS.txt",sep = ""), append = FALSE) # dump the results to a file
   print(outlst)

@@ -32,7 +32,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @description PLS-DA modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param ncomp Number of components to be used for modelling.
+#' @param ncomp Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.
 #' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm ("oscorespls"). Default is the popular \code{"simpls}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
@@ -41,14 +41,14 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
 #' @return Returns a PLS-DA model object, with class "mvr".
-#' @details For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#' @details For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number. For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 #' @importFrom pls plsr
 #' @examples
 #' \dontrun{
 #' rbioFS_plsda(x, y, ncomp = 20)
 #' }
 #' @export
-rbioFS_plsda <- function(x, y, ncomp, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
+rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
                          segments = 10, segments.type = "random",
                          jackknife = TRUE, ...){
   ## check arguments
@@ -271,6 +271,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
   if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.\n")
+  if (!tolower(ncomp.selection.method) %in% c("min", "1sd", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1sd\", or \"randomization\" exactly.")
 
   ## calcuate RMSEP
   rmsep <- RMSEP(object, ...)
@@ -666,10 +667,13 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
         err <- DfPlt$sd
       }
 
-      ymax <- (max(DfPlt$coefficients[DfPlt$coefficients > 0] + err[DfPlt$coefficients > 0]) * 1.05) * 1.2
-      ymin <- (min(DfPlt$coefficients[DfPlt$coefficients < 0] - err[DfPlt$coefficients < 0]) * 1.15) * 1.2
-      y_axis_Mx <- max(abs(ymax), abs(ymin))
-      y_axis_Mn <- max(abs(ymax), abs(ymin)) * sign(ymin)  # make sure the y-axes have the same abs value
+      # use tryCatch in the case of non of the coef are > or < 0.
+      ymax <- tryCatch((max(DfPlt$coefficients[DfPlt$coefficients > 0] + err[DfPlt$coefficients > 0]) * 1.05) * 1.2,
+                       warning = function(err) return(0))
+      ymin <- tryCatch((min(DfPlt$coefficients[DfPlt$coefficients < 0] - err[DfPlt$coefficients < 0]) * 1.15) * 1.2,
+                       warning = function(err) return(0))
+      y_axis_Mx <- ifelse(ymax == 0, 0, max(abs(ymax), abs(ymin)))
+      y_axis_Mn <- ifelse(ymin == 0, 0, max(abs(ymax), abs(ymin)) * sign(ymin)) # make sure the y-axes have the same abs value
 
       baseplt <- ggplot(data = DfPlt, aes(x = features, y = coefficients)) +
         geom_bar(position = "dodge", stat = "identity", color = outlineCol) +
@@ -743,8 +747,10 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       cat("Done!\n") # final message
       grid.draw(pltgtb) # preview
     }
+
+    assign(paste(deparse(substitute(object)), "_jackknife_plot_list", sep = ""), plot_list, envir = .GlobalEnv)
   }
 
   assign(paste(deparse(substitute(object)), "_jackknife_mtx_list", sep = ""), out, envir = .GlobalEnv)
-  assign(paste(deparse(substitute(object)), "_jackknife_plot_list", sep = ""), plot_list, envir = .GlobalEnv)
 }
+
