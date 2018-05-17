@@ -36,7 +36,6 @@ Change log
           - rbioFS_plsda_scoreplot(): y score projection
           - AUC and ROC analysis
           - Q-R plot
-          - ncomp optimization
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.2):
           - rbioFS_splsda()
@@ -59,6 +58,7 @@ Change log
           - Additional arugment checks added to rbioFS_plsda_ncomp_select()
           - A bug fixed where rbioFS_plsda_jackknife() fails if no coefs are > (or <) 0
           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
+          - ncomp optimization
         
         - Updates to RF-FS functions:
           - Arugment check added for rbioFS()
