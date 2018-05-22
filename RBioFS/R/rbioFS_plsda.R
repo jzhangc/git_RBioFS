@@ -94,19 +94,19 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @description T-U plot function for PLS-DA models.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
-#' @param multi_tuplot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
-#' @param multi_tuplot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
-#' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
-#' @param sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
-#' @param sampleLabel.vector Set only when \code{sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param sampleLabel.padding Set only when \code{sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
-#' @param tuplot.Title Scoreplot title. Default is \code{NULL}.
-#' @param tuplot.SymbolSize Symbol size. Default is \code{2}.
-#' @param tuplot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param tuplot.xTickLblSize X-axis tick label size. Default is \code{10}.
-#' @param tuplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
-#' @param tuplot.Width Scoreplot width. Default is \code{170}.
-#' @param tuplot.Height Scoreplot height. Default is \code{150}.
+#' @param multi_plot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
+#' @param multi_plot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
+#' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
+#' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.Title Scoreplot title. Default is \code{NULL}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Returns a pdf file for scoreplot.
 #' @details The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 #' @import ggplot2
@@ -117,21 +117,21 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_tuplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
+#' rbioFS_plsda_tuplot(new_model, comps = c(1, 2, 3))
 #' }
 #' @export
-rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = length(comps), multi_tuplot.nrow = 1,
-                                rightsideY = TRUE,
-                                sampleLabel.type = "none", sampleLabel.vector = NULL, sampleLabel.padding = 0.5,
-                                tuplot.SymbolSize = 5, tuplot.Title = NULL,
-                                tuplot.fontType = "sans", tuplot.xTickLblSize = 10, tuplot.yTickLblSize = 10,
-                                tuplot.Width = 170, tuplot.Height = 150){
+rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1,
+                                plot.rightsideY = TRUE,
+                                plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+                                plot.SymbolSize = 5, plot.Title = NULL,
+                                plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
   if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.\n")
   if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.\n")
-  if (!tolower(sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
-  if (rightsideY){
+  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  if (plot.rightsideY){
     if (length(comps) > 1){
       cat("right side y-axis ignored for multi-plot figure.\n")
     }
@@ -153,52 +153,52 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_tuplot.ncol = length(co
     lbl <- paste(c("t ", "u "), comp_axis_lbl, sep = "")
     plt <- ggplot(data = tu_dfm)  # base plot
 
-    if (sampleLabel.type != "none"){
-      if (is.null(sampleLabel.vector)){
+    if (plot.sampleLabel.type != "none"){
+      if (is.null(plot.sampleLabel.vector)){
         cat("sampleLabel.vector not provided. proceed without sampole labels.\n")
-        plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
-      } else if (length(sampleLabel.vector) != nrow(tu_dfm)){
+        plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
+      } else if (length(plot.sampleLabel.vector) != nrow(tu_dfm)){
         cat("sampleLabel.vector not the same length as the number of samples. proceed without sampole labels.\n")
-        plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
+        plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
       } else {
-        tu_dfm$samplelabel <- as.character(sampleLabel.vector)
-        if (tolower(sampleLabel.type) == "direct"){
-          plt <- plt + geom_text(data = tu_dfm, aes(x = t, y = u, colour = y, label = samplelabel), size = tuplot.SymbolSize)
-        } else if (tolower(sampleLabel.type) == "indirect") {
-          plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y)) +
-            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel), point.padding = unit(sampleLabel.padding, "lines"))
+        tu_dfm$samplelabel <- as.character(plot.sampleLabel.vector)
+        if (tolower(plot.sampleLabel.type) == "direct"){
+          plt <- plt + geom_text(data = tu_dfm, aes(x = t, y = u, colour = y, label = samplelabel), size = plot.SymbolSize)
+        } else if (tolower(plot.sampleLabel.type) == "indirect") {
+          plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y)) +
+            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel), point.padding = unit(plot.sampleLabel.padding, "lines"))
         }
       }
     } else {
-      plt <- plt + geom_point(size = tuplot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
+      plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
     }
 
     plt <- plt +
-      ggtitle(tuplot.Title) +
+      ggtitle(plot.Title) +
       xlab(lbl[1]) +
       ylab(lbl[2]) +
       theme_bw() +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", family = tuplot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = tuplot.fontType),
+            plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = plot.fontType),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = tuplot.xTickLblSize, family = tuplot.fontType),
-            axis.text.y = element_text(size = tuplot.yTickLblSize, family = tuplot.fontType, hjust = 0.5))
+            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
-    if (rightsideY & length(comps) == 1){
+    if (plot.rightsideY & length(comps) == 1){
       plt <- rightside_y(plt)
     }
     plt
   }
   names(plt_list) <- paste0("g", comps)
 
-  if (length(comps) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_tuplot.ncol, nrow = multi_tuplot.nrow, position = "bottom")
+  if (length(comps) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
 
   ## save
   grid.newpage()
   ggsave(filename = paste(deparse(substitute(object)),".plsda.tuplot.pdf", sep = ""), plot = plt,
-         width = tuplot.Width, height = tuplot.Height, units = "mm",dpi = 600)
+         width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   grid.draw(plt)
   cat("Done!\n")
 
@@ -233,17 +233,17 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
 #' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
 #' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
-#' @param rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
-#' @param rmsepplot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
-#' @param multi_rmsepplot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
-#' @param multi_rmsepplot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param rmsepplot.display.Title If to show the name of the y class. Default is \code{TRUE}.
-#' @param rmsepplot.SymbolSize Symbol size. Default is \code{2}.
-#' @param rmsepplot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param rmsepplot.xTickLblSize X-axis tick label size. Default is \code{10}.
-#' @param rmsepplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
-#' @param rmsepplot.Width Scoreplot width. Default is \code{170}.
-#' @param rmsepplot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param plot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
+#' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
+#' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 #' @import ggplot2
@@ -254,20 +254,20 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @importFrom pls RMSEP
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_ncomp_select(new_model,  multi_rmsepplot.ncol = 2, multi_rmsepplot.nrow = 2, min.rmsep.line = T,
+#' rbioFS_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
 #'          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
 #' }
 #' @export
 rbioFS_plsda_ncomp_select <- function(object, ...,
                                       ncomp.selection.method = "1sd", randomization.nperm = 999, randomization.alpha = 0.05,
                                       rmsepplot = TRUE,
-                                      rightsideY = TRUE,
-                                      rmsepplot.optm.ncomp.line = TRUE,
-                                      multi_rmsepplot.ncol = length(dimnames(object$coefficients)[[2]]), multi_rmsepplot.nrow = 1,
-                                      rmsepplot.display.Title = TRUE,
-                                      rmsepplot.SymbolSize = 2,
-                                      rmsepplot.fontType = "sans", rmsepplot.xTickLblSize = 10, rmsepplot.yTickLblSize = 10,
-                                      rmsepplot.Width = 170, rmsepplot.Height = 150){
+                                      plot.rightsideY = TRUE,
+                                      plot.optm.ncomp.line = TRUE,
+                                      multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1,
+                                      plot.display.Title = TRUE,
+                                      plot.SymbolSize = 2,
+                                      plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                      plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
   if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.\n")
@@ -337,37 +337,37 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
     plt_list[] <- foreach(i = 1:length(rmsep_dfm_list)) %do% {
       plt <- ggplot(data = rmsep_dfm_list[[i]], aes(x = comps, y = value, colour = variable)) +
         geom_line(aes(linetype = variable)) +
-        geom_point(aes(shape = variable), size = rmsepplot.SymbolSize) +
-        ggtitle(ifelse(rmsepplot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
+        geom_point(aes(shape = variable), size = plot.SymbolSize) +
+        ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
         ylab("RMSEP") +
         xlab("Components") +
         theme_bw() +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = rmsepplot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = rmsepplot.fontType),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
               legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-              axis.text.x = element_text(size = rmsepplot.xTickLblSize, family = rmsepplot.fontType),
-              axis.text.y = element_text(size = rmsepplot.yTickLblSize, family = rmsepplot.fontType, hjust = 0.5))
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
-      if (rmsepplot.optm.ncomp.line){
+      if (plot.optm.ncomp.line){
         plt <- plt +
           geom_vline(xintercept = ncompsel_mtx[i, ], linetype = "dashed", colour = "red")
       }
 
-      if (rightsideY & length(rmsep_dfm_list) == 1){
+      if (plot.rightsideY & length(rmsep_dfm_list) == 1){
         plt <- rightside_y(plt)
       }
       plt
     }
     names(plt_list) <- paste0("g_", names(rmsep_dfm_list))
 
-    if (length(rmsep_dfm_list) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_rmsepplot.ncol, nrow = multi_rmsepplot.nrow, position = "bottom")
+    if (length(rmsep_dfm_list) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
 
     ## save
     grid.newpage()
     ggsave(filename = paste(deparse(substitute(object)),".plsda.rmsepplot.pdf", sep = ""), plot = plt,
-           width = rmsepplot.Width, height = rmsepplot.Height, units = "mm",dpi = 600)
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)
     cat("Done!\n")
   }
@@ -383,21 +383,21 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
-#' @param rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
-#' @param scoreplot.Title Scoreplot title. Default is \code{NULL}.
-#' @param scoreplot.SymbolSize Symbol size. Default is \code{2}.
-#' @param scoreplot.ellipse If to draw ellipses. Default is \code{FALSE}.
-#' @param scoreplot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
-#' @param scoreplot.mtx.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
-#' @param scoreplot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
-#' @param scoreplot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
-#' @param scoreplot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
-#' @param scoreplot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
-#' @param scoreplot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param scoreplot.xTickLblSize X-axis tick label size. Default is \code{10}.
-#' @param scoreplot.yTickLblSize Y-axis tick label size. Default is \code{10}.
-#' @param scoreplot.Width Scoreplot width. Default is \code{170}.
-#' @param scoreplot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
+#' @param plot.Title Scoreplot title. Default is \code{NULL}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.ellipse If to draw ellipses. Default is \code{FALSE}.
+#' @param plot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
+#' @param plot.mtx.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
+#' @param plot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Returns a pdf file for scoreplot.
 #' @details When \code{length(comps) == 1}, the function generates a scatter plot plotting sample vs score for the comp of interest. When \code{length(comps) == 2}, the function generates a scatter plot plotting the two comps of interest against each other. When \code{length(comps) > 2}, the function generates a multi-panel correlation scoreplot matrix for the comps of interest - might be slow if the there are many comps.
 #' @import ggplot2
@@ -406,18 +406,18 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
+#' rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), plot.ellipse = TRUE)
 #' }
 #' @export
 rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
-                                   rightsideY = FALSE,
-                                   scoreplot.Title = NULL,
-                                   scoreplot.SymbolSize = 2,
-                                   scoreplot.ellipse = FALSE, scoreplot.ellipse_conf = 0.95,
-                                   scoreplot.mtx.densityplot = FALSE, scoreplot.mtx.stripLblSize = 10,
-                                   scoreplot.xAngle = 0, scoreplot.xhAlign = 0.5, scoreplot.xvAlign = 0.5,
-                                   scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10, scoreplot.yTickLblSize = 10,
-                                   scoreplot.Width = 170, scoreplot.Height = 150){
+                                   plot.rightsideY = FALSE,
+                                   plot.Title = NULL,
+                                   plot.SymbolSize = 2,
+                                   plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
+                                   plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
+                                   plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+                                   plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                   plot.Width = 170, plot.Height = 150){
   ## check variables
   if (any(class(object) == "rbiomvr")){
     y <- object$inputY
@@ -445,20 +445,20 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
     scoreplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
       geom_line(aes(colour = group, linetype = group)) +
-      geom_point(aes(shape = group, colour = group), size = scoreplot.SymbolSize) + # plot the sample score scatter plot
-      ggtitle(scoreplot.Title) +
+      geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) + # plot the sample score scatter plot
+      ggtitle(plot.Title) +
       ylab(comp_axis_lbl[1]) +
       theme_bw() +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = scoreplot.fontType),
+            plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = plot.fontType),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xvAlign),
-            axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType, hjust = 0.5))
+            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
     grid.newpage()
-    if (rightsideY){ # add the right-side y axis
+    if (plot.rightsideY){ # add the right-side y axis
       # extract gtable
       pltgtb <- rightside_y(scoreplt)
     } else { # no right side y-axis
@@ -470,49 +470,49 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
     scoreplt <- ggplot(score_x, aes(x = axis1, y = axis2)) +
-      geom_point(aes(shape = group, colour = group), size = scoreplot.SymbolSize) + # plot the sample score scatter plot
-      ggtitle(scoreplot.Title) +
+      geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) + # plot the sample score scatter plot
+      ggtitle(plot.Title) +
       xlab(comp_axis_lbl[1]) +
       ylab(comp_axis_lbl[2]) +
       theme_bw() +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = scoreplot.fontType),
+            plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = plot.fontType),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xvAlign),
-            axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType, hjust = 0.5))
-    if (scoreplot.ellipse){ # circles
+            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+    if (plot.ellipse){ # circles
       scoreplt <- scoreplt +
-        stat_ellipse(aes(colour = group, group = group), type = "norm", level = scoreplot.ellipse_conf)
+        stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
     }
 
     grid.newpage()
-    if (rightsideY){ # add the right-side y axis
+    if (plot.rightsideY){ # add the right-side y axis
       pltgtb <- rightside_y(scoreplt)
     } else { # no right side y-axis
       pltgtb <- scoreplt
     }
 
   } else if (length(comps) > 2){  # over two components plot matrix
-    if (rightsideY){
+    if (plot.rightsideY){
       cat("Right side y-axis ignored for comps more than 2...\n")
     }
 
     # custom functions for the paired scoreplot
-    if (scoreplot.ellipse){  # ellipse
-      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
+    if (plot.ellipse){  # ellipse
+      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
         ggplot(data = data, mapping = mapping) +
           geom_point(...) +
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
       }
     } else {
-      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = scoreplot.ellipse_conf, ...){
+      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
         ggplot(data = data, mapping = mapping) +
           geom_point(...)
       }
     }
-    if (scoreplot.mtx.densityplot){  # diag densityplot
+    if (plot.mtx.densityplot){  # diag densityplot
       densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
         ggplot(data = data, mapping = mapping) +
           geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
@@ -533,22 +533,22 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                         diag = list(continuous = densityfunc),
                         legend = 2)
     scoreplt <- scoreplt +
-      ggtitle(scoreplot.Title) +
-      theme(plot.title = element_text(face = "bold", family = scoreplot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = scoreplot.fontType),
+      ggtitle(plot.Title) +
+      theme(plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+            axis.title = element_text(face = "bold", family = plot.fontType),
             strip.background = element_blank(),  # no strip background colour
-            strip.text = element_text(face = "bold", size = scoreplot.mtx.stripLblSize),
+            strip.text = element_text(face = "bold", size = plot.mtx.stripLblSize),
             panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-            axis.text.x = element_text(size = scoreplot.xTickLblSize, family = scoreplot.fontType, angle = scoreplot.xAngle, hjust = scoreplot.xhAlign, vjust = scoreplot.xvAlign),
-            axis.text.y = element_text(size = scoreplot.yTickLblSize, family = scoreplot.fontType))
+            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType))
 
     grid.newpage()
     pltgtb <- scoreplt
   }
   ggsave(filename = paste(deparse(substitute(object)),".plsda.scoreplot.pdf", sep = ""), plot = pltgtb,
-         width = scoreplot.Width, height = scoreplot.Height, units = "mm",dpi = 600)
+         width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   cat("Done!\n") # final message
   grid.draw(pltgtb)
 
@@ -566,31 +566,30 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param sig.p Alpha value for the jack-knife coffecient p values. Defaults is \code{0.05}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
-#' @param outlineCol The outline colour for the bar gars. Default is \code{"black"}.
-#' @param greyScale To set the graph in grey scale. Default is \code{TRUE}.
-#' @param errorbar Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
-#' @param errorbarWidth Set the width for errorbar. Default is \code{0.2}.
-#' @param errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
-#' @param fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param xLabel x axis label. Type with quotation marks. Default is \code{NULL}.
-#' @param xLabelSize x axis label size. Default is \code{10}.
-#' @param xTickLblSize Font size of x axis ticks. Default is \code{10}.
-#' @param xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
-#' @param xTickBold Set x axis tick font to bold. Default is \code{FALSE}.
-#' @param xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
-#' @param xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
-#' @param xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
-#' @param rightsideY If to display the right side y-axis. Default is \code{TRUE}.
-#' @param yLabel y axis label. Type with quotation marks. Default is \code{NULL}.
-#' @param yLabelSize y axis label size. Default is \code{10}.
-#' @param yTickLblSize Font size of y axis ticks. Default is \code{10}.
-#' @param yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
-#' @param yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
-#' @param legendSize Legend size. Default is \code{9}.
-#' @param legendTtl Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.
-#' @param legendTtlSize Set when \code{legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
-#' @param plotWidth The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
-#' @param plotHeight The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
+#' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
+#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
+#' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabel x axis label. Type with quotation marks. Default is \code{NULL}.
+#' @param plot.xLabelSize x axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
+#' @param plot.xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set x axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
+#' @param plot.yLabel y axis label. Type with quotation marks. Default is \code{NULL}.
+#' @param plot.yLabelSize y axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
+#' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.legendTtl Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.
+#' @param plot.legendTtlSize Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
+#' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
+#' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @return Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
@@ -603,27 +602,29 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' \dontrun{
 #' rbioFS_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
 #'                        sig.p = 0.05, plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
-#'                        outlineCol = "black", errorbar = "SEM", errorbarWidth = 0.2,
-#'                        errorbarLblSize = 6, fontType = "sans", xLabel = "Features",
-#'                        xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE,
-#'                        xTickBold = FALSE, xAngle = 90, xhAlign = 1, xvAligh = 0.2, rightsideY = TRUE,
-#'                        yLabel = "Coefficients", yLabelSize = 10, yTickLblSize = 10,
-#'                        yTickItalic = FALSE, yTickBold = FALSE, legendSize = 9,
-#'                        legendTtl = FALSE, legendTtlSize = 9, plotWidth = 170,
-#'                        plotHeight = 150)
+#'                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+#'                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+#'                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+#'                        plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                        plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+#'                        plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+#'                        plot.Height = 150)
 #' }
 #' @export
 rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALSE, sig.p = 0.05,
-                                   plot = TRUE, plot.title = FALSE, plot.titleSize = 10,
-                                   outlineCol = "black",
-                                   errorbar = "SEM", errorbarWidth = 0.2, errorbarLblSize = 6,
-                                   fontType = "sans",
-                                   xLabel = NULL, xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE, xTickBold = FALSE, xAngle = 0,
-                                   xhAlign = 0.5, xvAlign = 0.5,
-                                   rightsideY = TRUE,
-                                   yLabel = NULL, yLabelSize = 10, yTickLblSize = 10, yTickItalic = FALSE, yTickBold = FALSE,
-                                   legendSize = 9, legendTtl = FALSE, legendTtlSize = 9,
-                                   plotWidth = 170, plotHeight = 150){
+                                   plot = TRUE,
+                                   plot.title = FALSE, plot.titleSize = 10,
+                                   plot.outlineCol = "black",
+                                   plot.errorbar = "SEM", plot.errorbarWidth = 0.2, plot.errorbarLblSize = 6,
+                                   plot.fontType = "sans",
+                                   plot.xLabel = NULL, plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                                   plot.xTickBold = FALSE, plot.xAngle = 0,
+                                   plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+                                   plot.rightsideY = TRUE,
+                                   plot.yLabel = NULL, plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE, plot.yTickBold = FALSE,
+                                   plot.legendSize = 9, plot.legendTtl = FALSE, plot.legendTtlSize = 9,
+                                   plot.Width = 170, plot.Height = 150){
   # check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
 
@@ -661,9 +662,9 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
       DfPlt <- plot_list[[i]]
 
-      if (tolower(errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
+      if (tolower(plot.errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
         err <- DfPlt$sem
-      } else if (tolower(errorbar) %in% c("sd", "standard deviation")){
+      } else if (tolower(plot.errorbar) %in% c("sd", "standard deviation")){
         err <- DfPlt$sd
       }
 
@@ -676,27 +677,27 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       y_axis_Mn <- ifelse(ymin == 0, 0, max(abs(ymax), abs(ymin)) * sign(ymin)) # make sure the y-axes have the same abs value
 
       baseplt <- ggplot(data = DfPlt, aes(x = features, y = coefficients)) +
-        geom_bar(position = "dodge", stat = "identity", color = outlineCol) +
+        geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
         ggtitle(names(plot_list)[i]) +
         geom_errorbar(aes(ymin = coefficients - err, ymax = coefficients + err),
-                      position = position_dodge(0.9), color = "black", width = errorbarWidth) +
+                      position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
         geom_text(aes(y = ifelse(sign(coefficients) > 0, (coefficients + err) * 1.05, (coefficients - err) * 1.15), label = sig),
                   position = position_dodge(width = 0.9), color = "black", size = 10) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
-        xlab(xLabel) +
-        ylab(yLabel) +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
         geom_hline(yintercept = 0) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", size = plot.titleSize, family = fontType),
-              axis.title.x = element_text(face = "bold", size = xLabelSize, family = fontType),
-              axis.title.y = element_text(face = "bold", size = xLabelSize, family = fontType),
+              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
               legend.position = "bottom",
-              legend.text = element_text(size = legendSize),
-              axis.text.x = element_text(size = xTickLblSize, family = fontType, angle = xAngle,
-                                         hjust = xhAlign, vjust = xvAlign),
-              axis.text.y = element_text(size = yTickLblSize, family = fontType, hjust = 0.5))
+              legend.text = element_text(size = plot.legendSize),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                         hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
       if (plot.title){
         baseplt <- baseplt + ggtitle(names(plot_list)[i])
@@ -704,38 +705,38 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
         baseplt <- baseplt + ggtitle(NULL)
       )
 
-      if (xTickItalic & xTickBold){
+      if (plot.xTickItalic & plot.xTickBold){
         baseplt <- baseplt +
           theme(axis.text.x = element_text(face = "bold.italic"))
-      } else if (xTickItalic & !xTickBold){
+      } else if (plot.xTickItalic & !plot.xTickBold){
         baseplt <- baseplt +
           theme(axis.text.x = element_text(face = "italic"))
-      } else if (xTickBold & !xTickItalic){
+      } else if (plot.xTickBold & !plot.xTickItalic){
         baseplt <- baseplt +
           theme(axis.text.x = element_text(face = "bold"))
       }
 
-      if (yTickItalic & yTickBold){
+      if (plot.yTickItalic & plot.yTickBold){
         baseplt <- baseplt +
           theme(axis.text.y  = element_text(face = "bold.italic"))
-      } else if (yTickItalic & !yTickBold){
+      } else if (plot.yTickItalic & !plot.yTickBold){
         baseplt <- baseplt +
           theme(axis.text.y = element_text(face = "italic"))
-      } else if (yTickBold & !yTickItalic){
+      } else if (plot.yTickBold & !plot.yTickItalic){
         baseplt <- baseplt +
           theme(axis.text.y = element_text(face = "bold"))
       }
 
-      if (legendTtl == FALSE){
+      if (plot.legendTtl == FALSE){
         baseplt <- baseplt + theme(legend.title = element_blank())
       } else {
-        baseplt <- baseplt + theme(legend.title = element_text(size = legendTtlSize))
+        baseplt <- baseplt + theme(legend.title = element_text(size = plot.legendTtlSize))
       }
 
       plt <- baseplt
       ## finalize the plot
       grid.newpage()
-      if (rightsideY){ # add the right-side y axis
+      if (plot.rightsideY){ # add the right-side y axis
         pltgtb <- rightside_y(plt)
       } else { # no right side y-axis
         pltgtb <- plt
@@ -743,7 +744,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 
       ## export the file and draw a preview
       ggsave(filename = paste(deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf", sep = ""), plot = pltgtb,
-             width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       cat("Done!\n") # final message
       grid.draw(pltgtb) # preview
     }

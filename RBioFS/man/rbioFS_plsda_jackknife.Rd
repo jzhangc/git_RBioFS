@@ -6,14 +6,15 @@
 \usage{
 rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
   sig.p = 0.05, plot = TRUE, plot.title = FALSE, plot.titleSize = 10,
-  outlineCol = "black", errorbar = "SEM", errorbarWidth = 0.2,
-  errorbarLblSize = 6, fontType = "sans", xLabel = NULL,
-  xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE,
-  xTickBold = FALSE, xAngle = 0, xhAlign = 0.5, xvAlign = 0.5,
-  rightsideY = TRUE, yLabel = NULL, yLabelSize = 10, yTickLblSize = 10,
-  yTickItalic = FALSE, yTickBold = FALSE, legendSize = 9,
-  legendTtl = FALSE, legendTtlSize = 9, plotWidth = 170,
-  plotHeight = 150)
+  plot.outlineCol = "black", plot.errorbar = "SEM",
+  plot.errorbarWidth = 0.2, plot.errorbarLblSize = 6,
+  plot.fontType = "sans", plot.xLabel = NULL, plot.xLabelSize = 10,
+  plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+  plot.xTickBold = FALSE, plot.xAngle = 0, plot.xhAlign = 0.5,
+  plot.xvAlign = 0.5, plot.rightsideY = TRUE, plot.yLabel = NULL,
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
+  plot.yTickBold = FALSE, plot.legendSize = 9, plot.legendTtl = FALSE,
+  plot.legendTtlSize = 9, plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -28,55 +29,53 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
 
 \item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
 
-\item{outlineCol}{The outline colour for the bar gars. Default is \code{"black"}.}
+\item{plot.outlineCol}{The outline colour for the bar gars. Default is \code{"black"}.}
 
-\item{errorbar}{Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.}
+\item{plot.errorbar}{Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.}
 
-\item{errorbarWidth}{Set the width for errorbar. Default is \code{0.2}.}
+\item{plot.errorbarWidth}{Set the width for errorbar. Default is \code{0.2}.}
 
-\item{errorbarLblSize}{Set the label size for the errorbar. Default is \code{6}.}
+\item{plot.errorbarLblSize}{Set the label size for the errorbar. Default is \code{6}.}
 
-\item{fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
-\item{xLabel}{x axis label. Type with quotation marks. Default is \code{NULL}.}
+\item{plot.xLabel}{x axis label. Type with quotation marks. Default is \code{NULL}.}
 
-\item{xLabelSize}{x axis label size. Default is \code{10}.}
+\item{plot.xLabelSize}{x axis label size. Default is \code{10}.}
 
-\item{xTickLblSize}{Font size of x axis ticks. Default is \code{10}.}
+\item{plot.xTickLblSize}{Font size of x axis ticks. Default is \code{10}.}
 
-\item{xTickItalic}{Set x axis tick font to italic. Default is \code{FALSE}.}
+\item{plot.xTickItalic}{Set x axis tick font to italic. Default is \code{FALSE}.}
 
-\item{xTickBold}{Set x axis tick font to bold. Default is \code{FALSE}.}
+\item{plot.xTickBold}{Set x axis tick font to bold. Default is \code{FALSE}.}
 
-\item{xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
+\item{plot.xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
 
-\item{xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{plot.xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{plot.xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{rightsideY}{If to display the right side y-axis. Default is \code{TRUE}.}
+\item{plot.rightsideY}{If to display the right side y-axis. Default is \code{TRUE}.}
 
-\item{yLabel}{y axis label. Type with quotation marks. Default is \code{NULL}.}
+\item{plot.yLabel}{y axis label. Type with quotation marks. Default is \code{NULL}.}
 
-\item{yLabelSize}{y axis label size. Default is \code{10}.}
+\item{plot.yLabelSize}{y axis label size. Default is \code{10}.}
 
-\item{yTickLblSize}{Font size of y axis ticks. Default is \code{10}.}
+\item{plot.yTickLblSize}{Font size of y axis ticks. Default is \code{10}.}
 
-\item{yTickItalic}{Set y axis tick font to italic. Default is \code{FALSE}.}
+\item{plot.yTickItalic}{Set y axis tick font to italic. Default is \code{FALSE}.}
 
-\item{yTickBold}{Set y axis tick font to bold. Default is \code{FALSE}.}
+\item{plot.yTickBold}{Set y axis tick font to bold. Default is \code{FALSE}.}
 
-\item{legendSize}{Legend size. Default is \code{9}.}
+\item{plot.legendSize}{Legend size. Default is \code{9}.}
 
-\item{legendTtl}{Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.}
+\item{plot.legendTtl}{Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.}
 
-\item{legendTtlSize}{Set when \code{legendTtl = TRUE}, font size of the legend title. Default is \code{9}.}
+\item{plot.legendTtlSize}{Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.}
 
-\item{plotWidth}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
+\item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 
-\item{plotHeight}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
-
-\item{greyScale}{To set the graph in grey scale. Default is \code{TRUE}.}
+\item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 }
 \value{
 Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
@@ -91,13 +90,13 @@ Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-
 \dontrun{
 rbioFS_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
                        sig.p = 0.05, plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
-                       outlineCol = "black", errorbar = "SEM", errorbarWidth = 0.2,
-                       errorbarLblSize = 6, fontType = "sans", xLabel = "Features",
-                       xLabelSize = 10, xTickLblSize = 10, xTickItalic = FALSE,
-                       xTickBold = FALSE, xAngle = 90, xhAlign = 1, xvAligh = 0.2, rightsideY = TRUE,
-                       yLabel = "Coefficients", yLabelSize = 10, yTickLblSize = 10,
-                       yTickItalic = FALSE, yTickBold = FALSE, legendSize = 9,
-                       legendTtl = FALSE, legendTtlSize = 9, plotWidth = 170,
-                       plotHeight = 150)
+                       plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+                       plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+                       plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                       plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+                       plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                       plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+                       plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+                       plot.Height = 150)
 }
 }

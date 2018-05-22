@@ -33,7 +33,7 @@ Change log
     (ICEBOX)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
-          - rbioFS_plsda_scoreplot(): y score projection
+          - rbioFS_plsda_VIP(): VIP, or variable importance in the projection, is plsda's version of VI. Can be used independently from plsda functions
           - AUC and ROC analysis
           - Q-R plot
             
@@ -41,10 +41,13 @@ Change log
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
             
-        - rbioFS_PCA() updated with the follwoing new functionalities:
+        - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
           - PCA function rbioFS_PCA() updated with S3 method
+        
+        - Updates to PLS-DA functions (non-Shiny):
+          - rbioFS_plsda_scoreplot(): y score projection
           
         - Updates to RF-FS functions:
           - Function message display feature added to rbioFS()
@@ -59,6 +62,7 @@ Change log
           - A bug fixed where rbioFS_plsda_jackknife() fails if no coefs are > (or <) 0
           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
           - ncomp optimization
+          - Plot property auguments names unified for function only produce one type of plot
         
         - Updates to RF-FS functions:
           - Arugment check added for rbioFS()

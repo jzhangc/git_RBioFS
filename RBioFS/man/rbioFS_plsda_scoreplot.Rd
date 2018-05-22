@@ -5,13 +5,12 @@
 \title{rbioFS_plsda_scoreplot}
 \usage{
 rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
-  rightsideY = FALSE, scoreplot.Title = NULL, scoreplot.SymbolSize = 2,
-  scoreplot.ellipse = FALSE, scoreplot.ellipse_conf = 0.95,
-  scoreplot.mtx.densityplot = FALSE, scoreplot.mtx.stripLblSize = 10,
-  scoreplot.xAngle = 0, scoreplot.xhAlign = 0.5, scoreplot.xvAlign = 0.5,
-  scoreplot.fontType = "sans", scoreplot.xTickLblSize = 10,
-  scoreplot.yTickLblSize = 10, scoreplot.Width = 170,
-  scoreplot.Height = 150)
+  plot.rightsideY = FALSE, plot.Title = NULL, plot.SymbolSize = 2,
+  plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
+  plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
+  plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -20,35 +19,35 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
 
 \item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 
-\item{rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
+\item{plot.rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
 
-\item{scoreplot.Title}{Scoreplot title. Default is \code{NULL}.}
+\item{plot.Title}{Scoreplot title. Default is \code{NULL}.}
 
-\item{scoreplot.SymbolSize}{Symbol size. Default is \code{2}.}
+\item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
-\item{scoreplot.ellipse}{If to draw ellipses. Default is \code{FALSE}.}
+\item{plot.ellipse}{If to draw ellipses. Default is \code{FALSE}.}
 
-\item{scoreplot.ellipse_conf}{The confidence value for the ellipses. Default is \code{0.95}.}
+\item{plot.ellipse_conf}{The confidence value for the ellipses. Default is \code{0.95}.}
 
-\item{scoreplot.mtx.densityplot}{If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.}
+\item{plot.mtx.densityplot}{If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.}
 
-\item{scoreplot.mtx.stripLblSize}{The label font size for the correlation scoreplot matrix strips. Default is \code{10}.}
+\item{plot.mtx.stripLblSize}{The label font size for the correlation scoreplot matrix strips. Default is \code{10}.}
 
-\item{scoreplot.xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
+\item{plot.xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
 
-\item{scoreplot.xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{plot.xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{scoreplot.xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{plot.xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{scoreplot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
-\item{scoreplot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
+\item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
-\item{scoreplot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
+\item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
-\item{scoreplot.Width}{Scoreplot width. Default is \code{170}.}
+\item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
-\item{scoreplot.Height}{Scoreplot height. Default is \code{150}.}
+\item{plot.Height}{Scoreplot height. Default is \code{150}.}
 }
 \value{
 Returns a pdf file for scoreplot.
@@ -61,6 +60,6 @@ When \code{length(comps) == 1}, the function generates a scatter plot plotting s
 }
 \examples{
 \dontrun{
-rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), scoreplot.ellipse = TRUE)
+rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), plot.ellipse = TRUE)
 }
 }

@@ -6,12 +6,11 @@
 \usage{
 rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
   randomization.nperm = 999, randomization.alpha = 0.05, rmsepplot = TRUE,
-  rightsideY = TRUE, rmsepplot.optm.ncomp.line = TRUE,
-  multi_rmsepplot.ncol = length(dimnames(object$coefficients)[[2]]),
-  multi_rmsepplot.nrow = 1, rmsepplot.display.Title = TRUE,
-  rmsepplot.SymbolSize = 2, rmsepplot.fontType = "sans",
-  rmsepplot.xTickLblSize = 10, rmsepplot.yTickLblSize = 10,
-  rmsepplot.Width = 170, rmsepplot.Height = 150)
+  plot.rightsideY = TRUE, plot.optm.ncomp.line = TRUE,
+  multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
+  multi_plot.nrow = 1, plot.display.Title = TRUE, plot.SymbolSize = 2,
+  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -26,27 +25,27 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 
 \item{rmsepplot}{If to generate a RMSEP plot. Default is \code{TRUE}.}
 
-\item{rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
+\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 
-\item{rmsepplot.optm.ncomp.line}{If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.}
+\item{plot.optm.ncomp.line}{If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.}
 
-\item{multi_rmsepplot.ncol}{Number of columns on one figure page. Default is the number of responding classes, i.e. y.}
+\item{multi_plot.ncol}{Number of columns on one figure page. Default is the number of responding classes, i.e. y.}
 
-\item{multi_rmsepplot.nrow}{Number of rows on one figure page. Default is \code{1}.}
+\item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
-\item{rmsepplot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
+\item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 
-\item{rmsepplot.SymbolSize}{Symbol size. Default is \code{2}.}
+\item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
-\item{rmsepplot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
-\item{rmsepplot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
+\item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
-\item{rmsepplot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
+\item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
-\item{rmsepplot.Width}{Scoreplot width. Default is \code{170}.}
+\item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
-\item{rmsepplot.Height}{Scoreplot height. Default is \code{150}.}
+\item{plot.Height}{Scoreplot height. Default is \code{150}.}
 }
 \value{
 Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
@@ -59,7 +58,7 @@ The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV 
 }
 \examples{
 \dontrun{
-rbioFS_plsda_ncomp_select(new_model,  multi_rmsepplot.ncol = 2, multi_rmsepplot.nrow = 2, min.rmsep.line = T,
+rbioFS_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
 }
 }
