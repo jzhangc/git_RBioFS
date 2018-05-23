@@ -76,13 +76,13 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 }
 \value{
-Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
+Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
 }
 \description{
-Variable importance of the projection calcualtion and plotting for plsda models.
+VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
 }
 \details{
-Only works when the plsda model is fit with orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. The box plot is the mean of the all the VIP from the components, hence with errorbars. However, if the model is fit using only one components, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is possible to adjust according to the data and objectives.
+Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
 }
 \examples{
 \dontrun{

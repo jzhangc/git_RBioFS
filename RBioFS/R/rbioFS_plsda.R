@@ -867,7 +867,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 
 #' @title rbioFS_plsda_VIP
 #'
-#' @description Variable importance of the projection calcualtion and plotting for plsda models.
+#' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
@@ -897,8 +897,8 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @param plot.legendTtlSize Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @return Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
-#' @details Only works when the plsda model is fit with orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. The box plot is the mean of the all the VIP from the components, hence with errorbars. However, if the model is fit using only one components, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is possible to adjust according to the data and objectives.
+#' @return Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
+#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y
@@ -943,23 +943,29 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
   lodw <- object$loading.weights
   Wnorm2 <- colSums(lodw^2)
 
+  vip_raw_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
+  vip_raw_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
+    ylod <- object$Yloadings[i, ] # one y variable at a time
+    ss <- c(ylod)^2 * colSums(score^2)
+    ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
+    vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))
+    return(vip)
+  }
+  names(vip_raw_list) <- dimnames(object$Yloadings)[[1]]
+
   vip_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
   vip_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
-      ylod <- object$Yloadings[i, ] # one y variable at a time
-      ss <- c(ylod)^2 * colSums(score^2)
-      ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
-      vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))
-      if (object$ncomp > 1){
-        vip_mean <- foreach(i = vip, .combine = "c") %do% mean(i)
-        vip_sd <- foreach(i = vip, .combine = "c") %do% sd(i)
-        vip_sem <- foreach(i = vip_sd, .combine = "c") %do% sqrt(i / nrow(vip))
-        vip_plot_dfm <- data.frame(features = colnames(vip), VIP = vip_mean, sd = vip_sd, sem = vip_sem)
-      } else { # no sem or sd is needed in ncomp == 1
-        vip_plot_dfm <- data.frame(features = names(vip), VIP = vip)
-      }
-      vip_plot_dfm <- vip_plot_dfm[order(vip_plot_dfm$VIP, decreasing = TRUE), ]
-      vip_plot_dfm$features <- factor(vip_plot_dfm$features, levels = unique(vip_plot_dfm$features))
-      return(vip_plot_dfm)
+    if (object$ncomp > 1){
+      vip_mean <- foreach(m = vip_raw_list[[i]], .combine = "c") %do% mean(m)
+      vip_sd <- foreach(n = vip_raw_list[[i]], .combine = "c") %do% sd(n)
+      vip_sem <- foreach(o = vip_sd, .combine = "c") %do% sqrt(o / nrow(vip_raw_list[[i]]))
+      vip_plot_dfm <- data.frame(features = colnames(vip_raw_list[[i]]), VIP = vip_mean, sd = vip_sd, sem = vip_sem)
+    } else { # no sem or sd is needed in ncomp == 1
+      vip_plot_dfm <- data.frame(features = names(vip), VIP = vip_raw_list[[i]])
+    }
+    vip_plot_dfm <- vip_plot_dfm[order(vip_plot_dfm$VIP, decreasing = TRUE), ]
+    vip_plot_dfm$features <- factor(vip_plot_dfm$features, levels = unique(vip_plot_dfm$features))
+    return(vip_plot_dfm)
   }
   names(vip_list) <- dimnames(object$Yloadings)[[1]]
 
@@ -1058,6 +1064,6 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
       grid.draw(pltgtb) # preview
     }
   }
-  out <- list(vip_summary = vip_list, ncomp = object$ncomp)
+  out <- list(vip_summary = vip_list, vip_raw = vip_raw_list, ncomp = object$ncomp)
   assign(paste(deparse(substitute(object)), "_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
 }
