@@ -207,6 +207,116 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 }
 
 
+#' @title rbioFS_plsda_q2r2()
+#'
+#' @description q2-r2 (i.e. Q^2 and R^2 scores) caluclation and plot for plsda models
+#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param intercept Wether to include intercept term, i.e. comps = 0. Default is \code{TRUE}.
+#' @param q2r2plot If to generate a q2r2 plot. Default is \code{TRUE}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. unique y classes.
+#' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
+#' @details A vertical line indicating the number of component with minimum q2-r2 distance.
+#' @import ggplot2
+#' @import foreach
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @importFrom pls mvrValstats R2
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_q2r2(object = new_model, multi_plot.ncol = 2, multi_plot.nrow = 2, intercept = TRUE
+#' }
+#' @export
+rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
+                              multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1,
+                              plot.rightsideY = TRUE,
+                              plot.SymbolSize = 2, plot.display.Title = TRUE,
+                              plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                              plot.Width = 170, plot.Height = 150){
+  ## check arguments
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls pacakge
+
+  ## construct q2r2 dataframes
+  # calculate q2 and r2
+  sst <- pls::mvrValstats(object, estimate = "train")$SST
+  press_mtx <- object$validation$PRESS
+  press_mtx <- cbind(object$validation$PRESS0, object$validation$PRESS)
+  colnames(press_mtx)[1] <- "0 comps"
+  q2 <- 1 - press_mtx / c(sst)  # extract SST
+  r2 <- pls::R2(object, intercept = TRUE, estimate = "train")$val
+  dimnames(r2)[[3]][1] <- "0 comps"
+
+  # construct and output a multi-dfm list
+  q2r2_dfm_list <- vector(mode = "list", length = length(rownames(press_mtx)))
+  q2r2_dfm_list[] <- foreach(i = 1:length(rownames(press_mtx))) %do% {
+    q2_dfm <- data.frame(components = as.integer(gsub(" comps", "", colnames(q2))), Q2 = q2[i, ],
+                         stringsAsFactors = FALSE, row.names = NULL)
+    r2_dfm <- data.frame(components = as.integer(gsub(" comps", "", dimnames(r2)[[3]])), R2 = r2[, i, ],
+                         row.names = NULL)
+    q2r2_dfm <- merge(q2_dfm, r2_dfm, by = "components")
+    if (!intercept){
+      q2r2_dfm <- q2r2_dfm[-1, ]
+    }
+    q2r2_dfm
+  }
+  names(q2r2_dfm_list) <- rownames(press_mtx)
+  assign(paste(deparse(substitute(object)), "_q2r2_list", sep = ""), q2r2_dfm_list, envir = .GlobalEnv)
+
+  ## plot
+  if (q2r2plot){
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.q2r2plot.pdf...", sep = ""))  # initial message
+    plt_list <- vector(mode = "list", length = length(q2r2_dfm_list))  # list
+    plt_list[] <- foreach(i = 1:length(q2r2_dfm_list)) %do% {
+      q2r2_plot_dfm <- reshape2::melt(q2r2_dfm_list[[i]], id = "components")
+      plt <- ggplot(data = q2r2_plot_dfm, aes(x = components, y = value, color = variable)) +
+        geom_line(aes(linetype = variable)) +
+        geom_point(size = plot.SymbolSize) +
+        scale_x_continuous(breaks = c(ifelse(intercept, 0, 1), q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1],
+                                      floor(median(seq(ifelse(intercept, 0, 1), nrow(q2r2_dfm_list[[i]])))),
+                                      q2r2_dfm_list[[i]][nrow(q2r2_dfm_list[[i]]), 1])) +
+        scale_y_continuous() +
+        ggtitle(ifelse(plot.display.Title, names(q2r2_dfm_list)[i], NULL)) +
+        geom_vline(xintercept = q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1], linetype = "dashed", colour = "red") +
+        xlab("components") +
+        ylab("R2/Q2") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+
+
+      if (plot.rightsideY & length(names(q2r2_dfm_list)) == 1){
+        plt <- RBioplot::rightside_y(plt)
+      }
+      plt
+    }
+    names(plt_list) <- names(q2r2_dfm_list)
+
+    if (length(names(q2r2_dfm_list)) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
+
+    ## save
+    grid.newpage()
+    ggsave(filename = paste(deparse(substitute(object)),".plsda.q2r2plot.pdf", sep = ""), plot = plt,
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    grid.draw(plt)
+    cat("Done!\n")
+  }
+}
+
+
 #' @title randomiz.test
 #'
 #' @description Randomization function from \code{pls} pacakge. For \code{\link{rbioFS_plsda_ncomp_select}} function.

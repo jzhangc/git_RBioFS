@@ -35,7 +35,6 @@ Change log
           - rbioFS_plsda_plot()
           - rbioFS_plsda_VIP(): VIP, or variable importance in the projection, is plsda's version of VI. Can be used independently from plsda functions
           - AUC and ROC analysis
-          - Q-R plot
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.2):
           - rbioFS_splsda()
@@ -56,6 +55,9 @@ Change log
         - All shiny apps' interface updated with a new look
         
       (ADDED)
+        - New PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
+          
         - Updates to PLS-DA functions (non-Shiny):
           - More information added to the manual page for rbioFS_plsda_ncomp_select()
           - Additional arugment checks added to rbioFS_plsda_ncomp_select()
