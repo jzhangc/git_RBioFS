@@ -252,8 +252,8 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
   press_mtx <- object$validation$PRESS
   press_mtx <- cbind(object$validation$PRESS0, object$validation$PRESS)
   colnames(press_mtx)[1] <- "0 comps"
-  q2 <- 1 - press_mtx / c(sst)  # extract SST
-  r2 <- pls::R2(object, intercept = TRUE, estimate = "train")$val
+  q2 <- 1 - press_mtx / c(sst)  # calculate q2. q2 = 1 - PRESS/SST
+  r2 <- pls::R2(object, intercept = TRUE, estimate = "train")$val  # R2() calulates R2. FYI: r2 = 1 - SSR/SST. Use estimate = "train" to use SSR
   dimnames(r2)[[3]][1] <- "0 comps"
 
   # construct and output a multi-dfm list
