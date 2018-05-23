@@ -33,7 +33,6 @@ Change log
     (ICEBOX)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
-          - rbioFS_plsda_VIP(): VIP, or variable importance in the projection, is plsda's version of VI. Can be used independently from plsda functions
           - AUC and ROC analysis
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.2):
@@ -52,10 +51,11 @@ Change log
           - Function message display feature added to rbioFS()
           - Group variable now customizable for rbioFS()
             
-        - All shiny apps' interface updated with a new look
+        - All shiny apps' interface updated with a new look (tentative, may implement in 0.5.2)
         
       (ADDED)
         - New PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_VIP(): VIP, or variable importance in the projection, is plsda's version of VI. Can be used independently from plsda functions
           - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
           
         - Updates to PLS-DA functions (non-Shiny):
@@ -63,7 +63,6 @@ Change log
           - Additional arugment checks added to rbioFS_plsda_ncomp_select()
           - A bug fixed where rbioFS_plsda_jackknife() fails if no coefs are > (or <) 0
           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
-          - ncomp optimization
           - Plot property auguments names unified for function only produce one type of plot
         
         - Updates to RF-FS functions:

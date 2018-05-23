@@ -33,7 +33,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param ncomp Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.
-#' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm ("oscorespls"). Default is the popular \code{"simpls}.
+#' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
 #' @param segments Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.
@@ -681,7 +681,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param plot.xLabel x axis label. Type with quotation marks. Default is \code{NULL}.
+#' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
 #' @param plot.xLabelSize x axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
 #' @param plot.xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
@@ -690,7 +690,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
-#' @param plot.yLabel y axis label. Type with quotation marks. Default is \code{NULL}.
+#' @param plot.yLabel y axis label. Type with quotation marks. Could be NULL. Default is \code{"Coefficients"}.
 #' @param plot.yLabelSize y axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
 #' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
@@ -700,7 +700,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.legendTtlSize Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @return Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
+#' @return Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
@@ -740,7 +740,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]
-  sdjack <- sqrt(var.jack(object, ncomp = ncomp, covariance = FALSE,
+  sdjack <- sqrt(pls::var.jack(object, ncomp = ncomp, covariance = FALSE,
                           use.mean = use.mean))  # var.jack from pls pacakge
   sem <- sdjack / sqrt(length(object$validation$segments))
   B <- coef(object, ncomp = ncomp)
@@ -756,18 +756,19 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
   sem <- as.matrix(sem[,,])
   out <- list(coefficients = B, sd = sdjack, sem = sem , df = df, tvalues = tvals, pvalues = pvals, ncomp = ncomp)
 
-  if (plot){
-    loclEnv <- environment()
-    plot_list <- foreach(i = 1:dim(object$coefficients)[2]) %do% {
-      tmp <- data.frame(features = dimnames(object$coefficients)[[1]], coefficients = out$coefficients[, i],
+  plot_list <- vector(mode = "list", length = dim(object$coefficients)[2])
+  plot_list[] <- foreach(i = 1:dim(object$coefficients)[2]) %do% {
+    tmp <- data.frame(features = dimnames(object$coefficients)[[1]], coefficients = out$coefficients[, i],
                         sd = out$sd[, i], sem = out$sem[, i], tvalues = out$tvalues[, i],
                         pvalues = out$pvalues[, i],
                         row.names = NULL, stringsAsFactors = FALSE)
-      tmp$sig <- ifelse(tmp$pvalues < sig.p, "*", "")
-      return(tmp)
-    }
-    names(plot_list) <- dimnames(object$coefficients)[[2]]
+    tmp$sig <- ifelse(tmp$pvalues < sig.p, "*", "")
+    return(tmp)
+  }
+  names(plot_list) <- dimnames(object$coefficients)[[2]]
 
+  if (plot){
+    loclEnv <- environment()
     for (i in 1:length(plot_list)){
       cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
       DfPlt <- plot_list[[i]]
@@ -858,10 +859,205 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       cat("Done!\n") # final message
       grid.draw(pltgtb) # preview
     }
-
-    assign(paste(deparse(substitute(object)), "_jackknife_plot_list", sep = ""), plot_list, envir = .GlobalEnv)
   }
-
-  assign(paste(deparse(substitute(object)), "_jackknife_mtx_list", sep = ""), out, envir = .GlobalEnv)
+  cat(paste0("jackknife is built on ", ncomp, " components.\n"))
+  assign(paste(deparse(substitute(object)), "_jackknife_summary_list", sep = ""), plot_list, envir = .GlobalEnv)
 }
 
+
+#' @title rbioFS_plsda_VIP
+#'
+#' @description Variable importance of the projection calcualtion and plotting for plsda models.
+#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
+#' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.sig.line Wether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.
+#' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
+#' @param plot.errorbar Set the type of errorbar. Only applicable if the object model is built using more than one component. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
+#' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
+#' @param plot.xLabelSize x axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
+#' @param plot.xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set x axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
+#' @param plot.yLabel y axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.
+#' @param plot.yLabelSize y axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
+#' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.legendTtl Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.
+#' @param plot.legendTtlSize Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
+#' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
+#' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
+#' @return Outputs two list objects to the environment, one for raw Jack-Knife results matrices, one for plot dataframe. Also the function also generates the pdf figure files to the working directory.
+#' @details Only works when the plsda model is fit with orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. The box plot is the mean of the all the VIP from the components, hence with errorbars. However, if the model is fit using only one components, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is possible to adjust according to the data and objectives.
+#' @importFrom reshape2 melt
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y
+#' @importFrom scales rescale_none
+#' @import pls
+#' @import ggplot2
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_VIP(object = new_model_optm,
+#'                        vip.alpha = 0.05,
+#'                        plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+#'                        plot.sig.line = TRUE,
+#'                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+#'                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+#'                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+#'                        plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                        plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+#'                        plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+#'                        plot.Height = 150)
+#' }
+#' @export
+rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
+                    plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+                    plot.sig.line = TRUE,
+                    plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+                    plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+                    plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                    plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
+                    plot.rightsideY = TRUE,
+                    plot.yLabel = "VIP",
+                    plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                    plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+                    plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+                    plot.Height = 150){
+  ## argument check
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using RBioFS_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
+
+  ## VIP calculation
+  score <- object$scores
+  lodw <- object$loading.weights
+  Wnorm2 <- colSums(lodw^2)
+
+  vip_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
+  vip_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
+      ylod <- object$Yloadings[i, ] # one y variable at a time
+      ss <- c(ylod)^2 * colSums(score^2)
+      ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
+      vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))
+      if (object$ncomp > 1){
+        vip_mean <- foreach(i = vip, .combine = "c") %do% mean(i)
+        vip_sd <- foreach(i = vip, .combine = "c") %do% sd(i)
+        vip_sem <- foreach(i = vip_sd, .combine = "c") %do% sqrt(i / nrow(vip))
+        vip_plot_dfm <- data.frame(features = colnames(vip), VIP = vip_mean, sd = vip_sd, sem = vip_sem)
+      } else { # no sem or sd is needed in ncomp == 1
+        vip_plot_dfm <- data.frame(features = names(vip), VIP = vip)
+      }
+      vip_plot_dfm <- vip_plot_dfm[order(vip_plot_dfm$VIP, decreasing = TRUE), ]
+      vip_plot_dfm$features <- factor(vip_plot_dfm$features, levels = unique(vip_plot_dfm$features))
+      return(vip_plot_dfm)
+  }
+  names(vip_list) <- dimnames(object$Yloadings)[[1]]
+
+  ## plot
+  if (plot){
+    for (j in 1:dim(object$Yloadings)[1]){
+      cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(vip_list)[j], ".vip.pdf...", sep = "")) # initial message
+
+      if (object$ncomp > 1){  #  detect if to use errorbar
+        if (tolower(plot.errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
+          err <- vip_list[[j]]$sem
+        } else if (tolower(plot.errorbar) %in% c("sd", "standard deviation")){
+          err <- vip_list[[j]]$sd
+        }
+        y_axis_Mx <- max((vip_list[[j]]$VIP + err) * 1.05) * 1.2
+
+      } else {
+        y_axis_Mx <- max((vip_list[[j]]$VIP) * 1.05) * 1.2
+      }
+      y_axis_Mn <- 0
+
+      baseplt <- ggplot(data = vip_list[[j]], aes(x = features, y = VIP)) +
+        geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
+        ggtitle(names(vip_list)[j]) +
+        scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
+                           oob = rescale_none) +
+        xlab(plot.xLabel) +
+        geom_hline(yintercept = 0) +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              legend.position = "bottom",
+              legend.text = element_text(size = plot.legendSize),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                         hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+
+      if (plot.title){
+        baseplt <- baseplt + ggtitle(names(vip_list)[j])
+      } else (
+        baseplt <- baseplt + ggtitle(NULL)
+      )
+
+      if (plot.sig.line){
+        baseplt <- baseplt +
+          geom_hline(yintercept = vip.alpha, linetype = "dashed", colour = "red")
+      }
+
+      if (object$ncomp > 1){
+        baseplt <- baseplt +
+          geom_errorbar(aes(ymin = VIP - err, ymax = VIP + err),
+                      position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
+          ylab(paste0(plot.yLabel, " (", object$ncomp, " comps)"))
+      } else {
+        baseplt <- baseplt +
+          ylab(paste0(plot.yLabel, " (", object$ncomp, " comp)"))
+      }
+
+      if (plot.xTickItalic & plot.xTickBold){
+        baseplt <- baseplt +
+          theme(axis.text.x = element_text(face = "bold.italic"))
+      } else if (plot.xTickItalic & !plot.xTickBold){
+        baseplt <- baseplt +
+          theme(axis.text.x = element_text(face = "italic"))
+      } else if (plot.xTickBold & !plot.xTickItalic){
+        baseplt <- baseplt +
+          theme(axis.text.x = element_text(face = "bold"))
+      }
+
+      if (plot.yTickItalic & plot.yTickBold){
+        baseplt <- baseplt +
+          theme(axis.text.y  = element_text(face = "bold.italic"))
+      } else if (plot.yTickItalic & !plot.yTickBold){
+        baseplt <- baseplt +
+          theme(axis.text.y = element_text(face = "italic"))
+      } else if (plot.yTickBold & !plot.yTickItalic){
+        baseplt <- baseplt +
+          theme(axis.text.y = element_text(face = "bold"))
+      }
+
+      plt <- baseplt
+      ## finalize the plot
+      grid.newpage()
+      if (plot.rightsideY){ # add the right-side y axis
+        pltgtb <- rightside_y(plt)
+      } else { # no right side y-axis
+        pltgtb <- plt
+      }
+
+      ## export the file and draw a preview
+      ggsave(filename = paste(deparse(substitute(object)), ".", names(vip_list)[j], ".vip.pdf", sep = ""), plot = pltgtb,
+             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      cat("Done!\n") # final message
+      grid.draw(pltgtb) # preview
+    }
+  }
+  out <- list(vip_summary = vip_list, ncomp = object$ncomp)
+  assign(paste(deparse(substitute(object)), "_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
+}

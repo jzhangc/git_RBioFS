@@ -15,7 +15,7 @@ rbioFS_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 
 \item{ncomp}{Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.}
 
-\item{method}{PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm ("oscorespls"). Default is the popular \code{"simpls}.}
+\item{method}{PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls}.}
 
 \item{scale}{Logical, whether to scale the data or not. Default is \code{TRUE}.}
 
