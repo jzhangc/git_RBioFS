@@ -288,7 +288,7 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
         ggtitle(ifelse(plot.display.Title, names(q2r2_dfm_list)[i], NULL)) +
         geom_vline(xintercept = q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1], linetype = "dashed", colour = "red") +
         xlab("components") +
-        ylab("R2/Q2") +
+        ylab("R2 & Q2") +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
