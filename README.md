@@ -29,30 +29,7 @@ Installation
 
 Change log
 
-    0.5.1 (Feature preview)
-    (ICEBOX)
-        - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_plot()
-            
-        - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.2):
-          - rbioFS_splsda()
-          - rbioFS_splsda_plot()
-            
-        - Updates to rbioFS_PCA():
-          - 3D score plot option for rbioFS_PCA (non-shiny)
-          - 3D socre plot option for rbioFS_PCA_app (shiny)
-          - PCA function rbioFS_PCA() updated with S3 method
-        
-        - Updates to PLS-DA functions (non-Shiny):
-          - rbioFS_plsda_scoreplot(): y score projection
-          
-        - Updates to RF-FS functions:
-          - Function message display feature added to rbioFS()
-          - Group variable now customizable for rbioFS()
-            
-        - All shiny apps' interface updated with a new look (tentative, may implement in 0.5.2)
-        
-      (ADDED)
+    0.5.1 (May.24.2018)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_VIP(): VIP, or variable importance in projection, is plsda's version of VI. Can be used independently from plsda functions
           - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
@@ -66,14 +43,15 @@ Change log
           - Plot property auguments names unified for function only produce one type of plot
         
         - Updates to RF-FS functions:
-          - Arugment check added for rbioFS()
           - rbioFS() now accepts R objects, in addition to csv files
+          - Group variable now customizable for rbioFS()
+          - Arugment check added for rbioFS()
           - rbioFS() output element "SFS_matrix" changed to "SFS_training_data_matrix"
+          - Function message display feature added to rbioFS()
         
         - Bug fixes
-      
 
-    0.5.0 (May.3.2018)
+    0.5.0 
         - Data preprocessing functions added for modelling precedures such as PLS-DA, sPLS-DA, PCA, SVM, etc.
           - center_scale()
           - dummy()

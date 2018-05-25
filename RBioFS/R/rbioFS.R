@@ -99,6 +99,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
   ## FS
   if (plot){
+    cat(paste("Initial selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = TRUE, n = initialFS_n,
@@ -107,7 +108,9 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                              xLabel = initialFS_xLabel, yLabel = initialFS_yLabel,
                              xTxtSize = initialFS_xTxtSize, yTxtSize = initialFS_yTxtSize,
                              plotWidth = initialFS_plotWidth, plotHeight = initialFS_plotHeight) # initial FS
+    cat(paste("Done!\n", sep = ""))  # final message
 
+    cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioRF_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
@@ -117,15 +120,21 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                        errorbar = SFS_errorbar, errorbarWidth = SFS_errorbarWidth,
                        symbolSize = SFS_symbolSize, xTxtSize = SFS_xTxtSize, yTxtSize = SFS_yTxtSize,
                        plotWidth = SFS_plotWidth, plotHeight = SFS_plotHeight) # SFS
+    cat(paste("Done!\n", sep = ""))  # final message
+
 
   } else {
+    cat(paste("Initial selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = FALSE) # initial FS
+    cat(paste("Done!\n", sep = ""))  # final message
 
+    cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioRF_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = FALSE) # SFS
+    cat(paste("Done!\n", sep = ""))  # final message
   }
 }
