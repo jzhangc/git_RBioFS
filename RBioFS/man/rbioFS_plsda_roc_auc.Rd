@@ -5,9 +5,10 @@
 \title{rbioFS_plsda_roc_auc()}
 \usage{
 rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
-  plot.display.Title = TRUE, multi_plot.ncol = length(plot.comps),
-  multi_plot.nrow = 1, plot.rightsideY = TRUE, plot.fontType = "sans",
-  plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+  plot.smooth = FALSE, multi_plot.ncol = length(plot.comps),
+  multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+  plot.rightsideY = TRUE, plot.SymbolSize = 2, plot.display.Title = TRUE,
+  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
   plot.Width = 170, plot.Height = 150)
 }
 \arguments{
@@ -17,17 +18,21 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
 
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
 
-\item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
+\item{plot.smooth}{If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.}
 
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{length(plot.comps)}.}
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
+
 \item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
-
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
+
+\item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
+
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 

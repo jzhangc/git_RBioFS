@@ -31,6 +31,8 @@ Change log
 
     0.5.2 (Feature preview)
     (ICEBOX)
+        - ROC-AUC now a seperate function that can be used for other classification/FS algorithms
+        
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
             
@@ -45,8 +47,15 @@ Change log
         
         - Updates to PLS-DA functions (non-Shiny):
           - rbioFS_plsda_scoreplot(): y score projection
+          - rbioFS_plsda_jackknife(): options added to hide the x-axis tick labels (useful in the case of many variables)
+          - rbioFS_plsda_VIP():  options added to hide the x-axis tick labels (useful in the case of many variables)
             
         - All shiny apps' interface updated with a new look
+      
+    (ADDED)
+        - Updates to PLS-DA functions (non-Shiny):
+          - Smooth functionality added for rbioFS_plsda_roc_auc()
+          - Legend position now customizable for multi-plot for the relevant functions
         
 
     0.5.1 (May.24.2018)

@@ -8,9 +8,10 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
   randomization.nperm = 999, randomization.alpha = 0.05, rmsepplot = TRUE,
   plot.rightsideY = TRUE, plot.optm.ncomp.line = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
-  multi_plot.nrow = 1, plot.display.Title = TRUE, plot.SymbolSize = 2,
-  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
-  plot.Width = 170, plot.Height = 150)
+  multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+  plot.display.Title = TRUE, plot.SymbolSize = 2, plot.fontType = "sans",
+  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.Width = 170,
+  plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -32,6 +33,8 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is the number of responding classes, i.e. y.}
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
+
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 

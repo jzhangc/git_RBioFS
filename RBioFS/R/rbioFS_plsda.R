@@ -96,6 +96,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param multi_plot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
 #' @param multi_plot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
@@ -120,7 +121,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' rbioFS_plsda_tuplot(new_model, comps = c(1, 2, 3))
 #' }
 #' @export
-rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1,
+rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                 plot.rightsideY = TRUE,
                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                                 plot.SymbolSize = 5, plot.Title = NULL,
@@ -193,7 +194,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
   }
   names(plt_list) <- paste0("g", comps)
 
-  if (length(comps) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
+  if (length(comps) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
 
   ## save
   grid.newpage()
@@ -216,6 +217,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. unique y classes.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -238,7 +240,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @export
 rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
                               plot.display.Title = TRUE,
-                              multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1,
+                              multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               plot.rightsideY = TRUE, plot.fontType = "sans",
                               plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
                               plot.Width = 170, plot.Height = 150){
@@ -303,7 +305,7 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
       plt
     }
     names(plt_list) <- names(q2r2_dfm_list)
-    if (length(names(q2r2_dfm_list)) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
+    if (length(names(q2r2_dfm_list)) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
 
     # save
     grid.newpage()
@@ -345,6 +347,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
@@ -371,7 +374,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
                                       rmsepplot = TRUE,
                                       plot.rightsideY = TRUE,
                                       plot.optm.ncomp.line = TRUE,
-                                      multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1,
+                                      multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                       plot.display.Title = TRUE,
                                       plot.SymbolSize = 2,
                                       plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
@@ -470,7 +473,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
     }
     names(plt_list) <- paste0("g_", names(rmsep_dfm_list))
 
-    if (length(rmsep_dfm_list) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
+    if (length(rmsep_dfm_list) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
 
     ## save
     grid.newpage()
@@ -1072,10 +1075,12 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @description ROC-AUC analysis and ploting for plsda model
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
+#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -1097,14 +1102,16 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' }
 #' @export
 rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
-                                plot.comps = 1:object$ncomp,
-                                plot.display.Title = TRUE,
-                                multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1,
-                                plot.rightsideY = TRUE, plot.fontType = "sans",
-                                plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
-                                plot.Width = 170, plot.Height = 150){
+                                 plot.comps = 1:object$ncomp,
+                                 plot.smooth = FALSE,
+                                 multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                 plot.rightsideY = TRUE,
+                                 plot.SymbolSize = 2, plot.display.Title = TRUE,
+                                 plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                 plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
 
   ## calcuate ROC-AUC
   pred_raw <- predict(object, newdata = object$inputX)
@@ -1122,8 +1129,11 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(outcome)[j]]]
-      perf <- pROC::roc(controls = controls, cases = cases)
-
+      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
+                       error = function(err){
+                         cat("Curve not smoothable. Proceed without smooth.\n")
+                         pROC::roc(controls = controls, cases = cases, smooth = FALSE)
+                       })
       if (length(levels(outcome)) == 2){
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
       } else {
@@ -1179,7 +1189,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
       plt
     }
     names(plt_list) <- names(roc_dfm_list)[plot.comps]
-    if (length(plot.comps) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
+    if (length(plot.comps) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
 
     # save
     grid.newpage()

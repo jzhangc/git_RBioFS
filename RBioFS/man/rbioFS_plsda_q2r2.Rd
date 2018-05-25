@@ -7,9 +7,10 @@
 rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
   plot.display.Title = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
-  multi_plot.nrow = 1, plot.rightsideY = TRUE, plot.fontType = "sans",
-  plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
-  plot.Width = 170, plot.Height = 150)
+  multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+  plot.rightsideY = TRUE, plot.fontType = "sans", plot.SymbolSize = 2,
+  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.Width = 170,
+  plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -23,6 +24,8 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is the number of responding classes, i.e. unique y classes.}
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
+
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 
