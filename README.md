@@ -29,6 +29,26 @@ Installation
 
 Change log
 
+    0.5.2 (Feature preview)
+    (ICEBOX)
+        - New PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_plot()
+            
+        - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.3):
+          - rbioFS_splsda()
+          - rbioFS_splsda_plot()
+            
+        - Updates to rbioFS_PCA():
+          - 3D score plot option for rbioFS_PCA (non-shiny)
+          - 3D socre plot option for rbioFS_PCA_app (shiny)
+          - PCA function rbioFS_PCA() updated with S3 method
+        
+        - Updates to PLS-DA functions (non-Shiny):
+          - rbioFS_plsda_scoreplot(): y score projection
+            
+        - All shiny apps' interface updated with a new look
+        
+
     0.5.1 (May.24.2018)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_VIP(): VIP, or variable importance in projection, is plsda's version of VI. Can be used independently from plsda functions
@@ -50,6 +70,7 @@ Change log
           - Function message display feature added to rbioFS()
         
         - Bug fixes
+        
 
     0.5.0 
         - Data preprocessing functions added for modelling precedures such as PLS-DA, sPLS-DA, PCA, SVM, etc.
@@ -71,16 +92,20 @@ Change log
           - PCA score plot now supports sample names for the samples
           
         - Rightside y-axis now uses a function from RBioplot pakcage, which now is a dependency
+        
         - Bug fixes
+        
 
     0.4.6
         - All the settings return to default upon "clear"
         - A bug fixed for rbioFS_app() where plots can't be regenerated on a new dataset upon "clear"
         - Other bug fixes
+        
 
     0.4.4 - 0.4.5
         - fs_csv_generator() added
         - Bug fixes
+        
 
     0.4.3
         - Web app verion of rbioFS_PCA() added: rbioFS_PCA_app()
@@ -90,6 +115,7 @@ Change log
         - Clear screen button added for rbioFS_app()
         - Parallel computing modules updated with the more efficient foreach method for rbioFS(), rbioRF_initialFS() and rbioRF_SFS()
         - Bug fixes
+        
 
     0.4.1 - 0.4.2
         - Progress bar added for rbioFS_app()
@@ -100,57 +126,72 @@ Change log
         - NA check added for the initial FS module in rbioFS_app()
         - Bug fixes for rbioFS_app()
         - Other minor bug fixes
+        
 
     0.4.0
         - Web app version of the main fuction rbioFS() added: rbioFS_app()
         - A bug fixed for the plot subsetting functionality for rbioRF_SFS()
         - Other minor bug fixes
+        
 
     0.3.3
         - zzz.R file added
+        
   
     0.3.0 - 0.3.2
         - Principal Component Analysis (PCA) and visualization function rbioFS_PCA() added
         - Citation information added
         - Bug fixes
+        
     
     0.2.0 - 0.2.5
         - All-in-one FS function added
         - Bug fixes
+        
     
     0.1.11 - 0.1.12
         - Output results as txt files functionality added
         - Bug fixes
+        
     
     0.1.10
         - Random Forest data imputation method added to the data imputation function
         - Round down now used for mtry augment
+        
     
     0.1.9
         - Text fixes
+        
     
     0.1.7 - 0.1.8
         - Name changed to RBioFS
         - Bug fixes
+        
     
     0.1.6
         - rbioRF_iterOOB() updated
+        
     
     0.1.5
         - Iterative OOB error rate computation function added
+        
     
     0.1.4
         - Initial FS function completed
+        
     
     0.1.3
         - Parallel computing added for rbioRF_vi()
+        
     
     0.1.2
         - rbioRF_vi and rbioRF_viplot functions combined to steramline the workflow
+        
     
     0.1.1
         - Data imputation function added
         - File processing functions added
+        
     
     0.1.0
         - Initial commit
