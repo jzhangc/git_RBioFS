@@ -213,12 +213,12 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param intercept Wether to include intercept term, i.e. comps = 0. Default is \code{TRUE}.
 #' @param q2r2plot If to generate a q2r2 plot. Default is \code{TRUE}.
-#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. unique y classes.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
-#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
@@ -233,14 +233,14 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @importFrom pls mvrValstats R2
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_q2r2(object = new_model, multi_plot.ncol = 2, multi_plot.nrow = 2, intercept = TRUE
+#' rbioFS_plsda_q2r2(object = new_model, multi_plot.ncol = 2, multi_plot.nrow = 2, intercept = TRUE)
 #' }
 #' @export
 rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
+                              plot.display.Title = TRUE,
                               multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1,
-                              plot.rightsideY = TRUE,
-                              plot.SymbolSize = 2, plot.display.Title = TRUE,
-                              plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                              plot.rightsideY = TRUE, plot.fontType = "sans",
+                              plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
                               plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
@@ -297,17 +297,15 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
-
       if (plot.rightsideY & length(names(q2r2_dfm_list)) == 1){
         plt <- RBioplot::rightside_y(plt)
       }
       plt
     }
     names(plt_list) <- names(q2r2_dfm_list)
-
     if (length(names(q2r2_dfm_list)) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
 
-    ## save
+    # save
     grid.newpage()
     ggsave(filename = paste(deparse(substitute(object)),".plsda.q2r2plot.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
@@ -1066,4 +1064,129 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
   }
   out <- list(vip_summary = vip_list, vip_raw = vip_raw_list, ncomp = object$ncomp)
   assign(paste(deparse(substitute(object)), "_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
+}
+
+
+#' @title rbioFS_plsda_roc_auc()
+#'
+#' @description ROC-AUC analysis and ploting for plsda model
+#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
+#' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
+#' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @return Prints AUC values in the console. And a pdf file for ROC plot
+#' @details Uses pROC module to calculate ROC.
+#' @import ggplot2
+#' @import foreach
+#' @importFrom pROC roc
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
+#' }
+#' @export
+rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
+                                plot.comps = 1:object$ncomp,
+                                plot.display.Title = TRUE,
+                                multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1,
+                                plot.rightsideY = TRUE, plot.fontType = "sans",
+                                plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                plot.Width = 170, plot.Height = 150){
+  ## check arguments
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+
+  ## calcuate ROC-AUC
+  pred_raw <- predict(object, newdata = object$inputX)
+  outcome <- object$inputY
+
+  roc_dfm_list <- vector(mode = "list", length = length(plot.comps))
+  roc_dfm_list[] <- foreach(i = 1:length(plot.comps)) %do% {
+    tmp_pred_raw <- pred_raw[, , i]
+    out <- foreach(j = 1:length(levels(outcome)), .combine = "rbind") %do% {
+      response <- outcome
+      levels(response)[-j] <- "others"
+      predictor <- as.matrix(tmp_pred_raw[, j], ncol = 1)
+      # pred <- ROCR::prediction(predictions = predictor, labels = response)
+      # perf <- ROCR::performance(prediction.obj = pred, "tpr", "fpr")
+      splt <- split(predictor, response)  # split function splist array according to a factor
+      controls <- splt$others
+      cases <- splt[[levels(outcome)[j]]]
+      perf <- pROC::roc(controls = controls, cases = cases)
+
+      if (length(levels(outcome)) == 2){
+        cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
+      } else {
+        cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
+      }
+
+      # fpr <- as.numeric(unlist(perf@x.values))
+      # tpr <- as.numeric(unlist(perf@y.values))
+      fpr <- 1 - perf$specificities
+      tpr <- perf$sensitivities
+      mtx <- cbind(fpr, tpr)
+      if (length(levels(outcome)) == 2){
+        df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL)
+      } else {
+        df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL)
+      }
+      return(df)
+    }
+  }
+  names(roc_dfm_list) <- paste0("comp ", 1:length(plot.comps))
+
+  ## plot
+  if (rocplot){
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.roc.pdf...", sep = ""))  # initial message
+
+    # extract comp variance distribution
+    varpp_x <- 100 * object$Xvar / object$Xtotvar
+    boxdfm_x <- data.frame(comp_x = as.numeric(gsub("Comp", "", names(varpp_x))), varpp_x = varpp_x)
+    var_percentage_x <- varpp_x[paste0("Comp ", plot.comps)] # extract the proportion of variance for the selected PCs
+    comp_axis_lbl <- paste("comp ", plot.comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
+
+
+    plt_list <- vector(mode = "list", length = length(plot.comps))
+    plt_list[] <- foreach(k = 1:length(plot.comps)) %do% {
+      plt <- ggplot(data = roc_dfm_list[[k]], aes(x = fpr, y = tpr, group = group, colour = group)) +
+        geom_line(aes(linetype = group)) +
+        geom_point(aes(shape = group), size = plot.SymbolSize) +
+        geom_abline(intercept = 0) +
+        ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +
+        xlab("1 - specificity") +
+        ylab("sensitivity") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+
+      if (plot.rightsideY & length(plot.comps) == 1){
+        plt <- RBioplot::rightside_y(plt)
+      }
+      plt
+    }
+    names(plt_list) <- names(roc_dfm_list)[plot.comps]
+    if (length(plot.comps) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = "bottom")
+
+    # save
+    grid.newpage()
+    ggsave(filename = paste(deparse(substitute(object)),".plsda.roc.pdf", sep = ""), plot = plt,
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    grid.draw(plt)
+    cat("Done!\n")
+  }
+  assign(paste(deparse(substitute(object)), "_roc_list", sep = ""), roc_dfm_list, envir = .GlobalEnv)
 }

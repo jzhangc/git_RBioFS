@@ -33,7 +33,6 @@ Change log
     (ICEBOX)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
-          - AUC and ROC analysis
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.2):
           - rbioFS_splsda()
@@ -57,6 +56,7 @@ Change log
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_VIP(): VIP, or variable importance in projection, is plsda's version of VI. Can be used independently from plsda functions
           - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
+          - rbioFS_plsda_aoc(): ROC and AUC analysis and plotting
           
         - Updates to PLS-DA functions (non-Shiny):
           - More information added to the manual page for rbioFS_plsda_ncomp_select()
@@ -69,6 +69,8 @@ Change log
           - Arugment check added for rbioFS()
           - rbioFS() now accepts R objects, in addition to csv files
           - rbioFS() output element "SFS_matrix" changed to "SFS_training_data_matrix"
+        
+        - Bug fixes
       
 
     0.5.0 (May.3.2018)
