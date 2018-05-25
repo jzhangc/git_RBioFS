@@ -31,7 +31,7 @@ Change log
 
     0.5.2 (Feature preview)
     (ICEBOX)
-        - ROC-AUC now a seperate function that can be used for other classification/FS algorithms
+        - ROC-AUC now a seperate function that can be used for other classification/FS methods.
         
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
