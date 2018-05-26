@@ -15,8 +15,8 @@
 #' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param errorbar The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.
 #' @param errorbarWidth The width of the errorbar. Default is \code{0.2}.
-#' @param xTxtSize Font size for the x-axis text. Default is \code{10}.
-#' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
+#' @param xTickLblSize Font size for the x-axis text. Default is \code{10}.
+#' @param yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
@@ -40,7 +40,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
                              plot = TRUE, n = "all",
                              Title = NULL, xLabel = "Mean Decrease in Accuracy", yLabel = NULL,
                              errorbar = "SEM", errorbarWidth = 0.2,
-                             xTxtSize = 10, yTxtSize =10,
+                             xTickLblSize = 10, yTickLblSize =10,
                              plotWidth = 170, plotHeight = 150){
 
   #### check the variables
@@ -192,8 +192,8 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
             plot.title = element_text(hjust = 0.5),
             legend.position = "bottom",
             legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize, angle = 0, hjust = 0.5), # x and y not reversed as they are not associated with the roation of the axes.
-            axis.text.y = element_text(size = yTxtSize, hjust = 0.5)) +
+            axis.text.x = element_text(size = xTickLblSize, angle = 0, hjust = 0.5), # x and y not reversed as they are not associated with the roation of the axes.
+            axis.text.y = element_text(size = yTickLblSize, hjust = 0.5)) +
       coord_flip()
 
     if (errorbar == "SEM"){
@@ -208,20 +208,7 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
     ## add the right-side y axis
     grid.newpage()
-
-    # extract gtable
-    pltgtb <- ggplot_gtable(ggplot_build(plt))
-
-    # add the right side y axis
-    Aa <- which(pltgtb$layout$name == "axis-l")
-    pltgtb_a <- pltgtb$grobs[[Aa]]
-    axs <- pltgtb_a$children[[2]]
-    axs$widths <- rev(axs$widths)
-    axs$grobs <- rev(axs$grobs)
-    axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-    Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-    pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-    pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+    pltgtb <- RBioplot::rightside_y(plt)
 
     # export the file and draw a preview
     ggsave(filename = paste(objTitle,".vi.plot.pdf", sep = ""), plot = pltgtb,

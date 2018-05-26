@@ -770,6 +770,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 
   if (plot){
     loclEnv <- environment()
+    if (plot.xTickLblSize == 0) cat("Due to plot.xTickLblSize = 0, x-axis ticks are hidden.\n")
     for (i in 1:length(plot_list)){
       cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
       DfPlt <- plot_list[[i]]
@@ -794,7 +795,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
         geom_errorbar(aes(ymin = coefficients - err, ymax = coefficients + err),
                       position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
         geom_text(aes(y = ifelse(sign(coefficients) > 0, (coefficients + err) * 1.05, (coefficients - err) * 1.15), label = sig),
-                  position = position_dodge(width = 0.9), color = "black", size = 10) +
+                  position = position_dodge(width = 0.9), color = "black", size = plot.errorbarLblSize) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
@@ -809,7 +810,8 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
               legend.text = element_text(size = plot.legendSize),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
                                          hjust = plot.xhAlign, vjust = plot.xvAlign),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
+              axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
 
       if (plot.title){
         baseplt <- baseplt + ggtitle(names(plot_list)[i])
@@ -972,6 +974,8 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 
   ## plot
   if (plot){
+   if (plot.xTickLblSize == 0) cat("Due to plot.xTickLblSize = 0, x-axis ticks are hidden.\n")
+
     for (j in 1:dim(object$Yloadings)[1]){
       cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(vip_list)[j], ".vip.pdf...", sep = "")) # initial message
 
@@ -1004,7 +1008,8 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
               legend.text = element_text(size = plot.legendSize),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
                                          hjust = plot.xhAlign, vjust = plot.xvAlign),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
+              axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
 
       if (plot.title){
         baseplt <- baseplt + ggtitle(names(vip_list)[j])
@@ -1053,7 +1058,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
       ## finalize the plot
       grid.newpage()
       if (plot.rightsideY){ # add the right-side y axis
-        pltgtb <- rightside_y(plt)
+        pltgtb <- RBioplot::rightside_y(plt)
       } else { # no right side y-axis
         pltgtb <- plt
       }

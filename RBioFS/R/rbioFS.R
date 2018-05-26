@@ -22,8 +22,8 @@
 #' @param initialFS_n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param initialFS_errorbar The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.
 #' @param initialFS_errorbarWidth The width of the errorbar. Default is \code{0.2}.
-#' @param initialFS_xTxtSize Font size for the x-axis text. Default is \code{10}.
-#' @param initialFS_yTxtSize Font size for the y-axis text. Default is \code{10}.
+#' @param initialFS_xTickLblSize Font size for the x-axis text. Default is \code{10}.
+#' @param initialFS_yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param initialFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param initialFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param SFS_xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -32,8 +32,8 @@
 #' @param SFS_errorbar The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.
 #' @param SFS_errorbarWidth The width of the errorbar. Default is \code{0.2}.
 #' @param SFS_symbolSize Size of the symbol. Default is \code{2}.
-#' @param SFS_xTxtSize Font size for the x-axis text. Default is \code{10}.
-#' @param SFS_yTxtSize Font size for the y-axis text. Default is \code{10}.
+#' @param SFS_xTickLblSize Font size for the x-axis text. Default is \code{10}.
+#' @param SFS_yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param SFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param SFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
@@ -52,12 +52,12 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                    initialFS_n = "all",
                    initialFS_Title = NULL, initialFS_xLabel = "Mean Decrease in Accuracy", initialFS_yLabel = NULL,
                    initialFS_errorbar = "SEM", initialFS_errorbarWidth = 0.2,
-                   initialFS_xTxtSize = 10, initialFS_yTxtSize =10,
+                   initialFS_xTickLblSize = 10, initialFS_yTickLblSize =10,
                    initialFS_plotWidth = 170, initialFS_plotHeight = 150,
                    SFS_n = "all",
                    SFS_Title = NULL, SFS_xLabel = NULL, SFS_yLabel = NULL,
                    SFS_errorbar = "SEM", SFS_errorbarWidth = 0.2,
-                   SFS_symbolSize = 2, SFS_xTxtSize = 10, SFS_yTxtSize =10,
+                   SFS_symbolSize = 2, SFS_xTickLblSize = 10, SFS_yTickLblSize =10,
                    SFS_plotWidth = 170, SFS_plotHeight = 150
                    ){
   ## argument check
@@ -99,6 +99,8 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
   ## FS
   if (plot){
+#   if (initialFS_yTickLblSize == 0) cat("Due to initialFS_yTickLblSize = 0, y-axis ticks are hidden for the VI boxplot.\n")  # not ready
+
     cat(paste("Initial selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
@@ -106,7 +108,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                              Title = initialFS_Title,
                              errorbar = initialFS_errorbar, errorbarWidth = initialFS_errorbarWidth,
                              xLabel = initialFS_xLabel, yLabel = initialFS_yLabel,
-                             xTxtSize = initialFS_xTxtSize, yTxtSize = initialFS_yTxtSize,
+                             xTickLblSize = initialFS_xTickLblSize, yTickLblSize = initialFS_yTickLblSize,
                              plotWidth = initialFS_plotWidth, plotHeight = initialFS_plotHeight) # initial FS
     cat(paste("Done!\n", sep = ""))  # final message
 
@@ -118,7 +120,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                        n = SFS_n,
                        Title = SFS_Title, xLabel = SFS_xLabel, yLabel = SFS_yLabel,
                        errorbar = SFS_errorbar, errorbarWidth = SFS_errorbarWidth,
-                       symbolSize = SFS_symbolSize, xTxtSize = SFS_xTxtSize, yTxtSize = SFS_yTxtSize,
+                       symbolSize = SFS_symbolSize, xTickLblSize = SFS_xTickLblSize, yTickLblSize = SFS_yTickLblSize,
                        plotWidth = SFS_plotWidth, plotHeight = SFS_plotHeight) # SFS
     cat(paste("Done!\n", sep = ""))  # final message
 

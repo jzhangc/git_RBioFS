@@ -11,11 +11,11 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
   plot = TRUE, initialFS_n = "all", initialFS_Title = NULL,
   initialFS_xLabel = "Mean Decrease in Accuracy", initialFS_yLabel = NULL,
   initialFS_errorbar = "SEM", initialFS_errorbarWidth = 0.2,
-  initialFS_xTxtSize = 10, initialFS_yTxtSize = 10,
+  initialFS_xTickLblSize = 10, initialFS_yTickLblSize = 10,
   initialFS_plotWidth = 170, initialFS_plotHeight = 150, SFS_n = "all",
   SFS_Title = NULL, SFS_xLabel = NULL, SFS_yLabel = NULL,
   SFS_errorbar = "SEM", SFS_errorbarWidth = 0.2, SFS_symbolSize = 2,
-  SFS_xTxtSize = 10, SFS_yTxtSize = 10, SFS_plotWidth = 170,
+  SFS_xTickLblSize = 10, SFS_yTickLblSize = 10, SFS_plotWidth = 170,
   SFS_plotHeight = 150)
 }
 \arguments{
@@ -61,9 +61,9 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
 
 \item{initialFS_errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
 
-\item{initialFS_xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+\item{initialFS_xTickLblSize}{Font size for the x-axis text. Default is \code{10}.}
 
-\item{initialFS_yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+\item{initialFS_yTickLblSize}{Font size for the y-axis text. Default is \code{10}.}
 
 \item{initialFS_plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 
@@ -81,9 +81,9 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
 
 \item{SFS_symbolSize}{Size of the symbol. Default is \code{2}.}
 
-\item{SFS_xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+\item{SFS_xTickLblSize}{Font size for the x-axis text. Default is \code{10}.}
 
-\item{SFS_yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+\item{SFS_yTickLblSize}{Font size for the y-axis text. Default is \code{10}.}
 
 \item{SFS_plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 

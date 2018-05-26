@@ -8,8 +8,8 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
   nTree = 1001, mTry = max(floor(ncol(x)/3), 2), multicore = TRUE,
   plot = TRUE, n = "all", Title = NULL,
   xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
-  errorbarWidth = 0.2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
-  plotHeight = 150)
+  errorbarWidth = 0.2, xTickLblSize = 10, yTickLblSize = 10,
+  plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
@@ -40,9 +40,9 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 
 \item{errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
 
-\item{xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+\item{xTickLblSize}{Font size for the x-axis text. Default is \code{10}.}
 
-\item{yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+\item{yTickLblSize}{Font size for the y-axis text. Default is \code{10}.}
 
 \item{plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 
