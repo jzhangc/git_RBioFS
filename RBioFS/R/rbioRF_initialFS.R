@@ -29,6 +29,7 @@
 #' @importFrom rpart rpart prune
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
+#' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
 #' rbioRF_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
