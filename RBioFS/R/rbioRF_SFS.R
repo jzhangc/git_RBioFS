@@ -209,7 +209,8 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
         geom_vline(xintercept = min(minerrsd), linetype = "dashed") +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(hjust = 0.5),
+              plot.title = element_text(face = "bold", hjust = 0.5),
+              axis.title = element_text(face = "bold"),
               legend.position = "bottom",
               legend.title = element_blank(),
               axis.text.x = element_text(size = xTickLblSize),
@@ -217,13 +218,15 @@ rbioRF_SFS <- function(objTitle = "x_vs_tgt",
 
       if (errorbar == "SEM"){
         plt <- baseplt +
-          geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth, position = position_dodge(0.9)) +
+          geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth) +
+#          geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth, position = position_dodge(0.9)) +
           scale_y_continuous(expand = c(0, 0),
                              limits = c(with(pltdfm, min(Mean - SEM) * 0.6),
                                         with(pltdfm, max(Mean + SEM) * 1.2)))
       } else if (errorbar == "SD") {
         plt <- baseplt +
-          geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth, position = position_dodge(0.9)) +
+          geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth) +
+#          geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth, position = position_dodge(0.9)) +
           scale_y_continuous(expand = c(0, 0),
                              limits = c(with(pltdfm, min(Mean - SD) * 0.6),
                                         with(pltdfm, max(Mean + SD) * 1.2)))

@@ -31,7 +31,11 @@ Change log
 
     0.5.2 (Feature preview)
     (ICEBOX)
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods.
+        - ROC-AUC now a seperate function that can be used for other classification/FS methods
+        
+        - RF-FS analysis plotting module separated from rbioFS() function as functions:
+          - rbioRF_initial_FS_plot() 
+          - rbioRF_SFS_plot()
         
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
@@ -39,6 +43,9 @@ Change log
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.3):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
+        
+        - Updates to rbioFS():
+          - Plotting module separated from the functions
             
         - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
@@ -55,7 +62,16 @@ Change log
           - Smooth functionality added for rbioFS_plsda_roc_auc()
           - Legend position now customizable for multi-plot for the relevant functions
           - rbioFS_plsda_jackknife(): options added for hiding the x-axis tick labels (useful in the case of many variables)
-          - rbioFS_plsda_VIP():  options added for hiding the x-axis tick labels (useful in the case of many variables)
+          - rbioFS_plsda_jackknife(): for plotting, x-axis margin adjusted
+          - rbioFS_plsda_VIP(): options added for hiding the x-axis tick labels (useful in the case of many variables)
+          - rbioFS_plsda_VIP() how outputs a list with VIP values as well as a vector containing features above the threshold
+          - Error handling added for all the functions featuring multiplot, excluding the rbioFS_plsda_scoreplot()
+          - Plot theme adjusted for functions:
+            - rbioFS_plsda_ncomp_select()
+            - rbioFS_plsda_tuplot()
+        
+        - Updates to rbioFS():
+          - plots title and axis title are in bold
         
 
     0.5.1 (May.24.2018)

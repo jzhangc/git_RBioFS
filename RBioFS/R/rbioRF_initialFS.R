@@ -181,28 +181,33 @@ rbioRF_initialFS <- function(objTitle = "x_vs_tgt",
 
     # plotting
     baseplt <- ggplot(pltdfm, aes(x = Target, y = Mean), environment = loclEnv) +
+#      geom_point(color = "black") +
       geom_bar(position="dodge", stat="identity", color="black", fill = "gray66")+
       scale_x_discrete(expand = c(0.01, 0)) +
       scale_y_continuous(expand = c(0.01, 0)) +
       ggtitle(Title) +
       xlab(yLabel) + # the arguments for x and y labls are switched as the figure will be rotated
       ylab(xLabel) + # the arguments for x and y labls are switched as the figure will be rotated
+#      geom_vline(xintercept = 0) +
       geom_hline(yintercept = 0) +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(hjust = 0.5),
+            plot.title = element_text(face = "bold", hjust = 0.5),
+            axis.title = element_text(face = "bold"),
             legend.position = "bottom",
             legend.title = element_blank(),
             axis.text.x = element_text(size = xTickLblSize, angle = 0, hjust = 0.5), # x and y not reversed as they are not associated with the roation of the axes.
             axis.text.y = element_text(size = yTickLblSize, hjust = 0.5)) +
-      coord_flip()
+     coord_flip()
 
     if (errorbar == "SEM"){
       plt <- baseplt +
+#        geom_errorbarh(aes(xmin = Mean - SEM, xmax = Mean + SEM), height = errorbarWidth)
         geom_errorbar(aes(ymin = Mean - SEM, ymax = Mean + SEM), width = errorbarWidth,
                       position = position_dodge(0.9))
     } else if (errorbar == "SD") {
       plt <- baseplt +
+#        geom_errorbarh(aes(xmin = Mean - SD, xmax = Mean + SD), height = errorbarWidth)
         geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbarWidth,
                       position = position_dodge(0.9))
     }

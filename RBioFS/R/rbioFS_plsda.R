@@ -178,7 +178,6 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
       ggtitle(plot.Title) +
       xlab(lbl[1]) +
       ylab(lbl[2]) +
-      theme_bw() +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
@@ -194,7 +193,13 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
   }
   names(plt_list) <- paste0("g", comps)
 
-  if (length(comps) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+  if (length(comps) > 1) {
+    if (multi_plot.ncol * multi_plot.nrow != length(comps)){
+      stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the number of components used.")
+    } else {
+      plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+    }
+  }
 
   ## save
   grid.newpage()
@@ -305,7 +310,14 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
       plt
     }
     names(plt_list) <- names(q2r2_dfm_list)
-    if (length(names(q2r2_dfm_list)) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+
+    if (length(names(q2r2_dfm_list)) > 1) {
+      if (multi_plot.ncol * multi_plot.nrow != length(q2r2_dfm_list)){
+        stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the number of response groups.")
+      } else {
+        plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+      }
+    }
 
     # save
     grid.newpage()
@@ -452,7 +464,6 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
         ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
         ylab("RMSEP") +
         xlab("Components") +
-        theme_bw() +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
@@ -473,7 +484,13 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
     }
     names(plt_list) <- paste0("g_", names(rmsep_dfm_list))
 
-    if (length(rmsep_dfm_list) > 1) plt <- multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+    if (length(rmsep_dfm_list) > 1) {
+      if (multi_plot.ncol * multi_plot.nrow != length(rmsep_dfm_list)){
+        stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the number of response groups.")
+      } else {
+        plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+      }
+    }
 
     ## save
     grid.newpage()
@@ -796,6 +813,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
                       position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
         geom_text(aes(y = ifelse(sign(coefficients) > 0, (coefficients + err) * 1.05, (coefficients - err) * 1.15), label = sig),
                   position = position_dodge(width = 0.9), color = "black", size = plot.errorbarLblSize) +
+        scale_x_discrete(expand = c(0.01, 0.01)) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
@@ -995,6 +1013,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
       baseplt <- ggplot(data = vip_list[[j]], aes(x = features, y = VIP)) +
         geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
         ggtitle(names(vip_list)[j]) +
+        scale_x_discrete(expand = c(0.01, 0.01)) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
@@ -1070,7 +1089,17 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
       grid.draw(pltgtb) # preview
     }
   }
-  out <- list(vip_summary = vip_list, vip_raw = vip_raw_list, ncomp = object$ncomp)
+
+  ## output
+  # important features lsit
+  ipf_list <- vector(mode = "list", length = length(vip_list))
+  ipf_list[] <- foreach(m = 1:length(vip_list)) %do% {
+    as.character(vip_list[[m]][which(vip_list[[m]]$VIP > vip.alpha), 1])
+  }
+  names(ipf_list) <- names(vip_list)
+
+  # output
+  out <- list(vip_summary = vip_list, features_above_alpha = ipf_list, vip_raw = vip_raw_list, ncomp = object$ncomp)
   assign(paste(deparse(substitute(object)), "_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
 }
 
@@ -1129,8 +1158,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
       response <- outcome
       levels(response)[-j] <- "others"
       predictor <- as.matrix(tmp_pred_raw[, j], ncol = 1)
-      # pred <- ROCR::prediction(predictions = predictor, labels = response)
-      # perf <- ROCR::performance(prediction.obj = pred, "tpr", "fpr")
+#      pred <- ROCR::prediction(predictions = predictor, labels = response)
+#      perf <- ROCR::performance(prediction.obj = pred, "tpr", "fpr")
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(outcome)[j]]]
@@ -1145,8 +1174,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
       }
 
-      # fpr <- as.numeric(unlist(perf@x.values))
-      # tpr <- as.numeric(unlist(perf@y.values))
+#      fpr <- as.numeric(unlist(perf@x.values))
+#      tpr <- as.numeric(unlist(perf@y.values))
       fpr <- 1 - perf$specificities
       tpr <- perf$sensitivities
       mtx <- cbind(fpr, tpr)
@@ -1194,7 +1223,13 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
       plt
     }
     names(plt_list) <- names(roc_dfm_list)[plot.comps]
-    if (length(plot.comps) > 1) plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+    if (length(plot.comps) > 1) {
+      if (multi_plot.ncol * multi_plot.nrow != length(plot.comps)){
+        stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the length of plot.comps.")
+      } else {
+        plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+      }
+    }
 
     # save
     grid.newpage()
