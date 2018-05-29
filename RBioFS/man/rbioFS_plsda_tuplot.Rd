@@ -9,8 +9,8 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
   plot.rightsideY = TRUE, plot.sampleLabel.type = "none",
   plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
   plot.SymbolSize = 5, plot.Title = NULL, plot.fontType = "sans",
-  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.Width = 170,
-  plot.Height = 150)
+  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -40,6 +40,8 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
+
+\item{plot.legendSize}{Legend size. Default is \code{9}.}
 
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 

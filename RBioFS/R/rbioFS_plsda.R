@@ -106,6 +106,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Returns a pdf file for scoreplot.
@@ -126,6 +127,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                                 plot.SymbolSize = 5, plot.Title = NULL,
                                 plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                plot.legendSize = 9,
                                 plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
@@ -182,7 +184,8 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = plot.fontType),
-            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+            legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
             axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
@@ -228,6 +231,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
@@ -248,6 +252,7 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
                               multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               plot.rightsideY = TRUE, plot.fontType = "sans",
                               plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                              plot.legendSize = 9,
                               plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
@@ -300,7 +305,8 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
@@ -365,6 +371,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
@@ -390,6 +397,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
                                       plot.display.Title = TRUE,
                                       plot.SymbolSize = 2,
                                       plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                      plot.legendSize = 9,
                                       plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
@@ -468,7 +476,8 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              legend.position = "bottom", legend.key = element_blank(),
+              legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
@@ -524,6 +533,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Returns a pdf file for scoreplot.
@@ -545,6 +555,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
                                    plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
                                    plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                   plot.legendSize = 9,
                                    plot.Width = 170, plot.Height = 150){
   ## check variables
   if (any(class(object) == "rbiomvr")){
@@ -581,7 +592,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = plot.fontType),
-            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+            legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
             axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
@@ -607,7 +619,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = plot.fontType),
-            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+            legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
             axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
     if (plot.ellipse){ # circles
@@ -668,7 +681,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
             strip.text = element_text(face = "bold", size = plot.mtx.stripLblSize),
             panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+            legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
             axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType))
 
@@ -713,9 +727,6 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
 #' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
 #' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
-#' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.legendTtl Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.
-#' @param plot.legendTtlSize Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @return Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.
@@ -751,7 +762,6 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
                                    plot.xhAlign = 0.5, plot.xvAlign = 0.5,
                                    plot.rightsideY = TRUE,
                                    plot.yLabel = NULL, plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE, plot.yTickBold = FALSE,
-                                   plot.legendSize = 9, plot.legendTtl = FALSE, plot.legendTtlSize = 9,
                                    plot.Width = 170, plot.Height = 150){
   # check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
@@ -799,12 +809,14 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       }
 
       # use tryCatch in the case of non of the coef are > or < 0.
-      ymax <- tryCatch((max(DfPlt$coefficients[DfPlt$coefficients > 0] + err[DfPlt$coefficients > 0]) * 1.05) * 1.2,
+      ymax <- tryCatch((max(DfPlt$coefficients[DfPlt$coefficients > 0] + err[DfPlt$coefficients > 0]) * 1.05),
                        warning = function(err) return(0))
-      ymin <- tryCatch((min(DfPlt$coefficients[DfPlt$coefficients < 0] - err[DfPlt$coefficients < 0]) * 1.15) * 1.2,
+      ymin <- tryCatch((min(DfPlt$coefficients[DfPlt$coefficients < 0] - err[DfPlt$coefficients < 0]) * 1.15),
                        warning = function(err) return(0))
-      y_axis_Mx <- ifelse(ymax == 0, 0, max(abs(ymax), abs(ymin)))
-      y_axis_Mn <- ifelse(ymin == 0, 0, max(abs(ymax), abs(ymin)) * sign(ymin)) # make sure the y-axes have the same abs value
+#      y_axis_Mx <- ifelse(ymax == 0, 0, max(abs(ymax), abs(ymin)))
+#      y_axis_Mn <- ifelse(ymin == 0, 0, max(abs(ymax), abs(ymin)) * sign(ymin)) # make sure the y-axes have the same abs value
+      y_axis_Mx <- ifelse(ymax == 0, 0, abs(ymax))
+      y_axis_Mn <- ifelse(ymin == 0, 0, abs(ymin) * sign(ymin))
 
       baseplt <- ggplot(data = DfPlt, aes(x = features, y = coefficients)) +
         geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
@@ -814,7 +826,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
         geom_text(aes(y = ifelse(sign(coefficients) > 0, (coefficients + err) * 1.05, (coefficients - err) * 1.15), label = sig),
                   position = position_dodge(width = 0.9), color = "black", size = plot.errorbarLblSize) +
         scale_x_discrete(expand = c(0.01, 0.01)) +
-        scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
+        scale_y_continuous(expand = c(0.01, 0.01), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
@@ -824,8 +836,6 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
               plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
               axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
               axis.title.y = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              legend.position = "bottom",
-              legend.text = element_text(size = plot.legendSize),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
                                          hjust = plot.xhAlign, vjust = plot.xvAlign),
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
@@ -857,12 +867,6 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
       } else if (plot.yTickBold & !plot.yTickItalic){
         baseplt <- baseplt +
           theme(axis.text.y = element_text(face = "bold"))
-      }
-
-      if (plot.legendTtl == FALSE){
-        baseplt <- baseplt + theme(legend.title = element_blank())
-      } else {
-        baseplt <- baseplt + theme(legend.title = element_text(size = plot.legendTtlSize))
       }
 
       plt <- baseplt
@@ -913,9 +917,6 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
 #' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
 #' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
-#' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.legendTtl Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.
-#' @param plot.legendTtlSize Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @return Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
@@ -1120,6 +1121,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return Prints AUC values in the console. And a pdf file for ROC plot
@@ -1142,6 +1144,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
                                  plot.rightsideY = TRUE,
                                  plot.SymbolSize = 2, plot.display.Title = TRUE,
                                  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                 plot.legendSize = 9,
                                  plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
@@ -1213,7 +1216,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+              legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 

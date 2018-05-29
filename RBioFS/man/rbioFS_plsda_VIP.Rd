@@ -65,12 +65,6 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
 
 \item{plot.yTickBold}{Set y axis tick font to bold. Default is \code{FALSE}.}
 
-\item{plot.legendSize}{Legend size. Default is \code{9}.}
-
-\item{plot.legendTtl}{Hide/Display legend title. If \code{TRUE} or \code{T}, the name of the first column of the raw data file will display as the legend title. Default is \code{FALSE}.}
-
-\item{plot.legendTtlSize}{Set when \code{plot.legendTtl = TRUE}, font size of the legend title. Default is \code{9}.}
-
 \item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}

@@ -99,17 +99,15 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
   ## FS
   if (plot){
-#   if (initialFS_yTickLblSize == 0) cat("Due to initialFS_yTickLblSize = 0, y-axis ticks are hidden for the VI boxplot.\n")  # not ready
-
     cat(paste("Initial selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = TRUE, n = initialFS_n,
-                             Title = initialFS_Title,
-                             errorbar = initialFS_errorbar, errorbarWidth = initialFS_errorbarWidth,
-                             xLabel = initialFS_xLabel, yLabel = initialFS_yLabel,
-                             xTickLblSize = initialFS_xTickLblSize, yTickLblSize = initialFS_yTickLblSize,
-                             plotWidth = initialFS_plotWidth, plotHeight = initialFS_plotHeight) # initial FS
+                             plot.title = initialFS_Title,
+                             plot.errorbar = initialFS_errorbar, plot.errorbarWidth = initialFS_errorbarWidth,
+                             plot.xLabel = initialFS_xLabel, plot.yLabel = initialFS_yLabel,
+                             plot.xTickLblSize = initialFS_xTickLblSize, plot.yTickLblSize = initialFS_yTickLblSize,
+                             plot.Width = initialFS_plotWidth, plot.Height = initialFS_plotHeight) # initial FS
     cat(paste("Done!\n", sep = ""))  # final message
 
     cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
@@ -118,10 +116,10 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = TRUE,
                        n = SFS_n,
-                       Title = SFS_Title, xLabel = SFS_xLabel, yLabel = SFS_yLabel,
-                       errorbar = SFS_errorbar, errorbarWidth = SFS_errorbarWidth,
-                       symbolSize = SFS_symbolSize, xTickLblSize = SFS_xTickLblSize, yTickLblSize = SFS_yTickLblSize,
-                       plotWidth = SFS_plotWidth, plotHeight = SFS_plotHeight) # SFS
+                       plot.title = SFS_Title, plot.xLabel = SFS_xLabel, plot.yLabel = SFS_yLabel,
+                       plot.errorbar = SFS_errorbar, plot.errorbarWidth = SFS_errorbarWidth,
+                       plot.symbolSize = SFS_symbolSize, plot.xTickLblSize = SFS_xTickLblSize, plot.yTickLblSize = SFS_yTickLblSize,
+                       plot.Width = SFS_plotWidth, plot.Height = SFS_plotHeight) # SFS
     cat(paste("Done!\n", sep = ""))  # final message
 
 

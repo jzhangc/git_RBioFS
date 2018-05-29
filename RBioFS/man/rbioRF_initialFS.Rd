@@ -6,10 +6,7 @@
 \usage{
 rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
   nTree = 1001, mTry = max(floor(ncol(x)/3), 2), multicore = TRUE,
-  plot = TRUE, n = "all", Title = NULL,
-  xLabel = "Mean Decrease in Accuracy", yLabel = NULL, errorbar = "SEM",
-  errorbarWidth = 0.2, xTickLblSize = 10, yTickLblSize = 10,
-  plotWidth = 170, plotHeight = 150)
+  plot = TRUE, n = "all", ...)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
@@ -30,26 +27,10 @@ rbioRF_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 
 \item{n}{Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).}
 
-\item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
-
-\item{xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
-
-\item{yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
-
-\item{errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
-
-\item{errorbarWidth}{The width of the errorbar. Default is \code{0.2}.}
-
-\item{xTickLblSize}{Font size for the x-axis text. Default is \code{10}.}
-
-\item{yTickLblSize}{Font size for the y-axis text. Default is \code{10}.}
-
-\item{plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
-
-\item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
+\item{...}{Additional arguments passed to the plot function \code{\link{rbioRF_initialFS_plot}}.}
 }
 \value{
-Outputs a \code{list} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
 }
 \description{
 Recursive random froest variable importance (vi) and OOB error rate computation.

@@ -33,19 +33,13 @@ Change log
     (ICEBOX)
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
-        - RF-FS analysis plotting module separated from rbioFS() function as functions:
-          - rbioRF_initial_FS_plot() 
-          - rbioRF_SFS_plot()
-        
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_plot()
+          - rbioFS_plsda_predict(): use the plsda model to predict the class for unknown data
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.3):
           - rbioFS_splsda()
           - rbioFS_splsda_plot()
-        
-        - Updates to rbioFS():
-          - Plotting module separated from the functions
             
         - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
@@ -58,6 +52,18 @@ Change log
         - All shiny apps' interface updated with a new look
       
     (ADDED)
+        - Updates to RF-FS functions:
+          - Plotting module separated from the functions
+          - Boxplot for the initial_FS object now horizontal
+          - Plot file suffix for both VI boxplot and OOB plot now ".rffs.ifs.plot.pdf" and ".rffs.sfs.plot.pdf", respectively
+          - Classes "rf_ifs" and "rf_sfs" created for the output of rbioRF_initial_FS() and rbioRF_SFS(), respectively
+          - Display messages added for the functions
+          - plots title and axis title are in bold
+          
+        - RF-FS analysis plotting module separated from rbioFS() function as functions:
+          - rbioRF_initialFS_plot() 
+          - rbioRF_SFS_plot()
+          
         - Updates to PLS-DA functions (non-Shiny):
           - Smooth functionality added for rbioFS_plsda_roc_auc()
           - Legend position now customizable for multi-plot for the relevant functions
@@ -69,9 +75,6 @@ Change log
           - Plot theme adjusted for functions:
             - rbioFS_plsda_ncomp_select()
             - rbioFS_plsda_tuplot()
-        
-        - Updates to rbioFS():
-          - plots title and axis title are in bold
         
 
     0.5.1 (May.24.2018)

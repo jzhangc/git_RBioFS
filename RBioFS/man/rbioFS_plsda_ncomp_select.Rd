@@ -10,8 +10,8 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   plot.display.Title = TRUE, plot.SymbolSize = 2, plot.fontType = "sans",
-  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.Width = 170,
-  plot.Height = 150)
+  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -45,6 +45,8 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
+
+\item{plot.legendSize}{Legend size. Default is \code{9}.}
 
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
