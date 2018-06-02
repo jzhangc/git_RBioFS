@@ -9,8 +9,9 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
   plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
   plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
   plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
-  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
-  plot.legendSize = 9, plot.Width = 170, plot.Height = 150)
+  plot.fontType = "sans", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -33,15 +34,19 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
 
 \item{plot.mtx.stripLblSize}{The label font size for the correlation scoreplot matrix strips. Default is \code{10}.}
 
-\item{plot.xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
+\item{plot.xAngle}{The rotation angle (degrees) of the x-axis marks. Default is \code{0} - horizontal.}
 
-\item{plot.xhAlign}{The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{plot.xhAlign}{The horizontal alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{plot.xvAlign}{The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
+\item{plot.xvAlign}{The vertical alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
+\item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
+
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
+
+\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 

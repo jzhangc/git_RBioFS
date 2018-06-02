@@ -9,8 +9,9 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
   plot.rightsideY = TRUE, plot.sampleLabel.type = "none",
   plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
   plot.SymbolSize = 5, plot.Title = NULL, plot.fontType = "sans",
-  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.Width = 170, plot.Height = 150)
+  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.yLabelSize = 10,
+  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
+  plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -37,7 +38,11 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
+\item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
+
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
+
+\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 

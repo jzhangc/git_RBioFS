@@ -34,8 +34,7 @@ Change log
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
         - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_plot()
-          - rbioFS_plsda_predict(): use the plsda model to predict the class for unknown data
+          - rbioFS_plsda_loadingplot(): with y loading as well
             
         - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.3):
           - rbioFS_splsda()
@@ -47,11 +46,15 @@ Change log
           - PCA function rbioFS_PCA() updated with S3 method
         
         - Updates to PLS-DA functions (non-Shiny):
-          - rbioFS_plsda_scoreplot(): y score projection
+          - rbioFS_plsda_scoreplot(): sample labeling functionality added
+          - xLabelSize and yLabelSize added for the functions
             
         - All shiny apps' interface updated with a new look
       
     (ADDED)
+        - New PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_predict(): use the plsda model to predict the class for unknown data. The function also produces a classification plot
+          
         - Updates to RF-FS functions:
           - Plotting module separated from the functions
           - Boxplot for the initial_FS object now horizontal
@@ -75,6 +78,7 @@ Change log
           - Plot theme adjusted for functions:
             - rbioFS_plsda_ncomp_select()
             - rbioFS_plsda_tuplot()
+          - Output (to R environment) object name suffix adjusted for all the relevant functions with added "_plsda"
         
 
     0.5.1 (May.24.2018)

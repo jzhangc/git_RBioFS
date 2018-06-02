@@ -8,8 +8,11 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
   plot.smooth = FALSE, multi_plot.ncol = length(plot.comps),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   plot.rightsideY = TRUE, plot.SymbolSize = 2, plot.display.Title = TRUE,
-  plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
-  plot.legendSize = 9, plot.Width = 170, plot.Height = 150)
+  plot.titleSize = 10, plot.fontType = "sans",
+  plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
+  plot.xTickLblSize = 10, plot.yLabel = "sensitivity",
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -32,9 +35,19 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 
+\item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
+
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
+\item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.}
+
+\item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
+
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
+
+\item{plot.yLabel}{Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.}
+
+\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 

@@ -104,7 +104,9 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
@@ -126,7 +128,9 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
                                 plot.rightsideY = TRUE,
                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                                 plot.SymbolSize = 5, plot.Title = NULL,
-                                plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                plot.fontType = "sans",
+                                plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                plot.yLabelSize = 10, plot.yTickLblSize = 10,
                                 plot.legendSize = 9,
                                 plot.Width = 170, plot.Height = 150){
   ## check arguments
@@ -183,7 +187,8 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = plot.fontType),
+            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
             legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
             legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
@@ -197,7 +202,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
   names(plt_list) <- paste0("g", comps)
 
   if (length(comps) > 1) {
-    if (multi_plot.ncol * multi_plot.nrow != length(comps)){
+    if (multi_plot.ncol * multi_plot.nrow < length(comps)){
       stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the number of components used.")
     } else {
       plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
@@ -229,7 +234,11 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"R2 & Q2"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
@@ -251,7 +260,9 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
                               plot.display.Title = TRUE,
                               multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               plot.rightsideY = TRUE, plot.fontType = "sans",
-                              plot.SymbolSize = 2, plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                              plot.SymbolSize = 2,
+                              plot.xLabel = "Components", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                              plot.yLabel = "R2 & Q2", plot.yLabelSize = 10, plot.yTickLblSize = 10,
                               plot.legendSize = 9,
                               plot.Width = 170, plot.Height = 150){
   ## check arguments
@@ -299,12 +310,13 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
         scale_y_continuous() +
         ggtitle(ifelse(plot.display.Title, names(q2r2_dfm_list)[i], NULL)) +
         geom_vline(xintercept = q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1], linetype = "dashed", colour = "red") +
-        xlab("components") +
-        ylab("R2 & Q2") +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
               legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
               legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
@@ -318,7 +330,7 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
     names(plt_list) <- names(q2r2_dfm_list)
 
     if (length(names(q2r2_dfm_list)) > 1) {
-      if (multi_plot.ncol * multi_plot.nrow != length(q2r2_dfm_list)){
+      if (multi_plot.ncol * multi_plot.nrow < length(q2r2_dfm_list)){
         stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the number of response groups.")
       } else {
         plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
@@ -369,7 +381,11 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"RMSEP"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
@@ -396,7 +412,9 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
                                       multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                       plot.display.Title = TRUE,
                                       plot.SymbolSize = 2,
-                                      plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                      plot.fontType = "sans",
+                                      plot.xLabel = "Components", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                      plot.yLabel = "RMSEP", plot.ylabelSize = 10, plot.yTickLblSize = 10,
                                       plot.legendSize = 9,
                                       plot.Width = 170, plot.Height = 150){
   ## check arguments
@@ -470,12 +488,13 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
         geom_line(aes(linetype = variable)) +
         geom_point(aes(shape = variable), size = plot.SymbolSize) +
         ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
-        ylab("RMSEP") +
-        xlab("Components") +
+        xlab(plot.xLabel) +
+        ylab(plot.ylabel) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
               legend.position = "bottom", legend.key = element_blank(),
               legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
@@ -494,7 +513,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
     names(plt_list) <- paste0("g_", names(rmsep_dfm_list))
 
     if (length(rmsep_dfm_list) > 1) {
-      if (multi_plot.ncol * multi_plot.nrow != length(rmsep_dfm_list)){
+      if (multi_plot.ncol * multi_plot.nrow < length(rmsep_dfm_list)){
         stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the number of response groups.")
       } else {
         plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
@@ -510,7 +529,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
   }
 
   ## return RMSEP values
-  assign(paste(deparse(substitute(object)), "_rmsep_list", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsda_rmsep_list", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
 }
 
 
@@ -527,11 +546,13 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param plot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
 #' @param plot.mtx.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
 #' @param plot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
-#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
-#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
-#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xAngle The rotation angle (degrees) of the x-axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
@@ -554,7 +575,9 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
                                    plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
                                    plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
-                                   plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                   plot.fontType = "sans",
+                                   plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                   plot.yLabelSize = 10, plot.yTickLblSize = 10,
                                    plot.legendSize = 9,
                                    plot.Width = 170, plot.Height = 150){
   ## check variables
@@ -590,8 +613,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       theme_bw() +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = plot.fontType),
+            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
             legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
             legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
@@ -618,7 +641,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
             panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
             plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = plot.fontType),
+            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
             legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
             legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
@@ -676,7 +700,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     scoreplt <- scoreplt +
       ggtitle(plot.Title) +
       theme(plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-            axis.title = element_text(face = "bold", family = plot.fontType),
+            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
             strip.background = element_blank(),  # no strip background colour
             strip.text = element_text(face = "bold", size = plot.mtx.stripLblSize),
             panel.background = element_rect(fill = 'white', colour = 'black'),
@@ -713,20 +738,20 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
-#' @param plot.xLabelSize x axis label size. Default is \code{10}.
-#' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
-#' @param plot.xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
-#' @param plot.xTickBold Set x axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize Font size of x-axis ticks. Default is \code{10}.
+#' @param plot.xTickItalic Set x-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set x-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
 #' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
-#' @param plot.yLabel y axis label. Type with quotation marks. Could be NULL. Default is \code{"Coefficients"}.
-#' @param plot.yLabelSize y axis label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"Coefficients"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
-#' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
-#' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.yTickItalic Set y-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set y-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @return Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.
@@ -835,7 +860,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
               axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
                                          hjust = plot.xhAlign, vjust = plot.xvAlign),
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
@@ -886,7 +911,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
     }
   }
   cat(paste0("jackknife is built on ", ncomp, " components.\n"))
-  assign(paste(deparse(substitute(object)), "_jackknife_summary_list", sep = ""), plot_list, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsda_jackknife_summary_list", sep = ""), plot_list, envir = .GlobalEnv)
 }
 
 
@@ -903,30 +928,29 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
-#' @param plot.xLabelSize x axis label size. Default is \code{10}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
-#' @param plot.xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
-#' @param plot.xTickBold Set x axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xTickItalic Set X-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set X-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
 #' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
-#' @param plot.yLabel y axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.
-#' @param plot.yLabelSize y axis label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
-#' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
-#' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.yTickItalic Set Y-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set Y-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @return Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
 #' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
+#' @import ggplot2
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y
 #' @importFrom scales rescale_none
-#' @import pls
-#' @import ggplot2
 #' @examples
 #' \dontrun{
 #' rbioFS_plsda_VIP(object = new_model_optm,
@@ -947,12 +971,11 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
                     plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
                     plot.sig.line = TRUE,
                     plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
-                    plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
-                    plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                    plot.errorbarLblSize = 6, plot.fontType = "sans",
+                    plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
                     plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
                     plot.rightsideY = TRUE,
-                    plot.yLabel = "VIP",
-                    plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                    plot.yLabel = "VIP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
                     plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
                     plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
                     plot.Height = 150){
@@ -1101,7 +1124,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 
   # output
   out <- list(vip_summary = vip_list, features_above_alpha = ipf_list, vip_raw = vip_raw_list, ncomp = object$ncomp)
-  assign(paste(deparse(substitute(object)), "_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsda_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
 }
 
 
@@ -1113,13 +1136,18 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
@@ -1142,8 +1170,10 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
                                  plot.smooth = FALSE,
                                  multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                  plot.rightsideY = TRUE,
-                                 plot.SymbolSize = 2, plot.display.Title = TRUE,
-                                 plot.fontType = "sans", plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                                 plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                 plot.fontType = "sans",
+                                 plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                 plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
                                  plot.legendSize = 9,
                                  plot.Width = 170, plot.Height = 150){
   ## check arguments
@@ -1202,7 +1232,6 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
     var_percentage_x <- varpp_x[paste0("Comp ", plot.comps)] # extract the proportion of variance for the selected PCs
     comp_axis_lbl <- paste("comp ", plot.comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
 
-
     plt_list <- vector(mode = "list", length = length(plot.comps))
     plt_list[] <- foreach(k = 1:length(plot.comps)) %do% {
       plt <- ggplot(data = roc_dfm_list[[k]], aes(x = fpr, y = tpr, group = group, colour = group)) +
@@ -1210,12 +1239,13 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
         geom_point(aes(shape = group), size = plot.SymbolSize) +
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +
-        xlab("1 - specificity") +
-        ylab("sensitivity") +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
+              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
               legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
               legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
@@ -1228,8 +1258,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
     }
     names(plt_list) <- names(roc_dfm_list)[plot.comps]
     if (length(plot.comps) > 1) {
-      if (multi_plot.ncol * multi_plot.nrow != length(plot.comps)){
-        stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. make sure they match the length of plot.comps.")
+      if (multi_plot.ncol * multi_plot.nrow < length(plot.comps)){
+        stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the length of plot.comps.")
       } else {
         plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
       }
@@ -1242,5 +1272,184 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
     grid.draw(plt)
     cat("Done!\n")
   }
-  assign(paste(deparse(substitute(object)), "_roc_list", sep = ""), roc_dfm_list, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsda_roc_list", sep = ""), roc_dfm_list, envir = .GlobalEnv)
+}
+
+
+#' @title rbioFS_plsda_predict
+#'
+#' @description Prediction function for PLS-DA analysis. The function takes PLS-DA model to predict the known data classification.
+#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param comps  Number of PLS-DA components used in the model. Default is \code{object$ncomp}.
+#' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
+#' @param threshold  Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.
+#' @param classplot If to generate a classification plot. Default is \code{TRUE}.
+#' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
+#' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.unclassifiedColour Colour for the unclassified samples. Default is \code{"gray"}.
+#' @param plot.classifiedColour Colour for the classified samples. Default is \code{"red"}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Samples"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"Predicted values"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @return  A \code{list} obejct with classificaiton results, as well as pdf figure file if \code{classplot = TRUE}.
+#' @details Regarding \code{threshold},
+#' @import ggplot2
+#' @import pls
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @import pls
+#' @import ggplot2
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_predict(object = new_model_optm, newdata = newdata,
+#'                      plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+#'                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+#'                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+#'                      plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
+#'                      plot.xLabel = "Samples", plot.xLabelSize = 10, plot.xTickLblSize = 6, plot.xTickItalic = FALSE,
+#'                      plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+#'                      plot.yLabel = "Predicted values", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                      plot.legendSize = 9,
+#'                      plot.Width = 170, plot.Height = 150)
+#' }
+#' @export
+rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshold = 0.2,
+                                 classplot = TRUE,
+                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+                                 multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                 plot.rightsideY = TRUE,
+                                 plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                 plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
+                                 plot.xLabel = "Samples", plot.xLabelSize = 10, plot.xTickLblSize = 6, plot.xTickItalic = FALSE,
+                                 plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+                                 plot.yLabel = "Predicted values", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                 plot.legendSize = 9,
+                                 plot.Width = 170, plot.Height = 150){
+  ## argument check
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (!class(newdata) %in% "matrix") stop("newdata has to be a matrix object. \n")
+  if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object. \n")
+  if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {stop("plot.sampleLabel.vector has to be the same length as nrow(newdata). \n")}
+
+  ## prediction and class assign
+  rownames(newdata) <- 1:nrow(newdata)
+  pred <- predict(object = object, ncomp = comps, newdata = newdata, type = "response")
+
+  predlist <- vector(mode = "list", length = length(levels(object$inputY)))
+  predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+    if (is.null(plot.sampleLabel.vector)){
+      preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = as.character(rownames(newdata)), predicted.value = pred[, i,])
+    } else {
+      preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = plot.sampleLabel.vector, predicted.value = pred[, i,])
+    }
+    preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "unclassified")))
+    preddfm$classified <- ifelse(preddfm$classification == "unclassified", "Unclassified", "Classified")
+    preddfm$classified <- factor(preddfm$classified, levels = c("Classified", "Unclassified"))
+    return(preddfm)
+  }
+  names(predlist) <- levels(object$inputY)
+
+  ## plot
+  if (classplot){
+    if (plot.sampleLabel.type != "none"){  # message when no label vector is provided.
+      if (is.null(plot.sampleLabel.vector)){
+        cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
+      }
+    }
+
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.classification.pdf...", sep = ""))  # initial message
+    plt_list <- vector(mode = "list", length = length(levels(object$inputY)))
+    plt_list[] <- foreach(j = 1:length(levels(object$inputY))) %do% {
+      pltdfm <- predlist[[j]]
+      plt <- ggplot(data = pltdfm)  # base plot
+
+      if (plot.sampleLabel.type != "none"){  # labels
+        if (tolower(plot.sampleLabel.type) == "direct"){
+          plt <- plt + geom_text(aes(x = sample, y = predicted.value, label = sample.label, colour = classified), size = plot.SymbolSize)
+        } else if (tolower(plot.sampleLabel.type) == "indirect") {
+          plt <- plt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = classified)) +
+            geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "unclassified"), ], aes(x = sample, y = predicted.value, label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+        }
+      } else {
+        plt <- plt + geom_point(alpha = 0.4, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = classified))
+      }
+
+      if (length(unique(pltdfm$classified)) == 1){
+        if (unique(pltdfm$classified) == "Unclassified"){
+          plt <- plt +
+            scale_color_manual(values = plot.unclassifiedColour)
+        } else if (unique(pltdfm$classified) == "Classified"){
+          plt <- plt +
+            scale_color_manual(values = plot.classifiedColour)
+        }
+      } else {
+        plt <- plt +
+          scale_color_manual(values = c(plot.classifiedColour, plot.unclassifiedColour))
+      }
+
+      plt <- plt +
+        ggtitle(ifelse(plot.display.Title, levels(object$inputY)[j], NULL)) +
+#        scale_x_continuous(expand = c(0, 0)) +
+        scale_y_continuous(breaks = c(-threshold, 0, threshold, 1 - threshold, 1, 1 + threshold)) +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
+        geom_hline(yintercept = c(0, 1)) +
+        geom_hline(yintercept = c(-threshold, threshold, 1 - threshold, 1 + threshold), linetype = "dashed") +
+#        geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
+#        geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4) +  # colour between lines: higher
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                         hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+
+      if (plot.rightsideY & length(plt_list) == 1){
+        plt <- RBioplot::rightside_y(plt)
+      }
+
+      return(plt)
+    }
+    names(plt_list) <- levels(object$inputY)
+
+    if (length(levels(object$inputY)) > 1) {
+      if (multi_plot.ncol * multi_plot.nrow < length(levels(object$inputY))){
+        stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the number of y groups.")
+      } else {
+        plt <- RBioplot::multi_plot_shared_legend(plt_list, ncol = multi_plot.ncol, nrow = multi_plot.nrow, position = multi_plot.legend.pos)
+      }
+    }
+
+    # save
+    grid.newpage()
+    ggsave(filename = paste(deparse(substitute(object)),".plsda.classification.pdf", sep = ""), plot = plt,
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    grid.draw(plt)
+    cat("Done!\n")
+  }
+
+  ## export
+  assign(paste(deparse(substitute(object)), "_plsda_predct_list", sep = ""), predlist, envir = .GlobalEnv)
 }

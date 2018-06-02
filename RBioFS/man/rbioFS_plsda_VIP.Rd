@@ -37,15 +37,15 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
-\item{plot.xLabel}{x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.}
+\item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.}
 
-\item{plot.xLabelSize}{x axis label size. Default is \code{10}.}
+\item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
 
 \item{plot.xTickLblSize}{Font size of x axis ticks. Default is \code{10}.}
 
-\item{plot.xTickItalic}{Set x axis tick font to italic. Default is \code{FALSE}.}
+\item{plot.xTickItalic}{Set X-axis tick font to italic. Default is \code{FALSE}.}
 
-\item{plot.xTickBold}{Set x axis tick font to bold. Default is \code{FALSE}.}
+\item{plot.xTickBold}{Set X-axis tick font to bold. Default is \code{FALSE}.}
 
 \item{plot.xAngle}{The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.}
 
@@ -55,15 +55,15 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
 
 \item{plot.rightsideY}{If to display the right side y-axis. Default is \code{TRUE}.}
 
-\item{plot.yLabel}{y axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.}
+\item{plot.yLabel}{Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.}
 
-\item{plot.yLabelSize}{y axis label size. Default is \code{10}.}
+\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Font size of y axis ticks. Default is \code{10}.}
 
-\item{plot.yTickItalic}{Set y axis tick font to italic. Default is \code{FALSE}.}
+\item{plot.yTickItalic}{Set Y-axis tick font to italic. Default is \code{FALSE}.}
 
-\item{plot.yTickBold}{Set y axis tick font to bold. Default is \code{FALSE}.}
+\item{plot.yTickBold}{Set Y-axis tick font to bold. Default is \code{FALSE}.}
 
 \item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 

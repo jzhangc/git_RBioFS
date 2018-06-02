@@ -9,8 +9,10 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   plot.rightsideY = TRUE, plot.fontType = "sans", plot.SymbolSize = 2,
-  plot.xTickLblSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.Width = 170, plot.Height = 150)
+  plot.xLabel = "Components", plot.xLabelSize = 10,
+  plot.xTickLblSize = 10, plot.yLabel = "R2 & Q2", plot.yLabelSize = 10,
+  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
+  plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -33,7 +35,15 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
+\item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.}
+
+\item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
+
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
+
+\item{plot.yLabel}{Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"R2 & Q2"}.}
+
+\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
