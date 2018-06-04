@@ -44,16 +44,12 @@ Change log
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
           - PCA function rbioFS_PCA() updated with S3 method
-        
-        - Updates to PLS-DA functions (non-Shiny):
-          - rbioFS_plsda_scoreplot(): sample labeling functionality added
-          - xLabelSize and yLabelSize added for the functions
             
         - All shiny apps' interface updated with a new look
       
     (ADDED)
         - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_predict(): use the plsda model to predict the class for unknown data. The function also produces a classification plot
+          - rbioFS_plsda_predict(): use the plsda model to predict the class for unknown data. The function also produces a classification plot. Note: This function will be updated with Bayesian threoshold calculation.
           
         - Updates to RF-FS functions:
           - Plotting module separated from the functions
@@ -79,7 +75,9 @@ Change log
             - rbioFS_plsda_ncomp_select()
             - rbioFS_plsda_tuplot()
           - Output (to R environment) object name suffix adjusted for all the relevant functions with added "_plsda"
-        
+          - xLabelSize and yLabelSize added for the functions
+          - rbioFS_plsda_scoreplot(): sample labeling functionality added
+
 
     0.5.1 (May.24.2018)
         - New PLS-DA functions added (non-Shiny):

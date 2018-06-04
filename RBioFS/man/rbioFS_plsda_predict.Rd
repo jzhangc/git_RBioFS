@@ -86,7 +86,8 @@ A \code{list} obejct with classificaiton results, as well as pdf figure file if 
 Prediction function for PLS-DA analysis. The function takes PLS-DA model to predict the known data classification.
 }
 \details{
-Regarding \code{threshold},
+Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
+The threshold creates classification regions so that samples fall within can be considered classififed.
 }
 \examples{
 \dontrun{

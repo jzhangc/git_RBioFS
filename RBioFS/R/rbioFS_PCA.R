@@ -107,7 +107,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
   # prepare for scatter plot values (i.e. sample score)
   score_x <- data.frame(PCA$x[, biplot.comps, drop = FALSE], check.names = FALSE) # extract rotated sample scores
   score_x$group <- factor(input[, groupIDVar], levels = unique(input[, groupIDVar]))
-  score_x$samplelabel <- input[, sampleIDVar]
+  score_x$sample.label <- input[, sampleIDVar]
   var_percentage_x <- varpp_x[paste0("PC", biplot.comps)] # extract the proportion of variance for the selected PCs
   pc_axis_lbl <- paste("PC ", biplot.comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
 
@@ -131,11 +131,11 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       # sample labels
       if (biplot.sampleLabel.type == "direct"){
         biplt <- biplt +
-          geom_text(aes(colour = group, label = samplelabel), size = biplot.SymbolSize)
+          geom_text(aes(colour = group, label = sample.label), size = biplot.SymbolSize)
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
-          geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
@@ -166,11 +166,11 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       # sample labels
       if (biplot.sampleLabel.type == "direct"){
         biplt <- biplt +
-          geom_text(aes(colour = group, label = samplelabel), size = biplot.SymbolSize)
+          geom_text(aes(colour = group, label = sample.label), size = biplot.SymbolSize)
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
-          geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
@@ -227,10 +227,10 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
         g <- ggplot(data = data, mapping = mapping)
 
         if (label.method == "direct"){
-          g <- g + geom_text(aes(colour = group, label = samplelabel), ...)
+          g <- g + geom_text(aes(colour = group, label = sample.label), ...)
         } else if (label.method == "indirect"){
           g <- g +  geom_point(...) +
-            geom_text_repel(aes(label = samplelabel), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+            geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
         } else {
           g <- g + geom_point(...)
         }

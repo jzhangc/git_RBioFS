@@ -541,6 +541,9 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
+#' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.ellipse If to draw ellipses. Default is \code{FALSE}.
 #' @param plot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
@@ -571,6 +574,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.rightsideY = FALSE,
                                    plot.Title = NULL,
+                                   plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                                    plot.SymbolSize = 2,
                                    plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
                                    plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
@@ -590,24 +594,49 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
   } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from RBioFS_plsda() function.\n")
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.\n")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.\n")
+  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  if (tolower(plot.sampleLabel.type != "none")){
+    if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(object$inputX)) {
+      stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX). \n")}
+  }
 
   ## extract information
   score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
   score_x$group <- y
+  if (is.null(plot.sampleLabel.vector)){  # sample label
+    score_x$sample.label <- 1:nrow(object$inputX)
+  } else {
+    score_x$sample.label <- plot.sampleLabel.vector
+  }
   varpp_x <- 100 * object$Xvar / object$Xtotvar
   boxdfm_x <- data.frame(comp_x = as.numeric(gsub("Comp", "", names(varpp_x))), varpp_x = varpp_x)
   var_percentage_x <- varpp_x[paste0("Comp ", comps)] # extract the proportion of variance for the selected PCs
   comp_axis_lbl <- paste("comp ", comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
 
   ## scoreplot plotting
+  if (plot.sampleLabel.type != "none" & is.null(plot.sampleLabel.vector)){
+    cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
+  }
   if (length(comps) == 1){  # one component plot
     score_x$sample <- as.numeric(rownames(score_x))
     names(score_x)[1] <- "axis1"
 
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
     scoreplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
-      geom_line(aes(colour = group, linetype = group)) +
-      geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) + # plot the sample score scatter plot
+      geom_line(aes(colour = group, linetype = group))
+
+    if (plot.sampleLabel.type != "none"){  # labels
+      if (tolower(plot.sampleLabel.type) == "direct"){
+        scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
+      } else if (tolower(plot.sampleLabel.type) == "indirect") {
+        scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+      }
+    } else {
+      scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
+    }
+
+    scoreplt <- scoreplt +
       ggtitle(plot.Title) +
       ylab(comp_axis_lbl[1]) +
       theme_bw() +
@@ -632,8 +661,20 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     names(score_x)[1:2] <- c("axis1", "axis2")
 
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
-    scoreplt <- ggplot(score_x, aes(x = axis1, y = axis2)) +
-      geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) + # plot the sample score scatter plot
+    scoreplt <- ggplot(score_x, aes(x = axis1, y = axis2))
+
+    if (plot.sampleLabel.type != "none"){  # labels
+      if (tolower(plot.sampleLabel.type) == "direct"){
+        scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
+      } else if (tolower(plot.sampleLabel.type) == "indirect") {
+        scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+      }
+    } else {
+      scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
+    }
+
+    scoreplt <- scoreplt +
       ggtitle(plot.Title) +
       xlab(comp_axis_lbl[1]) +
       ylab(comp_axis_lbl[2]) +
@@ -665,28 +706,56 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     }
 
     # custom functions for the paired scoreplot
-    if (plot.ellipse){  # ellipse
-      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
-        ggplot(data = data, mapping = mapping) +
-          geom_point(...) +
+    ellipsefunc <- function(data = score_x, mapping, label.method = plot.sampleLabel.type,
+                            ellipse = plot.ellipse, ellipse_conf = plot.ellipse_conf,
+                            ...){
+      g <- ggplot(data = data, mapping = mapping)
+
+      if (label.method == "direct"){
+        g <- g + geom_text(aes(colour = group, label = sample.label), ...)
+      } else if (label.method == "indirect"){
+        g <- g +  geom_point(...) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+      } else {
+        g <- g + geom_point(...)
+      }
+      if (ellipse){
+        g <- g +
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
       }
-    } else {
-      ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
-        ggplot(data = data, mapping = mapping) +
-          geom_point(...)
-      }
+      return(g)
     }
-    if (plot.mtx.densityplot){  # diag densityplot
-      densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
-        ggplot(data = data, mapping = mapping) +
-          geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
+
+    densityfunc <- function(data = score_x, mapping, alpha = 0.1, densityplot = plot.mtx.densityplot, ...){
+      g <- ggplot(data = data, mapping = mapping)
+      if (densityplot){
+        g <- g + geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
       }
-    } else {
-      densityfunc <- function(data = score_x, mapping, alpha = 0.1){
-        ggplot(data = data, mapping = mapping)
-      }
+      return(g)
     }
+
+    # if (plot.ellipse){  # ellipse
+    #   ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
+    #     ggplot(data = data, mapping = mapping) +
+    #       geom_point(...) +
+    #       stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+    #   }
+    # } else {
+    #   ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
+    #     ggplot(data = data, mapping = mapping) +
+    #       geom_point(...)
+    #   }
+    # }
+    # if (plot.mtx.densityplot){  # diag densityplot
+    #   densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
+    #     ggplot(data = data, mapping = mapping) +
+    #       geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
+    #   }
+    # } else {
+    #   densityfunc <- function(data = score_x, mapping, alpha = 0.1){
+    #     ggplot(data = data, mapping = mapping)
+    #   }
+    # }
 
     # matrx scoreplot
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
@@ -1310,7 +1379,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return  A \code{list} obejct with classificaiton results, as well as pdf figure file if \code{classplot = TRUE}.
-#' @details Regarding \code{threshold},
+#' @details Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
+#' The threshold creates classification regions so that samples fall within can be considered classififed.
 #' @import ggplot2
 #' @import pls
 #' @importFrom grid grid.newpage grid.draw
@@ -1347,7 +1417,11 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
   if (!class(newdata) %in% "matrix") stop("newdata has to be a matrix object. \n")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object. \n")
-  if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {stop("plot.sampleLabel.vector has to be the same length as nrow(newdata). \n")}
+  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  if (tolower(plot.sampleLabel.type != "none")){
+    if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {
+      stop("plot.sampleLabel.vector has to be the same length as nrow(newdata). \n")}
+  }
 
   ## prediction and class assign
   rownames(newdata) <- 1:nrow(newdata)
@@ -1369,10 +1443,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 
   ## plot
   if (classplot){
-    if (plot.sampleLabel.type != "none"){  # message when no label vector is provided.
-      if (is.null(plot.sampleLabel.vector)){
-        cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
-      }
+    if (plot.sampleLabel.type != "none" & is.null(plot.sampleLabel.vector)){  # message when no label vector is provided.
+      cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
     }
 
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.classification.pdf...", sep = ""))  # initial message
@@ -1407,14 +1479,14 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 
       plt <- plt +
         ggtitle(ifelse(plot.display.Title, levels(object$inputY)[j], NULL)) +
-#        scale_x_continuous(expand = c(0, 0)) +
+#       scale_x_continuous(expand = c(0, 0)) +
         scale_y_continuous(breaks = c(-threshold, 0, threshold, 1 - threshold, 1, 1 + threshold)) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
         geom_hline(yintercept = c(0, 1)) +
         geom_hline(yintercept = c(-threshold, threshold, 1 - threshold, 1 + threshold), linetype = "dashed") +
-#        geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
-#        geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4) +  # colour between lines: higher
+#       geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
+#       geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4) +  # colour between lines: higher
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
