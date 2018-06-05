@@ -414,7 +414,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
                                       plot.SymbolSize = 2,
                                       plot.fontType = "sans",
                                       plot.xLabel = "Components", plot.xLabelSize = 10, plot.xTickLblSize = 10,
-                                      plot.yLabel = "RMSEP", plot.ylabelSize = 10, plot.yTickLblSize = 10,
+                                      plot.yLabel = "RMSEP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
                                       plot.legendSize = 9,
                                       plot.Width = 170, plot.Height = 150){
   ## check arguments
@@ -471,7 +471,6 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
         idx_adjcv <- which(pvals_cv > randomization.alpha)
         adjcv_x <- min(c(idx_adjcv, absBest_adjcv)) - 1
       }
-
     }
     c(cv_x, adjcv_x)
   }
@@ -489,7 +488,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
         geom_point(aes(shape = variable), size = plot.SymbolSize) +
         ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.ylabel) +
+        ylab(plot.yLabel) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
@@ -715,7 +714,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         g <- g + geom_text(aes(colour = group, label = sample.label), ...)
       } else if (label.method == "indirect"){
         g <- g +  geom_point(...) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
       } else {
         g <- g + geom_point(...)
       }
@@ -1347,12 +1346,12 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 
 #' @title rbioFS_plsda_predict
 #'
-#' @description Prediction function for PLS-DA analysis. The function takes PLS-DA model to predict the known data classification.
-#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @description Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.
+#' @param object A \code{rbiomvr} or \code{mvr} object.
 #' @param comps  Number of PLS-DA components used in the model. Default is \code{object$ncomp}.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param threshold  Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.
-#' @param classplot If to generate a classification plot. Default is \code{TRUE}.
+#' @param predplot If to generate a prediction value plot. Default is \code{TRUE}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
@@ -1378,9 +1377,9 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @return  A \code{list} obejct with classificaiton results, as well as pdf figure file if \code{classplot = TRUE}.
+#' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 #' @details Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
-#' The threshold creates classification regions so that samples fall within can be considered classififed.
+#' This is only for information sake. For classification, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
 #' @import ggplot2
 #' @import pls
 #' @importFrom grid grid.newpage grid.draw
@@ -1402,7 +1401,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' }
 #' @export
 rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshold = 0.2,
-                                 classplot = TRUE,
+                                 predplot = TRUE,
                                  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                                  multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                  plot.rightsideY = TRUE,
@@ -1426,14 +1425,15 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   ## prediction and class assign
   rownames(newdata) <- 1:nrow(newdata)
   pred <- predict(object = object, ncomp = comps, newdata = newdata, type = "response")
+  if (is.null(plot.sampleLabel.vector)){
+    sample.label = as.character(rownames(newdata))
+  } else {
+    sample.label = plot.sampleLabel.vector
+  }
 
   predlist <- vector(mode = "list", length = length(levels(object$inputY)))
   predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
-    if (is.null(plot.sampleLabel.vector)){
-      preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = as.character(rownames(newdata)), predicted.value = pred[, i,])
-    } else {
-      preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = plot.sampleLabel.vector, predicted.value = pred[, i,])
-    }
+    preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
     preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "unclassified")))
     preddfm$classified <- ifelse(preddfm$classification == "unclassified", "Unclassified", "Classified")
     preddfm$classified <- factor(preddfm$classified, levels = c("Classified", "Unclassified"))
@@ -1442,7 +1442,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   names(predlist) <- levels(object$inputY)
 
   ## plot
-  if (classplot){
+  if (predplot){
     if (plot.sampleLabel.type != "none" & is.null(plot.sampleLabel.vector)){  # message when no label vector is provided.
       cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
     }
@@ -1523,5 +1523,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   }
 
   ## export
-  assign(paste(deparse(substitute(object)), "_plsda_predct_list", sep = ""), predlist, envir = .GlobalEnv)
+  out <- pred[, ,1]
+  rownames(out) <- sample.label
+  class(out) <- "prediction"
+  assign(paste(deparse(substitute(object)), "_plsda_predct", sep = ""), out, envir = .GlobalEnv)
 }

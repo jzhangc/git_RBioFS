@@ -46,10 +46,14 @@ Change log
           - PCA function rbioFS_PCA() updated with S3 method
             
         - All shiny apps' interface updated with a new look
+        
+        - Updates to PLS-DA functions (non-Shiny):
+          - Multi-category Y modelling now possible with rbioFS_plsda
       
     (ADDED)
         - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_predict(): use the plsda model to predict the class for unknown data. The function also produces a classification plot. Note: This function will be updated with Bayesian threoshold calculation.
+          - rbioFS_plsda_predict(): use the plsda model to calcualte predicted values for unknown data.
+          - rbioFS_plsda_classification(): use the predicted values (produced by rbioFS_plsda_predict) to classify. Note: current probability method is "softmax". A "Bayesian" method will be added later. 
           
         - Updates to RF-FS functions:
           - Plotting module separated from the functions

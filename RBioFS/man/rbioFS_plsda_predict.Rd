@@ -5,7 +5,7 @@
 \title{rbioFS_plsda_predict}
 \usage{
 rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
-  classplot = TRUE, plot.sampleLabel.type = "none",
+  predplot = TRUE, plot.sampleLabel.type = "none",
   plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
   multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom", plot.rightsideY = TRUE,
@@ -19,7 +19,7 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
   plot.Height = 150)
 }
 \arguments{
-\item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{rbiomvr} or \code{mvr} object.}
 
 \item{comps}{Number of PLS-DA components used in the model. Default is \code{object$ncomp}.}
 
@@ -27,7 +27,7 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
 
 \item{threshold}{Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.}
 
-\item{classplot}{If to generate a classification plot. Default is \code{TRUE}.}
+\item{predplot}{If to generate a prediction value plot. Default is \code{TRUE}.}
 
 \item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
@@ -80,14 +80,14 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 }
 \value{
-A \code{list} obejct with classificaiton results, as well as pdf figure file if \code{classplot = TRUE}.
+A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 }
 \description{
-Prediction function for PLS-DA analysis. The function takes PLS-DA model to predict the known data classification.
+Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.
 }
 \details{
 Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
-The threshold creates classification regions so that samples fall within can be considered classififed.
+This is only for information sake. For classification, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
 }
 \examples{
 \dontrun{

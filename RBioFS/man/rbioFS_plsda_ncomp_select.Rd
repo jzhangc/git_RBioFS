@@ -11,7 +11,7 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   plot.display.Title = TRUE, plot.SymbolSize = 2, plot.fontType = "sans",
   plot.xLabel = "Components", plot.xLabelSize = 10,
-  plot.xTickLblSize = 10, plot.yLabel = "RMSEP", plot.ylabelSize = 10,
+  plot.xTickLblSize = 10, plot.yLabel = "RMSEP", plot.yLabelSize = 10,
   plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
   plot.Height = 150)
 }
@@ -52,6 +52,8 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 
 \item{plot.yLabel}{Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"RMSEP"}.}
 
+\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
+
 \item{plot.yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
 \item{plot.legendSize}{Legend size. Default is \code{9}.}
@@ -59,8 +61,6 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
-
-\item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 }
 \value{
 Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
