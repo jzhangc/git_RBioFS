@@ -1648,7 +1648,7 @@ rbioFS_plsda_classification <- function(pred.obj,
   }
 
   ## export
-  out <- list(classification.summary = pltdfm, classification.method = classification.method)
+  out <- list(classification.summary = pltdfm, probability.method = prob.method)
   class(out) <- "classification"
   assign(paste(deparse(substitute(pred.obj)), "_sample_classification", sep = ""), out, envir = .GlobalEnv)
 }
