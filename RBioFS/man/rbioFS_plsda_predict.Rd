@@ -6,7 +6,8 @@
 \usage{
 rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
   predplot = TRUE, plot.sampleLabel.type = "none",
-  plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+  plot.sampleLabel.vector = NULL, plot.sampleLabelSize = 2,
+  plot.sampleLabel.padding = 0.5,
   multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom", plot.rightsideY = TRUE,
   plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -33,13 +34,15 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
 
 \item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
+\item{plot.sampleLabelSize}{The size of the sample label. Default is \code{2}.}
+
 \item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{length(plot.comps)}.}
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
-\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 

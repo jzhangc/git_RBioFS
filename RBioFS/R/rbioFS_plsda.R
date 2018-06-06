@@ -96,10 +96,11 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param multi_plot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
 #' @param multi_plot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
-#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleLabelSize The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -126,7 +127,8 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @export
 rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                 plot.rightsideY = TRUE,
-                                plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+                                plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
+                                plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
                                 plot.SymbolSize = 5, plot.Title = NULL,
                                 plot.fontType = "sans",
                                 plot.xLabelSize = 10, plot.xTickLblSize = 10,
@@ -173,7 +175,8 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
           plt <- plt + geom_text(data = tu_dfm, aes(x = t, y = u, colour = y, label = samplelabel), size = plot.SymbolSize)
         } else if (tolower(plot.sampleLabel.type) == "indirect") {
           plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y)) +
-            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel), point.padding = unit(plot.sampleLabel.padding, "lines"))
+            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel),
+                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize)
         }
       }
     } else {
@@ -230,7 +233,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. unique y classes.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -377,7 +380,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
@@ -542,6 +545,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleLabelSize The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.ellipse If to draw ellipses. Default is \code{FALSE}.
@@ -573,7 +577,8 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.rightsideY = FALSE,
                                    plot.Title = NULL,
-                                   plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+                                   plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
+                                   plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
                                    plot.SymbolSize = 2,
                                    plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
                                    plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
@@ -629,7 +634,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
         scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                          size = plot.sampleLabelSize)
       }
     } else {
       scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
@@ -667,7 +673,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
         scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                          size = plot.sampleLabelSize)
       }
     } else {
       scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
@@ -714,7 +721,8 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         g <- g + geom_text(aes(colour = group, label = sample.label), ...)
       } else if (label.method == "indirect"){
         g <- g +  geom_point(...) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                          size = plot.sampleLabelSize)
       } else {
         g <- g + geom_point(...)
       }
@@ -732,29 +740,6 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       }
       return(g)
     }
-
-    # if (plot.ellipse){  # ellipse
-    #   ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
-    #     ggplot(data = data, mapping = mapping) +
-    #       geom_point(...) +
-    #       stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
-    #   }
-    # } else {
-    #   ellipsefunc <- function(data = score_x, mapping, ellipse_conf = plot.ellipse_conf, ...){
-    #     ggplot(data = data, mapping = mapping) +
-    #       geom_point(...)
-    #   }
-    # }
-    # if (plot.mtx.densityplot){  # diag densityplot
-    #   densityfunc <- function(data = score_x, mapping, alpha = 0.1, ...){
-    #     ggplot(data = data, mapping = mapping) +
-    #       geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
-    #   }
-    # } else {
-    #   densityfunc <- function(data = score_x, mapping, alpha = 0.1){
-    #     ggplot(data = data, mapping = mapping)
-    #   }
-    # }
 
     # matrx scoreplot
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
@@ -1207,7 +1192,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -1354,12 +1339,13 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param predplot If to generate a prediction value plot. Default is \code{TRUE}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleLabelSize The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.unclassifiedColour Colour for the unclassified samples. Default is \code{"gray"}.
@@ -1384,8 +1370,6 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @import pls
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
-#' @import pls
-#' @import ggplot2
 #' @examples
 #' \dontrun{
 #' rbioFS_plsda_predict(object = new_model_optm, newdata = newdata,
@@ -1402,7 +1386,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @export
 rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshold = 0.2,
                                  predplot = TRUE,
-                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
+                                 plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
                                  multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                  plot.rightsideY = TRUE,
                                  plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -1426,9 +1411,9 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   rownames(newdata) <- 1:nrow(newdata)
   pred <- predict(object = object, ncomp = comps, newdata = newdata, type = "response")
   if (is.null(plot.sampleLabel.vector)){
-    sample.label = as.character(rownames(newdata))
+    sample.label <- seq(nrow(newdata))
   } else {
-    sample.label = plot.sampleLabel.vector
+    sample.label <- plot.sampleLabel.vector
   }
 
   predlist <- vector(mode = "list", length = length(levels(object$inputY)))
@@ -1447,7 +1432,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
       cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
     }
 
-    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.classification.pdf...", sep = ""))  # initial message
+    cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.predict.pdf...", sep = ""))  # initial message
     plt_list <- vector(mode = "list", length = length(levels(object$inputY)))
     plt_list[] <- foreach(j = 1:length(levels(object$inputY))) %do% {
       pltdfm <- predlist[[j]]
@@ -1458,7 +1443,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
           plt <- plt + geom_text(aes(x = sample, y = predicted.value, label = sample.label, colour = classified), size = plot.SymbolSize)
         } else if (tolower(plot.sampleLabel.type) == "indirect") {
           plt <- plt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = classified)) +
-            geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "unclassified"), ], aes(x = sample, y = predicted.value, label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"))
+            geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "unclassified"), ], aes(x = sample, y = predicted.value, label = sample.label),
+                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize)
         }
       } else {
         plt <- plt + geom_point(alpha = 0.4, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = classified))
@@ -1516,7 +1502,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 
     # save
     grid.newpage()
-    ggsave(filename = paste(deparse(substitute(object)),".plsda.classification.pdf", sep = ""), plot = plt,
+    ggsave(filename = paste(deparse(substitute(object)),".plsda.predict.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)
     cat("Done!\n")
@@ -1524,7 +1510,146 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 
   ## export
   out <- pred[, ,1]
+  if (is.null(dim(out))) {  # if only one sample
+    out <- t(as.matrix(out))
+  }
   rownames(out) <- sample.label
   class(out) <- "prediction"
-  assign(paste(deparse(substitute(object)), "_plsda_predct", sep = ""), out, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
 }
+
+
+#' @title rbioFS_plsda_classification
+#'
+#' @description Classification function for PLS-DA analysis. The function calculates probability for each classification using the predicted value for the sample (i.e. test or unkown) data generated from \code{\link{rbioFS_plsda_predict}}.
+#' @param pred.object A \code{prediction} object, which can be obtained from funciton \code{\link{rbioFS_plsda_predict}}.
+#' @param prob.method The method used to calcuate classification probability. Options are "softmax" and "bayesian". Default is \code{"softmax"}.
+#' @param classplot If to generate a classification pie plot. Default is \code{TRUE}.
+#' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj)}.
+#' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
+#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
+#' @param plot.Title Plot title. Default is \code{FALSE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.probLabelSize The size of the sample label. Default is \code{2}.
+#' @param plot.probLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @return  A \code{classification} obejct with classification probability summary for each sample, as well as pdf figure file fif \code{classplot = TRUE}.
+#' @details The function operates in conjunction with the prediction function \code{\link{rbioFS_plsda_predict}}, to which the sample(s) of intestested is provided.
+#'
+#' Based on the calculation, sample(s) will be classfied to the class with the highest classification probability. The \code{"softmax"} method calculates the classification using the equation below:
+#' \code{probability = exp(predicted.value) / sum(exp(predicted.values))}
+#'
+#' The Bayesian method is currently under development, and will be implemented in the next update.
+#'
+#' @import ggplot2
+#' @importFrom grid grid.newpage grid.draw
+#' @examples
+#' \dontrun{
+#' ribioFS_plsda_classification(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
+#' }
+#' @export
+rbioFS_plsda_classification <- function(pred.obj,
+                                        prob.method = "softmax",
+                                        classplot = TRUE,
+                                        multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                        multi_plot.stripLblSize = 10,
+                                        plot.Title = NULL, plot.titleSize = 10,
+                                        plot.probLabelSize = 2, plot.probLabel.padding = 0,
+                                        plot.fontType = "sans",
+                                        plot.legendSize = 9,
+                                        plot.Width = 170, plot.Height = 150){
+  ## check arguments
+  if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioFS_plsda_predict() to generate one.\n")
+  if (!prob.method %in% c("softmax", "bayesian")) stop("Probability method should be either \"softmax\" or \"bayesian\".\n")
+
+  ## construct matrix and group vector
+  pred_mtx <- pred.obj
+  group <- colnames(pred_mtx)
+
+  ## calculate probability and plot
+  if (prob.method == "softmax"){
+    # calcuate probability
+    prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
+    rownames(prob_mtx) <- group
+
+    # constuct plot dataframe list
+    pltdfm <- foreach(i = 1:ncol(prob_mtx), .combine = "rbind") %do% {
+      prob_dfm <- data.frame(Sample = rep(rownames(pred_mtx)[i], times = length(group)),
+                             Class = group, Probability = prob_mtx[, i], stringsAsFactors = FALSE)
+      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+      return(prob_dfm)
+    }
+
+  } else {
+    return(cat("Bayesian method is under development. Stay tuned.\n"))
+    ## Bayesian method for threshold determination
+    # training_mtx <- as.matrix(object$centerX)
+    #
+    # trainingpred <- predict(object = object, ncomp = comps, newdata = training_mtx, type = "response")
+    #
+    # traininglist <- vector(mode = "list", length = length(levels(object$inputY)))
+    # traininglist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+    #   trainingdfm <- data.frame(sample = as.character(1:length(trainingpred[, i,])), predicted.value = trainingpred[, i,],
+    #                             groups = object$inputY)
+    #   trainingdfm$class <- ifelse(trainingdfm$groups %in% levels(object$inputY)[i], levels(object$inputY)[i], "rest")
+    #   return(trainingdfm)
+    # }
+    # names(traininglist) <- levels(object$inputY)
+    #
+    # thresholdlist <- vector(mode = "list", length = length(levels(object$inputY)))
+    # thresholdlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+    #
+    # }
+    # names(thresholdlist) <- levels(object$inputY)
+  }
+
+  ## plot
+  if (classplot){
+    if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj)){
+      stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the number of y groups.\n")
+    }
+    cat(paste("Plot being saved to file: ", deparse(substitute(pred.obj)),".plsda.classification.pdf...", sep = ""))  # initial message
+    plt <- ggplot(pltdfm, aes(x = "", y = Probability, fill = Class)) +
+      geom_col(width = 1, colour = "black", alpha = 0.8) +
+      geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
+                       show.legend = FALSE, size = plot.probLabelSize) +
+      ggtitle(plot.Title) +
+      xlab(NULL) +
+      ylab(NULL) +
+      facet_wrap(~Sample, nrow = multi_plot.nrow, ncol = multi_plot.ncol) +
+      theme(strip.background = element_rect(fill = NA, colour = "black"),  # no strip background colour
+            strip.text = element_text(face = "bold", size = multi_plot.stripLblSize),
+            panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+            axis.text.x = element_blank(),
+            legend.position = multi_plot.legend.pos, legend.title = element_blank(),
+            legend.text = element_text(size = plot.legendSize),
+            legend.key = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.ticks.y = element_blank())
+    plt <- plt + coord_polar("y")
+
+    # save
+    grid.newpage()
+    ggsave(filename = paste(deparse(substitute(pred.obj)),".plsda.classification.pdf", sep = ""), plot = plt,
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    grid.draw(plt)
+    cat("Done!\n")
+  }
+
+  ## export
+  out <- list(classification.summary = pltdfm, classification.method = classification.method)
+  class(out) <- "classification"
+  assign(paste(deparse(substitute(pred.obj)), "_sample_classification", sep = ""), out, envir = .GlobalEnv)
+}
+

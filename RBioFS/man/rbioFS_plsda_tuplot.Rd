@@ -7,11 +7,11 @@
 rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   plot.rightsideY = TRUE, plot.sampleLabel.type = "none",
-  plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
-  plot.SymbolSize = 5, plot.Title = NULL, plot.fontType = "sans",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150)
+  plot.sampleLabel.vector = NULL, plot.sampleLabelSize = 2,
+  plot.sampleLabel.padding = 0.5, plot.SymbolSize = 5, plot.Title = NULL,
+  plot.fontType = "sans", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -22,13 +22,15 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
 
 \item{multi_plot.nrow}{Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.}
 
-\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}}
 
 \item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
 \item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
+
+\item{plot.sampleLabelSize}{The size of the sample label. Default is \code{2}.}
 
 \item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 

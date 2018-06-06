@@ -7,8 +7,8 @@
 rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
   plot.rightsideY = FALSE, plot.Title = NULL,
   plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
-  plot.sampleLabel.padding = 0.5, plot.SymbolSize = 2,
-  plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
+  plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
+  plot.SymbolSize = 2, plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
   plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
   plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
   plot.fontType = "sans", plot.xLabelSize = 10, plot.xTickLblSize = 10,
@@ -29,6 +29,8 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
 \item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
 \item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
+
+\item{plot.sampleLabelSize}{The size of the sample label. Default is \code{2}.}
 
 \item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 

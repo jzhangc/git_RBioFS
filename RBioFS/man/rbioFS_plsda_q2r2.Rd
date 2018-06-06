@@ -27,7 +27,7 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
-\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 

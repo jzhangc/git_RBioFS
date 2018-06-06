@@ -27,7 +27,7 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
-\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 

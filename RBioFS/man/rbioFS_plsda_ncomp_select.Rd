@@ -36,7 +36,7 @@ rbioFS_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
-\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
+\item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 

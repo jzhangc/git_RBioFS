@@ -29,28 +29,7 @@ Installation
 
 Change log
 
-    0.5.2 (Feature preview)
-    (ICEBOX)
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods
-        
-        - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_loadingplot(): with y loading as well
-            
-        - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.3):
-          - rbioFS_splsda()
-          - rbioFS_splsda_plot()
-            
-        - Updates to rbioFS_PCA():
-          - 3D score plot option for rbioFS_PCA (non-shiny)
-          - 3D socre plot option for rbioFS_PCA_app (shiny)
-          - PCA function rbioFS_PCA() updated with S3 method
-            
-        - All shiny apps' interface updated with a new look
-        
-        - Updates to PLS-DA functions (non-Shiny):
-          - Multi-category Y modelling now possible with rbioFS_plsda
-      
-    (ADDED)
+    0.5.2 (Jun. 6. 2018)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_predict(): use the plsda model to calcualte predicted values for unknown data.
           - rbioFS_plsda_classification(): use the predicted values (produced by rbioFS_plsda_predict) to classify. Note: current probability method is "softmax". A "Bayesian" method will be added later. 
@@ -81,6 +60,8 @@ Change log
           - Output (to R environment) object name suffix adjusted for all the relevant functions with added "_plsda"
           - xLabelSize and yLabelSize added for the functions
           - rbioFS_plsda_scoreplot(): sample labeling functionality added
+          - Size option added for ggrepel label for the relavent functions
+
 
 
     0.5.1 (May.24.2018)
