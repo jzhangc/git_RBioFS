@@ -87,7 +87,6 @@ Change log
           - Size option added for ggrepel label for the relavent functions
 
 
-
     0.5.1 (May.24.2018)
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_VIP(): VIP, or variable importance in projection, is plsda's version of VI. Can be used independently from plsda functions
