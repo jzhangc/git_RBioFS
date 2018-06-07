@@ -100,7 +100,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param plot.sampleLabelSize The size of the sample label. Default is \code{2}.
+#' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -176,7 +176,8 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
         } else if (tolower(plot.sampleLabel.type) == "indirect") {
           plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y)) +
             geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel),
-                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize)
+                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize,
+                            show.legend = FALSE)
         }
       }
     } else {
@@ -545,7 +546,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param plot.sampleLabelSize The size of the sample label. Default is \code{2}.
+#' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.ellipse If to draw ellipses. Default is \code{FALSE}.
@@ -635,7 +636,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
         scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                          size = plot.sampleLabelSize)
+                          size = plot.sampleLabelSize, show.legend = FALSE)
       }
     } else {
       scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
@@ -674,7 +675,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
         scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                          size = plot.sampleLabelSize)
+                          size = plot.sampleLabelSize, show.legend = FALSE)
       }
     } else {
       scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
@@ -722,7 +723,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       } else if (label.method == "indirect"){
         g <- g +  geom_point(...) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                          size = plot.sampleLabelSize)
+                          size = plot.sampleLabelSize, show.legend = FALSE)
       } else {
         g <- g + geom_point(...)
       }
@@ -1339,7 +1340,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param predplot If to generate a prediction value plot. Default is \code{TRUE}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param plot.sampleLabelSize The size of the sample label. Default is \code{2}.
+#' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
@@ -1420,8 +1421,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
     preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
     preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "unclassified")))
-    preddfm$classified <- ifelse(preddfm$classification == "unclassified", "Unclassified", "Classified")
-    preddfm$classified <- factor(preddfm$classified, levels = c("Classified", "Unclassified"))
+    preddfm$`Within threshold` <- ifelse(preddfm$classification == "unclassified", "N", "Y")
+    preddfm$`Within threshold` <- factor(preddfm$classified, levels = c("Y", "N"))
     return(preddfm)
   }
   names(predlist) <- levels(object$inputY)
@@ -1440,21 +1441,21 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 
       if (plot.sampleLabel.type != "none"){  # labels
         if (tolower(plot.sampleLabel.type) == "direct"){
-          plt <- plt + geom_text(aes(x = sample, y = predicted.value, label = sample.label, colour = classified), size = plot.SymbolSize)
+          plt <- plt + geom_text(aes(x = sample, y = predicted.value, label = sample.label, colour = `Within threshold`), size = plot.SymbolSize)
         } else if (tolower(plot.sampleLabel.type) == "indirect") {
-          plt <- plt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = classified)) +
+          plt <- plt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = `Within threshold`)) +
             geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "unclassified"), ], aes(x = sample, y = predicted.value, label = sample.label),
-                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize)
+                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize, show.legend = FALSE)
         }
       } else {
-        plt <- plt + geom_point(alpha = 0.4, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = classified))
+        plt <- plt + geom_point(alpha = 0.4, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = `Within threshold`))
       }
 
-      if (length(unique(pltdfm$classified)) == 1){
-        if (unique(pltdfm$classified) == "Unclassified"){
+      if (length(unique(pltdfm$`Within threshold`)) == 1){
+        if (unique(pltdfm$within.threshold) == "Unclassified"){
           plt <- plt +
             scale_color_manual(values = plot.unclassifiedColour)
-        } else if (unique(pltdfm$classified) == "Classified"){
+        } else if (unique(pltdfm$`Within threshold`) == "Classified"){
           plt <- plt +
             scale_color_manual(values = plot.classifiedColour)
         }
@@ -1478,7 +1479,9 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
               plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
               axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
               axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+              legend.position = "bottom",
+#              legend.title = element_blank(),
+              legend.text = element_text(size = plot.legendSize),
               legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
                                          hjust = plot.xhAlign, vjust = plot.xvAlign),

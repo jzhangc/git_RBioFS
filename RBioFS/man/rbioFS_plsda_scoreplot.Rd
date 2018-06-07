@@ -30,7 +30,7 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
 
 \item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{plot.sampleLabelSize}{The size of the sample label. Default is \code{2}.}
+\item{plot.sampleLabelSize}{Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
 
 \item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 

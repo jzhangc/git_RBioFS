@@ -43,14 +43,31 @@ Change log
         - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
+          - Legend style adjusted for the sample labels
           - PCA function rbioFS_PCA() updated with S3 method
+        
+        - Updates to RF-FS functions:
+          - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
             
         - All shiny apps' interface updated with a new look
         
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
-          - Relavent functions now also output results tst file to the directory
           - Bayesian method added for function rbioFS_plsda_classification()
+          - Options to move probability labels out of the pies adeed for rbioFS_plsda_classification()
+          - Relevant functions now also output results tst file to the directory
+      
+      (ADDED)
+        - Updates to rbioFS_PCA():
+          - Legend style adjusted for the sample labels
+        
+        - Updates to RF-FS functions:
+          - For consistency, the dashed line indicators now in red in all the relevant functions
+
+        - Updates to PLS-DA functions (non-Shiny):
+          - rbioFS_plsda_predict(): the legend adjusted to "within threshold" and "outside of threshold"
+          - Legend style adjusted for the sample labels for the relevant functions
+
           
 
     0.5.2 (Jun. 6. 2018)
@@ -60,7 +77,7 @@ Change log
           
         - Updates to RF-FS functions:
           - Plotting module separated from the functions
-          - Boxplot for the initial_FS object now horizontal
+          - Boxplot for the rf_ifs object now horizontal
           - Plot file suffix for both VI boxplot and OOB plot now ".rffs.ifs.plot.pdf" and ".rffs.sfs.plot.pdf", respectively
           - Classes "rf_ifs" and "rf_sfs" created for the output of rbioRF_initial_FS() and rbioRF_SFS(), respectively
           - Display messages added for the functions
@@ -84,7 +101,7 @@ Change log
           - Output (to R environment) object name suffix adjusted for all the relevant functions with added "_plsda"
           - xLabelSize and yLabelSize added for the functions
           - rbioFS_plsda_scoreplot(): sample labeling functionality added
-          - Size option added for ggrepel label for the relavent functions
+          - Size option added for ggrepel label for the relevant functions
 
 
     0.5.1 (May.24.2018)

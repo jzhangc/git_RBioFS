@@ -15,6 +15,7 @@
 #' @param biplot.comps Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.
 #' @param biplot.Title The biplot title. Default is \code{NULL}.
 #' @param biplot.sampleLabel.type  If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param biplot.samopleLabelSize Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.
 #' @param biplot.sampleLabel.padding Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param biplot.SymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
 #' @param biplot.ellipse If to draw ellipses. Default is \code{FALSE}.
@@ -49,7 +50,8 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        boxplot.Width = 170, boxplot.Height = 150,
                        biplot = TRUE, biplot.comps = c(1:2),
                        biplot.Title = NULL,
-                       biplot.sampleLabel.type = "none", biplot.sampleLabel.padding = 0.5,
+                       biplot.sampleLabel.type = "none", biplot.sampleLabelSize = 2,
+                       biplot.sampleLabel.padding = 0.5,
                        biplot.SymbolSize = 2,
                        biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95,
                        biplot.xAngle = 0, biplot.xhAlign = 0.5, biplot.xvAlign = 0.5,
@@ -135,7 +137,8 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
+                          show.legend = FALSE, size = biplot.sampleLabelSize,)
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
@@ -170,7 +173,8 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
+                          show.legend = FALSE, size = biplot.sampleLabelSize)
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
@@ -230,7 +234,8 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
           g <- g + geom_text(aes(colour = group, label = sample.label), ...)
         } else if (label.method == "indirect"){
           g <- g +  geom_point(...) +
-            geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"))
+            geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
+                            show.legend = FALSE, size = biplot.sampleLabelSize)
         } else {
           g <- g + geom_point(...)
         }

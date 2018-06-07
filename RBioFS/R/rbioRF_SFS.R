@@ -104,7 +104,7 @@ rbioRF_SFS_plot <- function(object, n = "all",
     ggtitle(plot.title) +
     xlab(plot.xLabel) +
     ylab(plot.yLabel) +
-    geom_vline(xintercept = min(object$feature_subsets_with_min_OOBerror_plus_1SD), linetype = "dashed") +
+    geom_vline(xintercept = min(object$feature_subsets_with_min_OOBerror_plus_1SD), linetype = "dashed", colour = "red") +
     geom_hline(yintercept = 0) +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
