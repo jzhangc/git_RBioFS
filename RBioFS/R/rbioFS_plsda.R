@@ -1420,9 +1420,9 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   predlist <- vector(mode = "list", length = length(levels(object$inputY)))
   predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
     preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
-    preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "unclassified")))
-    preddfm$`Within threshold` <- ifelse(preddfm$classification == "unclassified", "N", "Y")
-    preddfm$`Within threshold` <- factor(preddfm$classified, levels = c("Y", "N"))
+    preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "undermined")))
+    preddfm$`Within threshold` <- ifelse(preddfm$classification == "undermined", "N", "Y")
+    preddfm$`Within threshold` <- factor(preddfm$`Within threshold`, levels = c("Y", "N"))
     return(preddfm)
   }
   names(predlist) <- levels(object$inputY)
@@ -1444,7 +1444,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
           plt <- plt + geom_text(aes(x = sample, y = predicted.value, label = sample.label, colour = `Within threshold`), size = plot.SymbolSize)
         } else if (tolower(plot.sampleLabel.type) == "indirect") {
           plt <- plt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = `Within threshold`)) +
-            geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "unclassified"), ], aes(x = sample, y = predicted.value, label = sample.label),
+            geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "undetermined"), ], aes(x = sample, y = predicted.value, label = sample.label),
                             point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize, show.legend = FALSE)
         }
       } else {
@@ -1452,10 +1452,10 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
       }
 
       if (length(unique(pltdfm$`Within threshold`)) == 1){
-        if (unique(pltdfm$within.threshold) == "Unclassified"){
+        if (unique(pltdfm$`Within threshold`) == "N"){
           plt <- plt +
             scale_color_manual(values = plot.unclassifiedColour)
-        } else if (unique(pltdfm$`Within threshold`) == "Classified"){
+        } else if (unique(pltdfm$`Within threshold`) == "Y"){
           plt <- plt +
             scale_color_manual(values = plot.classifiedColour)
         }

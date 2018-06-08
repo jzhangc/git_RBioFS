@@ -53,6 +53,7 @@ Change log
         
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
+          - Bayesian probability option added to rbioFS_plsda_predict, so that the prediction object will contain a "Bayes.prob" section
           - Bayesian method added for function rbioFS_plsda_classification()
           - Options to move probability labels out of the pies adeed for rbioFS_plsda_classification()
           - Relevant functions now also output results tst file to the directory
