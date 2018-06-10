@@ -70,6 +70,8 @@ Change log
           - Options to move probability labels out of the pies adedd for rbioFS_plsda_classplot()
           - rbioFS_plsda_predict(): the legend adjusted to "within threshold" and "outside of threshold"
           - Legend style adjusted for the sample labels for the relevant functions
+        
+        - Bug fixes
           
 
     0.5.2 (Jun. 6. 2018)
@@ -104,6 +106,8 @@ Change log
           - xLabelSize and yLabelSize added for the functions
           - rbioFS_plsda_scoreplot(): sample labeling functionality added
           - Size option added for ggrepel label for the relevant functions
+        
+        - Bug fixes
 
 
     0.5.1 (May.24.2018)
