@@ -1336,6 +1336,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param object A \code{rbiomvr} or \code{mvr} object.
 #' @param comps  Number of PLS-DA components used in the model. Default is \code{object$ncomp}.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
+#' @param prob.method Method to calculate classification probability. Options are \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"Bayes"}.
 #' @param threshold  Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.
 #' @param predplot If to generate a prediction value plot. Default is \code{TRUE}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
@@ -1366,14 +1367,25 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 #' @details Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
-#' This is only for information sake. For classification, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
+#' This is only for information sake.
+#'
+#' The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
+#' Specifically, the equation models classification against predicted values from pls-da model and training data: \code{P(class|predicted values) = P(predicted values|)P(class)/P(predicted values)}.
+#' The resulted Bayesian classification model is then applied to newdata, thereby prosterior probabilites are calcuated.
+#'
+#' The "softmax" method uses the equation: \code{probability = exp(predicted.value) / sum(exp(predicted.values))}. This method doesn't relay on training data.
+#'
+#' The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
+#'
+#' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
 #' @import ggplot2
 #' @import pls
+#' @importFrom klaR NaiveBayes
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_predict(object = new_model_optm, newdata = newdata,
+#' rbioFS_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
 #'                      plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
 #'                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
 #'                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -1385,7 +1397,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #'                      plot.Width = 170, plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshold = 0.2,
+rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.method = "Bayes",
+                                 threshold = 0.2,
                                  predplot = TRUE,
                                  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
                                  plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
@@ -1402,6 +1415,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
   if (!class(newdata) %in% "matrix") stop("newdata has to be a matrix object. \n")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object. \n")
+  if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".\n")
   if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
   if (tolower(plot.sampleLabel.type != "none")){
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {
@@ -1417,22 +1431,67 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
     sample.label <- plot.sampleLabel.vector
   }
 
-  predlist <- vector(mode = "list", length = length(levels(object$inputY)))
-  predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
-    preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
-    preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "undermined")))
-    preddfm$`Within threshold` <- ifelse(preddfm$classification == "undermined", "N", "Y")
-    preddfm$`Within threshold` <- factor(preddfm$`Within threshold`, levels = c("Y", "N"))
-    return(preddfm)
+  ## classification and probability calculation
+  pred_mtx <- pred[, ,1]
+  if (is.null(dim(pred_mtx))) {  # if only one sample
+    pred_mtx <- t(as.matrix(pred_mtx))
   }
-  names(predlist) <- levels(object$inputY)
+  rownames(pred_mtx) <- plot.sampleLabel.vector
+  if (prob.method == "Bayes"){ # Naive Bayes probability calculation and prediction for sample data
+    training_mtx <- as.matrix(object$centerX$centerX)
+    trainingpred <- predict(object = object, ncomp = comps, newdata = training_mtx, type = "response")
+    bayes.prob <- klaR::NaiveBayes(x = trainingpred,
+                                   grouping = object$inputY, usekernel = TRUE)
+    bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calcuate posterior probability for
+    bayes.prob$x <- NULL
 
-  ## plot
+    bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
+    prob <- bayespred$posterior
+
+    prob <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
+      prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
+                             Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE)
+      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+      return(prob_dfm)
+    }
+  } else {
+    group <- colnames(pred_mtx)
+    # calcuate probability
+    prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
+    rownames(prob_mtx) <- group
+
+    # constuct plot dataframe list
+    prob <- foreach(i = 1:ncol(prob_mtx), .combine = "rbind") %do% {
+      prob_dfm <- data.frame(Sample = rep(rownames(pred_mtx)[i], times = length(group)),
+                             Class = group, Probability = prob_mtx[, i], stringsAsFactors = FALSE)
+      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+      return(prob_dfm)
+    }
+  }
+
+  ## prediction plot
   if (predplot){
+    # prepare prediction value list
+    predlist <- vector(mode = "list", length = length(levels(object$inputY)))
+    predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+      preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
+      preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "undermined")))
+      preddfm$`Within threshold` <- ifelse(preddfm$classification == "undermined", "N", "Y")
+      preddfm$`Within threshold` <- factor(preddfm$`Within threshold`, levels = c("Y", "N"))
+      return(preddfm)
+    }
+    names(predlist) <- levels(object$inputY)
+
+    # plot
     if (plot.sampleLabel.type != "none" & is.null(plot.sampleLabel.vector)){  # message when no label vector is provided.
       cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
     }
-
     cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.predict.pdf...", sep = ""))  # initial message
     plt_list <- vector(mode = "list", length = length(levels(object$inputY)))
     plt_list[] <- foreach(j = 1:length(levels(object$inputY))) %do% {
@@ -1466,21 +1525,21 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 
       plt <- plt +
         ggtitle(ifelse(plot.display.Title, levels(object$inputY)[j], NULL)) +
-#       scale_x_continuous(expand = c(0, 0)) +
+        #       scale_x_continuous(expand = c(0, 0)) +
         scale_y_continuous(breaks = c(-threshold, 0, threshold, 1 - threshold, 1, 1 + threshold)) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
         geom_hline(yintercept = c(0, 1)) +
         geom_hline(yintercept = c(-threshold, threshold, 1 - threshold, 1 + threshold), linetype = "dashed") +
-#       geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
-#       geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4) +  # colour between lines: higher
+        #       geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
+        #       geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4) +  # colour between lines: higher
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
               axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
               axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
               legend.position = "bottom",
-#              legend.title = element_blank(),
+              #              legend.title = element_blank(),
               legend.text = element_text(size = plot.legendSize),
               legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
@@ -1512,22 +1571,16 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
   }
 
   ## export
-  out <- pred[, ,1]
-  if (is.null(dim(out))) {  # if only one sample
-    out <- t(as.matrix(out))
-  }
-  rownames(out) <- sample.label
+  out <- list(predicted.value = pred_mtx, probability.summary = prob, probability.method = prob.method)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
 }
 
 
-#' @title rbioFS_plsda_classification
+#' @title rbioFS_plsda_classplot
 #'
-#' @description Classification function for PLS-DA analysis. The function calculates probability for each classification using the predicted value for the sample (i.e. test or unkown) data generated from \code{\link{rbioFS_plsda_predict}}.
+#' @description Classification plot function for PLS-DA analysis. The function uses \code{prediction} object generated from \code{\link{rbioFS_plsda_predict}} to generate classification probablity pie charts.
 #' @param pred.object A \code{prediction} object, which can be obtained from funciton \code{\link{rbioFS_plsda_predict}}.
-#' @param prob.method The method used to calcuate classification probability. Options are "softmax" and "bayesian". Default is \code{"softmax"}.
-#' @param classplot If to generate a classification pie plot. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
@@ -1542,117 +1595,59 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, threshol
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @return  A \code{classification} obejct with classification probability summary for each sample, as well as pdf figure file fif \code{classplot = TRUE}.
 #' @details The function operates in conjunction with the prediction function \code{\link{rbioFS_plsda_predict}}, to which the sample(s) of intestested is provided.
-#'
-#' Based on the calculation, sample(s) will be classfied to the class with the highest classification probability. The \code{"softmax"} method calculates the classification using the equation below:
-#' \code{probability = exp(predicted.value) / sum(exp(predicted.values))}
-#'
-#' The Bayesian method is currently under development, and will be implemented in the next update.
-#'
 #' @import ggplot2
 #' @importFrom grid grid.newpage grid.draw
 #' @examples
 #' \dontrun{
-#' ribioFS_plsda_classification(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
+#' rbioFS_plsda_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
 #' }
 #' @export
-rbioFS_plsda_classification <- function(pred.obj,
-                                        prob.method = "softmax",
-                                        classplot = TRUE,
+rbioFS_plsda_classplot <- function(pred.obj,
                                         multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                         multi_plot.stripLblSize = 10,
                                         plot.Title = NULL, plot.titleSize = 10,
-                                        plot.probLabelSize = 2, plot.probLabel.padding = 0,
+                                        plot.probLabelSize = 5, plot.probLabel.padding = 0,
                                         plot.fontType = "sans",
                                         plot.legendSize = 9,
                                         plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioFS_plsda_predict() to generate one.\n")
-  if (!prob.method %in% c("softmax", "bayesian")) stop("Probability method should be either \"softmax\" or \"bayesian\".\n")
-
-  ## construct matrix and group vector
-  pred_mtx <- pred.obj
-  group <- colnames(pred_mtx)
-
-  ## calculate probability and plot
-  if (prob.method == "softmax"){
-    # calcuate probability
-    prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
-    rownames(prob_mtx) <- group
-
-    # constuct plot dataframe list
-    pltdfm <- foreach(i = 1:ncol(prob_mtx), .combine = "rbind") %do% {
-      prob_dfm <- data.frame(Sample = rep(rownames(pred_mtx)[i], times = length(group)),
-                             Class = group, Probability = prob_mtx[, i], stringsAsFactors = FALSE)
-      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
-      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
-      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
-      return(prob_dfm)
-    }
-
-  } else {
-    return(cat("Bayesian method is under development. Stay tuned.\n"))
-    ## Bayesian method for threshold determination
-    # training_mtx <- as.matrix(object$centerX)
-    #
-    # trainingpred <- predict(object = object, ncomp = comps, newdata = training_mtx, type = "response")
-    #
-    # traininglist <- vector(mode = "list", length = length(levels(object$inputY)))
-    # traininglist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
-    #   trainingdfm <- data.frame(sample = as.character(1:length(trainingpred[, i,])), predicted.value = trainingpred[, i,],
-    #                             groups = object$inputY)
-    #   trainingdfm$class <- ifelse(trainingdfm$groups %in% levels(object$inputY)[i], levels(object$inputY)[i], "rest")
-    #   return(trainingdfm)
-    # }
-    # names(traininglist) <- levels(object$inputY)
-    #
-    # thresholdlist <- vector(mode = "list", length = length(levels(object$inputY)))
-    # thresholdlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
-    #
-    # }
-    # names(thresholdlist) <- levels(object$inputY)
-  }
 
   ## plot
-  if (classplot){
-    if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj)){
-      stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the number of y groups.\n")
-    }
-    cat(paste("Plot being saved to file: ", deparse(substitute(pred.obj)),".plsda.classification.pdf...", sep = ""))  # initial message
-    plt <- ggplot(pltdfm, aes(x = "", y = Probability, fill = Class)) +
-      geom_col(width = 1, colour = "black", alpha = 0.8) +
-      geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
-                       show.legend = FALSE, size = plot.probLabelSize) +
-      ggtitle(plot.Title) +
-      xlab(NULL) +
-      ylab(NULL) +
-      facet_wrap(~Sample, nrow = multi_plot.nrow, ncol = multi_plot.ncol) +
-      theme(strip.background = element_rect(fill = NA, colour = "black"),  # no strip background colour
-            strip.text = element_text(face = "bold", size = multi_plot.stripLblSize),
-            panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-            axis.title.x = element_text(face = "bold", family = plot.fontType),
-            axis.title.y = element_text(face = "bold", family = plot.fontType),
-            axis.text.x = element_blank(),
-            legend.position = multi_plot.legend.pos, legend.title = element_blank(),
-            legend.text = element_text(size = plot.legendSize),
-            legend.key = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.ticks.y = element_blank())
-    plt <- plt + coord_polar("y")
-
-    # save
-    grid.newpage()
-    ggsave(filename = paste(deparse(substitute(pred.obj)),".plsda.classification.pdf", sep = ""), plot = plt,
-           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-    grid.draw(plt)
-    cat("Done!\n")
+  if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj$predicted.value)){
+    stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the number of y groups.\n")
   }
+  cat(paste("Plot being saved to file: ", deparse(substitute(pred.obj)),".plsda.classification.pdf...", sep = ""))  # initial message
+  plt <- ggplot(pred.obj$probability.summary, aes(x = "", y = Probability, fill = Class)) +
+    geom_col(width = 1, colour = "black", alpha = 0.8) +
+    geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
+                     show.legend = FALSE, size = plot.probLabelSize) +
+    ggtitle(plot.Title) +
+    xlab(NULL) +
+    ylab(NULL) +
+    facet_wrap(~Sample, nrow = multi_plot.nrow, ncol = multi_plot.ncol) +
+    theme(strip.background = element_rect(fill = NA, colour = "black"),  # no strip background colour
+          strip.text = element_text(face = "bold", size = multi_plot.stripLblSize),
+          panel.background = element_rect(fill = 'white', colour = 'black'),
+          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+          plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+          axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+          axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+          axis.text.x = element_blank(),
+          legend.position = multi_plot.legend.pos, legend.title = element_blank(),
+          legend.text = element_text(size = plot.legendSize),
+          legend.key = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_blank())
+  plt <- plt + coord_polar("y")
 
-  ## export
-  out <- list(classification.summary = pltdfm, probability.method = prob.method)
-  class(out) <- "classification"
-  assign(paste(deparse(substitute(pred.obj)), "_sample_classification", sep = ""), out, envir = .GlobalEnv)
+  # save
+  grid.newpage()
+  ggsave(filename = paste(deparse(substitute(pred.obj)),".plsda.classification.pdf", sep = ""), plot = plt,
+         width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+  grid.draw(plt)
+  cat("Done!\n")
+
+  invisible(plt)
 }
 

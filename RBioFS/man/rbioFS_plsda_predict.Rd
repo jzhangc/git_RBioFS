@@ -4,10 +4,10 @@
 \alias{rbioFS_plsda_predict}
 \title{rbioFS_plsda_predict}
 \usage{
-rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
-  predplot = TRUE, plot.sampleLabel.type = "none",
-  plot.sampleLabel.vector = NULL, plot.sampleLabelSize = 2,
-  plot.sampleLabel.padding = 0.5,
+rbioFS_plsda_predict(object, comps = object$ncomp, newdata,
+  prob.method = "Bayes", threshold = 0.2, predplot = TRUE,
+  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
+  plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
   multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom", plot.rightsideY = TRUE,
   plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -25,6 +25,8 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata, threshold = 0.2,
 \item{comps}{Number of PLS-DA components used in the model. Default is \code{object$ncomp}.}
 
 \item{newdata}{Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.}
+
+\item{prob.method}{Method to calculate classification probability. Options are \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"Bayes"}.}
 
 \item{threshold}{Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.}
 
@@ -90,11 +92,21 @@ Prediction function for PLS-DA analysis. The function calculates the predicted v
 }
 \details{
 Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
-This is only for information sake. For classification, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
+This is only for information sake.
+
+The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
+Specifically, the equation models classification against predicted values from pls-da model and training data: \code{P(class|predicted values) = P(predicted values|)P(class)/P(predicted values)}.
+The resulted Bayesian classification model is then applied to newdata, thereby prosterior probabilites are calcuated.
+
+The "softmax" method uses the equation: \code{probability = exp(predicted.value) / sum(exp(predicted.values))}. This method doesn't relay on training data.
+
+The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
+
+For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
 }
 \examples{
 \dontrun{
-rbioFS_plsda_predict(object = new_model_optm, newdata = newdata,
+rbioFS_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
                      plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
