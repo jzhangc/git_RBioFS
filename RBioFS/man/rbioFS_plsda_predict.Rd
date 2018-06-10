@@ -102,7 +102,7 @@ The "softmax" method uses the equation: \code{probability = exp(predicted.value)
 
 The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
 
-For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
+For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classplot()}}.
 }
 \examples{
 \dontrun{

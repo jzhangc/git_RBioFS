@@ -1378,7 +1378,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #'
 #' The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
 #'
-#' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
+#' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classplot()}}.
 #' @import ggplot2
 #' @import pls
 #' @import ggrepel
