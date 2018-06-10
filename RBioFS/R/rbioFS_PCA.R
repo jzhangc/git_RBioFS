@@ -36,6 +36,7 @@
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
 #' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2
+#' @import ggrepel
 #' @importFrom GGally ggpairs
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y
@@ -138,7 +139,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
-                          show.legend = FALSE, size = biplot.sampleLabelSize,)
+                          show.legend = FALSE, size = biplot.sampleLabelSize)
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)

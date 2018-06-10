@@ -567,6 +567,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @return Returns a pdf file for scoreplot.
 #' @details When \code{length(comps) == 1}, the function generates a scatter plot plotting sample vs score for the comp of interest. When \code{length(comps) == 2}, the function generates a scatter plot plotting the two comps of interest against each other. When \code{length(comps) > 2}, the function generates a multi-panel correlation scoreplot matrix for the comps of interest - might be slow if the there are many comps.
 #' @import ggplot2
+#' @import ggrepel
 #' @importFrom GGally ggpairs
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y
@@ -1380,6 +1381,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classification()}}.
 #' @import ggplot2
 #' @import pls
+#' @import ggrepel
 #' @importFrom klaR NaiveBayes
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
@@ -1588,6 +1590,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.probLabelSize The size of the sample label. Default is \code{2}.
 #' @param plot.probLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.probLabel.outside If to put the probability label outside of the pies. Default is \code{"TRUE"}.
+#' @param plot.probLabel.outside.nudge Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
@@ -1596,6 +1600,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
 #' @return  A \code{classification} obejct with classification probability summary for each sample, as well as pdf figure file fif \code{classplot = TRUE}.
 #' @details The function operates in conjunction with the prediction function \code{\link{rbioFS_plsda_predict}}, to which the sample(s) of intestested is provided.
 #' @import ggplot2
+#' @import ggrepel
 #' @importFrom grid grid.newpage grid.draw
 #' @examples
 #' \dontrun{
@@ -1603,13 +1608,14 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
 #' }
 #' @export
 rbioFS_plsda_classplot <- function(pred.obj,
-                                        multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-                                        multi_plot.stripLblSize = 10,
-                                        plot.Title = NULL, plot.titleSize = 10,
-                                        plot.probLabelSize = 5, plot.probLabel.padding = 0,
-                                        plot.fontType = "sans",
-                                        plot.legendSize = 9,
-                                        plot.Width = 170, plot.Height = 150){
+                                   multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                   multi_plot.stripLblSize = 10,
+                                   plot.Title = NULL, plot.titleSize = 10,
+                                   plot.probLabelSize = 5, plot.probLabel.padding = 0,
+                                   plot.probLabel.outside = FALSE, plot.probLabel.outside.nudge = 1.5,
+                                   plot.fontType = "sans",
+                                   plot.legendSize = 9,
+                                   plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioFS_plsda_predict() to generate one.\n")
 
@@ -1620,8 +1626,6 @@ rbioFS_plsda_classplot <- function(pred.obj,
   cat(paste("Plot being saved to file: ", deparse(substitute(pred.obj)),".plsda.classification.pdf...", sep = ""))  # initial message
   plt <- ggplot(pred.obj$probability.summary, aes(x = "", y = Probability, fill = Class)) +
     geom_col(width = 1, colour = "black", alpha = 0.8) +
-    geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
-                     show.legend = FALSE, size = plot.probLabelSize) +
     ggtitle(plot.Title) +
     xlab(NULL) +
     ylab(NULL) +
@@ -1639,6 +1643,17 @@ rbioFS_plsda_classplot <- function(pred.obj,
           legend.key = element_blank(),
           axis.ticks.x = element_blank(),
           axis.ticks.y = element_blank())
+
+  if (plot.probLabel.outside){
+    plt <- plt +
+      geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
+                       show.legend = FALSE, nudge_x = plot.probLabel.outside.nudge, size = plot.probLabelSize)
+  } else {
+    plt <- plt +
+      geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
+                       show.legend = FALSE, size = plot.probLabelSize)
+  }
+
   plt <- plt + coord_polar("y")
 
   # save

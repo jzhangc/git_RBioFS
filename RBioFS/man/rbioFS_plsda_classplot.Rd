@@ -8,6 +8,7 @@ rbioFS_plsda_classplot(pred.obj, multi_plot.ncol = nrow(pred.obj),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   multi_plot.stripLblSize = 10, plot.Title = NULL, plot.titleSize = 10,
   plot.probLabelSize = 5, plot.probLabel.padding = 0,
+  plot.probLabel.outside = FALSE, plot.probLabel.outside.nudge = 1.5,
   plot.fontType = "sans", plot.legendSize = 9, plot.Width = 170,
   plot.Height = 150)
 }
@@ -25,6 +26,10 @@ rbioFS_plsda_classplot(pred.obj, multi_plot.ncol = nrow(pred.obj),
 \item{plot.probLabelSize}{The size of the sample label. Default is \code{2}.}
 
 \item{plot.probLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
+
+\item{plot.probLabel.outside}{If to put the probability label outside of the pies. Default is \code{"TRUE"}.}
+
+\item{plot.probLabel.outside.nudge}{Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.}
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
