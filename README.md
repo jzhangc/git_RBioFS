@@ -30,7 +30,6 @@ Installation
 Change log
 
     0.5.3 (June.10.2018)
-      (ADDED)
         - Updates to rbioFS_PCA():
           - Legend style adjusted for the sample labels
         
