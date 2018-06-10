@@ -1439,6 +1439,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
     pred_mtx <- t(as.matrix(pred_mtx))
   }
   rownames(pred_mtx) <- plot.sampleLabel.vector
+
+  cat(paste("Classification probability calculation using ", prob.method, " method...", sep = ""))  # initial message
   if (prob.method == "Bayes"){ # Naive Bayes probability calculation and prediction for sample data
     training_mtx <- as.matrix(object$centerX$centerX)
     trainingpred <- predict(object = object, ncomp = comps, newdata = training_mtx, type = "response")
@@ -1476,6 +1478,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
       return(prob_dfm)
     }
   }
+  cat(paste("Done!\n", sep = ""))  # initial message
 
   ## prediction plot
   if (predplot){
@@ -1483,8 +1486,8 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
     predlist <- vector(mode = "list", length = length(levels(object$inputY)))
     predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
       preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
-      preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "undermined")))
-      preddfm$`Within threshold` <- ifelse(preddfm$classification == "undermined", "N", "Y")
+      preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "undetermined")))
+      preddfm$`Within threshold` <- ifelse(preddfm$classification == "undetermined", "N", "Y")
       preddfm$`Within threshold` <- factor(preddfm$`Within threshold`, levels = c("Y", "N"))
       return(preddfm)
     }
