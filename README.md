@@ -29,16 +29,34 @@ Installation
 
 Change log
 
+    0.6.0 (Blueprint feature preview)
+        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
+          - rbioFS_rf_class()
+          - rbioFS_rf_class_plot()
+        
+        - SVM functions added (non-Shiny) (tentative):
+          - rbioFS_svm()
+          - rbioFS_svm_plot()
+          
+        - ANN (artificial neural network) functions added (non-Shiny) (tentative):
+          - rbioFS_ann()
+          - rbioFS_ann_plot()
+          
+        - sPLS-DA functions added (non-Shiny) (tentative):
+          - rbioFS_splsda()
+          - rbioFS_splsda_plot()
+        
+        - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
+          - rbioFS_knn()
+          - rbioFS_knn_plot()
+
+
     0.5.4 (Feature preview)
         (ICEBOX)
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
-            
-        - sPLS-DA functions added (non-Shiny) (tentative, may implement in 0.5.5):
-          - rbioFS_splsda()
-          - rbioFS_splsda_plot()
             
         - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
@@ -111,7 +129,7 @@ Change log
         - Bug fixes
 
 
-    0.5.1 (May.24.2018)
+    0.5.1
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_VIP(): VIP, or variable importance in projection, is plsda's version of VI. Can be used independently from plsda functions
           - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
