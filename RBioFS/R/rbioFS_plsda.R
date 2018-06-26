@@ -1000,7 +1000,9 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @return Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
-#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}. For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust. The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
+#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}.
+#'          For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust.
+#'          The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
 #' @import ggplot2
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
@@ -1048,7 +1050,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
     ylod <- object$Yloadings[i, ] # one y variable at a time
     ss <- c(ylod)^2 * colSums(score^2)
     ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
-    vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))
+    vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))  # cumsum: cucmulative sum
     return(vip)
   }
   names(vip_raw_list) <- dimnames(object$Yloadings)[[1]]
