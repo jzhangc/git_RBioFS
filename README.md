@@ -33,10 +33,6 @@ Change log
         - RF-class (random forest classification) functions added (non-Shiny) (tentative):
           - rbioFS_rf_class()
           - rbioFS_rf_class_plot()
-        
-        - SVM functions added (non-Shiny) (tentative):
-          - rbioFS_svm()
-          - rbioFS_svm_plot()
           
         - ANN (artificial neural network) functions added (non-Shiny) (tentative):
           - rbioFS_ann()
@@ -53,11 +49,19 @@ Change log
 
     0.5.4 (Feature preview)
         (ICEBOX)
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods
+        - SVM functions added (non-Shiny) (tentative):
+          - rbioFS_svm()
+          - rbioFS_svm_plot()
+          - rbioFS_svm_boot()
+          - rbioFS_svm_perm()
+          - rbioFS_svm_roc_auc()
         
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
-            
+          - rbioFS_plsda_perm(): permutation test for plsda models, used in rbioFS_plsda()
+        
+        - ROC-AUC now a seperate function that can be used for other classification/FS methods
+        
         - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
@@ -72,6 +76,10 @@ Change log
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
           - Relevant functions now also output results tst file to the directory
+          - rbioFS_plsda() now has a permutation test module built in, with new arugments "perm.test" and "nperm". With perm.test = TRUE, the results will have a p-value indicating the model significance. 
+          
+        (ADDED)
+        - Bug fixes
           
 
     0.5.3 (June.10.2018)

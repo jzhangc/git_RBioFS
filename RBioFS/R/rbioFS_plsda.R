@@ -1045,6 +1045,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
   lodw <- object$loading.weights
   Wnorm2 <- colSums(lodw^2)
 
+  # vip_raw_list contains VIP for all the components
   vip_raw_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
   vip_raw_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
     ylod <- object$Yloadings[i, ] # one y variable at a time
@@ -1429,7 +1430,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
   ## prediction and class assign
   rownames(newdata) <- 1:nrow(newdata)
   pred <- predict(object = object, ncomp = comps, newdata = newdata, type = "response")
-  if (is.null(plot.sampleLabel.vector)){
+  if (is.null(plot.sampleLabel.vector) | missing(plot.sampleLabel.vector)){
     sample.label <- seq(nrow(newdata))
   } else {
     sample.label <- plot.sampleLabel.vector
@@ -1440,7 +1441,9 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
   if (is.null(dim(pred_mtx))) {  # if only one sample
     pred_mtx <- t(as.matrix(pred_mtx))
   }
-  rownames(pred_mtx) <- plot.sampleLabel.vector
+  if (!missing(plot.sampleLabel.vector) & !is.null(plot.sampleLabel.vector)){
+    rownames(pred_mtx) <- plot.sampleLabel.vector
+  }
 
   cat(paste("Classification probability calculation using ", prob.method, " method...", sep = ""))  # initial message
   if (prob.method == "Bayes"){ # Naive Bayes probability calculation and prediction for sample data
