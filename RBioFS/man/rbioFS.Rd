@@ -16,7 +16,7 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
   SFS_Title = NULL, SFS_xLabel = NULL, SFS_yLabel = NULL,
   SFS_errorbar = "SEM", SFS_errorbarWidth = 0.2, SFS_symbolSize = 2,
   SFS_xTickLblSize = 10, SFS_yTickLblSize = 10, SFS_plotWidth = 170,
-  SFS_plotHeight = 150)
+  SFS_plotHeight = 150, verbose = TRUE)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"data"}}
@@ -88,6 +88,8 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
 \item{SFS_plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 
 \item{SFS_plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.

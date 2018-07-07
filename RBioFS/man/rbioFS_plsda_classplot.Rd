@@ -10,7 +10,7 @@ rbioFS_plsda_classplot(pred.obj, multi_plot.ncol = nrow(pred.obj),
   plot.probLabelSize = 5, plot.probLabel.padding = 0,
   plot.probLabel.outside = FALSE, plot.probLabel.outside.nudge = 1.5,
   plot.fontType = "sans", plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150)
+  plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{nrow(pred.obj)}.}
@@ -38,6 +38,8 @@ rbioFS_plsda_classplot(pred.obj, multi_plot.ncol = nrow(pred.obj),
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 
 \item{pred.object}{A \code{prediction} object, which can be obtained from funciton \code{\link{rbioFS_plsda_predict}}.}
 

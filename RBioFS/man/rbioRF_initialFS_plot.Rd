@@ -13,7 +13,8 @@ rbioRF_initialFS_plot(object, n = "all",
   plot.xTickItalic = FALSE, plot.xTickBold = FALSE,
   plot.rightsideY = TRUE, plot.yLabel = "Mean Decrease in Accuracy",
   plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
-  plot.yTickBold = FALSE, plot.Width = 170, plot.Height = 150)
+  plot.yTickBold = FALSE, plot.Width = 170, plot.Height = 150,
+  verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rf_ifs} object. Make sure the object is generated with a \code{validation} section.}
@@ -65,6 +66,8 @@ rbioRF_initialFS_plot(object, n = "all",
 \item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 The function also generates the pdf VI boxplot figure files to the working directory.

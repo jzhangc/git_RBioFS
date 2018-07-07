@@ -12,7 +12,7 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
   plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
   plot.xTickLblSize = 10, plot.yLabel = "sensitivity",
   plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.Width = 170, plot.Height = 150)
+  plot.Width = 170, plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -56,6 +56,8 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 Prints AUC values in the console. And a pdf file for ROC plot

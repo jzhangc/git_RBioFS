@@ -15,7 +15,7 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   biplot.loadingplot.textsize = 3, biplot.mtx.densityplot = FALSE,
   biplot.mtx.stripLblSize = 10, biplot.Width = 170, biplot.Height = 150,
   rightsideY = FALSE, fontType = "sans", xTickLblSize = 10,
-  yTickLblSize = 10)
+  yTickLblSize = 10, verbose = TRUE)
 }
 \arguments{
 \item{input}{Input data, data frame.}
@@ -79,6 +79,8 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 \item{xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
 \item{yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 
 \item{biplot.samopleLabelSize}{Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.}
 }

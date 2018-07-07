@@ -79,6 +79,11 @@ Change log
           - rbioFS_plsda() now has a permutation test module built in, with new arugments "perm.test" and "nperm". With perm.test = TRUE, the results will have a p-value indicating the model significance. 
           
         (ADDED)
+        - New PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_perm(): permutation test for plsda models, used in rbioFS_plsda()
+          
+        - verbose argument added for all the relavent functions so that user can silence the messages
+          
         - Bug fixes
           
 

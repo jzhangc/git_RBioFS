@@ -12,7 +12,7 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
   plot.xLabel = "Components", plot.xLabelSize = 10,
   plot.xTickLblSize = 10, plot.yLabel = "R2 & Q2", plot.yLabelSize = 10,
   plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150)
+  plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -52,6 +52,8 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.

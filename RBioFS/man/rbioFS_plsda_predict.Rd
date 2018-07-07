@@ -17,7 +17,7 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata,
   plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
   plot.yLabel = "Predicted values", plot.yLabelSize = 10,
   plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150)
+  plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object.}
@@ -83,6 +83,8 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata,
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.

@@ -14,7 +14,7 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
   plot.yLabel = "VIP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
   plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
   plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
-  plot.Height = 150)
+  plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -68,6 +68,8 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
 \item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.

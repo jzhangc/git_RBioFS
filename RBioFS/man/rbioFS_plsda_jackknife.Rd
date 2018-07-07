@@ -13,7 +13,8 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
   plot.xTickBold = FALSE, plot.xAngle = 0, plot.xhAlign = 0.5,
   plot.xvAlign = 0.5, plot.rightsideY = TRUE, plot.yLabel = NULL,
   plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
-  plot.yTickBold = FALSE, plot.Width = 170, plot.Height = 150)
+  plot.yTickBold = FALSE, plot.Width = 170, plot.Height = 150,
+  verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -69,6 +70,8 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
 \item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.

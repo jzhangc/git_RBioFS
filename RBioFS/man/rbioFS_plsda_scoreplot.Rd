@@ -13,7 +13,7 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
   plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
   plot.fontType = "sans", plot.xLabelSize = 10, plot.xTickLblSize = 10,
   plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.Width = 170, plot.Height = 150)
+  plot.Width = 170, plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -65,6 +65,8 @@ rbioFS_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
 \item{plot.Width}{Scoreplot width. Default is \code{170}.}
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
 }
 \value{
 Returns a pdf file for scoreplot.
