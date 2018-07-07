@@ -30,6 +30,13 @@ Installation
 Change log
 
     0.6.0 (Blueprint feature preview)
+        - SVM functions added (non-Shiny) (tentative):
+          - rbioFS_svm()
+          - rbioFS_svm_plot()
+          - rbioFS_svm_boot()
+          - rbioFS_svm_perm()
+          - rbioFS_svm_roc_auc()
+          
         - RF-class (random forest classification) functions added (non-Shiny) (tentative):
           - rbioFS_rf_class()
           - rbioFS_rf_class_plot()
@@ -49,17 +56,9 @@ Change log
 
     0.5.4 (Feature preview)
         (ICEBOX)
-        - SVM functions added (non-Shiny) (tentative):
-          - rbioFS_svm()
-          - rbioFS_svm_plot()
-          - rbioFS_svm_boot()
-          - rbioFS_svm_perm()
-          - rbioFS_svm_roc_auc()
-        
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
-          - rbioFS_plsda_perm(): permutation test for plsda models, used in rbioFS_plsda()
-        
+
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
         - Updates to rbioFS_PCA():
