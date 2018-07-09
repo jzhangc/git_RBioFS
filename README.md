@@ -79,7 +79,7 @@ Change log
           
         (ADDED)
         - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_perm(): permutation test for plsda models, used in rbioFS_plsda()
+          - rbioFS_plsda_perm(): permutation test for plsda models, with two permutation methods. 
           
         - verbose argument added for all the relavent functions so that user can silence the messages
           

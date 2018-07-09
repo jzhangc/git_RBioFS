@@ -4,33 +4,45 @@
 \alias{rbioFS_plsda_perm}
 \title{rbioFS_plsda_perm()}
 \usage{
-rbioFS_plsda_perm(object, nperm = 999, ncomp = object$ncomp,
-  adjCV = FALSE, parallelComputing = TRUE, clusterType = "PSOCK",
-  verbose = TRUE)
+rbioFS_plsda_perm(object, ncomp = object$ncomp, adjCV = FALSE,
+  perm.method = "by_y", nperm = 999, parallelComputing = TRUE,
+  clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
 
+\item{ncomp}{Model complexity, i.e. number of components to model. Default is \code{object$ncomp}, i.e. maximum complexity.}
+
+\item{adjCV}{If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.}
+
+\item{perm.method}{Permutation method. Options are \code{"by_y"} and \code{"by_feature_per_y"}. Default is \code{"by_y"}. See details below.}
+
 \item{nperm}{Number of permutations to run. Default is \code{999}.}
-
-\item{ncomp}{tbc}
-
-\item{adjCV}{tbc}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will notaffect error or warning messeages.}
 }
 \value{
-tbc
+The function returns \code{CSV} files for all intermediate permuatation RMSEP values as well as the p-value resutls. The final results are also exported to the environment.
 }
 \description{
 Permutation test for PLS-DA models.
 }
 \details{
-tbc
+The function uses RMSEP as the stats for comparing original model with permutatsions.
+
+Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioFS_plsda}} and \code{\link{rbioFS_plsda_ncomp_select}}.
+
+Data for permutation are object$centerX$centerX, meaning center-scaled X are used in applicable.
+
+Permutation methods are according to:
+
+Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance. J Mach Learn Res. 11: 1833 - 63.
+
+For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. For \code{perm.method = "by_feature_per_by"}, X are first subset by label (y) before permutating data for each feature.
 }
 \examples{
 \dontrun{

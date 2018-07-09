@@ -36,7 +36,7 @@
 #' @param SFS_yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param SFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param SFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
 #' @return Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
 #' @details Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @examples

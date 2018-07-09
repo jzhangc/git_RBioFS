@@ -53,7 +53,7 @@ rbioFS_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
 Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.

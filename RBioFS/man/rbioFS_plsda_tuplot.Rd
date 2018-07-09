@@ -54,7 +54,7 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
 Returns a pdf file for scoreplot.

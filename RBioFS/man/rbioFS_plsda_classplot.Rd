@@ -39,7 +39,7 @@ rbioFS_plsda_classplot(pred.obj, multi_plot.ncol = nrow(pred.obj),
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 
 \item{pred.object}{A \code{prediction} object, which can be obtained from funciton \code{\link{rbioFS_plsda_predict}}.}
 

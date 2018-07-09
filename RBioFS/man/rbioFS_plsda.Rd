@@ -29,7 +29,7 @@ rbioFS_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 
 \item{...}{Additional arguments for \code{mvr} function from \code{pls} pacakge.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
 Returns a PLS-DA model object, with class "mvr".

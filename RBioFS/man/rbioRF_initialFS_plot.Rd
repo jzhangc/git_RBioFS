@@ -67,7 +67,7 @@ rbioRF_initialFS_plot(object, n = "all",
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
 The function also generates the pdf VI boxplot figure files to the working directory.

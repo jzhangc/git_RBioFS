@@ -84,7 +84,7 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata,
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
 A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.

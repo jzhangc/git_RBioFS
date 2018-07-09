@@ -80,7 +80,7 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 
 \item{yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 
 \item{biplot.samopleLabelSize}{Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.}
 }

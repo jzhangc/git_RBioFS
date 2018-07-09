@@ -71,7 +71,7 @@ rbioFS_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
 Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.
