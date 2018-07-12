@@ -14,7 +14,7 @@ rbioFS_plsda_tuplot(object, comps = 1, multi_plot.ncol = length(comps),
   plot.Width = 170, plot.Height = 150, verbose = TRUE)
 }
 \arguments{
-\item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
 
 \item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 

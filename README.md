@@ -29,14 +29,7 @@ Installation
 
 Change log
 
-    0.6.0 (Blueprint feature preview)
-        - SVM functions added (non-Shiny) (tentative):
-          - rbioFS_svm()
-          - rbioFS_svm_plot()
-          - rbioFS_svm_boot()
-          - rbioFS_svm_perm()
-          - rbioFS_svm_roc_auc()
-          
+    Blueprint feature preview
         - RF-class (random forest classification) functions added (non-Shiny) (tentative):
           - rbioFS_rf_class()
           - rbioFS_rf_class_plot()
@@ -44,42 +37,60 @@ Change log
         - ANN (artificial neural network) functions added (non-Shiny) (tentative):
           - rbioFS_ann()
           - rbioFS_ann_plot()
-          
-        - sPLS-DA functions added (non-Shiny) (tentative):
-          - rbioFS_splsda()
-          - rbioFS_splsda_plot()
         
         - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
           - rbioFS_knn()
           - rbioFS_knn_plot()
-
-
-    0.5.4 (Feature preview)
-        (ICEBOX)
-        - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_loadingplot(): with y loading as well
-
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods
+        
+        - sPLS-DA functions added (non-Shiny) (tentative):
+          - rbioFS_splsda()
+          - rbioFS_splsda_plot()
+        
+        - All shiny apps' interface updated with a new look
         
         - Updates to rbioFS_PCA():
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
           - Legend style adjusted for the sample labels
           - PCA function rbioFS_PCA() updated with S3 method
+
+        - ROC-AUC now a seperate function that can be used for other classification/FS methods
+
+    0.6.0 (Feature preview)
+        (ICEBOX)
+        - SVM functions added (non-Shiny) (tentative):
+          - rbioFS_svm_plot()
+          - rbioFS_svm_boot()
+          - rbioFS_svm_perm()
+          - rbioFS_svm_roc_auc()
+          - rbioFS_svm_predict()
+          - rbioFS_svm_classplot()
+          
+        - New PLS-DA functions added (non-Shiny):
+          - rbioFS_plsda_loadingplot(): with y loading as well
+        
+        - Updates to SVM functions:
+          - class weight determination functionality added to rbioFS_svm()
         
         - Updates to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
-            
-        - All shiny apps' interface updated with a new look
         
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
           - Relevant functions now also output results tst file to the directory
-          - rbioFS_plsda() now has a permutation test module built in, with new arugments "perm.test" and "nperm". With perm.test = TRUE, the results will have a p-value indicating the model significance. 
           
         (ADDED)
+        - SVM functions added (non-Shiny):
+          - rbioFS_svm()
+          - rbioFS_svm_roc_auc()
+          
         - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_perm(): permutation test for plsda models, with two permutation methods. 
+          - rbioFS_plsda_perm(): permutation test for plsda models, with two permutation methods.
+        
+        - Updates to PLS-DA functions (non-Shiny):
+          - data centering and scaling argument "center.newdata"" added to rbioFS_plsda_predict()
+          - rbioFS_plsda_roc_auc() now correctly uses the centered data from the rbiomvr object for ROC-AUC analysis
+          - argument checking functionality adjusted with correct class checking for all PLS-DA functions
           
         - verbose argument added for all the relavent functions so that user can silence the messages
           

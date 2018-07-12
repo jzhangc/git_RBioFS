@@ -9,7 +9,7 @@ rbioFS_plsda_perm(object, ncomp = object$ncomp, adjCV = FALSE,
   clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
-\item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
 
 \item{ncomp}{Model complexity, i.e. number of components to model. Default is \code{object$ncomp}, i.e. maximum complexity.}
 
@@ -36,13 +36,17 @@ The function uses RMSEP as the stats for comparing original model with permutats
 
 Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioFS_plsda}} and \code{\link{rbioFS_plsda_ncomp_select}}.
 
-Data for permutation are object$centerX$centerX, meaning center-scaled X are used in applicable.
+Data for permutation are object$centerX$centerX, meaning centered X are used in applicable.
 
 Permutation methods are according to:
 
 Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance. J Mach Learn Res. 11: 1833 - 63.
 
-For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. For \code{perm.method = "by_feature_per_by"}, X are first subset by label (y) before permutating data for each feature.
+For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+
+For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
+the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
+Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 }
 \examples{
 \dontrun{

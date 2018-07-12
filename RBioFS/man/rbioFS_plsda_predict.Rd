@@ -5,9 +5,10 @@
 \title{rbioFS_plsda_predict}
 \usage{
 rbioFS_plsda_predict(object, comps = object$ncomp, newdata,
-  prob.method = "Bayes", threshold = 0.2, predplot = TRUE,
-  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
-  plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
+  center.newdata = TRUE, prob.method = "Bayes", threshold = 0.2,
+  predplot = TRUE, plot.sampleLabel.type = "none",
+  plot.sampleLabel.vector = NULL, plot.sampleLabelSize = 2,
+  plot.sampleLabel.padding = 0.5,
   multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom", plot.rightsideY = TRUE,
   plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -20,11 +21,13 @@ rbioFS_plsda_predict(object, comps = object$ncomp, newdata,
   plot.Height = 150, verbose = TRUE)
 }
 \arguments{
-\item{object}{A \code{rbiomvr} or \code{mvr} object.}
+\item{object}{A \code{rbiomvr} object.}
 
 \item{comps}{Number of PLS-DA components used in the model. Default is \code{object$ncomp}.}
 
 \item{newdata}{Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.}
+
+\item{center.newdata}{If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.}
 
 \item{prob.method}{Method to calculate classification probability. Options are \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"Bayes"}.}
 
@@ -93,6 +96,9 @@ A \code{prediction} obejct, as well as pdf figure file for predicted values if \
 Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.
 }
 \details{
+Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option {center.newdata = FALSE} is
+for the already centered the data matrix.
+
 Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
 This is only for information sake.
 

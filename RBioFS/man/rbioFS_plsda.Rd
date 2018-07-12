@@ -32,7 +32,7 @@ rbioFS_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
 }
 \value{
-Returns a PLS-DA model object, with class "mvr".
+Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
 }
 \description{
 PLS-DA modelling

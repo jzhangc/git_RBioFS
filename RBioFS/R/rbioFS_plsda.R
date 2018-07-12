@@ -41,7 +41,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
-#' @return Returns a PLS-DA model object, with class "mvr".
+#' @return Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
 #' @details For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number. For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 #' @importFrom pls plsr
 #' @examples
@@ -58,7 +58,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
     stop(cat("x has to be either a matrix or data frame."))
   }
   if (class(x) == "data.frame"){
-    message(cat("data frame x converted to a matrix object."))
+    message(cat("data.frame x converted to a matrix object.\n"))
     x <- as.matrix(x)
   }
   if (!is.factor(y))stop("y has to be a factor object.")
@@ -94,7 +94,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @title rbioFS_plsda_tuplot
 #'
 #' @description T-U plot function for PLS-DA models.
-#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param multi_plot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
 #' @param multi_plot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
@@ -140,7 +140,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
                                 plot.Width = 170, plot.Height = 150,
                                 verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.\n")
   if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.\n")
   if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.\n")
   if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
@@ -546,7 +546,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @title rbioFS_plsda_perm()
 #'
 #' @description Permutation test for PLS-DA models.
-#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ncomp Model complexity, i.e. number of components to model. Default is \code{object$ncomp}, i.e. maximum complexity.
 #' @param adjCV If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.
 #' @param perm.method Permutation method. Options are \code{"by_y"} and \code{"by_feature_per_y"}. Default is \code{"by_y"}. See details below.
@@ -559,13 +559,17 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #'
 #' Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioFS_plsda}} and \code{\link{rbioFS_plsda_ncomp_select}}.
 #'
-#' Data for permutation are object$centerX$centerX, meaning center-scaled X are used in applicable.
+#' Data for permutation are object$centerX$centerX, meaning centered X are used in applicable.
 #'
 #' Permutation methods are according to:
 #'
 #' Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance. J Mach Learn Res. 11: 1833 - 63.
 #'
-#' For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. For \code{perm.method = "by_feature_per_by"}, X are first subset by label (y) before permutating data for each feature.
+#' For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'
+#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
+#' the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
+#' Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 #'
 #' @import ggplot2
 #' @import foreach
@@ -582,7 +586,7 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
                               parallelComputing = TRUE, clusterType = "PSOCK",
                               verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.\n")
   if (!"validation" %in% names(object) || is.null(object$validation)) stop("PLS-DA model has to include Cross-Validation.\n")
   if (!all(ncomp %in% seq(object$ncomp))) stop("ncomp contain non-existant comp.\n")
   if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
@@ -1398,7 +1402,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @title rbioFS_plsda_roc_auc()
 #'
 #' @description ROC-AUC analysis and ploting for plsda model
-#' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -1446,11 +1450,11 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
                                  plot.Width = 170, plot.Height = 150,
                                  verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.\n")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
 
   ## calcuate ROC-AUC
-  pred_raw <- predict(object, newdata = object$inputX)
+  pred_raw <- predict(object, newdata = object$centerX$centerX)
   outcome <- object$inputY
 
   roc_dfm_list <- vector(mode = "list", length = length(plot.comps))
@@ -1486,6 +1490,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
       } else {
         df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL)
       }
+      df <- df[order(df$tpr), ]  # order by tpr so that all the points will be connected on graph
       return(df)
     }
   }
@@ -1548,9 +1553,10 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @title rbioFS_plsda_predict
 #'
 #' @description Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.
-#' @param object A \code{rbiomvr} or \code{mvr} object.
+#' @param object A \code{rbiomvr} object.
 #' @param comps  Number of PLS-DA components used in the model. Default is \code{object$ncomp}.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
+#' @param center.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"Bayes"}.
 #' @param threshold  Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.
 #' @param predplot If to generate a prediction value plot. Default is \code{TRUE}.
@@ -1582,7 +1588,10 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
 #' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
-#' @details Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
+#' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option {center.newdata = FALSE} is
+#' for the already centered the data matrix.
+#'
+#' Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
 #' This is only for information sake.
 #'
 #' The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
@@ -1614,7 +1623,8 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #'                      plot.Width = 170, plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.method = "Bayes",
+rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, center.newdata = TRUE,
+                                 prob.method = "Bayes",
                                  threshold = 0.2,
                                  predplot = TRUE,
                                  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
@@ -1630,7 +1640,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
                                  plot.Width = 170, plot.Height = 150,
                                  verbose = TRUE){
   ## argument check
-  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.\n")
   if (!class(newdata) %in% "matrix") stop("newdata has to be a matrix object. \n")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object. \n")
   if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".\n")
@@ -1640,11 +1650,20 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
       stop("plot.sampleLabel.vector has to be the same length as nrow(newdata). \n")}
   }
 
+  ## center data with the option of scaling
+  if (center.newdata){
+    if (verbose) cat("newdata is centered with the same scaling setting as the input rbiomvr object.")
+    centerdata <- center_scale(newdata, scale = object$centerX$scale)
+    test <- centerdata$centerX
+  } else {
+    test <- newdata
+  }
+
   ## prediction and class assign
-  rownames(newdata) <- 1:nrow(newdata)
-  pred <- predict(object = object, ncomp = comps, newdata = newdata, type = "response")
+  rownames(test) <- 1:nrow(test)
+  pred <- predict(object = object, ncomp = comps, newdata = test, type = "response")
   if (is.null(plot.sampleLabel.vector) | missing(plot.sampleLabel.vector)){
-    sample.label <- seq(nrow(newdata))
+    sample.label <- seq(nrow(test))
   } else {
     sample.label <- plot.sampleLabel.vector
   }
@@ -1703,7 +1722,7 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, prob.met
     # prepare prediction value list
     predlist <- vector(mode = "list", length = length(levels(object$inputY)))
     predlist[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
-      preddfm <- data.frame(sample = as.integer(rownames(newdata)), sample.label = sample.label, predicted.value = pred[, i,])
+      preddfm <- data.frame(sample = as.integer(rownames(test)), sample.label = sample.label, predicted.value = pred[, i,])
       preddfm$classification <- sapply(preddfm$predicted.value, FUN = function(x)ifelse(x > 1 - threshold & x < (1 + threshold), levels(object$inputY)[i], ifelse(x > - threshold & x < threshold, "rest", "undetermined")))
       preddfm$`Within threshold` <- ifelse(preddfm$classification == "undetermined", "N", "Y")
       preddfm$`Within threshold` <- factor(preddfm$`Within threshold`, levels = c("Y", "N"))

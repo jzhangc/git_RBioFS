@@ -15,7 +15,7 @@ rbioFS_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
   plot.Width = 170, plot.Height = 150, verbose = TRUE)
 }
 \arguments{
-\item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
