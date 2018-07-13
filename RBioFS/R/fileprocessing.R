@@ -71,6 +71,7 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
   return(out)
 }
 
+
 #' @title rbioNorm
 #'
 #' @description Data normalization. This is a shell function using limma package.
