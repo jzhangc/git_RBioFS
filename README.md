@@ -62,7 +62,6 @@ Change log
           - rbioFS_svm_plot()
           - rbioFS_svm_boot()
           - rbioFS_svm_perm()
-          - rbioFS_svm_roc_auc()
           - rbioFS_svm_predict()
           - rbioFS_svm_classplot()
           

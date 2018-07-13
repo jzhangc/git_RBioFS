@@ -237,7 +237,7 @@ rbioFS_svm_roc_auc <- function(object, newdata, newdata.label,
     grid.draw(plt)
     if (verbose) cat("Done!\n")
   }
-  ## output
+  ## return
   out <- list(svm.roc = roc_dfm, input.newdata = newdata, input.newdata.label = newdata.label,
               newdata.centered = centered_newdata, newdata.scaled = scale_newdata)
   assign(paste(deparse(substitute(object)), "_svm_roc_list", sep = ""), out, envir = .GlobalEnv)
