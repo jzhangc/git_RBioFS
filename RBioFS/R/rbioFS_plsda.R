@@ -42,7 +42,22 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
 #' @return Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
-#' @details For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number. For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#'
+#' Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
+#'
+#' \code{centerX}: centered X data if applicable, with scale option.
+#'
+#' \code{dummy_y}: dummified y
+#'
+#' \code{inputX}: raw input predictor data.
+#'
+#' \code{inputY}: input group labels.
+#'
+#' @details For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
+#'
+#' For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
+#' or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#'
 #' @importFrom pls plsr
 #' @examples
 #' \dontrun{
@@ -1185,7 +1200,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @title rbioFS_plsda_VIP
 #'
 #' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
-#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
 #' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.

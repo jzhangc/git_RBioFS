@@ -4,8 +4,8 @@
 \alias{rbioFS_svm_roc_auc}
 \title{rbioFS_svm_roc_auc()}
 \usage{
-rbioFS_svm_roc_auc(object, newdata, newdata.label, center.newdata = TRUE,
-  scale.newdata = TRUE, rocplot = TRUE, plot.smooth = FALSE,
+rbioFS_svm_roc_auc(object, newdata, newdata.label,
+  center.scale.newdata = TRUE, rocplot = TRUE, plot.smooth = FALSE,
   plot.rightsideY = TRUE, plot.SymbolSize = 2, plot.display.Title = TRUE,
   plot.titleSize = 10, plot.fontType = "sans",
   plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
@@ -20,9 +20,7 @@ rbioFS_svm_roc_auc(object, newdata, newdata.label, center.newdata = TRUE,
 
 \item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object.}
 
-\item{center.newdata}{Logical, wether center the newdata, i.e. subtracting mean. Default is \code{TRUE}.}
-
-\item{scale.newdata}{Logical, whether to scale the newdata, i.e. dividing by standard deviation. Default is \code{TRUE}.}
+\item{center.scale.newdata}{Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
@@ -69,8 +67,8 @@ ROC-AUC analysis and ploting for SVM model
 \details{
 Uses pROC module to calculate ROC.
 
-Although optional, the \code{newdata} matrix should have the same center/scale settings as the SVM modelling prior to the ROC-AUC analysis.
-The option \code{center.newdata = FALSE} and \code{scale.newdata = FALSE} can also be used for the already processed the newdata matrix.
+Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to enter.scale prior to ROC-AUC analysis.
+The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
 }
 \examples{
 \dontrun{

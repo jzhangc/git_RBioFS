@@ -33,12 +33,25 @@ rbioFS_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 }
 \value{
 Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
+
+Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
+
+\code{centerX}: centered X data if applicable, with scale option.
+
+\code{dummy_y}: dummified y
+
+\code{inputX}: raw input predictor data.
+
+\code{inputY}: input group labels.
 }
 \description{
 PLS-DA modelling
 }
 \details{
-For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number. For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package, or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
+
+For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
+or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 }
 \examples{
 \dontrun{

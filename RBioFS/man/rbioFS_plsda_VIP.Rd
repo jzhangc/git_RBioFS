@@ -17,7 +17,7 @@ rbioFS_plsda_VIP(object, vip.alpha = 1, plot = TRUE, plot.title = TRUE,
   plot.Height = 150, verbose = TRUE)
 }
 \arguments{
-\item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
+\item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.}
 
 \item{vip.alpha}{Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.}
 

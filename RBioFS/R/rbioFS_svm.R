@@ -3,16 +3,34 @@
 #' @description Support Vector Machine (SVM) modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center Logical, wether center the data, i.e. subtracting mean. Default is \code{TRUE}.
-#' @param scale Logical, whether to scale the data, i.e. dividing by standard deviation. Default is \code{TRUE}.
+#' @param center.scale Logical, wether center and scale the data, i.e. subtracting mean and deviding by standard deviation. Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param svm.cross.k Fold of cross validation. Default is \code{10}.
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{svm} function from \code{e1071} pacakge.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
+#'
+#' Additional items for \code{rbiosvm} object to \code{svm} object from e1071 package:
+#'
+#' \code{inputX}: raw input predictor data.
+#'
+#' \code{inputY}: input group labels.
+#'
+#' \code{center.scaledX}: centered X data with scaling if applicable.
+#'
+#' \code{class.weight}: class weight, \code{1} if data is balanced.
+#'
 #' @details Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
+#'
+#' The function automatically detects if the data is unbalanced or not, and applies class weight accordingly. For unbalanced data, the
+#' class weight the inverse of the draw probability: \code{sample size / class size}.
+#'
+#' When \code{tune.method = "cross"} and the sample size set for \code{tune.cross.k}, the method is effectively "leave-one-out (LOO)" cross-validation.
+#' Same goes for \code{svm.cross.k} argument.
+#'
 #' @importFrom e1071 svm tune tune.control
 #' @importFrom matrixStats colSds
 #' @examples
@@ -20,59 +38,64 @@
 #' svm_model <- rbioFS_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial", center = TRUE, scale = FALSE)
 #' }
 #' @export
-rbioFS_svm <- function(x, y, center = TRUE, scale = TRUE,
-                       kernel = "radial",
+rbioFS_svm <- function(x, y, center.scale = TRUE,
+                       kernel = "radial", svm.cross.k = 10,
                        tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
                        verbose = TRUE){
   ## check arguments
+  if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.")
   if (class(x) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     x <- as.matrix(x)
   }
+  if (class(y) != "factor"){
+    if (verbose) cat("y is converted to factor. \n")
+    y <- factor(y, levels = unique(y))
+  }
+  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\". \n")
 
   ## data processing
-  if (center){
-    if (verbose) cat(paste0("Data centered with the scale option ", ifelse(scale, "\"ON\" ", "\"OFF\" "), "prior to modelling..."))
-    centered_X <- center_scale(x, scale = scale)  # center data with the option of scaling
+  if (center.scale){
+    if (verbose) cat(paste0("Data centered with the scaling prior to modelling..."))
+    centered_X <- center_scale(x, scale = TRUE)  # center data with the option of scaling
     if (verbose) cat("DONE!\n")
-    scale_X <- "See centerX"
     X <- centered_X$centerX
   } else {
-    if (scale){
-      if (verbose) cat(paste0("Data scaling prior to modelling..."))
-      col.mean <- colMeans(x, na.rm = TRUE)
-      col.sd <- matrixStats::colSds(x, center = col.mean, na.rm = TRUE) # matrixStats::colSds
-      scale_X <- t(t(x) / col.sd)  # scale without centering
-      X <- scale_X
-      if (verbose) cat("DONE!\n")
-    } else {
-      scale_X <- NULL
-      X <- x
-    }
+    X <- x
     centered_X <- NULL
   }
   y <- y
 
   ## weight evaluation
+  if (length(unique(table(y))) != 1){  # test if the sample is balanced
+    wgt <- length(y) / table(y)
+  } else {  # balanced sample, each class weight is 1
+    wgt <- unique(table(y)) / table(y)
+  }
 
   ## svm
   # tune parameters
-  gamma_start <- ifelse(is.vector(X), 1, 1 / ncol(X))
+  gamma_start <- ifelse(is.vector(X), 1, 1 / ncol(X))  # starting gamma value per svm() default settings
   if (verbose) cat(paste0("Grid searching for parameter optimization with ", tune.method, " method (speed depending on hardware configuration)..."))
   svm_tuned <- tune(svm, kernel = kernel,
-                    train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)),
+                    train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
                     tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n))
   if (verbose) cat("DONE!\n")
 
   # svm
-  m <- svm(x = X, y = y, kernel = kernel,cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-           scale = FALSE,...)
+  if (verbose) cat("SVM modelling...")
+  m <- svm(x = X, y = y, kernel = kernel, cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
+           scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+           cross = svm.cross.k,...)
+  if (verbose) cat("Done!\n")
 
   # return
   m$inputX <- x
-  m$inputY <- y
-  m$scaleX <- scale_X
-  m$centerX <- centered_X
+  m$scaled <- NULL
+  m$x.scale <- NULL
+  m$y.scale <- NULL
+  m$center.scaledX <- centered_X
+  m$class.weights <- wgt
   class(m) <- c("svm", "rbiosvm")
   return(m)
 }
@@ -84,8 +107,7 @@ rbioFS_svm <- function(x, y, center = TRUE, scale = TRUE,
 #' @param object A \code{rbiosvm} object.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object.
-#' @param center.newdata Logical, wether center the newdata, i.e. subtracting mean. Default is \code{TRUE}.
-#' @param scale.newdata Logical, whether to scale the newdata, i.e. dividing by standard deviation. Default is \code{TRUE}.
+#' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -107,8 +129,8 @@ rbioFS_svm <- function(x, y, center = TRUE, scale = TRUE,
 #' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list to the environment.
 #' @details Uses pROC module to calculate ROC.
 #'
-#' Although optional, the \code{newdata} matrix should have the same center/scale settings as the SVM modelling prior to the ROC-AUC analysis.
-#' The option \code{center.newdata = FALSE} and \code{scale.newdata = FALSE} can also be used for the already processed the newdata matrix.
+#' Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to enter.scale prior to ROC-AUC analysis.
+#' The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
 #'
 #' @import ggplot2
 #' @import foreach
@@ -123,8 +145,7 @@ rbioFS_svm <- function(x, y, center = TRUE, scale = TRUE,
 #' }
 #' @export
 rbioFS_svm_roc_auc <- function(object, newdata, newdata.label,
-                               center.newdata = TRUE,
-                               scale.newdata = TRUE,
+                               center.scale.newdata = TRUE,
                                rocplot = TRUE,
                                plot.smooth = FALSE,
                                plot.rightsideY = TRUE,
@@ -146,29 +167,20 @@ rbioFS_svm_roc_auc <- function(object, newdata, newdata.label,
   } else {
     if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same dimension as the training data.")
   }
+  if (center.scale.newdata){
+    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data.")
+  }
 
   ## process data
-  if (center.newdata){
-    if (verbose) cat(paste0("Data centered with the scale option ", ifelse(scale.newdata, "\"ON\" ", "\"OFF\" "), "prior to modelling..."))
-    centered_newdata <- center_scale(newdata, scale = scale.newdata)  # center data with the option of scaling
+  if (center.scale.newdata){ # using training data mean and sd
+    if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling..."))
+    centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    test <- centered_newdata
     if (verbose) cat("DONE!\n")
-    scale_newdata <- "See newdata.centered"
-    test <- centered_newdata$centerX
   } else {
-    if (scale.newdata){
-      if (verbose) cat(paste0("Data scaling prior to modelling..."))
-      col.mean <- colMeans(newdata, na.rm = TRUE)
-      col.sd <- matrixStats::colSds(newdata, center = col.mean, na.rm = TRUE) # matrixStats::colSds
-      scale_newdata <- t(t(newdata) / col.sd)  # scale without centering
-      test <- scale_newdata
-      if (verbose) cat("DONE!\n")
-    } else {
-      scale_newdata <- NULL
-      test <- newdata
-    }
     centered_newdata <- NULL
+    test <- newdata
   }
-  test <- newdata
 
   ## ROC-AUC calculation
   pred <- predict(object, newdata = test)  # prediction
@@ -239,6 +251,6 @@ rbioFS_svm_roc_auc <- function(object, newdata, newdata.label,
   }
   ## return
   out <- list(svm.roc = roc_dfm, input.newdata = newdata, input.newdata.label = newdata.label,
-              newdata.centered = centered_newdata, newdata.scaled = scale_newdata)
+              newdata.center.scaled = centered_newdata)
   assign(paste(deparse(substitute(object)), "_svm_roc_list", sep = ""), out, envir = .GlobalEnv)
 }

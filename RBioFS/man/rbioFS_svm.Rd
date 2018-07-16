@@ -4,7 +4,7 @@
 \alias{rbioFS_svm}
 \title{rbioFS_svm}
 \usage{
-rbioFS_svm(x, y, center = TRUE, scale = TRUE, kernel = "radial",
+rbioFS_svm(x, y, center.scale = TRUE, kernel = "radial", svm.cross.k = 10,
   tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
   verbose = TRUE)
 }
@@ -13,11 +13,11 @@ rbioFS_svm(x, y, center = TRUE, scale = TRUE, kernel = "radial",
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center}{Logical, wether center the data, i.e. subtracting mean. Default is \code{TRUE}.}
-
-\item{scale}{Logical, whether to scale the data, i.e. dividing by standard deviation. Default is \code{TRUE}.}
+\item{center.scale}{Logical, wether center and scale the data, i.e. subtracting mean and deviding by standard deviation. Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
+
+\item{svm.cross.k}{Fold of cross validation. Default is \code{10}.}
 
 \item{tune.method}{Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
 
@@ -31,12 +31,28 @@ rbioFS_svm(x, y, center = TRUE, scale = TRUE, kernel = "radial",
 }
 \value{
 Returns a SVM model object, with classes "svm" and "rbiosvm".
+
+Additional items for \code{rbiosvm} object to \code{svm} object from e1071 package:
+
+\code{inputX}: raw input predictor data.
+
+\code{inputY}: input group labels.
+
+\code{center.scaledX}: centered X data with scaling if applicable.
+
+\code{class.weight}: class weight, \code{1} if data is balanced.
 }
 \description{
 Support Vector Machine (SVM) modelling
 }
 \details{
 Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
+
+The function automatically detects if the data is unbalanced or not, and applies class weight accordingly. For unbalanced data, the
+class weight the inverse of the draw probability: \code{sample size / class size}.
+
+When \code{tune.method = "cross"} and the sample size set for \code{tune.cross.k}, the method is effectively "leave-one-out (LOO)" cross-validation.
+Same goes for \code{svm.cross.k} argument.
 }
 \examples{
 \dontrun{

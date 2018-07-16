@@ -58,7 +58,10 @@ Change log
 
     0.6.0 (Feature preview)
         (ICEBOX)
-        - SVM functions added (non-Shiny) (tentative):
+        - Overall classification functioins added:
+          - rbioClass()
+        
+        - SVM functions added (non-Shiny):
           - rbioFS_svm_plot()
           - rbioFS_svm_boot()
           - rbioFS_svm_perm()
@@ -67,9 +70,6 @@ Change log
           
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
-        
-        - Updates to SVM functions:
-          - class weight determination functionality added to rbioFS_svm()
         
         - Updates to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
@@ -82,6 +82,9 @@ Change log
         - SVM functions added (non-Shiny):
           - rbioFS_svm()
           - rbioFS_svm_roc_auc()
+        
+        - Updates to SVM functions:
+          - class weight determination functionality added to rbioFS_svm()
           
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_perm(): permutation test for plsda models, with two permutation methods.
