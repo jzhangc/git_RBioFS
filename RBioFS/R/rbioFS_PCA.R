@@ -33,7 +33,7 @@
 #' @param fontType Font for the figure texts. Default is \code{"sans"}.
 #' @param xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param yTickLblSize Y-axis tick label size. Default is \code{10}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
 #' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2

@@ -62,11 +62,10 @@ Change log
           - rbioClass()
         
         - SVM functions added (non-Shiny):
-          - rbioFS_svm_plot()
-          - rbioFS_svm_boot()
-          - rbioFS_svm_perm()
-          - rbioFS_svm_predict()
-          - rbioFS_svm_classplot()
+          - rbioClass_svm_plot()
+          - rbioClass_svm_boot()
+          - rbioClass_svm_predict()
+          - rbioClass_svm_classplot()
           
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
@@ -79,20 +78,30 @@ Change log
           - Relevant functions now also output results tst file to the directory
           
         (ADDED)
+        - New generic functions
+          - Generic plot function for permutation test: rbioUtil_permplot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
+        
         - SVM functions added (non-Shiny):
-          - rbioFS_svm()
-          - rbioFS_svm_roc_auc()
+          - rbioClass_svm()
+          - rbioClass_svm_roc_auc()
+          - rbioClass_svm_perm()
         
         - Updates to SVM functions:
-          - class weight determination functionality added to rbioFS_svm()
+          - class weight determination functionality added to rbioClass_svm()
+          - additional items added for the modelling settings to the SVM model object (i.e. rbiosvm object).
           
         - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_perm(): permutation test for plsda models, with two permutation methods.
+          - rbioClass_plsda_perm(): permutation test for plsda models, with two permutation methods
         
         - Updates to PLS-DA functions (non-Shiny):
-          - data centering and scaling argument "center.newdata"" added to rbioFS_plsda_predict()
-          - rbioFS_plsda_roc_auc() now correctly uses the centered data from the rbiomvr object for ROC-AUC analysis
+          - All PLS-DA function names updated with new prefix: rbioClass_
+          - data centering and scaling argument "center.newdata"" added to rbioClass_plsda_predict()
+            - When "center.newdata = TRUE", the function applies training data's col.mean and col.sd to the test data 
+          - rbioClass_plsda_roc_auc() now correctly uses the centered data from the rbiomvr object for ROC-AUC analysis
           - argument checking functionality adjusted with correct class checking for all PLS-DA functions
+        
+        - Updates to RF-FS functions:
+          - All RF-FS function names updated with new prefix: rbioFS_rf_
           
         - verbose argument added for all the relavent functions so that user can silence the messages
           

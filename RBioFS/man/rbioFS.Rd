@@ -89,7 +89,7 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
 
 \item{SFS_plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.

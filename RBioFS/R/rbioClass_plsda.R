@@ -27,7 +27,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 }
 
 
-#' @title rbioFS_plsda
+#' @title rbioClass_plsda
 #'
 #' @description PLS-DA modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
@@ -40,7 +40,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}.Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
 #'
 #' Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
@@ -53,7 +53,9 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'
 #' \code{inputY}: input group labels.
 #'
-#' @details For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
+#' @details The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
+#'
+#' For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
 #'
 #' For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
 #' or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
@@ -61,10 +63,10 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @importFrom pls plsr
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda(x, y, ncomp = 20)
+#' rbioClass_plsda(x, y, ncomp = 20)
 #' }
 #' @export
-rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
+rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
                          segments = 10, segments.type = "random",
                          jackknife = TRUE, ...,
                          verbose = TRUE){
@@ -106,7 +108,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 }
 
 
-#' @title rbioFS_plsda_tuplot
+#' @title rbioClass_plsda_tuplot
 #'
 #' @description T-U plot function for PLS-DA models.
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
@@ -129,7 +131,7 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Returns a pdf file for scoreplot.
 #' @details The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 #' @import ggplot2
@@ -140,10 +142,10 @@ rbioFS_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_tuplot(new_model, comps = c(1, 2, 3))
+#' rbioClass_plsda_tuplot(new_model, comps = c(1, 2, 3))
 #' }
 #' @export
-rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                 plot.rightsideY = TRUE,
                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
                                 plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
@@ -244,7 +246,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 }
 
 
-#' @title rbioFS_plsda_q2r2()
+#' @title rbioClass_plsda_q2r2()
 #'
 #' @description q2-r2 (i.e. Q^2 and R^2 scores) caluclation and plot for plsda models
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
@@ -266,7 +268,7 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details A vertical line indicating the number of component with minimum q2-r2 distance.
 #' @import ggplot2
@@ -277,10 +279,10 @@ rbioFS_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comp
 #' @importFrom pls mvrValstats R2
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_q2r2(object = new_model, multi_plot.ncol = 2, multi_plot.nrow = 2, intercept = TRUE)
+#' rbioClass_plsda_q2r2(object = new_model, multi_plot.ncol = 2, multi_plot.nrow = 2, intercept = TRUE)
 #' }
 #' @export
-rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
+rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
                               plot.display.Title = TRUE,
                               multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               plot.rightsideY = TRUE, plot.fontType = "sans",
@@ -374,7 +376,7 @@ rbioFS_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
 
 #' @title randomiz.test
 #'
-#' @description Randomization function from \code{pls} pacakge. For \code{\link{rbioFS_plsda_ncomp_select}} function.
+#' @description Randomization function from \code{pls} pacakge. For \code{\link{rbioClass_plsda_ncomp_select}} function.
 randomiz.test <- function(residualsNew, residualsReference, nperm){
   d <- residualsNew^2 - residualsReference^2
   md <- mean(d)
@@ -389,7 +391,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 }
 
 
-#' @title rbioFS_plsda_ncomp_select()
+#' @title rbioClass_plsda_ncomp_select()
 #'
 #' @description Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
@@ -415,7 +417,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 #' @import ggplot2
@@ -426,11 +428,11 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @importFrom pls RMSEP
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
+#' rbioClass_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
 #'          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
 #' }
 #' @export
-rbioFS_plsda_ncomp_select <- function(object, ...,
+rbioClass_plsda_ncomp_select <- function(object, ...,
                                       ncomp.selection.method = "1sd", randomization.nperm = 999, randomization.alpha = 0.05,
                                       rmsepplot = TRUE,
                                       plot.rightsideY = TRUE,
@@ -558,7 +560,7 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
   assign(paste(deparse(substitute(object)), "_plsda_rmsep_list", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
 }
 
-#' @title rbioFS_plsda_perm()
+#' @title rbioClass_plsda_perm()
 #'
 #' @description Permutation test for PLS-DA models.
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
@@ -566,15 +568,34 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @param adjCV If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.
 #' @param perm.method Permutation method. Options are \code{"by_y"} and \code{"by_feature_per_y"}. Default is \code{"by_y"}. See details below.
 #' @param nperm Number of permutations to run. Default is \code{999}.
+#' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
+#' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will notaffect error or warning messeages.
-#' @return The function returns \code{CSV} files for all intermediate permuatation RMSEP values as well as the p-value resutls. The final results are also exported to the environment.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return The function returns \code{CSV} files for all intermediate permuatation RMSEP values as well as the p-value resutls.
+#'
+#' The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
+#'
+#' \code{perm.method} Permutation method.
+#'
+#' \code{nperm} The number of permutation runs.
+#'
+#' \code{perm.stats} The stats metric used for the permutation test.
+#'
+#' \code{adjCV} If the adjusted cross-validation stats is used.
+#'
+#' \code{p.value.summary} P values for the permutation test.
+#'
+#' \code{poerm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
+#'
+#' A scatter plot is also generaeted when \code{perm.plot = TRUE}.
+#'
 #' @details The function uses RMSEP as the stats for comparing original model with permutatsions.
 #'
-#' Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioFS_plsda}} and \code{\link{rbioFS_plsda_ncomp_select}}.
+#' Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
 #'
-#' Data for permutation are object$centerX$centerX, meaning centered X are used in applicable.
+#' Data for permutation are object$centerX$centerX, meaning centered X are used if applicable.
 #'
 #' Permutation methods are according to:
 #'
@@ -593,13 +614,14 @@ rbioFS_plsda_ncomp_select <- function(object, ...,
 #' @importFrom pls RMSEP
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_perm()
+#' rbioClass_plsda_perm(object = new_model_optm, perm.method = "by_y", nperm = 999, adjCV = TRUE, parallelComputing = TRUE)
 #' }
 #' @export
-rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
-                              perm.method = "by_y", nperm = 999,
-                              parallelComputing = TRUE, clusterType = "PSOCK",
-                              verbose = TRUE){
+rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
+                                 perm.plot = TRUE, ...,
+                                 perm.method = "by_y", nperm = 999,
+                                 parallelComputing = TRUE, clusterType = "PSOCK",
+                                 verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.\n")
   if (!"validation" %in% names(object) || is.null(object$validation)) stop("PLS-DA model has to include Cross-Validation.\n")
@@ -627,9 +649,9 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     if (perm.method == "by_y"){  # permutate label
       perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
         perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- rbioFS_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                   ncomp = ncomp, scale = FALSE, validation = "CV",
-                                   verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+        perm_model <- rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
+                                      ncomp = ncomp, scale = FALSE, validation = "CV",
+                                      verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
         perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
@@ -655,9 +677,9 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
           perm_dat
         }
 
-        perm_model <- rbioFS_plsda(x = perm_x, y = object$inputY,
-                                   ncomp = ncomp, scale = FALSE, validation = "CV",
-                                   verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+        perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
+                                      ncomp = ncomp, scale = FALSE, validation = "CV",
+                                      verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
         perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
@@ -684,9 +706,9 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     if (perm.method == "by_y"){  # permutate label
       perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% {
         perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- RBioFS::rbioFS_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                           ncomp = ncomp, scale = FALSE, validation = "CV",
-                                           verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+        perm_model <- RBioFS::rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
+                                              ncomp = ncomp, scale = FALSE, validation = "CV",
+                                              verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
         perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
@@ -712,9 +734,9 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
           perm_dat
         }
 
-        perm_model <- rbioFS_plsda(x = perm_x, y = object$inputY,
-                                   ncomp = ncomp, scale = FALSE, validation = "CV",
-                                   verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+        perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
+                                      ncomp = ncomp, scale = FALSE, validation = "CV",
+                                      verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
         perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
@@ -733,7 +755,7 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   }
 
   # permutation model data frame
-  perm_results <- foreach(i = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
+  perm_results_p_val <- foreach(i = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
     tmp <- perm_dfm[perm_dfm$comparison == i, ]
     orig_rmsep <- data.frame(nperm = 0, rmsep_dfm[rmsep_dfm$comparison == i, ], row.names = NULL)
     tmp <- rbind(orig_rmsep, tmp)
@@ -742,24 +764,41 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     orig.val <- tmp$RMSEP[which(tmp$nperm == 0)]
     perm.val <- tmp$RMSEP[which(tmp$nperm != 0)]
     p.val <- (length(which(perm.val <= orig.val)) + 1) / (nperm + 1)
-    out <- data.frame(comparison = i, comps = ncomp, nperm = nperm,
-                      original.RMSEP = orig.val, p.value = p.val, adjCV = adjCV,
+    out <- data.frame(comparison = i, original.RMSEP = orig.val, p.value = p.val,
                       row.names = NULL, stringsAsFactors = FALSE)
   }
   if (verbose) cat("Done!\n")
+
   ## output
   if (verbose) cat("\n")
   cat("Permutation test restuls: \n")
-  print(perm_results)
+  print(perm_results_p_val)
   if (verbose) cat("\n")
-  if (verbose) cat(paste0("Intermediate permutation RMSEP values stored in csv files with suffix: _perm_intermediate.csv. \n"))
-  write.csv(file = paste(deparse(substitute(object)), "_perm.csv", sep = ""), perm_results, row.names = FALSE)
+
+  # env
+  perm_stats <- rbind(data.frame(nperm = rep(0, times = nrow(rmsep_dfm)), comparison = rmsep_dfm$comparison, RMSEP = rmsep_dfm$RMSEP, row.names = NULL),
+                      data.frame(nperm = perm_dfm$nperm, comparison = perm_dfm$comparison, RMSEP = perm_dfm$RMSEP, row.names = NULL))
+
+  out <- list(perm.method = perm.method, nperm = nperm, perm.stats = "RMSEP", adjCV = adjCV,
+              p.value.summary = perm_results_p_val, perm.results =  perm_stats)
+
+  class(out) <- "rbiomvr_perm"
+  assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
+
+  # directory
+  if (verbose) cat(paste0("Permutation RMSEP values stored in csv files with suffix: _perm_intermediate.csv. \n"))
   if (verbose) cat(paste0("Permutation results stored in csv file: ", paste(deparse(substitute(object)), "_perm.csv", sep = ""), ". \n"))
-  assign(paste(deparse(substitute(object)), "_perm", sep = ""), perm_results, envir = .GlobalEnv)
+  write.csv(file = paste(deparse(substitute(object)), "_perm.csv", sep = ""), perm_results_p_val, row.names = FALSE)
+
+  ## plot
+  if (perm.plot){
+    plsda_permutation_test <- out
+    rbioUtil_perm_plot(perm_res = permutation_test, ...)
+  }
 }
 
 
-#' @title rbioFS_plsda_scoreplot
+#' @title rbioClass_plsda_scoreplot
 #'
 #' @description scoreplot function for PLS-DA models.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
@@ -787,7 +826,7 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Returns a pdf file for scoreplot.
 #' @details When \code{length(comps) == 1}, the function generates a scatter plot plotting sample vs score for the comp of interest. When \code{length(comps) == 2}, the function generates a scatter plot plotting the two comps of interest against each other. When \code{length(comps) > 2}, the function generates a multi-panel correlation scoreplot matrix for the comps of interest - might be slow if the there are many comps.
 #' @import ggplot2
@@ -797,10 +836,10 @@ rbioFS_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 #' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_scoreplot(new_model, comps = c(1, 2, 3), plot.ellipse = TRUE)
+#' rbioClass_plsda_scoreplot(new_model, comps = c(1, 2, 3), plot.ellipse = TRUE)
 #' }
 #' @export
-rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
+rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.rightsideY = FALSE,
                                    plot.Title = NULL,
                                    plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
@@ -822,7 +861,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     if (is.null(y)) stop("for mvr class objects, please provide response factor vector y.\n")
     if (!is.factor(y)) stop("for mvr class objects, y has to be a factor vector.\n")
     y <- y
-  } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from RBioFS_plsda() function.\n")
+  } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from rbioClass_plsda() function.\n")
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.\n")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.\n")
   if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
@@ -1004,7 +1043,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 }
 
 
-#' @title rbioFS_plsda_jackknife
+#' @title rbioClass_plsda_jackknife
 #'
 #' @description Jack-Knife procedure for the \code{PLS} models, e.g. \code{PLS-DA} or \code{PLS-R}.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
@@ -1034,7 +1073,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.yTickBold Set y-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
@@ -1045,7 +1084,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @import ggplot2
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
+#' rbioClass_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
 #'                        sig.p = 0.05, plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
 #'                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
 #'                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
@@ -1057,7 +1096,7 @@ rbioFS_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #'                        plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALSE, sig.p = 0.05,
+rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALSE, sig.p = 0.05,
                                    plot = TRUE,
                                    plot.title = FALSE, plot.titleSize = 10,
                                    plot.outlineCol = "black",
@@ -1197,7 +1236,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 }
 
 
-#' @title rbioFS_plsda_VIP
+#' @title rbioClass_plsda_VIP
 #'
 #' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
@@ -1226,9 +1265,9 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @param plot.yTickBold Set Y-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
-#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioFS_plsda}} with \code{method = "oscorespls"}.
+#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
 #'          For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust.
 #'          The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
 #' @import ggplot2
@@ -1238,7 +1277,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #' @importFrom scales rescale_none
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_VIP(object = new_model_optm,
+#' rbioClass_plsda_VIP(object = new_model_optm,
 #'                        vip.alpha = 0.05,
 #'                        plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
 #'                        plot.sig.line = TRUE,
@@ -1252,7 +1291,7 @@ rbioFS_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = FALS
 #'                        plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
+rbioClass_plsda_VIP <- function(object, vip.alpha = 1,
                     plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
                     plot.sig.line = TRUE,
                     plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
@@ -1266,7 +1305,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
                     plot.Height = 150, verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
-  if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using RBioFS_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
+  if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using rbioClass_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
 
   ## VIP calculation
   score <- object$scores
@@ -1414,7 +1453,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 }
 
 
-#' @title rbioFS_plsda_roc_auc()
+#' @title rbioClass_plsda_roc_auc()
 #'
 #' @description ROC-AUC analysis and ploting for plsda model
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
@@ -1438,7 +1477,7 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Prints AUC values in the console. And a pdf file for ROC plot
 #' @details Uses pROC module to calculate ROC.
 #' @import ggplot2
@@ -1449,10 +1488,10 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
+#' rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
 #' }
 #' @export
-rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
+rbioClass_plsda_roc_auc <- function(object, rocplot = TRUE,
                                  plot.comps = 1:object$ncomp,
                                  plot.smooth = FALSE,
                                  multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
@@ -1565,7 +1604,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 }
 
 
-#' @title rbioFS_plsda_predict
+#' @title rbioClass_plsda_predict
 #'
 #' @description Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.
 #' @param object A \code{rbiomvr} object.
@@ -1601,10 +1640,13 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 #' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option \code{center.newdata = FALSE} is
-#' for the already centered the data matrix.
+#' for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
+#'
+#' The option \code{center.newdata = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
+#' Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
 #'
 #' Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
 #' This is only for information sake.
@@ -1617,7 +1659,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #'
 #' The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
 #'
-#' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioFS_plsda_classplot()}}.
+#' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioClass_plsda_classplot()}}.
 #' @import ggplot2
 #' @import pls
 #' @import ggrepel
@@ -1626,7 +1668,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
+#' rbioClass_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
 #'                      plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
 #'                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
 #'                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -1638,7 +1680,7 @@ rbioFS_plsda_roc_auc <- function(object, rocplot = TRUE,
 #'                      plot.Width = 170, plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, center.newdata = TRUE,
+rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, center.newdata = TRUE,
                                  prob.method = "Bayes",
                                  threshold = 0.2,
                                  predplot = TRUE,
@@ -1667,10 +1709,11 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, center.n
 
   ## center data with the option of scaling
   if (center.newdata){
-    if (verbose) cat("newdata is centered with the same scaling setting as the input rbiomvr object.")
-    centerdata <- center_scale(newdata, scale = object$centerX$scale)
-    test <- centerdata$centerX
+    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")
+    centerdata <- t((t(newdata) - object$centerX$meanX) / object$centerX$columnSD)
+    test <- centerdata
   } else {
+    centerdata <- NULL
     test <- newdata
   }
 
@@ -1828,16 +1871,17 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, center.n
   }
 
   ## export
-  out <- list(predicted.value = pred_mtx, probability.summary = prob, probability.method = prob.method)
+  out <- list(predicted.value = pred_mtx, probability.summary = prob, probability.method = prob.method,
+              center.scaled.newdata = centerdata)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
 }
 
 
-#' @title rbioFS_plsda_classplot
+#' @title rbioClass_plsda_classplot
 #'
-#' @description Classification plot function for PLS-DA analysis. The function uses \code{prediction} object generated from \code{\link{rbioFS_plsda_predict}} to generate classification probablity pie charts.
-#' @param pred.object A \code{prediction} object, which can be obtained from funciton \code{\link{rbioFS_plsda_predict}}.
+#' @description Classification plot function for PLS-DA analysis. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} to generate classification probablity pie charts.
+#' @param pred.object A \code{prediction} object, which can be obtained from funciton \code{\link{rbioClass_plsda_predict}}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
@@ -1852,18 +1896,18 @@ rbioFS_plsda_predict <- function(object, comps = object$ncomp, newdata, center.n
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return  A \code{classification} obejct with classification probability summary for each sample, as well as pdf figure file fif \code{classplot = TRUE}.
-#' @details The function operates in conjunction with the prediction function \code{\link{rbioFS_plsda_predict}}, to which the sample(s) of intestested is provided.
+#' @details The function operates in conjunction with the prediction function \code{\link{rbioClass_plsda_predict}}, to which the sample(s) of intestested is provided.
 #' @import ggplot2
 #' @import ggrepel
 #' @importFrom grid grid.newpage grid.draw
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
+#' rbioClass_plsda_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
 #' }
 #' @export
-rbioFS_plsda_classplot <- function(pred.obj,
+rbioClass_plsda_classplot <- function(pred.obj,
                                    multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                    multi_plot.stripLblSize = 10,
                                    plot.Title = NULL, plot.titleSize = 10,
@@ -1874,7 +1918,7 @@ rbioFS_plsda_classplot <- function(pred.obj,
                                    plot.Width = 170, plot.Height = 150,
                                    verbose = TRUE){
   ## check arguments
-  if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioFS_plsda_predict() to generate one.\n")
+  if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioClass_plsda_predict() to generate one.\n")
 
   ## plot
   if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj$predicted.value)){

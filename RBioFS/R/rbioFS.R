@@ -36,7 +36,7 @@
 #' @param SFS_yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param SFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param SFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will be affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
 #' @details Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @examples
@@ -105,7 +105,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
   ## FS
   if (plot){
     if (verbose) cat(paste("Initial selection with plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = TRUE, n = initialFS_n,
                              plot.title = initialFS_Title,
@@ -116,7 +116,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_SFS(objTitle = objTitle,
+    RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = TRUE,
@@ -130,13 +130,13 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
   } else {
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = FALSE) # initial FS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
     if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_SFS(objTitle = objTitle,
+    RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = FALSE) # SFS
