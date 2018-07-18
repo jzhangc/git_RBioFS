@@ -79,7 +79,7 @@ Change log
           
         (ADDED)
         - New generic functions
-          - Generic plot function for permutation test: rbioUtil_permplot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
+          - Generic plot function for permutation test: rbioUtil_perm_plot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
         
         - SVM functions added (non-Shiny):
           - rbioClass_svm()
@@ -99,6 +99,8 @@ Change log
             - When "center.newdata = TRUE", the function applies training data's col.mean and col.sd to the test data 
           - rbioClass_plsda_roc_auc() now correctly uses the centered data from the rbiomvr object for ROC-AUC analysis
           - argument checking functionality adjusted with correct class checking for all PLS-DA functions
+          - output object of rbioClass_class_perm() is now defined as "rbiomvr_perm" object
+          - rbioClass_plsda_perm() updated with plotting capability, using rbioUtil_perm_plot method for class "rbiomvr_perm" 
         
         - Updates to RF-FS functions:
           - All RF-FS function names updated with new prefix: rbioFS_rf_
