@@ -60,7 +60,7 @@ Change log
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
 
-   0.6.1 (Feature preview)
+    0.6.1 (Feature preview)
       (ICEBOX)
         - SVM functions added (non-Shiny):
           - rbioClass_svm_plot()
