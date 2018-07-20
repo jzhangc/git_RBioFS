@@ -28,7 +28,8 @@ Installation
         
 
 Change log
-    0.6.0 (Feature preview)
+
+    0.6.0 (July.20.2018)
         (ADDED)
         - New generic functions:
           - Generic plot function for permutation test: rbioUtil_perm_plot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
@@ -69,7 +70,7 @@ Change log
         - Bug fixes
           
 
-    0.5.3 (June.10.2018)
+    0.5.3
         - Updates to rbioFS_PCA():
           - Legend style adjusted for the sample labels
         
