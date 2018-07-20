@@ -28,54 +28,7 @@ Installation
         
 
 Change log
-
-    Feature blueprint
-        - All-in-one classification solution functions added:
-          - rbioClass()
-          
-        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
-          - rbioClass_rf_class()
-          - rbioClass_rf_class_plot()
-          
-        - ANN (artificial neural network) functions added (non-Shiny) (tentative):
-          - rbioClass_ann()
-          - rbioClass_ann_plot()
-        
-        - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
-          - rbioClass_knn()
-          - rbioClass_knn_plot()
-        
-        - sPLS-DA functions added (non-Shiny) (tentative):
-          - rbioClass_splsda()
-          - rbioClass_splsda_plot()
-        
-        - All shiny apps' interface updated with a new look
-        
-        - Updates to rbioFS_PCA():
-          - 3D score plot option for rbioFS_PCA (non-shiny)
-          - 3D socre plot option for rbioFS_PCA_app (shiny)
-          - Legend style adjusted for the sample labels
-          - PCA function rbioFS_PCA() updated with S3 method
-
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods
-        
-
     0.6.0 (Feature preview)
-        (ICEBOX)
-        - SVM functions added (non-Shiny):
-          - rbioClass_svm_plot()
-          - rbioClass_svm_boot()
-
-        - New PLS-DA functions added (non-Shiny):
-          - rbioFS_plsda_loadingplot(): with y loading as well
-        
-        - Updates to RF-FS functions:
-          - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
-        
-        - Updates to PLS-DA functions (non-Shiny):
-          - Multi-category Y modelling now possible with rbioFS_plsda
-          - Relevant functions now also output results tst file to the directory
-          
         (ADDED)
         - New generic functions:
           - Generic plot function for permutation test: rbioUtil_perm_plot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
