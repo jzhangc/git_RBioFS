@@ -545,7 +545,6 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
   ## posterior
   if (prob.method == "logistic"){
     prob <- pred_mtx  # probability matrix
-
   } else if (prob.method == "Bayes"){
     if (!is.null(object$center.scaledX)){
       training_mtx <- as.matrix(object$center.scaledX$centerX)
