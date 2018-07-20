@@ -157,10 +157,10 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
                                 plot.Width = 170, plot.Height = 150,
                                 verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.\n")
-  if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.\n")
-  if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.\n")
-  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
+  if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.")
+  if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.")
+  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
   if (plot.rightsideY){
     if (length(comps) > 1){
       cat("right side y-axis ignored for multi-plot figure.\n")
@@ -293,7 +293,7 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
                               plot.Width = 170, plot.Height = 150,
                               verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
   if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls pacakge
 
   ## construct q2r2 dataframes
@@ -447,8 +447,8 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
                                       plot.Width = 170, plot.Height = 150,
                                       verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
-  if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.\n")
+  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
+  if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.")
   if (!tolower(ncomp.selection.method) %in% c("min", "1sd", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1sd\", or \"randomization\" exactly.")
 
   ## calcuate RMSEP
@@ -623,10 +623,13 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
                                  parallelComputing = TRUE, clusterType = "PSOCK",
                                  verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.\n")
-  if (!"validation" %in% names(object) || is.null(object$validation)) stop("PLS-DA model has to include Cross-Validation.\n")
-  if (!all(ncomp %in% seq(object$ncomp))) stop("ncomp contain non-existant comp.\n")
-  if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.")
+  if (!"validation" %in% names(object) || is.null(object$validation)) stop("PLS-DA model has to include Cross-Validation.")
+  if (!all(ncomp %in% seq(object$ncomp))) stop("ncomp contain non-existant comp.")
+  if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\".")
+  if (length(nperm) != 1) stop("nperm can only contain one integer.")
+  if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
+  if (nperm < 1) stop("nperm can only take interger equal to or greater than 1.")
 
   ## calcuate RMSEP and construct original RMSEP data frame
   rmsep <- pls::RMSEP(object)
@@ -858,16 +861,16 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
   if (any(class(object) == "rbiomvr")){
     y <- object$inputY
   } else if (!any(class(object) == "rbiomvr") & any(class(object) == "mvr")){
-    if (is.null(y)) stop("for mvr class objects, please provide response factor vector y.\n")
-    if (!is.factor(y)) stop("for mvr class objects, y has to be a factor vector.\n")
+    if (is.null(y)) stop("for mvr class objects, please provide response factor vector y.")
+    if (!is.factor(y)) stop("for mvr class objects, y has to be a factor vector.")
     y <- y
-  } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from rbioClass_plsda() function.\n")
-  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.\n")
-  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.\n")
-  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from rbioClass_plsda() function.")
+  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
+  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
+  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
   if (tolower(plot.sampleLabel.type != "none")){
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(object$inputX)) {
-      stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX). \n")}
+      stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX).")}
   }
 
   ## extract information
@@ -1110,7 +1113,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                                    plot.Width = 170, plot.Height = 150,
                                    verbose = TRUE){
   # check arguments
-  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.\n")
+  if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
 
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]
@@ -1236,7 +1239,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 }
 
 
-#' @title rbioClass_plsda_VIP
+#' @title rbioFS_plsda_VIP
 #'
 #' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
@@ -1277,7 +1280,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @importFrom scales rescale_none
 #' @examples
 #' \dontrun{
-#' rbioClass_plsda_VIP(object = new_model_optm,
+#' rbioFS_plsda_VIP(object = new_model_optm,
 #'                        vip.alpha = 0.05,
 #'                        plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
 #'                        plot.sig.line = TRUE,
@@ -1291,20 +1294,20 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #'                        plot.Height = 150)
 #' }
 #' @export
-rbioClass_plsda_VIP <- function(object, vip.alpha = 1,
-                    plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
-                    plot.sig.line = TRUE,
-                    plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
-                    plot.errorbarLblSize = 6, plot.fontType = "sans",
-                    plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
-                    plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
-                    plot.rightsideY = TRUE,
-                    plot.yLabel = "VIP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                    plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
-                    plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
-                    plot.Height = 150, verbose = TRUE){
+rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
+                             plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+                             plot.sig.line = TRUE,
+                             plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+                             plot.errorbarLblSize = 6, plot.fontType = "sans",
+                             plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                             plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
+                             plot.rightsideY = TRUE,
+                             plot.yLabel = "VIP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                             plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+                             plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+                             plot.Height = 150, verbose = TRUE){
   ## argument check
-  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.\n")
+  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
   if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using rbioClass_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
 
   ## VIP calculation
@@ -1504,7 +1507,7 @@ rbioClass_plsda_roc_auc <- function(object, rocplot = TRUE,
                                  plot.Width = 170, plot.Height = 150,
                                  verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.\n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
 
   ## calcuate ROC-AUC
@@ -1642,11 +1645,25 @@ rbioClass_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
+#'
+#' The items of the object are:
+#'
+#' \code{classifier.class}
+#'
+#' \code{predited.value}
+#'
+#' \code{prob.method}  Method to caluculate posterier probability
+#'
+#' \code{probability.summary}
+#'
+#' \code{raw.newdata}
+#'
+#' \code{center.scale}
+#'
+#' \code{center.scaled.newdata}
+#'
 #' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option \code{center.newdata = FALSE} is
 #' for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
-#'
-#' The option \code{center.newdata = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
-#' Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
 #'
 #' Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
 #' This is only for information sake.
@@ -1660,6 +1677,9 @@ rbioClass_plsda_roc_auc <- function(object, rocplot = TRUE,
 #' The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
 #'
 #' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioClass_plsda_classplot()}}.
+#'
+#' If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#'
 #' @import ggplot2
 #' @import pls
 #' @import ggrepel
@@ -1697,19 +1717,23 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
                                  plot.Width = 170, plot.Height = 150,
                                  verbose = TRUE){
   ## argument check
-  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.\n")
-  if (!class(newdata) %in% "matrix") stop("newdata has to be a matrix object. \n")
-  if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object. \n")
-  if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".\n")
-  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\". \n")
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.")
+  if (!class(newdata) %in% c("matrix", "data.frame")) stop("newdata has to be either a matrix or data.frame object.")
+  if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
+  if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
+  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
   if (tolower(plot.sampleLabel.type != "none")){
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {
-      stop("plot.sampleLabel.vector has to be the same length as nrow(newdata). \n")}
+      stop("plot.sampleLabel.vector has to be the same length as nrow(newdata).")}
   }
 
   ## center data with the option of scaling
+  if (class(newdata) == "data.frame"){
+    if (verbose) cat("data.frame x converted to a matrix object.\n")
+    newdata <- as.matrix(newdata)
+  }
   if (center.newdata){
-    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")
+    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.\n")
     centerdata <- t((t(newdata) - object$centerX$meanX) / object$centerX$columnSD)
     test <- centerdata
   } else {
@@ -1747,31 +1771,42 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
     bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
     prob <- bayespred$posterior
 
-    prob <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
-      prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
-                             Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE)
-      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
-      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
-      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
-      return(prob_dfm)
-    }
+    # prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
+    #   prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
+    #                          Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE)
+    #   prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+    #   prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+    #   prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+    #   prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+    #   return(prob_dfm)
+    # }
   } else {
     group <- colnames(pred_mtx)
     # calcuate probability
     prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
     rownames(prob_mtx) <- group
+    prob <- t(prob_mtx)
 
     # constuct plot dataframe list
-    prob <- foreach(i = 1:ncol(prob_mtx), .combine = "rbind") %do% {
-      prob_dfm <- data.frame(Sample = rep(rownames(pred_mtx)[i], times = length(group)),
-                             Class = group, Probability = prob_mtx[, i], stringsAsFactors = FALSE)
-      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
-      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
-      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
-      return(prob_dfm)
-    }
+    # prob_dfm <- foreach(i = 1:ncol(prob_mtx), .combine = "rbind") %do% {
+    #   prob_dfm <- data.frame(Sample = rep(rownames(pred_mtx)[i], times = length(group)),
+    #                          Class = group, Probability = prob_mtx[, i], stringsAsFactors = FALSE)
+    #   prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+    #   prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+    #   prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+    #   prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+    #   return(prob_dfm)
+    # }
+  }
+
+  prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
+    prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
+                           Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE, row.names = NULL)
+    prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+    prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+    prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+    prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+    return(prob_dfm)
   }
   if (verbose) cat(paste("Done!\n", sep = ""))  # initial message
 
@@ -1871,97 +1906,8 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   }
 
   ## export
-  out <- list(predicted.value = pred_mtx, probability.summary = prob, probability.method = prob.method,
-              center.scaled.newdata = centerdata)
+  out <- list(classifier.class = class(object), predicted.value = pred_mtx, probability.method = prob.method, probability.summary = prob_dfm,
+              raw.newdata = newdata, center.scale = center.newdata, center.scaled.newdata = centerdata)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
 }
-
-
-#' @title rbioClass_plsda_classplot
-#'
-#' @description Classification plot function for PLS-DA analysis. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} to generate classification probablity pie charts.
-#' @param pred.object A \code{prediction} object, which can be obtained from funciton \code{\link{rbioClass_plsda_predict}}.
-#' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj)}.
-#' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
-#' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
-#' @param plot.Title Plot title. Default is \code{FALSE}.
-#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
-#' @param plot.probLabelSize The size of the sample label. Default is \code{2}.
-#' @param plot.probLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
-#' @param plot.probLabel.outside If to put the probability label outside of the pies. Default is \code{"TRUE"}.
-#' @param plot.probLabel.outside.nudge Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param plot.SymbolSize Symbol size. Default is \code{2}.
-#' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Scoreplot width. Default is \code{170}.
-#' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return  A \code{classification} obejct with classification probability summary for each sample, as well as pdf figure file fif \code{classplot = TRUE}.
-#' @details The function operates in conjunction with the prediction function \code{\link{rbioClass_plsda_predict}}, to which the sample(s) of intestested is provided.
-#' @import ggplot2
-#' @import ggrepel
-#' @importFrom grid grid.newpage grid.draw
-#' @examples
-#' \dontrun{
-#' rbioClass_plsda_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
-#' }
-#' @export
-rbioClass_plsda_classplot <- function(pred.obj,
-                                   multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-                                   multi_plot.stripLblSize = 10,
-                                   plot.Title = NULL, plot.titleSize = 10,
-                                   plot.probLabelSize = 5, plot.probLabel.padding = 0,
-                                   plot.probLabel.outside = FALSE, plot.probLabel.outside.nudge = 1.5,
-                                   plot.fontType = "sans",
-                                   plot.legendSize = 9,
-                                   plot.Width = 170, plot.Height = 150,
-                                   verbose = TRUE){
-  ## check arguments
-  if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioClass_plsda_predict() to generate one.\n")
-
-  ## plot
-  if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj$predicted.value)){
-    stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the number of y groups.\n")
-  }
-  if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(pred.obj)),".plsda.classification.pdf...", sep = ""))  # initial message
-  plt <- ggplot(pred.obj$probability.summary, aes(x = "", y = Probability, fill = Class)) +
-    geom_col(width = 1, colour = "black", alpha = 0.8) +
-    ggtitle(plot.Title) +
-    xlab(NULL) +
-    ylab(NULL) +
-    facet_wrap(~Sample, nrow = multi_plot.nrow, ncol = multi_plot.ncol) +
-    theme(strip.background = element_rect(fill = NA, colour = "black"),  # no strip background colour
-          strip.text = element_text(face = "bold", size = multi_plot.stripLblSize),
-          panel.background = element_rect(fill = 'white', colour = 'black'),
-          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-          plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-          axis.text.x = element_blank(),
-          legend.position = multi_plot.legend.pos, legend.title = element_blank(),
-          legend.text = element_text(size = plot.legendSize),
-          legend.key = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.ticks.y = element_blank())
-
-  if (plot.probLabel.outside){
-    plt <- plt +
-      geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
-                       show.legend = FALSE, nudge_x = plot.probLabel.outside.nudge, size = plot.probLabelSize)
-  } else {
-    plt <- plt +
-      geom_label_repel(aes(label = precent.label, y = repel.label.pos), point.padding = unit(plot.probLabel.padding, "lines"),
-                       show.legend = FALSE, size = plot.probLabelSize)
-  }
-
-  plt <- plt + coord_polar("y")
-
-  # save
-  grid.newpage()
-  ggsave(filename = paste(deparse(substitute(pred.obj)),".plsda.classification.pdf", sep = ""), plot = plt,
-         width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-  grid.draw(plt)
-  if (verbose) cat("Done!\n")
-
-  invisible(plt)
-}
-

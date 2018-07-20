@@ -31,20 +31,20 @@ Change log
 
     Blueprint feature preview
         - RF-class (random forest classification) functions added (non-Shiny) (tentative):
-          - rbioFS_rf_class()
-          - rbioFS_rf_class_plot()
+          - rbioClass_rf_class()
+          - rbioClass_rf_class_plot()
           
         - ANN (artificial neural network) functions added (non-Shiny) (tentative):
-          - rbioFS_ann()
-          - rbioFS_ann_plot()
+          - rbioClass_ann()
+          - rbioClass_ann_plot()
         
         - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
-          - rbioFS_knn()
-          - rbioFS_knn_plot()
+          - rbioClass_knn()
+          - rbioClass_knn_plot()
         
         - sPLS-DA functions added (non-Shiny) (tentative):
-          - rbioFS_splsda()
-          - rbioFS_splsda_plot()
+          - rbioClass_splsda()
+          - rbioClass_splsda_plot()
         
         - All shiny apps' interface updated with a new look
         
@@ -55,6 +55,7 @@ Change log
           - PCA function rbioFS_PCA() updated with S3 method
 
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
+        
 
     0.6.0 (Feature preview)
         (ICEBOX)
@@ -65,8 +66,7 @@ Change log
           - rbioClass_svm_plot()
           - rbioClass_svm_boot()
           - rbioClass_svm_predict()
-          - rbioClass_svm_classplot()
-          
+
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
         
@@ -78,34 +78,41 @@ Change log
           - Relevant functions now also output results tst file to the directory
           
         (ADDED)
-        - New generic functions
+        - New generic functions:
           - Generic plot function for permutation test: rbioUtil_perm_plot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
+          - Generic plot function for classification: rbioUtil_classplot(). Current supported class: prediction 
         
         - SVM functions added (non-Shiny):
           - rbioClass_svm()
           - rbioClass_svm_roc_auc()
           - rbioClass_svm_perm()
+          - rbioClass_svm_predict()
         
-        - Updates to SVM functions:
-          - class weight determination functionality added to rbioClass_svm()
-          - additional items added for the modelling settings to the SVM model object (i.e. rbiosvm object).
-          
         - New PLS-DA functions added (non-Shiny):
           - rbioClass_plsda_perm(): permutation test for plsda models, with two permutation methods
         
+        - Updates to SVM functions:
+          - Class weight determination functionality added to rbioClass_svm()
+          - Additional items added for the modelling settings to the SVM model object (i.e. rbiosvm object)
+        
         - Updates to PLS-DA functions (non-Shiny):
-          - All PLS-DA function names updated with new prefix: rbioClass_
-          - data centering and scaling argument "center.newdata"" added to rbioClass_plsda_predict()
+          - All PLS-DA function names updated with new prefix: rbioClass_, except for the VIP function, which is a FS function
+          - Data centering and scaling argument "center.newdata"" added to rbioClass_plsda_predict()
             - When "center.newdata = TRUE", the function applies training data's col.mean and col.sd to the test data 
+          - rbioClass_plsda_predict() new supports data.frame object as newdata
+          - Additional argument checking added for rbioClass_plsda_perm()
           - rbioClass_plsda_roc_auc() now correctly uses the centered data from the rbiomvr object for ROC-AUC analysis
-          - argument checking functionality adjusted with correct class checking for all PLS-DA functions
-          - output object of rbioClass_class_perm() is now defined as "rbiomvr_perm" object
-          - rbioClass_plsda_perm() updated with plotting capability, using rbioUtil_perm_plot method for class "rbiomvr_perm" 
+          - Argument checking functionality adjusted with correct class checking for all PLS-DA functions
+          - Output object of rbioClass_class_perm() is now defined as "rbiomvr_perm" object
+          - rbioClass_plsda_perm() updated with plotting capability, using rbioUtil_perm_plot method for class "rbiomvr_perm"
+          - rbioClass_plsda_classplot() now changed to a generic function rbioUtil_classplot() applicable to other classifier predictions
         
         - Updates to RF-FS functions:
           - All RF-FS function names updated with new prefix: rbioFS_rf_
           
         - verbose argument added for all the relavent functions so that user can silence the messages
+        
+        - Overall code base optimization
           
         - Bug fixes
           

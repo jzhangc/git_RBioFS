@@ -31,7 +31,9 @@
 #'
 #' \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
 #'
-#' @details Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
+#' @details Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
+#'
+#' Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
 #'
 #' The function automatically detects if the data is unbalanced or not, and applies class weight accordingly. For unbalanced data, the
 #' class weight the inverse of the draw probability: \code{sample size / class size}.
@@ -67,7 +69,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
     if (verbose) cat("y is converted to factor. \n")
     y <- factor(y, levels = unique(y))
   }
-  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\". \n")
+  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
 
   ## data processing
   if (center.scale){
@@ -98,7 +100,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 
   # svm
   if (verbose) cat("SVM modelling...")
-  m <- svm(x = X, y = y, kernel = kernel, cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
+  m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
+           cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
            scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
            cross = svm.cross.k,...)
   if (verbose) cat("Done!\n")
@@ -175,7 +178,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
                                   plot.Width = 170, plot.Height = 150,
                                   verbose = TRUE){
   ## argument check
-  if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.\n")
+  if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
   if (class(newdata) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     newdata <- as.matrix(newdata)
@@ -186,7 +189,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same dimension as the training data.")
   }
   if (center.scale.newdata){
-    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data.")
+    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
 
   ## process data
@@ -335,6 +338,9 @@ rbioClass_svm_perm <- function(object,
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
   if (!"tot.accuracy" %in% names(object) || is.null(object$tot.accuracy)) stop("SVM model has to include tot.accuracy value from Cross-Validation.\n")
   if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
+  if (length(nperm) != 1) stop("nperm can only contain one integer. \n")
+  if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
+  if (nperm < 1) stop("nperm can only take interger equal to or greater than 1. \n")
 
   ## test
   ## calcuate RMSEP and construct original RMSEP data frame
@@ -448,3 +454,135 @@ rbioClass_svm_perm <- function(object,
   }
 }
 
+
+#' @title rbioClass_svm_predict
+#'
+#' @description Prediction function for SVM analysis. The function calculates the predicted value for unknown sample data using the input SVM model.
+#' @param object A \code{rbiosvm} object.
+#' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
+#' @param sampleLabel.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
+#' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return  A \code{prediction} obejct. The items of the object are:
+#'
+#' \code{classifier.class}
+#'
+#' \code{predited.value}
+#'
+#' \code{prob.method}  Method to caluculate posterier probability
+#'
+#' \code{probability.summary}
+#'
+#' \code{raw.newdata}
+#'
+#' \code{center.scale}
+#'
+#' \code{center.scaled.newdata}
+#'
+#' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object. The option \code{center.scale.newdata = FALSE} is
+#' for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
+#'
+#' The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
+#' See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
+#'
+#' If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#'
+#' @import ggplot2
+#' @import pls
+#' @importFrom klaR NaiveBayes
+#' @examples
+#' \dontrun{
+#'
+#'
+#' }
+#' @export
+rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
+                                  center.scale.newdata = TRUE, prob.method = "logistic",
+                                  verbose = TRUE){
+  ## argument check
+  if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
+  if (!class(newdata) %in% c("matrix", "data.frame")) stop("newdata has to be either a matrix or data.frame object.")
+  if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
+  if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
+  if (center.scale.newdata){
+    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
+  }
+  if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
+    if (length(sampleLabel.vector) != nrow(newdata)){
+      cat("")
+      sampleLabel.vector <- NULL
+    }
+  }
+
+  ## center data with the option of scaling
+  if (class(newdata) == "data.frame"){
+    if (verbose) cat("data.frame x converted to a matrix object.\n")
+    newdata <- as.matrix(newdata)
+  }
+  if (center.scale.newdata){
+    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")
+    centerdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    test <- centerdata
+  } else {
+    centerdata <- NULL
+    test <- newdata
+  }
+
+  ## predict
+  rownames(test) <- 1:nrow(test)
+  # pred <- predict(object = object, newdata = test, type = "response", probability = TRUE)
+  pred <- predict(object = object, newdata = test, probability = TRUE)
+  pred_mtx <- attr(pred, "probabilities")  # probability matrix
+
+  if (is.null(dim(pred_mtx))) {  # if only one sample
+    pred_mtx <- t(as.matrix(pred_mtx))
+  }
+  if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
+    rownames(pred_mtx) <- sampleLabel.vector
+  }
+
+  ## posterior
+  if (prob.method == "logistic"){
+    prob <- pred_mtx  # probability matrix
+
+  } else if (prob.method == "Bayes"){
+    if (!is.null(object$center.scaledX)){
+      training_mtx <- as.matrix(object$center.scaledX$centerX)
+    } else {
+      training_mtx <- as.matrix(object$inputX)
+    }
+    trainingpred <- predict(object = object, newdata = training_mtx, type = "response", probability = TRUE)
+    trainingpred <- attributes(trainingpred)$probabilities
+    bayes.prob <- klaR::NaiveBayes(x = trainingpred, grouping = object$inputY, usekernel = TRUE)
+    bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calcuate posterior probability for
+    bayes.prob$x <- NULL
+
+    bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
+    prob <- bayespred$posterior
+  } else {
+    group <- colnames(pred_mtx)
+    # calcuate probability
+    prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
+    rownames(prob_mtx) <- group
+    prob <- t(prob_mtx)
+  }
+
+  prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
+    prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
+                           Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE, row.names = NULL)
+    prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+    prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+    prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+    prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+    return(prob_dfm)
+  }
+
+  ## output
+  predicted.value <- pred
+  attributes(predicted.value) <- NULL
+  out <- list(classifier.class = class(object), predicted.value = predicted.value, prob.method = prob.method, probability.summary = prob_dfm,
+              raw.newdata = newdata, center.scale = center.scale.newdata, center.scaled.newdata = centerdata)
+  class(out) <- "prediction"
+  assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
+}

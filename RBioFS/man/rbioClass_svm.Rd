@@ -54,6 +54,8 @@ Additional items for \code{rbiosvm} object to \code{svm} object from e1071 packa
 Support Vector Machine (SVM) modelling
 }
 \details{
+Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
+
 Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
 
 The function automatically detects if the data is unbalanced or not, and applies class weight accordingly. For unbalanced data, the

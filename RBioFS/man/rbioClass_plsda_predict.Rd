@@ -91,6 +91,22 @@ rbioClass_plsda_predict(object, comps = object$ncomp, newdata,
 }
 \value{
 A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
+
+The items of the object are:
+
+\code{classifier.class}
+
+\code{predited.value}
+
+\code{prob.method}  Method to caluculate posterier probability
+
+\code{probability.summary}
+
+\code{raw.newdata}
+
+\code{center.scale}
+
+\code{center.scaled.newdata}
 }
 \description{
 Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.
@@ -98,9 +114,6 @@ Prediction function for PLS-DA analysis. The function calculates the predicted v
 \details{
 Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option \code{center.newdata = FALSE} is
 for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
-
-The option \code{center.newdata = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
-Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
 
 Regarding \code{threshold}, the value should between \code{0} and \code{1}. It's the flank region around the dummified classification values \code{0} (i.e. "control") and \code{1} (i.e. "case").
 This is only for information sake.
@@ -114,6 +127,8 @@ The "softmax" method uses the equation: \code{probability = exp(predicted.value)
 The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
 
 For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioClass_plsda_classplot()}}.
+
+If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
 }
 \examples{
 \dontrun{
