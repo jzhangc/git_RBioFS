@@ -36,6 +36,7 @@
 #' @param SFS_yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param SFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param SFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
 #' @details Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @examples
@@ -58,8 +59,8 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                    SFS_Title = NULL, SFS_xLabel = NULL, SFS_yLabel = NULL,
                    SFS_errorbar = "SEM", SFS_errorbarWidth = 0.2,
                    SFS_symbolSize = 2, SFS_xTickLblSize = 10, SFS_yTickLblSize =10,
-                   SFS_plotWidth = 170, SFS_plotHeight = 150
-                   ){
+                   SFS_plotWidth = 170, SFS_plotHeight = 150,
+                   verbose = TRUE){
   ## argument check
   if (!is.null(file) & !is.null(input)) stop("set only one of the \"file\" and \"input\"")
   if (is.null(file) & is.null(input)) stop("set one of the \"file\" and \"input\"")
@@ -77,6 +78,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
   ## imputation
   if (impute){
+    if (verbose) cat(paste("Imputing missing data using ", imputeMethod, " method...", sep = ""))  # initial message
     imp_data <- RBioFS::rbioIMP(dfm = raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], method = imputeMethod,
                              iter = imputeIter, ntree = imputeNtree,
                              fct = tgt, annot = raw[, sampleIDVar], transpo = FALSE)
@@ -86,21 +88,24 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
     # export imputation results
     out <- data.frame(raw[, c(sampleIDVar, groupIDVar)], imp_data, check.names = FALSE)
     write.csv(out, file = paste(objTitle, "_imputed.csv", sep = ""), row.names = FALSE)
+    if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   } else {
     fs_data <- data.frame(raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], check.names = FALSE)
   }
 
   if (quantileNorm){ # normalization
+    if (verbose) cat(paste("Quantile normalization...", sep = ""))  # initial message
     fs_data <- t(fs_data)
     fs_data <- RBioFS::rbioNorm(fs_data, correctBG = FALSE)
     fs_data <- t(fs_data)
     fs_data <- data.frame(fs_data, check.names = FALSE)
+    if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   }
 
   ## FS
   if (plot){
-    cat(paste("Initial selection with plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    if (verbose) cat(paste("Initial selection with plotting...", sep = ""))  # initial message
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = TRUE, n = initialFS_n,
                              plot.title = initialFS_Title,
@@ -108,10 +113,10 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                              plot.xLabel = initialFS_xLabel, plot.yLabel = initialFS_yLabel,
                              plot.xTickLblSize = initialFS_xTickLblSize, plot.yTickLblSize = initialFS_yTickLblSize,
                              plot.Width = initialFS_plotWidth, plot.Height = initialFS_plotHeight) # initial FS
-    cat(paste("Done!\n", sep = ""))  # final message
+    if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
-    cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_SFS(objTitle = objTitle,
+    if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
+    RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = TRUE,
@@ -120,21 +125,21 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                        plot.errorbar = SFS_errorbar, plot.errorbarWidth = SFS_errorbarWidth,
                        plot.symbolSize = SFS_symbolSize, plot.xTickLblSize = SFS_xTickLblSize, plot.yTickLblSize = SFS_yTickLblSize,
                        plot.Width = SFS_plotWidth, plot.Height = SFS_plotHeight) # SFS
-    cat(paste("Done!\n", sep = ""))  # final message
+    if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
 
   } else {
-    cat(paste("Initial selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
                              plot = FALSE) # initial FS
-    cat(paste("Done!\n", sep = ""))  # final message
+    if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
-    cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioRF_SFS(objTitle = objTitle,
+    if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
+    RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = FALSE) # SFS
-    cat(paste("Done!\n", sep = ""))  # final message
+    if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   }
 }

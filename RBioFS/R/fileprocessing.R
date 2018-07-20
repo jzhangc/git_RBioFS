@@ -71,6 +71,7 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
   return(out)
 }
 
+
 #' @title rbioNorm
 #'
 #' @description Data normalization. This is a shell function using limma package.
@@ -123,13 +124,13 @@ center_scale <- function(x, scale = TRUE){
   if (scale){
     col.sd <- colSds(x, center = col.mean, na.rm = TRUE) # matrixStats::colSds
     # check zero values
-    if (any(abs(col.sd) < .Machine$double.eps^0.5))warning("Scaling with (near) zero standard deviation")
+    if (any(abs(col.sd) < .Machine$double.eps^0.5)) warning("Scaling with (near) zero standard deviation")
     temp <- t((t(x) - col.mean) / col.sd)  # centre + scale
   } else {
     col.sd <- NULL
     temp <- t((t(x) - col.mean)) # centre
   }
-  out <- list(centerX = temp, meanX = col.mean, scale = ifelse(scale, "yes", "no"), columnSD = col.sd)
+  out <- list(centerX = temp, meanX = col.mean, scale = ifelse(scale, TRUE, FALSE), columnSD = col.sd)
   return(out)
 }
 

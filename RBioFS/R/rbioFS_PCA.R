@@ -33,6 +33,7 @@
 #' @param fontType Font for the figure texts. Default is \code{"sans"}.
 #' @param xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
 #' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2
@@ -60,7 +61,8 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        biplot.mtx.densityplot = FALSE, biplot.mtx.stripLblSize = 10,
                        biplot.Width = 170, biplot.Height = 150,
                        rightsideY = FALSE,
-                       fontType = "sans", xTickLblSize = 10, yTickLblSize = 10){
+                       fontType = "sans", xTickLblSize = 10, yTickLblSize = 10,
+                       verbose = TRUE){
   ## check the argument
   if (!all(c(sampleIDVar, groupIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
 
@@ -78,7 +80,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
   ## Boxplot
   if (boxplot){
-    cat(paste("Boxplot being saved to file: ", deparse(substitute(input)), ".pca.boxplot.pdf...", sep = ""))  # initial message
+    if (verbose) cat(paste("Boxplot being saved to file: ", deparse(substitute(input)), ".pca.boxplot.pdf...", sep = ""))  # initial message
     grid.newpage()
     boxplt <- ggplot(data = boxdfm_x, aes(x = PC, y = varpp_x, group = 1)) +
       geom_bar(position = "dodge", stat = "identity", color = "black", fill = "gray66") +
@@ -102,7 +104,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
     ggsave(filename = paste(deparse(substitute(input)),".pca.boxplot.pdf", sep = ""), plot = boxplt,
            width = boxplot.Width, height = boxplot.Height, units = "mm",dpi = 600)
-    cat("Done!\n")
+    if (verbose) cat("Done!\n")
     grid.draw(boxplt) # preview
   }
 
@@ -127,7 +129,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       score_x$sample <- as.numeric(rownames(score_x))
       names(score_x)[1] <- "axis1"
 
-      cat(paste("Single PC biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
+      if (verbose) cat(paste("Single PC biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
         geom_line(aes(colour = group, linetype = group))
 
@@ -164,7 +166,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
     } else if (length(biplot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
 
-      cat(paste("Biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
+      if (verbose) cat(paste("Biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = axis1, y = axis2))
 
       # sample labels
@@ -256,7 +258,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       }
 
       # matrx scoreplot
-      cat(paste("Biplot matrix being saved to file: ", deparse(substitute(input)),".pca.biplot.pdf...", sep = ""))  # initial message
+      if (verbose) cat(paste("Biplot matrix being saved to file: ", deparse(substitute(input)),".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggpairs(score_x, columns = biplot.comps, aes(colour = group, shape = group),
                        axisLabels = "show", columnLabels = pc_axis_lbl,
                        showStrips = NULL,
@@ -280,7 +282,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
     }
     ggsave(filename = paste(deparse(substitute(input)),".pca.biplot.pdf", sep = ""), plot = biplt,
            width = biplot.Width, height = biplot.Height, units = "mm",dpi = 600)
-    cat("Done!\n") # final message
+    if (verbose) cat("Done!\n") # final message
     grid.draw(biplt)
   }
 

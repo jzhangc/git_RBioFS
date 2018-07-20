@@ -28,6 +28,46 @@ Installation
         
 
 Change log
+    0.6.0 (Feature preview)
+        (ADDED)
+        - New generic functions:
+          - Generic plot function for permutation test: rbioUtil_perm_plot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
+          - Generic plot function for classification: rbioUtil_classplot(). Current supported class: prediction 
+        
+        - SVM functions added (non-Shiny):
+          - rbioClass_svm()
+          - rbioClass_svm_roc_auc()
+          - rbioClass_svm_perm()
+          - rbioClass_svm_predict()
+        
+        - New PLS-DA functions added (non-Shiny):
+          - rbioClass_plsda_perm(): permutation test for plsda models, with two permutation methods
+        
+        - Updates to SVM functions:
+          - Class weight determination functionality added to rbioClass_svm()
+          - Additional items added for the modelling settings to the SVM model object (i.e. rbiosvm object)
+        
+        - Updates to PLS-DA functions (non-Shiny):
+          - All PLS-DA function names updated with new prefix: rbioClass_, except for the VIP function, which is a FS function
+          - Data centering and scaling argument "center.newdata"" added to rbioClass_plsda_predict()
+            - When "center.newdata = TRUE", the function applies training data's col.mean and col.sd to the test data 
+          - rbioClass_plsda_predict() new supports data.frame object as newdata
+          - Additional argument checking added for rbioClass_plsda_perm()
+          - rbioClass_plsda_roc_auc() now correctly uses the centered data from the rbiomvr object for ROC-AUC analysis
+          - Argument checking functionality adjusted with correct class checking for all PLS-DA functions
+          - Output object of rbioClass_class_perm() is now defined as "rbiomvr_perm" object
+          - rbioClass_plsda_perm() updated with plotting capability, using rbioUtil_perm_plot method for class "rbiomvr_perm"
+          - rbioClass_plsda_classplot() now changed to a generic function rbioUtil_classplot() applicable to other classifier predictions
+        
+        - Updates to RF-FS functions:
+          - All RF-FS function names updated with new prefix: rbioFS_rf_
+          
+        - verbose argument added for all the relavent functions so that user can silence the messages
+        
+        - Overall code base optimization
+          
+        - Bug fixes
+          
 
     0.5.3 (June.10.2018)
         - Updates to rbioFS_PCA():
@@ -84,7 +124,7 @@ Change log
         - Bug fixes
 
 
-    0.5.1 (May.24.2018)
+    0.5.1
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_VIP(): VIP, or variable importance in projection, is plsda's version of VI. Can be used independently from plsda functions
           - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
