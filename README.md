@@ -30,7 +30,6 @@ Installation
 Change log
 
     0.6.0 (July.20.2018)
-        (ADDED)
         - New generic functions:
           - Generic plot function for permutation test: rbioUtil_perm_plot(). Current supported classes: rbiomvr_perm, rbiosvm_perm
           - Generic plot function for classification: rbioUtil_classplot(). Current supported class: prediction 
