@@ -29,7 +29,10 @@ Installation
 
 Change log
 
-    Blueprint feature preview
+    Feature blueprint
+        - All-in-one classification solution functions added:
+          - rbioClass()
+          
         - RF-class (random forest classification) functions added (non-Shiny) (tentative):
           - rbioClass_rf_class()
           - rbioClass_rf_class_plot()
@@ -59,13 +62,9 @@ Change log
 
     0.6.0 (Feature preview)
         (ICEBOX)
-        - Overall classification functioins added:
-          - rbioClass()
-        
         - SVM functions added (non-Shiny):
           - rbioClass_svm_plot()
           - rbioClass_svm_boot()
-          - rbioClass_svm_predict()
 
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well

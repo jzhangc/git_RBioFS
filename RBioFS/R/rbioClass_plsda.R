@@ -1770,33 +1770,12 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
 
     bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
     prob <- bayespred$posterior
-
-    # prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
-    #   prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
-    #                          Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE)
-    #   prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-    #   prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
-    #   prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
-    #   prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
-    #   return(prob_dfm)
-    # }
   } else {
     group <- colnames(pred_mtx)
     # calcuate probability
     prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
     rownames(prob_mtx) <- group
     prob <- t(prob_mtx)
-
-    # constuct plot dataframe list
-    # prob_dfm <- foreach(i = 1:ncol(prob_mtx), .combine = "rbind") %do% {
-    #   prob_dfm <- data.frame(Sample = rep(rownames(pred_mtx)[i], times = length(group)),
-    #                          Class = group, Probability = prob_mtx[, i], stringsAsFactors = FALSE)
-    #   prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-    #   prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
-    #   prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
-    #   prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
-    #   return(prob_dfm)
-    # }
   }
 
   prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
