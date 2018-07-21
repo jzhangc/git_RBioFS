@@ -1,5 +1,5 @@
 # git_RBioFS
-A simple to use package for implementing machine learning feature selection in biological and biochemical research
+A comprehensive yet straightforward machine learning package for biological and biochemical research
 
 To cite in publication
   
