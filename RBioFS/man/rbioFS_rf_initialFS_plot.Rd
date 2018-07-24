@@ -6,13 +6,14 @@
 \usage{
 rbioFS_rf_initialFS_plot(object, n = "all",
   plot.file.title = deparse(substitute(object)), plot.title = NULL,
-  plot.titleSize = 10, plot.errorbar = "sem", plot.errorbarWidth = 0.2,
-  plot.outlineCol = "black", plot.fontType = "sans",
-  plot.xLabel = "Features", plot.xLabelSize = 10, plot.xAngle = 90,
-  plot.xhAlign = 0.95, plot.xvAlign = 0.5, plot.xTickLblSize = 10,
-  plot.xTickItalic = FALSE, plot.xTickBold = FALSE,
-  plot.rightsideY = TRUE, plot.yLabel = "Mean Decrease in Accuracy",
-  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
+  plot.fs.line = TRUE, plot.titleSize = 10, plot.errorbar = "sem",
+  plot.errorbarWidth = 0.2, plot.outlineCol = "black",
+  plot.fontType = "sans", plot.xLabel = "Features", plot.xLabelSize = 10,
+  plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
+  plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+  plot.xTickBold = FALSE, plot.rightsideY = TRUE,
+  plot.yLabel = "Feature Importance", plot.yLabelSize = 10,
+  plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
   plot.yTickBold = FALSE, plot.Width = 170, plot.Height = 150,
   verbose = TRUE)
 }
@@ -24,6 +25,8 @@ rbioFS_rf_initialFS_plot(object, n = "all",
 \item{plot.file.title}{Plot file title prefix. Defatuls is \code{deparse(substitute(object))}.}
 
 \item{plot.title}{Whether to display plot title on top of the plot. Default is \code{FALSE}.}
+
+\item{plot.fs.line}{Wether to display the vi line at the feature selection threshold. Default is \code{TRUE}.}
 
 \item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
 

@@ -30,13 +30,6 @@ Installation
 Change log
 
     Feature blueprint
-        - All-in-one classification solution functions added:
-          - rbioClass()
-          
-        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
-          - rbioClass_rf_class()
-          - rbioClass_rf_class_plot()
-          
         - ANN (artificial neural network) functions added (non-Shiny) (tentative):
           - rbioClass_ann()
           - rbioClass_ann_plot()
@@ -62,19 +55,31 @@ Change log
 
     0.6.1 (Feature preview)
       (ICEBOX)
+        - All-in-one classification solution functions added:
+          - rbioClass()
+          
+        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
+          - rbioClass_rf_class()
+          - rbioClass_rf_class_plot()
+          
         - SVM functions added (non-Shiny):
           - rbioClass_svm_plot()
           - rbioClass_svm_boot()
+          - rbioClass_svm_nestedCV()
 
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
         
-        - Updates to RF-FS functions:
-          - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
-        
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
           - Relevant functions now also output results tst file to the directory
+          
+        (ADDED)
+        - Updates to RF-FS functions:
+          - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
+          - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
+          
+        - Bug fixes
           
 
     0.6.0 (July.20.2018)

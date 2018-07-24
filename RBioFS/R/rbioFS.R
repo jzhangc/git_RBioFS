@@ -117,7 +117,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
-                       x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
+                       x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = TRUE,
                        n = SFS_n,
@@ -137,7 +137,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
 
     if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
-                       x = get(paste(objTitle, "_initial_FS", sep = ""))$matrix_initial_FS,
+                       x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
                        plot = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message

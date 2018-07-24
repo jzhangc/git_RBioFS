@@ -63,7 +63,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
   if (class(x) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-    x <- as.matrix(x)
+    x <- as.matrix(sapply(x, as.numeric))
   }
   if (class(y) != "factor"){
     if (verbose) cat("y is converted to factor. \n")
@@ -181,7 +181,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
   if (class(newdata) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-    newdata <- as.matrix(newdata)
+    newdata <- as.matrix(sapply(newdata, as.numeric))
   }
   if (is.vector(newdata)) {
     if (!is.vector(object$inputX)) stop("test data should have the same dimension as the training data.")
@@ -518,7 +518,7 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
   ## center data with the option of scaling
   if (class(newdata) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-    newdata <- as.matrix(newdata)
+    newdata <- as.matrix(sapply(newdata, as.numeric))
   }
   if (center.scale.newdata){
     if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")

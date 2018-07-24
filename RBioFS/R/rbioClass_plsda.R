@@ -76,7 +76,7 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
   }
   if (class(x) == "data.frame"){
     message(cat("data.frame x converted to a matrix object.\n"))
-    x <- as.matrix(x)
+    x <- as.matrix(sapply(x, as.numeric))
   }
   if (!is.factor(y))stop("y has to be a factor object.")
   if (is.null(ncomp))stop("please set the ncomp number.")
@@ -1730,7 +1730,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   ## center data with the option of scaling
   if (class(newdata) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-    newdata <- as.matrix(newdata)
+    newdata <- as.matrix(sapply(newdata, as.numeric))
   }
   if (center.newdata){
     if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.\n")
