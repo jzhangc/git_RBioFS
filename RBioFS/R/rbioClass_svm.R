@@ -61,8 +61,9 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
                        verbose = TRUE){
   ## check arguments
   if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
-  if (class(x) == "data.frame"){
-    if (verbose) cat("data.frame x converted to a matrix object.\n")
+  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
+  if (class(x) == "data.frame" | is.vector(x)){
+    if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
   if (class(y) != "factor"){
@@ -116,10 +117,231 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   m$class.weights <- wgt
   m$svm.cross.k <- svm.cross.k
   m$tune.method <- tune.method
-  m$tune.cross.k <- tune.cross.k
-  m$tune.boot.n <- tune.boot.n
+  m$tune.cross.k <- if(tune.method == "cross") tune.cross.k else NULL
+  m$tune.boot.n <- if(tune.method == "boot") tune.boot.n else NULL
   class(m) <- c("svm", "rbiosvm")
   return(m)
+}
+
+
+#' @title rbioClass_svm_ncv_fs
+#'
+#' @description Nested cross-validation assessment for SVM classification. It evaluates the overall performace of SVM modelling given the training data.
+#' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
+#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param center.scale Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
+#' @param tune.method Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
+#' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
+#' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
+#' @param ... Additional arguments for \code{rbioClass_svm}.
+#' @param fs.method Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.
+#' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
+#'
+#' Additional items for \code{rbiosvm_nestedcv}:
+#'
+#' \code{cv.fold}:
+#'
+#' \code{randomized.sample.index}:
+#'
+#' \code{tot.nested.accuracy.summary}:
+#'
+#' \code{nested.accuracy}:
+#'
+#' \code{fs.method}:
+#'
+#' \code{selected.features}:
+#'
+#' \code{nested.fs.count}:
+#'
+#' \code{tune.method}:
+#'
+#' \code{tune.cross.k}:
+#'
+#' \code{tune.boot.n}:
+#'
+#' @details TBA
+#'
+#' For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
+#' Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.
+#' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
+#' meaning maximum number of features selected from the nested cross-validation are reported.
+#'
+#' @import foreach
+#' @import doParallel
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @examples
+#' \dontrun{
+#' svm_nestedcv <- rbioClass_svm_ncv_fs(x = mydata[, -c(1:2)],
+#'                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+#'                                      center.scale = TRUE,
+#'                                      cross.k = 5,
+#'                                      tune.method = "cross",
+#'                                      tune.cross.k = 5,
+#'                                      parallelComputing = TRUE, clusterType = "FORK")
+#'
+#' }
+#' @export
+rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
+                                 kernel = "radial",
+                                 cross.k = 10,
+                                 tune.method = "cross",
+                                 tune.cross.k = 10, tune.boot.n = 10, ...,
+                                 fs.method = "rf", fs.count.cutoff = cross.k,
+                                 parallelComputing = TRUE, clusterType = "PSOCK",
+                                 verbose = TRUE){
+  ## check arguments
+  if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
+  if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+  if (cross.k > nrow(x)) stop("Cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
+  if (class(x) == "data.frame"){
+    if (verbose) cat("data.frame x converted to a matrix object.\n")
+    x <- as.matrix(sapply(x, as.numeric))
+  }
+  if (class(y) != "factor"){
+    if (verbose) cat("y is converted to factor. \n")
+    y <- factor(y, levels = unique(y))
+  }
+  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
+
+  ## nested cv
+  # processing training data
+  dfm <- data.frame(y, x, check.names = FALSE)
+  random_sample_idx <- sample(nrow(dfm))
+  dfm_randomized <- dfm[random_sample_idx, ]  # randomize samples
+  fold <- cut(seq(1:nrow(dfm_randomized)), breaks = cross.k, labels = FALSE)  # create a factor object with fold indices
+
+  # nested cv
+  if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
+  if (verbose) cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
+  if (verbose) cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...")
+  nested.cv.list <- vector(mode = "list", length = cross.k)
+  if (!parallelComputing){  # single core
+    nested.cv.list[] <- foreach(i = 1:cross.k) %do% {
+      training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
+      # fs
+      if (center.scale){
+        fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
+      }
+      rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
+                          nTree = 1001, mTry = 6, multicore = FALSE, plot = FALSE)
+      # fs <- svm_nested_initial_FS$feature_initial_FS
+      rbioFS_rf_SFS(objTitle = "svm_nested", x = x_vs_tgt_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
+                    nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+      if (length(svm_nested_SFS$selected_features) > 1){
+        fs <- svm_nested_SFS$selected_features
+      } else {
+        fs <- svm_nested_initial_FS$feature_initial_FS
+      }
+
+      # cv svm
+      m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
+                         svm.cross.k = 0, tune.method = tune.method,
+                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
+
+      # processing test data
+      test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
+      if (center.scale){ # using training data mean and sd
+        centered_newdata <- t((t(test[, -1]) - m$center.scaledX$meanX) / m$center.scaledX$columnSD)
+        test[, -1] <- centered_newdata
+      } else {
+        centered_newdata <- NULL
+      }
+      pred <- predict(m, newdata = test[, -1])
+      accu <- sum(diag(table(pred, test$y))) / length(test$y)  # accuracy = total TP / total (TP: true positive)
+
+      # foreach output
+      tmp_out <- list(selected.features = fs, nested.cv.accuracy = accu)
+      tmp_out
+    }
+  } else {  # multiple cores
+    # set clusters
+    n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores, clusterType = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # computing
+    nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %dopar% {
+      training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
+      # fs
+      if (center.scale){
+        fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
+      }
+      rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
+                          nTree = 1001, mTry = 6, multicore = FALSE, plot = FALSE)
+      # fs <- svm_nested_initial_FS$feature_initial_FS
+      rbioFS_rf_SFS(objTitle = "svm_nested", x = x_vs_tgt_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
+                    nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+      if (length(svm_nested_SFS$selected_features) > 1){
+        fs <- svm_nested_SFS$selected_features
+      } else {
+        fs <- svm_nested_initial_FS$feature_initial_FS
+      }
+
+      # cv svm
+      m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
+                         svm.cross.k = 0, tune.method = tune.method,
+                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
+
+      # processing test data
+      test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
+      if (center.scale){ # using training data mean and sd
+        centered_newdata <- t((t(test[, -1]) - m$center.scaledX$meanX) / m$center.scaledX$columnSD)
+        test[, -1] <- centered_newdata
+      } else {
+        centered_newdata <- NULL
+      }
+      pred <- predict(m, newdata = test[, -1])
+      accu <- sum(diag(table(pred, test$y))) / length(test$y)  # accuracy = total TP / total (TP: true positive)
+
+      # foreach output
+      tmp_out <- list(selected.features = fs, nested.cv.accuracy = accu)
+      tmp_out
+    }
+  }
+  names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
+
+  nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
+    nested.cv.list[[i]]$nested.cv.accuracy
+  }
+  nested.fs <- foreach(i = 1:cross.k, .combine = "c") %do% {
+    nested.cv.list[[i]]$selected.features
+  }
+  fs.count <- sort(table(nested.fs), decreasing = TRUE)
+  if (verbose) cat("Done!\n")
+
+  ## output
+  tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
+  names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
+  selected.features <- names(fs.count[which(fs.count >= fs.count.cutoff)])
+
+  # display
+  if (verbose) cat("\n")
+  if (verbose) cat("Nested cross-validation accuracy summary: \n")
+  if (verbose) print(tot.nested.acc.summary)
+  if (verbose) cat("\n")
+  if (verbose) cat("Nested cross-validation selected features: \n")
+  if (verbose) print(selected.features)
+
+  # export to environment
+  out <- list(cv.fold = fold,
+              randomized.sample.index = random_sample_idx,
+              tot.nested.accuracy.summary = tot.nested.acc.summary,
+              nested.accuracy = nested.accu,
+              fs.method = fs.method,
+              selected.features = selected.features,
+              nested.fs.count = fs.count,
+              tune.method = tune.method,
+              tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
+              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL)
+
+  class(out) <- "rbiosvm_nestedcv"
+  return(out)
 }
 
 
@@ -179,15 +401,12 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
-  if (class(newdata) == "data.frame"){
-    if (verbose) cat("data.frame x converted to a matrix object.\n")
+  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
+  if (class(newdata) == "data.frame" | is.null(dim(newdata))){
+    if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }
-  if (is.vector(newdata)) {
-    if (!is.vector(object$inputX)) stop("test data should have the same dimension as the training data.")
-  } else {
-    if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same dimension as the training data.")
-  }
+  if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same dimension as the training data.")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
@@ -439,8 +658,8 @@ rbioClass_svm_perm <- function(object,
 
   # print results
   if (verbose) cat("\n")
-  cat("Permutation test restuls (p value):")
-  cat(p.val)
+  if (verbose) cat("Permutation test restuls (p value):")
+  if (verbose) cat(p.val)
   if (verbose) cat("\n")
 
   # export to the directory

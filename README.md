@@ -65,7 +65,6 @@ Change log
         - SVM functions added (non-Shiny):
           - rbioClass_svm_plot()
           - rbioClass_svm_boot()
-          - rbioClass_svm_nestedCV()
 
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
@@ -73,8 +72,18 @@ Change log
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
           - Relevant functions now also output results tst file to the directory
+          - Bootstraping option added for rbioClass_plsda() so that VIP can use bootstrap data for SD/SEM errorbars
           
         (ADDED)
+        - New SVM functions:
+          - rbioClass_svm_ncv_fs()
+          
+        - Updates to SVM functions (non-Shiny):
+          - Additional argument checks
+          
+        - Updates to PLS-DA functions (non-Shiny):
+          - Additional argument checks
+          
         - Updates to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS

@@ -71,11 +71,9 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
                          jackknife = TRUE, ...,
                          verbose = TRUE){
   ## check arguments
-  if (!class(x) %in% c("matrix", "data.frame")){
-    stop(cat("x has to be either a matrix or data frame."))
-  }
-  if (class(x) == "data.frame"){
-    message(cat("data.frame x converted to a matrix object.\n"))
+  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
+  if (class(x) == "data.frame" | is.vector(x)){
+    if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
   if (!is.factor(y))stop("y has to be a factor object.")
@@ -1718,7 +1716,12 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
                                  verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.")
-  if (!class(newdata) %in% c("matrix", "data.frame")) stop("newdata has to be either a matrix or data.frame object.")
+
+  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
+  if (class(newdata) == "data.frame" | is.null(dim(newdata))){
+    if (verbose) cat("newdata converted to a matrix object.\n")
+    newdata <- as.matrix(sapply(newdata, as.numeric))
+  }
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
@@ -1728,10 +1731,6 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   }
 
   ## center data with the option of scaling
-  if (class(newdata) == "data.frame"){
-    if (verbose) cat("data.frame x converted to a matrix object.\n")
-    newdata <- as.matrix(sapply(newdata, as.numeric))
-  }
   if (center.newdata){
     if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.\n")
     centerdata <- t((t(newdata) - object$centerX$meanX) / object$centerX$columnSD)

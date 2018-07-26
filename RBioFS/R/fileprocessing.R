@@ -118,7 +118,10 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
 #' }
 #' @export
 center_scale <- function(x, scale = TRUE){
-  if (!is.matrix(x))stop("x needs to be a matrix")
+  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
+  if (class(x) == "data.frame" | is.vector(x)){
+    x <- as.matrix(sapply(x, as.numeric))
+  }
 
   col.mean <- colMeans(x, na.rm = TRUE)
   if (scale){

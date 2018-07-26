@@ -203,10 +203,13 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   if (ncol(x) == 1){
     stop("only one feature detected. No need to select.")
   }
+  if (class(x) == "data.frame"){
+    x <- as.matrix(sapply(x, as.numeric))
+  }
 
   #### recursive RF
   ### load the dataframe/matrix
-  training <- as.matrix(x)
+  training <- x
 
   ### pepare the target variable
   tgt <- factor(as.character(targetVar), levels = unique(targetVar))
@@ -325,7 +328,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
 
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   outlst <- list(feature_initial_FS = feature_initFS,
-                 vi_at_threshold = outdfm_vi[thsd, outdfm_vi$Mean],
+                 vi_at_threshold = outdfm_vi[thsd, "Mean"],
                  vi_summary = outdfm_vi,
                  initial_FS_OOB_err_summary = outdfm_OOB_err,
                  training_initial_FS = training_initFS)

@@ -23,7 +23,7 @@ rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
 
 \item{file}{Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.}
 
-\item{input}{Input data frame. They type should be \code{data frame} or \code{matrix}. Set either this or \code{file}, but not both.}
+\item{input}{Input data frame. The type should be \code{data.frame} or \code{matrix}. Set either this or \code{file}, but not both.}
 
 \item{sampleIDVar}{Sample variable name. It's a character string.}
 
