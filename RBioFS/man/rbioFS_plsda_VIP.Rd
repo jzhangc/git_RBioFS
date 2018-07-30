@@ -33,12 +33,19 @@ rbioFS_plsda_vip(object, vip.alpha = 1, comps = c(1, 2),
 Outputs a \code{rbiomvr_vip} class object to the environment.
 
 \code{rbiomvr_vip} items are:
+
 \code{vip_summary}
+
 \code{comps}: number of PLS-DA components calculated fro VIP
+
 \code{vip.alpha}: cutoff VIP value for a feature to be considered as important
-\code{features_above_alpha}: selected features according to vip.alpha, i.e. features with VIP >= vip.alpha.
+
+\code{features_above_alpha}: selected features according to vip.alpha, i.e. features with VIP >= vip.alpha
+
 \code{boostrap}
+
 \code{boot.n}: boostrap iterations
+
 \code{bootstrap.iteration.results}: raw VIP values for each bootstrap iteration
 }
 \description{

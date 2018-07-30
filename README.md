@@ -71,7 +71,7 @@ Change log
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
           
-        (ADDED)
+      (ADDED)
         - New SVM functions:
           - rbioClass_svm_ncv_fs(): nested SVM cross-validation function with feature selection functionality
         

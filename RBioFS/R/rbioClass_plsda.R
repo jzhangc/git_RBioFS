@@ -1254,12 +1254,19 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @return Outputs a \code{rbiomvr_vip} class object to the environment.
 #'
 #' \code{rbiomvr_vip} items are:
+#'
 #' \code{vip_summary}
+#'
 #' \code{comps}: number of PLS-DA components calculated fro VIP
+#'
 #' \code{vip.alpha}: cutoff VIP value for a feature to be considered as important
-#' \code{features_above_alpha}: selected features according to vip.alpha, i.e. features with VIP >= vip.alpha.
+#'
+#' \code{features_above_alpha}: selected features according to vip.alpha, i.e. features with VIP >= vip.alpha
+#'
 #' \code{boostrap}
+#'
 #' \code{boot.n}: boostrap iterations
+#'
 #' \code{bootstrap.iteration.results}: raw VIP values for each bootstrap iteration
 #'
 #' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
@@ -1677,6 +1684,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
   ## not-export
   invisible(final.plt_list)
 }
+
 
 #' @title rbioClass_plsda_roc_auc()
 #'
