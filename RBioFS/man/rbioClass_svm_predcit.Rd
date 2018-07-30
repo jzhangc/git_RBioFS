@@ -5,7 +5,8 @@
 \title{rbioClass_svm_predict}
 \usage{
 rbioClass_svm_predcit(object, newdata, sampleLabel.vector = NULL,
-  center.scale.newdata = TRUE, prob.method = "logistic", verbose = TRUE)
+  center.scale.newdata = TRUE, prob.method = "logistic",
+  verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}

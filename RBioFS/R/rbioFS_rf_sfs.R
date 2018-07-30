@@ -100,7 +100,7 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
     geom_point(size = plot.symbolSize) +
     geom_errorbar(aes(ymin = Mean - err, ymax = Mean + err),
                   position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
-    scale_x_continuous(expand = c(0.01, 0.01)) +
+    scale_x_continuous(expand = c(0.05, 0.05)) +
     scale_y_continuous(expand = c(0, 0), limits = c(ymin, ymax),
                        oob = rescale_none) +
     ggtitle(plot.title) +

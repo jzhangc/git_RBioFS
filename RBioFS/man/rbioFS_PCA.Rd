@@ -10,12 +10,13 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   biplot = TRUE, biplot.comps = c(1:2), biplot.Title = NULL,
   biplot.sampleLabel.type = "none", biplot.sampleLabelSize = 2,
   biplot.sampleLabel.padding = 0.5, biplot.SymbolSize = 2,
-  biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95, biplot.xAngle = 0,
-  biplot.xhAlign = 0.5, biplot.xvAlign = 0.5, biplot.loadingplot = FALSE,
-  biplot.loadingplot.textsize = 3, biplot.mtx.densityplot = FALSE,
-  biplot.mtx.stripLblSize = 10, biplot.Width = 170, biplot.Height = 150,
-  rightsideY = FALSE, fontType = "sans", xTickLblSize = 10,
-  yTickLblSize = 10, verbose = TRUE)
+  biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95,
+  biplot.xAngle = 0, biplot.xhAlign = 0.5, biplot.xvAlign = 0.5,
+  biplot.loadingplot = FALSE, biplot.loadingplot.textsize = 3,
+  biplot.mtx.densityplot = FALSE, biplot.mtx.stripLblSize = 10,
+  biplot.Width = 170, biplot.Height = 150, rightsideY = FALSE,
+  fontType = "sans", xTickLblSize = 10, yTickLblSize = 10,
+  verbose = TRUE)
 }
 \arguments{
 \item{input}{Input data, data frame.}

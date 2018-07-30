@@ -63,7 +63,6 @@ Change log
           - rbioClass_rf_class_plot()
           
         - SVM functions added (non-Shiny):
-          - rbioClass_svm_plot()
           - rbioClass_svm_boot()
 
         - New PLS-DA functions added (non-Shiny):
@@ -71,22 +70,31 @@ Change log
         
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
-          - Relevant functions now also output results tst file to the directory
-          - Bootstraping option added for rbioClass_plsda() so that VIP can use bootstrap data for SD/SEM errorbars
           
         (ADDED)
         - New SVM functions:
-          - rbioClass_svm_ncv_fs()
+          - rbioClass_svm_ncv_fs(): nested SVM cross-validation function with feature selection functionality
+        
+        - New PLS-DA functions:
+          - rbioFS_plsda_vip_plot(): the function only accepts "rbiomvr_vip" class object
           
         - Updates to SVM functions (non-Shiny):
           - Additional argument checks
           
         - Updates to PLS-DA functions (non-Shiny):
+          - rbioFS_plsda_VIP() changed to rbioFS_plsda_vip()
+          - Bootstraping option added for rbioFS_plsda_vip() so that VIP can use bootstrap data for SD/SEM errorbars
+          - rbioFS_plsda_vip() now outputs a "rbiomvr_vip" class object
+          - Plot module removed from rbioFS_plsda_vip() and now a separated function: rbioFS_plsda_vip_plot()
+          - Relevant functions now also output results tst file to the directory
           - Additional argument checks
           
         - Updates to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
+          
+        - Other update
+          - Dependency ggplot2 now requires version 3.0.0
           
         - Bug fixes
           

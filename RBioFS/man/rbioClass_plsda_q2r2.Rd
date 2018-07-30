@@ -8,9 +8,10 @@ rbioClass_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
   plot.display.Title = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-  plot.rightsideY = TRUE, plot.fontType = "sans", plot.SymbolSize = 2,
-  plot.xLabel = "Components", plot.xLabelSize = 10,
-  plot.xTickLblSize = 10, plot.yLabel = "R2 & Q2", plot.yLabelSize = 10,
+  plot.rightsideY = TRUE, plot.fontType = "sans",
+  plot.SymbolSize = 2, plot.xLabel = "Components",
+  plot.xLabelSize = 10, plot.xTickLblSize = 10,
+  plot.yLabel = "R2 & Q2", plot.yLabelSize = 10,
   plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
   plot.Height = 150, verbose = TRUE)
 }

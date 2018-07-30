@@ -4,10 +4,11 @@
 \alias{rbioClass_plsda_roc_auc}
 \title{rbioClass_plsda_roc_auc()}
 \usage{
-rbioClass_plsda_roc_auc(object, rocplot = TRUE, plot.comps = 1:object$ncomp,
-  plot.smooth = FALSE, multi_plot.ncol = length(plot.comps),
-  multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-  plot.rightsideY = TRUE, plot.SymbolSize = 2, plot.display.Title = TRUE,
+rbioClass_plsda_roc_auc(object, rocplot = TRUE,
+  plot.comps = 1:object$ncomp, plot.smooth = FALSE,
+  multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1,
+  multi_plot.legend.pos = "bottom", plot.rightsideY = TRUE,
+  plot.SymbolSize = 2, plot.display.Title = TRUE,
   plot.titleSize = 10, plot.fontType = "sans",
   plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
   plot.xTickLblSize = 10, plot.yLabel = "sensitivity",

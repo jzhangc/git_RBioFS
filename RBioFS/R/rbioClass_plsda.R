@@ -558,6 +558,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   assign(paste(deparse(substitute(object)), "_plsda_rmsep_list", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
 }
 
+
 #' @title rbioClass_plsda_perm()
 #'
 #' @description Permutation test for PLS-DA models.
@@ -1172,7 +1173,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                       position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
         geom_text(aes(y = ifelse(sign(coefficients) > 0, (coefficients + err) * 1.05, (coefficients - err) * 1.15), label = sig),
                   position = position_dodge(width = 0.9), color = "black", size = plot.errorbarLblSize) +
-        scale_x_discrete(expand = c(0.01, 0.01)) +
+        scale_x_discrete(expand = c(0.05, 0.05)) +
         scale_y_continuous(expand = c(0.01, 0.01), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
@@ -1237,11 +1238,275 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 }
 
 
-#' @title rbioFS_plsda_VIP
+#' @title rbioFS_plsda_vip
 #'
 #' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
 #' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
+#' @param plot If to generate a plot. Default is \code{TRUE}.
+#' @param ... Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return Outputs a \code{rbiomvr_vip} class object to the environment.
+#'
+#' \code{rbiomvr_vip} items are:
+#' \code{vip_summary}
+#' \code{comps}: number of PLS-DA components calculated fro VIP
+#' \code{vip.alpha}: cutoff VIP value for a feature to be considered as important
+#' \code{features_above_alpha}: selected features according to vip.alpha, i.e. features with VIP >= vip.alpha.
+#' \code{boostrap}
+#' \code{boot.n}: boostrap iterations
+#' \code{bootstrap.iteration.results}: raw VIP values for each bootstrap iteration
+#'
+#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
+#'
+#' The \code{vip.alpha} of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
+#' @import ggplot2
+#' @importFrom reshape2 melt
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y
+#' @importFrom scales rescale_none
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_vip(object = new_model_optm, boostrap = TRUE, boot.m = 50,
+#'                  vip.alpha = 0.8,
+#'                  plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+#'                  plot.sig.line = TRUE,
+#'                  plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                  plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+#'                  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+#'                  plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2,
+#'                  plot.rightsideY = TRUE,
+#'                  plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+#'                  plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+#'                  plot.Height = 150)
+#' }
+#' @export
+rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = 1,
+                             bootstrap = TRUE,
+                             boot.n = 999, boot.parallelComputing = TRUE, boot.clusterType = "PSOCK",
+                             plot = TRUE,...,
+                             verbose = TRUE){
+  ## argument check
+  if (!any(class(object) %in% c("rbiomvr", "mvr"))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
+  if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using rbioClass_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
+  if (bootstrap & (boot.n < 2 | boot.n %% 1 != 0)) stop("when boostrap = TRUE, boot.n needs to be an integer greater than 1.")
+
+  ## VIP process
+  if (verbose) cat(paste0("Boostrap: ", ifelse(bootstrap, "ON\n", "OFF\n")))
+  if (bootstrap){  # bootstrap VIP process
+    # message
+    if (verbose) cat(paste0("Parallel computing: ", ifelse(boot.parallelComputing, "ON\n", "OFF\n")))
+    if (verbose) cat(paste0("Boostrap interation: ", boot.n, "\n"))
+    if (verbose) cat("Boostrap VIP calculation (speed depending on hardware configuration)...")
+
+    # set up data
+    orig.dat <- data.frame(Y = object$inputY, object$inputX, row.names = NULL, check.names = FALSE, stringsAsFactors = FALSE)
+    sum.boot.vip_raw_list <- vector(mode = "list", length = boot.n)
+
+    # bootstrap modelling and VIP calculation
+    if (!boot.parallelComputing){  # non-parallel
+      sum.boot.vip_raw_list[] <- foreach(i = 1:boot.n) %do% {
+        # bootstrap resampling
+        boot.idx <- foreach(j = levels(object$inputY), .combine = "c") %do% {
+          group.idx <- which(object$inputY == j)
+          group.boot.idx <- sample(group.idx, replace = TRUE)
+          group.boot.idx
+        }
+        boot.dat <- orig.dat[boot.idx, ]
+
+        # bootstrap modelling
+        boot.X <- boot.dat[, -1]
+        boot.Y <- boot.dat[, 1]
+        boot.m <- rbioClass_plsda(x = boot.X, y = factor(boot.Y, levels = unique(boot.Y)),
+                                  ncomp = object$ncomp, validation = "CV", method = "oscorespls",
+                                  verbose = FALSE)
+
+        # boostrap VIP
+        boot.score <- boot.m$scores
+        boot.lodw <- boot.m$loading.weights
+        boot.Wnorm2 <- colSums(boot.lodw^2)
+
+        # vip_raw_list contains VIP for all the components
+        boot.vip_raw_list <- vector(mode = "list", length = dim(boot.m$Yloadings)[1])
+        boot.vip_raw_list[] <- foreach(m = 1:dim(boot.m$Yloadings)[1]) %do% {
+          ylod <- boot.m$Yloadings[m, ] # one y variable at a time
+          boot.ss <- c(ylod)^2 * colSums(boot.score^2)
+          boot.ssw <- sweep(boot.lodw^2, 2, boot.ss / boot.Wnorm2, "*")
+          boot.vip <- sqrt(nrow(boot.ssw) * apply(boot.ssw, 1, cumsum) / cumsum(boot.ss))  # cumsum: cucmulative sum
+          boot.vip <- boot.vip[comps, ]
+          return(boot.vip)
+        }
+        names(boot.vip_raw_list) <- dimnames(boot.m$Yloadings)[[1]]
+        boot.vip_raw_list
+      }
+    } else {  # boot parallel computing
+      # set up cluster
+      n_cores <- detectCores() - 1
+      cl <- makeCluster(n_cores, clusterType = boot.clusterType)
+      registerDoParallel(cl)
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+      # computing
+      sum.boot.vip_raw_list[] <- foreach(i = 1:boot.n, .packages = c("foreach", "RBioFS")) %dopar% {
+        # bootstrap resampling
+        boot.idx <- foreach(j = levels(object$inputY), .combine = "c") %do% {
+          group.idx <- which(object$inputY == j)
+          group.boot.idx <- sample(group.idx, replace = TRUE)
+          group.boot.idx
+        }
+        boot.dat <- orig.dat[boot.idx, ]
+
+        # bootstrap modelling
+        boot.X <- boot.dat[, -1]
+        boot.Y <- boot.dat[, 1]
+        boot.m <- rbioClass_plsda(x = boot.X, y = factor(boot.Y, levels = unique(boot.Y)),
+                                  ncomp = object$ncomp, validation = "CV", method = "oscorespls",
+                                  verbose = FALSE)
+
+        # boostrap VIP
+        boot.score <- boot.m$scores
+        boot.lodw <- boot.m$loading.weights
+        boot.Wnorm2 <- colSums(boot.lodw^2)
+
+        # vip_raw_list contains VIP for all the components
+        boot.vip_raw_list <- vector(mode = "list", length = dim(boot.m$Yloadings)[1])
+        boot.vip_raw_list[] <- foreach(m = 1:dim(boot.m$Yloadings)[1]) %do% {
+          ylod <- boot.m$Yloadings[m, ] # one y variable at a time
+          boot.ss <- c(ylod)^2 * colSums(boot.score^2)
+          boot.ssw <- sweep(boot.lodw^2, 2, boot.ss / boot.Wnorm2, "*")
+          boot.vip <- sqrt(nrow(boot.ssw) * apply(boot.ssw, 1, cumsum) / cumsum(boot.ss))  # cumsum: cucmulative sum
+          boot.vip <- boot.vip[comps, , drop = FALSE]
+          return(boot.vip)
+        }
+        names(boot.vip_raw_list) <- dimnames(boot.m$Yloadings)[[1]]
+        boot.vip_raw_list
+      }
+    }
+    names(sum.boot.vip_raw_list) <- paste0("boot ", seq(boot.n))
+
+    # sum.boot.vip_raw_list structure: boot$group$: (row)`comp 1`|`comp 2`|`comp 3`...
+    # targeted format: group$`comp 1`: (colums)`boot 1`|`boot 2`|`boot 3`...
+    group.comp.boot.vip_list <- vector(mode = "list", length = length(levels(object$inputY)))
+    group.comp.boot.vip_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+      group.comp.list <- vector(mode = "list", length = length(comps))
+      group.comp.list[] <- foreach(j = comps) %do% {
+        group.comp.boot_mtx <- foreach(m = 1:boot.n, .combine = "cbind") %do% {
+          sum.boot.vip_raw_list[[m]][[i]][j, ]  # i: groups, j: boot, 1: comp
+        }
+        colnames(group.comp.boot_mtx) <- paste0("boot ", seq(boot.n))
+        group.comp.boot_mtx
+      }
+      names(group.comp.list) <- paste0("comp ", comps)
+      group.comp.list
+    }
+    names(group.comp.boot.vip_list) <- levels(object$inputY)
+
+    # plot list
+    boot.vip.plt_dat_list <- vector(mode = "list", length = length(levels(object$inputY)))
+    boot.vip.plt_dat_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+      boot.plt_list.comp <- vector(mode = "list", length = length(comps))
+      boot.plt_list.comp[] <- foreach(j = comps) %do% {
+        boot.mean <- rowMeans(final.boot.vip_raw_list[[i]][[j]])
+        boot.sd <- matrixStats::rowSds(final.boot.vip_raw_list[[i]][[j]])
+        boot.sem <- matrixStats::rowSds(final.boot.vip_raw_list[[i]][[j]])/sqrt(boot.n)
+        outdfm <- data.frame(Features = rownames(final.boot.vip_raw_list[[i]][[j]]),
+                             VIP = boot.mean,
+                             sd = boot.sd,
+                             sem = boot.sem,
+                             row.names = NULL,
+                             check.names = FALSE)
+        outdfm <- outdfm[order(outdfm$VIP, decreasing = TRUE),]
+        outdfm$Features <- factor(outdfm$Features, levels = unique(outdfm$Features))
+        rownames(outdfm) <- NULL
+        outdfm
+      }
+      names(boot.plt_list.comp) <- paste0("comp ", comps)
+      boot.plt_list.comp
+    }
+    names(boot.vip.plt_dat_list) <- levels(object$inputY)
+    vip_list <- boot.vip.plt_dat_list
+  } else {  # non bootstrap VIP process
+    # message
+    if (verbose) cat("VIP calculation...")
+
+    # VIP calculation
+    score <- object$scores
+    lodw <- object$loading.weights
+    Wnorm2 <- colSums(lodw^2)
+
+    # vip_raw_list contains VIP for all the components
+    vip_raw_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
+    vip_raw_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
+      ylod <- object$Yloadings[i, ] # one y variable at a time
+      ss <- c(ylod)^2 * colSums(score^2)
+      ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
+      vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))  # cumsum: cucmulative sum
+      vip <- vip[comps, , drop = FALSE]
+      vip
+    }
+    names(vip_raw_list) <- dimnames(object$Yloadings)[[1]]
+
+    vip_list <- vector(mode = "list", length = length(levels(object$inputY)))
+    vip_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+      plt_list.comp <- vector(mode = "list", length = length(comps))
+      j = 1
+      plt_list.comp[] <- foreach(j = comps) %do% {
+        vip <- vip_raw_list[[i]][j, ]
+        outdfm <- data.frame(Features = colnames(vip_raw_list[[i]]),
+                             VIP = vip,
+                             row.names = NULL,
+                             check.names = FALSE)
+        outdfm <- outdfm[order(outdfm$VIP, decreasing = TRUE),]
+        outdfm$Features <- factor(outdfm$Features, levels = unique(outdfm$Features))
+        rownames(outdfm) <- NULL
+        outdfm
+      }
+      names(plt_list.comp) <- paste0("comp ", comps)
+      plt_list.comp
+    }
+    names(vip_list) <- levels(object$inputY)
+  }
+  if (verbose) cat("Done!\n")
+
+  ## output
+  # important features lsit
+  final.ipf_list <- vector(mode = "list", length = length(vip_list))
+  final.ipf_list <- foreach(m = 1:length(vip_list)) %do% {
+    ipf_list <- vector(mode = "list", length = length(vip_list))
+    ipf_list[] <- foreach(n = 1:length(vip_list[[m]])) %do% {
+      as.character(vip_list[[m]][[n]][which(vip_list[[m]][[n]]$VIP > vip.alpha), 1])
+    }
+    names(ipf_list) <- names(vip_list[[m]])
+    ipf_list
+  }
+  names(final.ipf_list) <- names(vip_list)
+
+  # output
+  out <- list(vip_summary = vip_list,
+              vip.alpha = vip.alpha,
+              features_above_alpha = final.ipf_list,
+              comps = comps,
+              bootstrap = bootstrap,
+              boot.n = if (bootstrap) boot.n else NULL,
+              bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL)
+  class(out) <- "rbiomvr_vip"
+  assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
+
+  ## plot
+  if (plot){
+    # message
+    if (verbose) cat("\n")
+    RBioFS::rbioFS_plsda_vip_plot(vip_obj = out, ...)
+  }
+}
+
+
+#' @title rbioFS_plsda_vip_plot
+#'
+#' @description Plotting function for \code{\link{rbioFS_plsda_VIP}}.
+#' @param vip_obj A \code{rbiomvr_vip}, generated by \code{\link{rbioFS_plsda_VIP}}.
+#' @param plot.preview If to preview plots. Default is \code{TRUE}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.sig.line Wether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.
@@ -1267,10 +1532,8 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return Outputs a list objects to the environment with the VIP raw values, VIP summary and the ncomp value. Also the function also generates the pdf figure files to the working directory.
-#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
-#'          For each feature, the boxplot is the mean of the VIP values from all the components, hence with errorbars. However, if the model is fitted using only one component, the function will automatically adjust.
-#'          The VIP threshold of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
+#' @return Outputs pdf figure files to the working directory.
+#' @details Only works with \code{rbiomvr_vip} objects. Set \code{plot.preview = FALSE} to speed up the process as preview rendering may be slow.
 #' @import ggplot2
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
@@ -1278,95 +1541,67 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @importFrom scales rescale_none
 #' @examples
 #' \dontrun{
-#' rbioFS_plsda_VIP(object = new_model_optm,
-#'                        vip.alpha = 0.05,
-#'                        plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
-#'                        plot.sig.line = TRUE,
-#'                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
-#'                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
-#'                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
-#'                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
-#'                        plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-#'                        plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
-#'                        plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
-#'                        plot.Height = 150)
+#' rbioFS_plsda_vip_plot(vip_obj = plsda_m_vip,
+#'                       plot.title = TRUE, plot.titleSize = 10,
+#'                       plot.sig.line = TRUE,
+#'                       plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                       plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+#'                       plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+#'                       plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+#'                       plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                       plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+#'                       plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+#'                       plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
-                             plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
-                             plot.sig.line = TRUE,
-                             plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
-                             plot.errorbarLblSize = 6, plot.fontType = "sans",
-                             plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
-                             plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
-                             plot.rightsideY = TRUE,
-                             plot.yLabel = "VIP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                             plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
-                             plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
-                             plot.Height = 150, verbose = TRUE){
+rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
+                                  plot.title = TRUE, plot.titleSize = 10,
+                                  multi_plot.ncol = length(unique(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                  plot.sig.line = TRUE,
+                                  plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+                                  plot.errorbarLblSize = 6, plot.fontType = "sans",
+                                  plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                                  plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
+                                  plot.rightsideY = TRUE,
+                                  plot.yLabel = "VIP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+                                  plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+                                  plot.Height = 150, verbose = TRUE){
   ## argument check
-  if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
-  if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using rbioClass_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
-
-  ## VIP calculation
-  score <- object$scores
-  lodw <- object$loading.weights
-  Wnorm2 <- colSums(lodw^2)
-
-  # vip_raw_list contains VIP for all the components
-  vip_raw_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
-  vip_raw_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
-    ylod <- object$Yloadings[i, ] # one y variable at a time
-    ss <- c(ylod)^2 * colSums(score^2)
-    ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
-    vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))  # cumsum: cucmulative sum
-    return(vip)
-  }
-  names(vip_raw_list) <- dimnames(object$Yloadings)[[1]]
-
-  vip_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
-  vip_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
-    if (object$ncomp > 1){
-      vip_mean <- foreach(m = vip_raw_list[[i]], .combine = "c") %do% mean(m)
-      vip_sd <- foreach(n = vip_raw_list[[i]], .combine = "c") %do% sd(n)
-      vip_sem <- foreach(o = vip_sd, .combine = "c") %do% sqrt(o / nrow(vip_raw_list[[i]]))
-      vip_plot_dfm <- data.frame(features = colnames(vip_raw_list[[i]]), VIP = vip_mean, sd = vip_sd, sem = vip_sem)
-    } else { # no sem or sd is needed in ncomp == 1
-      vip_plot_dfm <- data.frame(features = names(vip), VIP = vip_raw_list[[i]])
-    }
-    vip_plot_dfm <- vip_plot_dfm[order(vip_plot_dfm$VIP, decreasing = TRUE), ]
-    vip_plot_dfm$features <- factor(vip_plot_dfm$features, levels = unique(vip_plot_dfm$features))
-    return(vip_plot_dfm)
-  }
-  names(vip_list) <- dimnames(object$Yloadings)[[1]]
+  if (!any(class(vip_obj) %in% c("rbiomvr_vip"))) stop("object needs to be a \"rbiomvr_vip\" class.")
 
   ## plot
-  if (plot){
-   if (plot.xTickLblSize == 0) cat("Due to plot.xTickLblSize = 0, x-axis ticks are hidden.\n")
+  # set up bootstrap setting
+  bootstrap <- vip_obj$bootstrap
 
-    for (j in 1:dim(object$Yloadings)[1]){
-      if (verbose) cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(vip_list)[j], ".vip.pdf...", sep = "")) # initial message
+  # set up data
+  vip_list <- vip_obj$vip_summary
 
-      if (object$ncomp > 1){  #  detect if to use errorbar
+  # plot
+  grid.newpage()
+  final.plt_list <- vector(mode = "list", length = length(vip_list))
+  final.plt_list <- foreach(i = 1:length(vip_list)) %do% {
+    plt_list <- foreach(j = 1:length(vip_list[[i]])) %do% {
+      if (bootstrap){  #  detect if to use errorbar
         if (tolower(plot.errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
-          err <- vip_list[[j]]$sem
+          err <- vip_list[[i]][[j]]$sem
         } else if (tolower(plot.errorbar) %in% c("sd", "standard deviation")){
-          err <- vip_list[[j]]$sd
+          err <- vip_list[[i]][[j]]$sd
         }
-        y_axis_Mx <- max((vip_list[[j]]$VIP + err) * 1.05) * 1.2
+        y_axis_Mx <- max((vip_list[[i]][[j]]$VIP + err) * 1.05) * 1.2
 
       } else {
-        y_axis_Mx <- max((vip_list[[j]]$VIP) * 1.05) * 1.2
+        y_axis_Mx <- max((vip_list[[i]][[j]]$VIP) * 1.05) * 1.2
       }
       y_axis_Mn <- 0
 
-      baseplt <- ggplot(data = vip_list[[j]], aes(x = features, y = VIP)) +
+      baseplt <- ggplot(data = vip_list[[i]][[j]], aes(x = Features, y = VIP)) +
         geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
-        ggtitle(names(vip_list)[j]) +
-        scale_x_discrete(expand = c(0.01, 0.01)) +
+        scale_x_discrete(expand = c(0.05, 0.05)) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
+        ylab(paste0(plot.yLabel, " (", names(vip_list[[i]])[j], ")")) +
         geom_hline(yintercept = 0) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
               panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
@@ -1380,79 +1615,63 @@ rbioFS_plsda_VIP <- function(object, vip.alpha = 1,
               axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
               axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
 
+      if (bootstrap){
+        plt <- baseplt +
+          geom_errorbar(aes(ymin = VIP - err, ymax = VIP + err),
+                        position = position_dodge(0.9), color = "black", width = plot.errorbarWidth)
+      } else {
+        plt <- baseplt
+      }
+
       if (plot.title){
-        baseplt <- baseplt + ggtitle(names(vip_list)[j])
+        plt <- plt + ggtitle(names(vip_list)[i])
       } else (
-        baseplt <- baseplt + ggtitle(NULL)
+        plt <- plt + ggtitle(NULL)
       )
 
       if (plot.sig.line){
-        baseplt <- baseplt +
-          geom_hline(yintercept = vip.alpha, linetype = "dashed", colour = "red")
-      }
-
-      if (object$ncomp > 1){
-        baseplt <- baseplt +
-          geom_errorbar(aes(ymin = VIP - err, ymax = VIP + err),
-                      position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
-          ylab(paste0(plot.yLabel, " (", object$ncomp, " comps)"))
-      } else {
-        baseplt <- baseplt +
-          ylab(paste0(plot.yLabel, " (", object$ncomp, " comp)"))
+        plt <- plt +
+          geom_hline(yintercept = vip_obj$vip.alpha, linetype = "dashed", colour = "red")
       }
 
       if (plot.xTickItalic & plot.xTickBold){
-        baseplt <- baseplt +
+        plt <- plt +
           theme(axis.text.x = element_text(face = "bold.italic"))
       } else if (plot.xTickItalic & !plot.xTickBold){
-        baseplt <- baseplt +
+        plt <- plt +
           theme(axis.text.x = element_text(face = "italic"))
       } else if (plot.xTickBold & !plot.xTickItalic){
-        baseplt <- baseplt +
+        plt <- plt +
           theme(axis.text.x = element_text(face = "bold"))
       }
 
       if (plot.yTickItalic & plot.yTickBold){
-        baseplt <- baseplt +
+        plt <- plt +
           theme(axis.text.y  = element_text(face = "bold.italic"))
       } else if (plot.yTickItalic & !plot.yTickBold){
-        baseplt <- baseplt +
+        plt <- plt +
           theme(axis.text.y = element_text(face = "italic"))
       } else if (plot.yTickBold & !plot.yTickItalic){
-        baseplt <- baseplt +
+        plt <- plt +
           theme(axis.text.y = element_text(face = "bold"))
       }
 
-      plt <- baseplt
-      ## finalize the plot
-      grid.newpage()
-      if (plot.rightsideY){ # add the right-side y axis
-        pltgtb <- RBioplot::rightside_y(plt)
-      } else { # no right side y-axis
-        pltgtb <- plt
-      }
+      plt <- RBioplot::rightside_y(plt)
 
       ## export the file and draw a preview
-      ggsave(filename = paste(deparse(substitute(object)), ".", names(vip_list)[j], ".vip.pdf", sep = ""), plot = pltgtb,
+      if (verbose) cat(paste0("Plot saved to file: ", deparse(substitute(vip_obj)), ".", names(vip_list)[i], ".", names(vip_list[[i]])[j], ".vip.pdf..."))
+      ggsave(filename = paste(deparse(substitute(vip_obj)), ".", names(vip_list)[i], ".", names(vip_list[[i]])[j], ".vip.pdf", sep = ""), plot = plt,
              width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       if (verbose) cat("Done!\n") # final message
-      grid.draw(pltgtb) # preview
+      if (plot.preview) grid.draw(plt) # preview
     }
+    plt_list
   }
+  names(final.plt_list) <- names(vip_list)
 
-  ## output
-  # important features lsit
-  ipf_list <- vector(mode = "list", length = length(vip_list))
-  ipf_list[] <- foreach(m = 1:length(vip_list)) %do% {
-    as.character(vip_list[[m]][which(vip_list[[m]]$VIP > vip.alpha), 1])
-  }
-  names(ipf_list) <- names(vip_list)
-
-  # output
-  out <- list(vip_summary = vip_list, features_above_alpha = ipf_list, vip_raw = vip_raw_list, ncomp = object$ncomp)
-  assign(paste(deparse(substitute(object)), "_plsda_vip_summary_list", sep = ""), out, envir = .GlobalEnv)
+  ## not-export
+  invisible(final.plt_list)
 }
-
 
 #' @title rbioClass_plsda_roc_auc()
 #'

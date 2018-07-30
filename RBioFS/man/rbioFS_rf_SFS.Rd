@@ -5,8 +5,8 @@
 \title{rbioFS_rf_SFS}
 \usage{
 rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
-  nTree = 1001, mTry = "recur_default", multicore = TRUE, plot = TRUE,
-  n = "all", ...)
+  nTree = 1001, mTry = "recur_default", multicore = TRUE,
+  plot = TRUE, n = "all", ...)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}

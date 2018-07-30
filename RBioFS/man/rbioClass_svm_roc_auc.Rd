@@ -6,12 +6,13 @@
 \usage{
 rbioClass_svm_roc_auc(object, newdata, newdata.label,
   center.scale.newdata = TRUE, rocplot = TRUE, plot.smooth = FALSE,
-  plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
-  plot.fontType = "sans", plot.xLabel = "1 - specificity",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10,
-  plot.yLabel = "sensitivity", plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.rightsideY = TRUE,
-  plot.Width = 170, plot.Height = 150, verbose = TRUE)
+  plot.SymbolSize = 2, plot.display.Title = TRUE,
+  plot.titleSize = 10, plot.fontType = "sans",
+  plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
+  plot.xTickLblSize = 10, plot.yLabel = "sensitivity",
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.rightsideY = TRUE, plot.Width = 170, plot.Height = 150,
+  verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}

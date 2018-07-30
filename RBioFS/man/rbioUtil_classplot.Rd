@@ -6,11 +6,12 @@
 \usage{
 rbioUtil_classplot(pred.obj, multi_plot.ncol = nrow(pred.obj),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-  multi_plot.stripLblSize = 10, plot.Title = NULL, plot.titleSize = 10,
-  plot.probLabelSize = 5, plot.probLabel.padding = 0,
-  plot.probLabel.outside = FALSE, plot.probLabel.outside.nudge = 1.5,
-  plot.fontType = "sans", plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+  multi_plot.stripLblSize = 10, plot.Title = NULL,
+  plot.titleSize = 10, plot.probLabelSize = 5,
+  plot.probLabel.padding = 0, plot.probLabel.outside = FALSE,
+  plot.probLabel.outside.nudge = 1.5, plot.fontType = "sans",
+  plot.legendSize = 9, plot.Width = 170, plot.Height = 150,
+  verbose = TRUE)
 }
 \arguments{
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{nrow(pred.obj)}.}

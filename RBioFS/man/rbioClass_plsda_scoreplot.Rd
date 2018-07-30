@@ -8,12 +8,13 @@ rbioClass_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
   plot.rightsideY = FALSE, plot.Title = NULL,
   plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
   plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
-  plot.SymbolSize = 2, plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
-  plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
-  plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
-  plot.fontType = "sans", plot.xLabelSize = 10, plot.xTickLblSize = 10,
-  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.Width = 170, plot.Height = 150, verbose = TRUE)
+  plot.SymbolSize = 2, plot.ellipse = FALSE,
+  plot.ellipse_conf = 0.95, plot.mtx.densityplot = FALSE,
+  plot.mtx.stripLblSize = 10, plot.xAngle = 0, plot.xhAlign = 0.5,
+  plot.xvAlign = 0.5, plot.fontType = "sans", plot.xLabelSize = 10,
+  plot.xTickLblSize = 10, plot.yLabelSize = 10,
+  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
+  plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}

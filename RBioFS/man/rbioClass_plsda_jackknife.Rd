@@ -4,17 +4,17 @@
 \alias{rbioClass_plsda_jackknife}
 \title{rbioClass_plsda_jackknife}
 \usage{
-rbioClass_plsda_jackknife(object, ncomp = object$ncomp, use.mean = FALSE,
-  sig.p = 0.05, plot = TRUE, plot.title = FALSE, plot.titleSize = 10,
-  plot.outlineCol = "black", plot.errorbar = "SEM",
-  plot.errorbarWidth = 0.2, plot.errorbarLblSize = 6,
-  plot.fontType = "sans", plot.xLabel = NULL, plot.xLabelSize = 10,
-  plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
-  plot.xTickBold = FALSE, plot.xAngle = 0, plot.xhAlign = 0.5,
-  plot.xvAlign = 0.5, plot.rightsideY = TRUE, plot.yLabel = NULL,
-  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
-  plot.yTickBold = FALSE, plot.Width = 170, plot.Height = 150,
-  verbose = TRUE)
+rbioClass_plsda_jackknife(object, ncomp = object$ncomp,
+  use.mean = FALSE, sig.p = 0.05, plot = TRUE, plot.title = FALSE,
+  plot.titleSize = 10, plot.outlineCol = "black",
+  plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+  plot.errorbarLblSize = 6, plot.fontType = "sans",
+  plot.xLabel = NULL, plot.xLabelSize = 10, plot.xTickLblSize = 10,
+  plot.xTickItalic = FALSE, plot.xTickBold = FALSE, plot.xAngle = 0,
+  plot.xhAlign = 0.5, plot.xvAlign = 0.5, plot.rightsideY = TRUE,
+  plot.yLabel = NULL, plot.yLabelSize = 10, plot.yTickLblSize = 10,
+  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.Width = 170,
+  plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}

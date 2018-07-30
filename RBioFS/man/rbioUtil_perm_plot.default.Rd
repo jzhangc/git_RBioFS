@@ -7,8 +7,9 @@
 \method{rbioUtil_perm_plot}{default}(baseplt, plot.display.Title = TRUE,
   plot.titleSize = 10, plot.fontType = "sans",
   plot.xLabel = "Permutations", plot.xLabelSize = 10,
-  plot.xTickLblSize = 10, plot.yLabel = "Accuracy", plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.rightsideY = TRUE)
+  plot.xTickLblSize = 10, plot.yLabel = "Accuracy",
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+  plot.rightsideY = TRUE)
 }
 \arguments{
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}

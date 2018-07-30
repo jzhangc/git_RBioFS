@@ -5,8 +5,8 @@
 \title{rbioClass_svm_perm()}
 \usage{
 rbioClass_svm_perm(object, perm.method = "by_y", nperm = 999,
-  perm.plot = TRUE, ..., parallelComputing = TRUE, clusterType = "PSOCK",
-  verbose = TRUE)
+  perm.plot = TRUE, ..., parallelComputing = TRUE,
+  clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object. Make sure the object is generated with a \code{tot.accuracy} section.}

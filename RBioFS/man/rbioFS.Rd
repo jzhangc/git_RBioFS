@@ -4,19 +4,21 @@
 \alias{rbioFS}
 \title{rbioFS}
 \usage{
-rbioFS(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL,
-  groupIDVar = NULL, impute = FALSE, imputeMethod = "rf",
-  imputeIter = 10, imputeNtree = 501, quantileNorm = FALSE, nTimes = 50,
-  nTree = 1001, SFS_mTry = "recur_default", multicore = TRUE,
-  plot = TRUE, initialFS_n = "all", initialFS_Title = NULL,
-  initialFS_xLabel = "Mean Decrease in Accuracy", initialFS_yLabel = NULL,
-  initialFS_errorbar = "SEM", initialFS_errorbarWidth = 0.2,
-  initialFS_xTickLblSize = 10, initialFS_yTickLblSize = 10,
-  initialFS_plotWidth = 170, initialFS_plotHeight = 150, SFS_n = "all",
-  SFS_Title = NULL, SFS_xLabel = NULL, SFS_yLabel = NULL,
-  SFS_errorbar = "SEM", SFS_errorbarWidth = 0.2, SFS_symbolSize = 2,
-  SFS_xTickLblSize = 10, SFS_yTickLblSize = 10, SFS_plotWidth = 170,
-  SFS_plotHeight = 150, verbose = TRUE)
+rbioFS(objTitle = "data", file = NULL, input = NULL,
+  sampleIDVar = NULL, groupIDVar = NULL, impute = FALSE,
+  imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
+  quantileNorm = FALSE, nTimes = 50, nTree = 1001,
+  SFS_mTry = "recur_default", multicore = TRUE, plot = TRUE,
+  initialFS_n = "all", initialFS_Title = NULL,
+  initialFS_xLabel = "Mean Decrease in Accuracy",
+  initialFS_yLabel = NULL, initialFS_errorbar = "SEM",
+  initialFS_errorbarWidth = 0.2, initialFS_xTickLblSize = 10,
+  initialFS_yTickLblSize = 10, initialFS_plotWidth = 170,
+  initialFS_plotHeight = 150, SFS_n = "all", SFS_Title = NULL,
+  SFS_xLabel = NULL, SFS_yLabel = NULL, SFS_errorbar = "SEM",
+  SFS_errorbarWidth = 0.2, SFS_symbolSize = 2, SFS_xTickLblSize = 10,
+  SFS_yTickLblSize = 10, SFS_plotWidth = 170, SFS_plotHeight = 150,
+  verbose = TRUE)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"data"}}
