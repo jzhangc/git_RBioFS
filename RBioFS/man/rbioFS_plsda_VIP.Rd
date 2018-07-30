@@ -4,14 +4,24 @@
 \alias{rbioFS_plsda_vip}
 \title{rbioFS_plsda_vip}
 \usage{
-rbioFS_plsda_vip(object, vip.alpha = 1, comps = 1, bootstrap = TRUE,
-  boot.n = 999, boot.parallelComputing = TRUE,
+rbioFS_plsda_vip(object, vip.alpha = 1, comps = c(1, 2),
+  bootstrap = TRUE, boot.n = 50, boot.parallelComputing = TRUE,
   boot.clusterType = "PSOCK", plot = TRUE, ..., verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.}
 
 \item{vip.alpha}{Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.}
+
+\item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
+
+\item{bootstrap}{If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{FALSE}.}
+
+\item{boot.n}{Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.}
+
+\item{boot.parallelComputing}{Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.}
+
+\item{boot.clusterType}{Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
 \item{plot}{If to generate a plot. Default is \code{TRUE}.}
 

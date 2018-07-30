@@ -32,6 +32,10 @@ rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = "radial",
 
 \item{fs.count.cutoff}{A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.}
 
+\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{

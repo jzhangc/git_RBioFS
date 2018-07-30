@@ -1243,6 +1243,11 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
 #' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
+#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
+#' @param bootstrap If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{FALSE}.
+#' @param boot.n Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.
+#' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.
+#' @param boot.clusterType Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to generate a plot. Default is \code{TRUE}.
 #' @param ... Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
@@ -1260,11 +1265,9 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
 #'
 #' The \code{vip.alpha} of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
-#' @import ggplot2
-#' @importFrom reshape2 melt
-#' @importFrom grid grid.newpage grid.draw
-#' @importFrom RBioplot rightside_y
-#' @importFrom scales rescale_none
+#' @import foreach
+#' @import doParallel
+#' @importFrom parallel detectCores makeCluster stopCluster
 #' @examples
 #' \dontrun{
 #' rbioFS_plsda_vip(object = new_model_optm, boostrap = TRUE, boot.m = 50,
@@ -1282,14 +1285,16 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #'                  plot.Height = 150)
 #' }
 #' @export
-rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = 1,
+rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
                              bootstrap = TRUE,
-                             boot.n = 999, boot.parallelComputing = TRUE, boot.clusterType = "PSOCK",
+                             boot.n = 50, boot.parallelComputing = TRUE, boot.clusterType = "PSOCK",
                              plot = TRUE,...,
                              verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiomvr", "mvr"))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
   if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using rbioClass_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
+  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
+  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
   if (bootstrap & (boot.n < 2 | boot.n %% 1 != 0)) stop("when boostrap = TRUE, boot.n needs to be an integer greater than 1.")
 
   ## VIP process
