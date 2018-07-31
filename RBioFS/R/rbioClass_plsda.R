@@ -795,7 +795,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   ## plot
   if (perm.plot){
     plsda_permutation_test <- out
-    rbioUtil_perm_plot(perm_res = permutation_test, ...)
+    rbioUtil_perm_plot(perm_res = plsda_permutation_test, ...)
   }
 }
 
@@ -1419,10 +1419,10 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     boot.vip.plt_dat_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
       boot.plt_list.comp <- vector(mode = "list", length = length(comps))
       boot.plt_list.comp[] <- foreach(j = comps) %do% {
-        boot.mean <- rowMeans(final.boot.vip_raw_list[[i]][[j]])
-        boot.sd <- matrixStats::rowSds(final.boot.vip_raw_list[[i]][[j]])
-        boot.sem <- matrixStats::rowSds(final.boot.vip_raw_list[[i]][[j]])/sqrt(boot.n)
-        outdfm <- data.frame(Features = rownames(final.boot.vip_raw_list[[i]][[j]]),
+        boot.mean <- rowMeans(group.comp.boot.vip_list[[i]][[j]])
+        boot.sd <- matrixStats::rowSds(group.comp.boot.vip_list[[i]][[j]])
+        boot.sem <- matrixStats::rowSds(group.comp.boot.vip_list[[i]][[j]])/sqrt(boot.n)
+        outdfm <- data.frame(Features = rownames(group.comp.boot.vip_list[[i]][[j]]),
                              VIP = boot.mean,
                              sd = boot.sd,
                              sem = boot.sem,

@@ -43,7 +43,8 @@
 #' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
-#' rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
+#' rbioFS_PCA(input = pcaDfm, sampleIDVar = "conditions", groupIDVar = "samples",
+#' biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
 #' }
 #' @export
 rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE, centerData = TRUE, ...,

@@ -231,14 +231,14 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       }
       rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
                           nTree = 1001, mTry = 6, multicore = FALSE, plot = FALSE)
-      # fs <- svm_nested_initial_FS$feature_initial_FS
-      rbioFS_rf_SFS(objTitle = "svm_nested", x = x_vs_tgt_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-                    nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
-      if (length(svm_nested_SFS$selected_features) > 1){
-        fs <- svm_nested_SFS$selected_features
-      } else {
-        fs <- svm_nested_initial_FS$feature_initial_FS
-      }
+      fs <- svm_nested_initial_FS$feature_initial_FS
+      # rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
+      #               nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+      # if (length(svm_nested_SFS$selected_features) > 1){
+      #   fs <- svm_nested_SFS$selected_features
+      # } else {
+      #   fs <- svm_nested_initial_FS$feature_initial_FS
+      # }
 
       # cv svm
       m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
@@ -276,14 +276,14 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       }
       rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
                           nTree = 1001, mTry = 6, multicore = FALSE, plot = FALSE)
-      # fs <- svm_nested_initial_FS$feature_initial_FS
-      rbioFS_rf_SFS(objTitle = "svm_nested", x = x_vs_tgt_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-                    nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
-      if (length(svm_nested_SFS$selected_features) > 1){
-        fs <- svm_nested_SFS$selected_features
-      } else {
-        fs <- svm_nested_initial_FS$feature_initial_FS
-      }
+      fs <- svm_nested_initial_FS$feature_initial_FS
+      # rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
+      #               nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+      # if (length(svm_nested_SFS$selected_features) > 1){
+      #   fs <- svm_nested_SFS$selected_features
+      # } else {
+      #   fs <- svm_nested_initial_FS$feature_initial_FS
+      # }
 
       # cv svm
       m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,

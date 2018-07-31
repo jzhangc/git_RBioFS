@@ -96,6 +96,7 @@ Make sure to arrange input data with first two columns for smaple ID and conditi
 }
 \examples{
 \dontrun{
-rbioFS_PCA(input = pcaDfm, idx = pcaDfm$Conditions, biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
+rbioFS_PCA(input = pcaDfm, sampleIDVar = "conditions", groupIDVar = "samples",
+biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
 }
 }
