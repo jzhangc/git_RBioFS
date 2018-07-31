@@ -1,11 +1,12 @@
 Package: RBioFS
 Type: Package
-Title: A simple to use wrapper for implementing recursive random forest-based feature selection (RF-FS) workflow for biological and biomedical research.
+Title: A easy-to-use yet comprehensive wrapper for implementing recursive random forest-based feature selection (RF-FS) and machine learning classification workflow for biological and biomedical research.
 Version: 0.6.1
 Author: Jing Zhang
 Maintainer: Jing Zhang <jzhangcad@gmail.com>
 Description: RBioFS features random forest-based feature selection (RF-FS) workflow for non-bioinformatician users to implement such feature into their projects.
 License: GPL-3
+Encoding: UTF-8
 LazyData: TRUE
 Imports:
     ggplot2 (>= 3.0.0),
