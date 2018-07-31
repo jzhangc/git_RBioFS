@@ -6,7 +6,8 @@
 \usage{
 rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = "radial",
   cross.k = 10, tune.method = "cross", tune.cross.k = 10,
-  tune.boot.n = 10, ..., fs.method = "rf", fs.count.cutoff = cross.k,
+  tune.boot.n = 10, ..., fs.method = "rf", rf.ifs.ntree = 1001,
+  rf.sfs.ntree = 1001, fs.count.cutoff = cross.k,
   parallelComputing = TRUE, clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
@@ -30,6 +31,10 @@ rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = "radial",
 
 \item{fs.method}{Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.}
 
+\item{rf.ifs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.}
+
+\item{rf.sfs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.}
+
 \item{fs.count.cutoff}{A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
@@ -43,25 +48,25 @@ Returns a SVM model object, with classes "svm" and "rbiosvm".
 
 Additional items for \code{rbiosvm_nestedcv}:
 
-\code{cv.fold}:
+\code{cv.fold}: number of (outer) cross-validation fold
 
-\code{randomized.sample.index}:
+\code{randomized.sample.index}: randomized sample order for (outer) cross-validation
 
-\code{tot.nested.accuracy.summary}:
+\code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accouracy
 
-\code{nested.accuracy}:
+\code{nested.accuracy}: accuracy for each cross-validation iteration
 
-\code{fs.method}:
+\code{fs.method}: feature selection method
 
-\code{selected.features}:
+\code{selected.features}
 
-\code{nested.fs.count}:
+\code{nested.fs.count}: total vote counts for each selected feature
 
-\code{tune.method}:
+\code{tune.method}: (inner) loop method for SVM grid search
 
-\code{tune.cross.k}:
+\code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 
-\code{tune.boot.n}:
+\code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
 }
 \description{
 Nested cross-validation assessment for SVM classification. It evaluates the overall performace of SVM modelling given the training data.
@@ -82,6 +87,8 @@ svm_nestedcv <- rbioClass_svm_ncv_fs(x = mydata[, -c(1:2)],
                                      cross.k = 5,
                                      tune.method = "cross",
                                      tune.cross.k = 5,
+                                     fs.method = "rf",
+                                     rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                      parallelComputing = TRUE, clusterType = "FORK")
 
 }

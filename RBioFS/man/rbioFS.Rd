@@ -23,9 +23,9 @@ rbioFS(objTitle = "data", file = NULL, input = NULL,
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"data"}}
 
-\item{file}{Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.}
+\item{file}{Input file. Only takes \code{.csv} format, with the label column, i.e. the whole dataset. Set either this or \code{input}, but not both.}
 
-\item{input}{Input data frame. The type should be \code{data.frame} or \code{matrix}. Set either this or \code{file}, but not both.}
+\item{input}{Input data frame. The type should be \code{data.frame} or \code{matrix}, with the label column, i.e. the whole dataset. Set either this or \code{file}, but not both.}
 
 \item{sampleIDVar}{Sample variable name. It's a character string.}
 

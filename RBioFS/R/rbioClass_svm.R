@@ -137,6 +137,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
 #' @param fs.method Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.
+#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.
+#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.
 #' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -145,25 +147,25 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 #'
 #' Additional items for \code{rbiosvm_nestedcv}:
 #'
-#' \code{cv.fold}:
+#' \code{cv.fold}: number of (outer) cross-validation fold
 #'
-#' \code{randomized.sample.index}:
+#' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
 #'
-#' \code{tot.nested.accuracy.summary}:
+#' \code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accouracy
 #'
-#' \code{nested.accuracy}:
+#' \code{nested.accuracy}: accuracy for each cross-validation iteration
 #'
-#' \code{fs.method}:
+#' \code{fs.method}: feature selection method
 #'
-#' \code{selected.features}:
+#' \code{selected.features}
 #'
-#' \code{nested.fs.count}:
+#' \code{nested.fs.count}: total vote counts for each selected feature
 #'
-#' \code{tune.method}:
+#' \code{tune.method}: (inner) loop method for SVM grid search
 #'
-#' \code{tune.cross.k}:
+#' \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 #'
-#' \code{tune.boot.n}:
+#' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
 #'
 #' @details TBA
 #'
@@ -183,6 +185,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 #'                                      cross.k = 5,
 #'                                      tune.method = "cross",
 #'                                      tune.cross.k = 5,
+#'                                      fs.method = "rf",
+#'                                      rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
 #'                                      parallelComputing = TRUE, clusterType = "FORK")
 #'
 #' }
@@ -192,7 +196,8 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
                                  cross.k = 10,
                                  tune.method = "cross",
                                  tune.cross.k = 10, tune.boot.n = 10, ...,
-                                 fs.method = "rf", fs.count.cutoff = cross.k,
+                                 fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+                                 fs.count.cutoff = cross.k,
                                  parallelComputing = TRUE, clusterType = "PSOCK",
                                  verbose = TRUE){
   ## check arguments
@@ -228,17 +233,19 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       # fs
       if (center.scale){
         fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
+      } else {
+        fs_training <- training[, -1]
       }
       rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
-                          nTree = 1001, mTry = 6, multicore = FALSE, plot = FALSE)
-      fs <- svm_nested_initial_FS$feature_initial_FS
-      # rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-      #               nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
-      # if (length(svm_nested_SFS$selected_features) > 1){
-      #   fs <- svm_nested_SFS$selected_features
-      # } else {
-      #   fs <- svm_nested_initial_FS$feature_initial_FS
-      # }
+                          nTree = rf.ifs.ntree, multicore = FALSE, plot = FALSE)
+      # fs <- svm_nested_initial_FS$feature_initial_FS
+      rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
+                    nTree = rf.sfs.ntree, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+      if (length(svm_nested_SFS$selected_features) > 1){
+        fs <- svm_nested_SFS$selected_features
+      } else {
+        fs <- svm_nested_initial_FS$feature_initial_FS
+      }
 
       # cv svm
       m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
@@ -273,17 +280,19 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       # fs
       if (center.scale){
         fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
+      } else {
+        fs_training <- training[, -1]
       }
       rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
-                          nTree = 1001, mTry = 6, multicore = FALSE, plot = FALSE)
-      fs <- svm_nested_initial_FS$feature_initial_FS
-      # rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-      #               nTree = 1001, mTry = "recur_default", multicore = FALSE, plot = FALSE)
-      # if (length(svm_nested_SFS$selected_features) > 1){
-      #   fs <- svm_nested_SFS$selected_features
-      # } else {
-      #   fs <- svm_nested_initial_FS$feature_initial_FS
-      # }
+                          nTree = rf.ifs.ntree, multicore = FALSE, plot = FALSE)
+      # fs <- svm_nested_initial_FS$feature_initial_FS
+      rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
+                    nTree = rf.sfs.ntree, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+      if (length(svm_nested_SFS$selected_features) > 1){
+        fs <- svm_nested_SFS$selected_features
+      } else {
+        fs <- svm_nested_initial_FS$feature_initial_FS
+      }
 
       # cv svm
       m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,

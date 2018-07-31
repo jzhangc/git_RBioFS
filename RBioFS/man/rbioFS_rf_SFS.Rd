@@ -11,7 +11,7 @@ rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
 
-\item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names.}
+\item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.}
 
 \item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
 

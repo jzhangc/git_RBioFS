@@ -156,7 +156,7 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
 #'
 #' @description Recursive nested random froest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
-#' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names.
+#' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.
 #' @param targetVar The target variable for random forest feature selection. This is a factor object.
 #' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.

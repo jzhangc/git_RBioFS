@@ -2,8 +2,8 @@
 #'
 #' @description Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"data"}
-#' @param file Input file. Only takes \code{.csv} format. Set either this or \code{input}, but not both.
-#' @param input Input data frame. The type should be \code{data.frame} or \code{matrix}. Set either this or \code{file}, but not both.
+#' @param file Input file. Only takes \code{.csv} format, with the label column, i.e. the whole dataset. Set either this or \code{input}, but not both.
+#' @param input Input data frame. The type should be \code{data.frame} or \code{matrix}, with the label column, i.e. the whole dataset. Set either this or \code{file}, but not both.
 #' @param sampleIDVar Sample variable name. It's a character string.
 #' @param groupIDVar Group variable name. It's a character string.
 #' @param impute Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.
