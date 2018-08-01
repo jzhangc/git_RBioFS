@@ -740,7 +740,7 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
   }
   if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
     if (length(sampleLabel.vector) != nrow(newdata)){
-      cat("")
+      cat("Sample label vector not the same length as newdata. Proceed without custom sample labels.\n")
       sampleLabel.vector <- NULL
     }
   }
@@ -810,8 +810,13 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
   ## output
   predicted.value <- pred
   attributes(predicted.value) <- NULL
-  out <- list(classifier.class = class(object), predicted.value = predicted.value, prob.method = prob.method, probability.summary = prob_dfm,
-              raw.newdata = newdata, center.scale = center.scale.newdata, center.scaled.newdata = centerdata)
+  out <- list(classifier.class = class(object),
+              predicted.value = predicted.value,
+              prob.method = prob.method,
+              probability.summary = prob_dfm,
+              raw.newdata = newdata,
+              center.scale = center.scale.newdata,
+              center.scaled.newdata = centerdata)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
 }

@@ -68,8 +68,13 @@ Change log
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
         
+        - Update to SVM functions:
+          - rbioClass_svm_perm()  plot output file name fixed
+        
         - Updates to PLS-DA functions (non-Shiny):
           - Multi-category Y modelling now possible with rbioFS_plsda
+          - rbioFS_plsda_vip_plot() plot output file name fixed
+          - rbioClass_plsda_perm() plot output file name fixed
           
       (ADDED)
         - New SVM functions:
@@ -86,6 +91,7 @@ Change log
           - Bootstraping option added for rbioFS_plsda_vip() so that VIP can use bootstrap data for SD/SEM errorbars
           - rbioFS_plsda_vip() now outputs a "rbiomvr_vip" class object
           - Plot module removed from rbioFS_plsda_vip() and now a separated function: rbioFS_plsda_vip_plot()
+          - rbioClass_plsda_roc_auc() new accepts custom newdata
           - Relevant functions now also output results tst file to the directory
           - Additional argument checks
           

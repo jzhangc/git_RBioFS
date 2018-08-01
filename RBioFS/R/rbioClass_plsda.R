@@ -1690,6 +1690,9 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #'
 #' @description ROC-AUC analysis and ploting for plsda model
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param newdata Newdata (test data) for ROC-AUC analysis, excluding labels, i.e. y. If missing, the function will use the transformed data from the model object.
+#' @param newdata.y Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.
+#' @param center.newdasta Only set when both \code{newdata} and \code{newdata.y} are set, if to center.scale newdata. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -1724,25 +1727,38 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
 #' }
 #' @export
-rbioClass_plsda_roc_auc <- function(object, rocplot = TRUE,
-                                 plot.comps = 1:object$ncomp,
-                                 plot.smooth = FALSE,
-                                 multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-                                 plot.rightsideY = TRUE,
-                                 plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
-                                 plot.fontType = "sans",
-                                 plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
-                                 plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                                 plot.legendSize = 9,
-                                 plot.Width = 170, plot.Height = 150,
-                                 verbose = TRUE){
+rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata = TRUE,
+                                    rocplot = TRUE,
+                                    plot.comps = 1:object$ncomp,
+                                    plot.smooth = FALSE,
+                                    multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                    plot.rightsideY = TRUE,
+                                    plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                    plot.fontType = "sans",
+                                    plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                    plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                    plot.legendSize = 9,
+                                    plot.Width = 170, plot.Height = 150,
+                                    verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
+  if (missing(newdata) || is.null(newdata) || missing(newdata.y) || is.null(newdata.y)) {
+    cat("Note: newdata or newdata.y info isn't complete. Proceed with training data.\n")
+    newdata <- object$centerX$centerX
+    outcome <- object$inputY
+  } else {
+    ## center data with the option of scaling
+    if (center.newdata){
+      if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.\n")
+      centerdata <- t((t(newdata) - object$centerX$meanX) / object$centerX$columnSD)
+      newdata <- centerdata
+    }
+    outcome <- newdata.y
+  }
 
   ## calcuate ROC-AUC
-  pred_raw <- predict(object, newdata = object$centerX$centerX)
-  outcome <- object$inputY
+  pred_raw <- predict(object, newdata = newdata)
 
   roc_dfm_list <- vector(mode = "list", length = length(plot.comps))
   roc_dfm_list[] <- foreach(i = 1:length(plot.comps)) %do% {
