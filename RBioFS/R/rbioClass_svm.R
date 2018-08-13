@@ -482,11 +482,12 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     } else {
       cat(paste0(" AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
     }
+    print(perf$ci)
+    cat("\n")
 
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
-    `95% ci` <- perf$ci
-    mtx <- cbind(fpr, tpr, `95% ci`)
+    mtx <- cbind(fpr, tpr)
     if (length(levels(outcome)) == 2){
       df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     } else {

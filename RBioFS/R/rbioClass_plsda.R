@@ -1767,8 +1767,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
       response <- outcome
       levels(response)[-j] <- "others"
       predictor <- as.matrix(tmp_pred_raw[, j], ncol = 1)
-#      pred <- ROCR::prediction(predictions = predictor, labels = response)
-#      perf <- ROCR::performance(prediction.obj = pred, "tpr", "fpr")
+      #      pred <- ROCR::prediction(predictions = predictor, labels = response)
+      #      perf <- ROCR::performance(prediction.obj = pred, "tpr", "fpr")
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(outcome)[j]]]
@@ -1782,13 +1782,14 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
       } else {
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
       }
+      print(perf$ci)
+      cat("\n")
 
-#      fpr <- as.numeric(unlist(perf@x.values))
-#      tpr <- as.numeric(unlist(perf@y.values))
+      #      fpr <- as.numeric(unlist(perf@x.values))
+      #      tpr <- as.numeric(unlist(perf@y.values))
       fpr <- 1 - perf$specificities
       tpr <- perf$sensitivities
-      `95% ci` <- perf$ci
-      mtx <- cbind(fpr, tpr, `95% ci`)
+      mtx <- cbind(fpr, tpr)
       if (length(levels(outcome)) == 2){
         df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       } else {
