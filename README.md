@@ -87,7 +87,6 @@ Change log
           - rbioFS_plsda_vip_plot(): the function only accepts "rbiomvr_vip" class object
           
         - Updates to SVM functions (non-Shiny):
-          - rbioClass_svm_roc_auc() now outputs CI information
           - Additional argument checks
           
         - Updates to PLS-DA functions (non-Shiny):
@@ -96,7 +95,6 @@ Change log
           - rbioFS_plsda_vip() now outputs a "rbiomvr_vip" class object
           - Plot module removed from rbioFS_plsda_vip() and now a separated function: rbioFS_plsda_vip_plot()
           - rbioClass_plsda_roc_auc() now accepts custom newdata
-          - rbioClass_plsda_roc_auc() now outputs CI information
           - Relevant functions now also output results tst file to the directory
           - Additional argument checks
           

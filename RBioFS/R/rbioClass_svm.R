@@ -472,18 +472,16 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
     cases <- splt[[levels(outcome)[j]]]
-    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
+    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
                      error = function(err){
                        cat("Curve not smoothable. Proceed without smooth.\n")
-                       pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
+                       pROC::roc(controls = controls, cases = cases, smooth = FALSE)
                      })
     if (length(levels(outcome)) == 2){
       cat(paste0("AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
     } else {
       cat(paste0(" AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
     }
-    print(perf$ci)
-    cat("\n")
 
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
