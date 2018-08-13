@@ -1772,10 +1772,10 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(outcome)[j]]]
-      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
+      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
                        error = function(err){
                          cat("Curve not smoothable. Proceed without smooth.\n")
-                         pROC::roc(controls = controls, cases = cases, smooth = FALSE)
+                         pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
                        })
       if (length(levels(outcome)) == 2){
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
@@ -1787,11 +1787,12 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
 #      tpr <- as.numeric(unlist(perf@y.values))
       fpr <- 1 - perf$specificities
       tpr <- perf$sensitivities
-      mtx <- cbind(fpr, tpr)
+      `95% ci` <- perf$ci
+      mtx <- cbind(fpr, tpr, `95% ci`)
       if (length(levels(outcome)) == 2){
-        df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL)
+        df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       } else {
-        df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL)
+        df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       }
       df <- df[order(df$tpr), ]  # order by tpr so that all the points will be connected on graph
       return(df)

@@ -61,20 +61,23 @@ Change log
         - RF-class (random forest classification) functions added (non-Shiny) (tentative):
           - rbioClass_rf_class()
           - rbioClass_rf_class_plot()
-          
-        - SVM functions added (non-Shiny):
-          - rbioClass_svm_boot()
 
         - New PLS-DA functions added (non-Shiny):
           - rbioFS_plsda_loadingplot(): with y loading as well
         
         - Update to SVM functions:
-          - rbioClass_svm_perm()  plot output file name fixed
+          - rbioClass_svm_perm() plot output file name fixed
+          - S3 print method for relevant functions
         
-        - Updates to PLS-DA functions (non-Shiny):
+        - Updates to PLS-DA functions:
           - Multi-category Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
+          - S3 print method for relevant functions
+          
+        - Updates to RF-FS functions:
+          - S3 print method for relevant functions
+
           
       (ADDED)
         - New SVM functions:
@@ -84,6 +87,7 @@ Change log
           - rbioFS_plsda_vip_plot(): the function only accepts "rbiomvr_vip" class object
           
         - Updates to SVM functions (non-Shiny):
+          - rbioClass_svm_roc_auc() now outputs CI information
           - Additional argument checks
           
         - Updates to PLS-DA functions (non-Shiny):
@@ -91,7 +95,8 @@ Change log
           - Bootstraping option added for rbioFS_plsda_vip() so that VIP can use bootstrap data for SD/SEM errorbars
           - rbioFS_plsda_vip() now outputs a "rbiomvr_vip" class object
           - Plot module removed from rbioFS_plsda_vip() and now a separated function: rbioFS_plsda_vip_plot()
-          - rbioClass_plsda_roc_auc() new accepts custom newdata
+          - rbioClass_plsda_roc_auc() now accepts custom newdata
+          - rbioClass_plsda_roc_auc() now outputs CI information
           - Relevant functions now also output results tst file to the directory
           - Additional argument checks
           
@@ -101,6 +106,7 @@ Change log
           
         - Other update
           - Dependency ggplot2 now requires version 3.0.0
+          - Added corresponding print method for the relevant S3 classes
           
         - Bug fixes
           

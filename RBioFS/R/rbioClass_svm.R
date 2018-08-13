@@ -119,8 +119,35 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   m$tune.method <- tune.method
   m$tune.cross.k <- if(tune.method == "cross") tune.cross.k else NULL
   m$tune.boot.n <- if(tune.method == "boot") tune.boot.n else NULL
-  class(m) <- c("svm", "rbiosvm")
+  class(m) <- c("rbiosvm", "svm")
   return(m)
+}
+
+
+#' @export
+print.rbiosvm <- function(x, ...){
+  cat("Parameters:\n")
+  cat("   SVM-Type: ", c("C-classification", "nu-classification",
+                         "one-classification", "eps-regression", "nu-regression")[x$type +
+                                                                                    1], "\n")
+  cat(" SVM-Kernel: ", c("linear", "polynomial", "radial",
+                         "sigmoid")[x$kernel + 1], "\n")
+  if (x$type == 0 || x$type == 3 || x$type == 4)
+    cat("       cost: ", x$cost, "\n")
+  if (x$kernel == 1)
+    cat("     degree: ", x$degree, "\n")
+  cat("      gamma: ", x$gamma, "\n")
+  if (x$kernel == 1 || x$kernel == 3)
+    cat("     coef.0: ", x$coef0, "\n")
+  if (x$type == 1 || x$type == 2 || x$type == 4)
+    cat("         nu: ", x$nu, "\n")
+  if (x$type == 3) {
+    cat("    epsilon: ", x$epsilon, "\n\n")
+    if (x$compprob)
+      cat("Sigma: ", x$sigma, "\n\n")
+  }
+  cat("\nNumber of Support Vectors: ", x$tot.nSV)
+  cat("\n\n")
 }
 
 
@@ -412,7 +439,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
-  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
+  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata)))stop("x needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
@@ -436,6 +463,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
   pred <- predict(object, newdata = test)  # prediction
 
   outcome <- newdata.label  # origial label
+
   roc_dfm <- foreach(j = 1:length(levels(outcome)), .combine = "rbind") %do% {
     response <- outcome
     levels(response)[-j] <- "others"
@@ -444,10 +472,10 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
     cases <- splt[[levels(outcome)[j]]]
-    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
+    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
                      error = function(err){
                        cat("Curve not smoothable. Proceed without smooth.\n")
-                       pROC::roc(controls = controls, cases = cases, smooth = FALSE)
+                       pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
                      })
     if (length(levels(outcome)) == 2){
       cat(paste0("AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
@@ -457,11 +485,12 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
-    mtx <- cbind(fpr, tpr)
+    `95% ci` <- perf$ci
+    mtx <- cbind(fpr, tpr, `95% ci`)
     if (length(levels(outcome)) == 2){
-      df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL)
+      df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     } else {
-      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL)
+      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     }
     df <- df[order(df$tpr), ]
     return(df)
