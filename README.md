@@ -87,6 +87,7 @@ Change log
           - rbioFS_plsda_vip_plot(): the function only accepts "rbiomvr_vip" class object
           
         - Updates to SVM functions (non-Shiny):
+          - Fixed a bug where rbioClass_svm cannot handle group weight in the scenario of not all groups represent in the training data
           - Additional argument checks
           
         - Updates to PLS-DA functions (non-Shiny):

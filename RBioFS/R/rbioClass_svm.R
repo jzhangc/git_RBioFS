@@ -85,7 +85,13 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 
   ## weight evaluation
   if (length(unique(table(y))) != 1){  # test if the sample is balanced
-    wgt <- length(y) / table(y)
+    if(any(table(y) == 0)) {
+      warning("Not all groups present in the unbalanced training data, discard missing group and set weight for other groups as 1")
+      wgt <- rep(1, length(unique(y)))
+      names(wgt) <- unique(y)
+    } else {
+      wgt <- length(y) / table(y)
+    }
   } else {  # balanced sample, each class weight is 1
     wgt <- unique(table(y)) / table(y)
   }
@@ -104,7 +110,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
            cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
            scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-           cross = svm.cross.k,...)
+           cross = svm.cross.k, ...)
   if (verbose) cat("Done!\n")
 
   # return
@@ -277,7 +283,7 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       # cv svm
       m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
                          svm.cross.k = 0, tune.method = tune.method,
-                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
+                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
       # processing test data
       test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
@@ -324,7 +330,7 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       # cv svm
       m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
                          svm.cross.k = 0, tune.method = tune.method,
-                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
+                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
       # processing test data
       test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
@@ -444,7 +450,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }
-  if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same dimension as the training data.")
+  if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same number of variables as the training data.")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
