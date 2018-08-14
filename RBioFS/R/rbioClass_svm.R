@@ -190,6 +190,8 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{fs.method}: feature selection method
 #'
+#' \code{fs.count.threshold}: count threshold for generating consensus feature list
+#'
 #' \code{selected.features}
 #'
 #' \code{nested.fs.count}: total vote counts for each selected feature
@@ -378,6 +380,7 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
               tot.nested.accuracy.summary = tot.nested.acc.summary,
               nested.accuracy = nested.accu,
               fs.method = fs.method,
+              fs.count.threshold = fs.count.cutoff,
               selected.features = selected.features,
               nested.fs.count = fs.count,
               tune.method = tune.method,
@@ -386,6 +389,17 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
 
   class(out) <- "rbiosvm_nestedcv"
   return(out)
+}
+
+
+#' @export
+print.rbiosvm_nestedcv <- function(x, ...){
+  cat("Total nested cross-validation accuracy:\n")
+  x$tot.nested.accuracy.summary
+  cat("\n\n")
+  cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
+  x$selected.features
+  cat("\n\n")
 }
 
 

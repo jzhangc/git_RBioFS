@@ -58,6 +58,8 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{fs.method}: feature selection method
 
+\code{fs.count.threshold}: count threshold for generating consensus feature list
+
 \code{selected.features}
 
 \code{nested.fs.count}: total vote counts for each selected feature
