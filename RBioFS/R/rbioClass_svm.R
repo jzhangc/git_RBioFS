@@ -395,10 +395,10 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
 #' @export
 print.rbiosvm_nestedcv <- function(x, ...){
   cat("Total nested cross-validation accuracy:\n")
-  x$tot.nested.accuracy.summary
+  print(x$tot.nested.accuracy.summary)
   cat("\n\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
-  x$selected.features
+  print(x$selected.features)
   cat("\n\n")
 }
 
@@ -867,4 +867,15 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
               center.scaled.newdata = centerdata)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
+}
+
+
+#' @export
+print.prediction <- function(x, ...){
+  cat("The prediction results:\n")
+  print(x$probability.summary[, c(1:2, 5)])
+  cat("\n\n")
+  cat(paste0("Classifier class:\n"))
+  print(x$classifier.class)
+  cat("\n\n")
 }
