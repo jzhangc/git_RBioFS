@@ -541,7 +541,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     }
 
     # save
-    grid.newpage()
+    # grid.newpage()
     ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)

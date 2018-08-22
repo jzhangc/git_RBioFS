@@ -104,6 +104,7 @@ Change log
           - S3 print method for relevant functions
           
         - Other update
+          - Functions updated for R Notebook/Markdown compatibility
           - Dependency ggplot2 now requires version 3.0.0
 
         - Bug fixes

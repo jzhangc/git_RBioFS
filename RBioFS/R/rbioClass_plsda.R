@@ -233,7 +233,7 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
   }
 
   ## save
-  grid.newpage()
+  # grid.newpage()
   ggsave(filename = paste(deparse(substitute(object)),".plsda.tuplot.pdf", sep = ""), plot = plt,
          width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   grid.draw(plt)
@@ -547,7 +547,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
     }
 
     ## save
-    grid.newpage()
+    # grid.newpage()
     ggsave(filename = paste(deparse(substitute(object)),".plsda.rmsepplot.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)
@@ -931,7 +931,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
             axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
-    grid.newpage()
+    # grid.newpage()
     if (plot.rightsideY){ # add the right-side y axis
       # extract gtable
       pltgtb <- rightside_y(scoreplt)
@@ -976,7 +976,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
     }
 
-    grid.newpage()
+    # grid.newpage()
     if (plot.rightsideY){ # add the right-side y axis
       pltgtb <- rightside_y(scoreplt)
     } else { # no right side y-axis
@@ -1041,7 +1041,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
             axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType))
 
-    grid.newpage()
+    # grid.newpage()
     pltgtb <- scoreplt
   }
   ggsave(filename = paste(deparse(substitute(object)),".plsda.scoreplot.pdf", sep = ""), plot = pltgtb,
@@ -1228,7 +1228,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 
       plt <- baseplt
       ## finalize the plot
-      grid.newpage()
+      # grid.newpage()
       if (plot.rightsideY){ # add the right-side y axis
         pltgtb <- rightside_y(plt)
       } else { # no right side y-axis
@@ -1599,7 +1599,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
   vip_list <- vip_obj$vip_summary
 
   # plot
-  grid.newpage()
+  # grid.newpage()
   final.plt_list <- vector(mode = "list", length = length(vip_list))
   final.plt_list <- foreach(i = 1:length(vip_list)) %do% {
     plt_list <- foreach(j = 1:length(vip_list[[i]])) %do% {
@@ -1852,7 +1852,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
     }
 
     # save
-    grid.newpage()
+    # grid.newpage()
     ggsave(filename = paste(deparse(substitute(object)),".plsda.roc.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)
@@ -2133,7 +2133,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
     }
 
     # save
-    grid.newpage()
+    # grid.newpage()
     ggsave(filename = paste(deparse(substitute(object)),".plsda.predict.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)

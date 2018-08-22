@@ -45,7 +45,7 @@ rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
 
   # save
   if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(perm_res)),".svm.perm.plot.pdf...", sep = ""))  # initial message
-  grid.newpage()
+  # grid.newpage()
   ggsave(filename = paste(deparse(substitute(perm_res)),".svm.perm.plot.pdf", sep = ""), plot = plt,
          width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   grid.draw(plt)
@@ -81,7 +81,7 @@ rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
 
   # save
   if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(perm_res)),".plsda.perm.plot.pdf...", sep = ""))  # initial message
-  grid.newpage()
+  # grid.newpage()
   ggsave(filename = paste(deparse(substitute(perm_res)),".plsda.perm.plot.pdf", sep = ""), plot = plt,
          width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   grid.draw(plt)
@@ -217,7 +217,7 @@ rbioUtil_classplot<- function(pred.obj,
   plt <- plt + coord_polar("y")
 
   # save
-  grid.newpage()
+  # grid.newpage()
   ggsave(filename = paste(deparse(substitute(pred.obj)),".plsda.classification.pdf", sep = ""), plot = plt,
          width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   grid.draw(plt)

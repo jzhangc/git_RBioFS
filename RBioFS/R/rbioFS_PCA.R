@@ -82,7 +82,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
   ## Boxplot
   if (boxplot){
     if (verbose) cat(paste("Boxplot being saved to file: ", deparse(substitute(input)), ".pca.boxplot.pdf...", sep = ""))  # initial message
-    grid.newpage()
+    # grid.newpage()
     boxplt <- ggplot(data = boxdfm_x, aes(x = PC, y = varpp_x, group = 1)) +
       geom_bar(position = "dodge", stat = "identity", color = "black", fill = "gray66") +
       scale_x_continuous() +
@@ -160,7 +160,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
               axis.text.x = element_text(size = xTickLblSize, family = fontType, angle = biplot.xAngle, hjust = biplot.xhAlign, vjust = biplot.xhAlign),
               axis.text.y = element_text(size = yTickLblSize, family = fontType, hjust = 0.5))
 
-      grid.newpage()
+      # grid.newpage()
       if (rightsideY){ # add the right-side y axis
         biplt <- RBioplot::rightside_y(biplt)
       }
@@ -218,7 +218,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
           geom_text(data = loadingValuePlot, aes(x = axis1, y = axis2), label = loadingValuePlot$lbl, colour = "gray30", size = biplot.loadingplot.textsize)
       }
 
-      grid.newpage()
+      # grid.newpage()
       if (rightsideY){ # add the right-side y axis
         biplt <- RBioplot::rightside_y(biplt)
       }
@@ -279,7 +279,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
               axis.text.x = element_text(size = xTickLblSize, family = fontType, angle = biplot.xAngle, hjust = biplot.xhAlign, vjust = biplot.xvAlign),
               axis.text.y = element_text(size = yTickLblSize, family = fontType))
 
-      grid.newpage()
+      # grid.newpage()
     }
     ggsave(filename = paste(deparse(substitute(input)),".pca.biplot.pdf", sep = ""), plot = biplt,
            width = biplot.Width, height = biplot.Height, units = "mm",dpi = 600)
@@ -289,7 +289,6 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
   assign(paste(deparse(substitute(input)), "_pca", sep = ""), PCA, envir = .GlobalEnv)
 }
-
 
 
 #' @title rbioFS_PCA.file

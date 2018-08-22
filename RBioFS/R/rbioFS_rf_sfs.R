@@ -141,7 +141,7 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
   }
 
   ## add the right-side y axis
-  grid.newpage()
+  # grid.newpage()
   pltgtb <- RBioplot::rightside_y(baseplt)
 
   # export the file and draw a preview
