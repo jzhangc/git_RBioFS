@@ -800,6 +800,15 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 }
 
 
+#' @export
+print.rbiomvr_perm <- function(x, ...){
+  cat(paste0("PLS-DA permuatation results with ", x$nperm, " permutations:\n"))
+  cat("\n")
+  print(x$p.value.summary)
+  cat("\n\n")
+}
+
+
 #' @title rbioClass_plsda_scoreplot
 #'
 #' @description scoreplot function for PLS-DA models.

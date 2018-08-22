@@ -71,7 +71,10 @@ Change log
           - Multi-category Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
-          - S3 print method for relevant functions
+        
+        - Updates to the PCA functions
+          - rbioFS_PCA() now exports a "rbiofs_pca" class object
+          - rbioFS_PCA() updated with S3 print method
           
       (ADDED)
         - New SVM functions:
@@ -92,14 +95,13 @@ Change log
           - Plot module removed from rbioFS_plsda_vip() and now a separated function: rbioFS_plsda_vip_plot()
           - rbioClass_plsda_roc_auc() now accepts custom newdata
           - Relevant functions now also output results tst file to the directory
+          - S3 print method for relevant functions
           - Additional argument checks
           
         - Updates to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
           - S3 print method for relevant functions
-        
-        - PCA function rbioFS_PCA() updated with S3 print method
           
         - Other update
           - Dependency ggplot2 now requires version 3.0.0

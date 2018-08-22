@@ -733,6 +733,16 @@ rbioClass_svm_perm <- function(object,
 }
 
 
+#' @export
+print.rbiosvm_perm <- function(x, ...){
+  cat(paste0("SVM permuatation results with ", x$nperm, " permutations:\n"))
+  cat("\n")
+  cat("p-value: \n")
+  print(x$p.value)
+  cat("\n\n")
+}
+
+
 #' @title rbioClass_svm_predict
 #'
 #' @description Prediction function for SVM analysis. The function calculates the predicted value for unknown sample data using the input SVM model.
