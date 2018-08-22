@@ -48,7 +48,6 @@ Change log
           - 3D score plot option for rbioFS_PCA (non-shiny)
           - 3D socre plot option for rbioFS_PCA_app (shiny)
           - Legend style adjusted for the sample labels
-          - PCA function rbioFS_PCA() updated with S3 method
 
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
@@ -67,17 +66,12 @@ Change log
         
         - Update to SVM functions:
           - rbioClass_svm_perm() plot output file name fixed
-          - S3 print method for relevant functions
         
         - Updates to PLS-DA functions:
           - Multi-category Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
           - S3 print method for relevant functions
-          
-        - Updates to RF-FS functions:
-          - S3 print method for relevant functions
-
           
       (ADDED)
         - New SVM functions:
@@ -88,7 +82,8 @@ Change log
           
         - Updates to SVM functions (non-Shiny):
           - Fixed a bug where rbioClass_svm cannot handle group weight in the scenario of not all groups represent in the training data
-          - Additional argument checks
+          - S3 print method for relevant functions
+          - Additional argument checks added for all functions
           
         - Updates to PLS-DA functions (non-Shiny):
           - rbioFS_plsda_VIP() changed to rbioFS_plsda_vip()
@@ -102,11 +97,13 @@ Change log
         - Updates to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
+          - S3 print method for relevant functions
+        
+        - PCA function rbioFS_PCA() updated with S3 print method
           
         - Other update
           - Dependency ggplot2 now requires version 3.0.0
-          - Added corresponding print method for the relevant S3 classes
-          
+
         - Bug fixes
           
 
