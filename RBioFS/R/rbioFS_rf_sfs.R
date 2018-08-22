@@ -337,3 +337,12 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   ## output to env
   return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
 }
+
+#' @export
+print.rf_sfs <- function(x, ...){
+  cat("Feature selected from sequential forward selection:\n")
+  print(x$selected_features)
+  cat("\n")
+  if (length(x$selected_features) == 1) cat("Note: SFS might be overfitted as only one feature is selected.")
+  cat("\n\n")
+}

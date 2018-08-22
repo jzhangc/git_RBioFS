@@ -346,3 +346,11 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   ## return a dataframe with the vi ranking dataframe
   return(assign(paste(objTitle, "_initial_FS", sep = ""), outlst, envir = .GlobalEnv))
 }
+
+
+#' @export
+print.rf_ifs <- function(x, ...){
+  cat("Feature selected from initial selection:\n")
+  print(x$feature_initial_FS)
+  cat("\n\n")
+}
