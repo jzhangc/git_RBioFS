@@ -340,7 +340,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
 
   ## plot
   if (plot){
-    rbioFS_rf_initial_FS_plot(object = outlst, n = n, plot.file.title = objTitle,...)
+    rbioFS_rf_initialFS_plot(object = outlst, n = n, plot.file.title = objTitle,...)
   }
 
   ## return a dataframe with the vi ranking dataframe

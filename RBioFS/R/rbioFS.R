@@ -112,7 +112,8 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                              plot.errorbar = initialFS_errorbar, plot.errorbarWidth = initialFS_errorbarWidth,
                              plot.xLabel = initialFS_xLabel, plot.yLabel = initialFS_yLabel,
                              plot.xTickLblSize = initialFS_xTickLblSize, plot.yTickLblSize = initialFS_yTickLblSize,
-                             plot.Width = initialFS_plotWidth, plot.Height = initialFS_plotHeight) # initial FS
+                             plot.Width = initialFS_plotWidth, plot.Height = initialFS_plotHeight,
+                             verbose = FALSE) # initial FS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
@@ -124,7 +125,8 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
                        plot.title = SFS_Title, plot.xLabel = SFS_xLabel, plot.yLabel = SFS_yLabel,
                        plot.errorbar = SFS_errorbar, plot.errorbarWidth = SFS_errorbarWidth,
                        plot.symbolSize = SFS_symbolSize, plot.xTickLblSize = SFS_xTickLblSize, plot.yTickLblSize = SFS_yTickLblSize,
-                       plot.Width = SFS_plotWidth, plot.Height = SFS_plotHeight) # SFS
+                       plot.Width = SFS_plotWidth, plot.Height = SFS_plotHeight,
+                       verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
 
@@ -132,14 +134,14 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
-                             plot = FALSE) # initial FS
+                             plot = FALSE, verbose = FALSE) # initial FS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
     if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
-                       plot = FALSE) # SFS
+                       plot = FALSE, verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   }
 }
