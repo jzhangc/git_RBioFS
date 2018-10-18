@@ -89,6 +89,7 @@ Change log
           - Additional argument checks added for all functions
           
         - Updates to PLS-DA functions (non-Shiny):
+          - Changes made to rbioClass_plsda() and rbioClass_plsda_perm() to acconmmodate validation = "LOO"
           - rbioFS_plsda_VIP() changed to rbioFS_plsda_vip()
           - Bootstraping option added for rbioFS_plsda_vip() so that VIP can use bootstrap data for SD/SEM errorbars
           - rbioFS_plsda_vip() now outputs a "rbiomvr_vip" class object
@@ -103,7 +104,8 @@ Change log
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
           - S3 print method for relevant functions
           
-        - Other update
+        - Other updates
+          - Documentation edits for rbioClass_plsda()
           - Functions updated for R Notebook/Markdown compatibility
           - Dependency ggplot2 now requires version 3.0.0
 

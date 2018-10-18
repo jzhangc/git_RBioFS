@@ -23,7 +23,7 @@ rbioClass_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 
 \item{segments}{Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.}
 
-\item{segments.type}{Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}.Default is \code{"random"}.}
+\item{segments.type}{Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.}
 
 \item{jackknife}{If to use jack-knife procedure. Default is \code{TRUE}.}
 
@@ -43,11 +43,20 @@ Additional items for \code{rbiomvr} object to \code{mvr} object from pls package
 \code{inputX}: raw input predictor data.
 
 \code{inputY}: input group labels.
+
+\code{validation_method}
+
+\code{validation_segments_type}
 }
 \description{
 PLS-DA modelling
 }
 \details{
+The center and scale processes are handled by \code{\link{center_scale}} function.
+         Therefore, the \code{center} and \code{scale} arguments \code{pls::mvr} are set to \code{FALSE}.
+
+         The function always centers the data.
+
 The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
 
 For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.

@@ -54,19 +54,21 @@ Permutation test for PLS-DA models.
 \details{
 The function uses RMSEP as the stats for comparing original model with permutatsions.
 
-Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
+         Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
 
-Data for permutation are object$centerX$centerX, meaning centered X are used if applicable.
+         Data for permutation are object$centerX$centerX, meaning centered X are used if applicable.
 
-Permutation methods are according to:
+         Permutation methods are according to:
 
-Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance. J Mach Learn Res. 11: 1833 - 63.
+            Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
+            J Mach Learn Res. 11: 1833 - 63.
 
-For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+         For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 
-For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
-the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
-Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
+         For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature.
+         Since the permutation is done for the features WITHIN the group,
+         the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
+         Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 }
 \examples{
 \dontrun{

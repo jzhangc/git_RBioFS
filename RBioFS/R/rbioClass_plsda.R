@@ -37,10 +37,15 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
 #' @param segments Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.
-#' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}.Default is \code{"random"}.
+#' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @details The center and scale processes are handled by \code{\link{center_scale}} function.
+#'          Therefore, the \code{center} and \code{scale} arguments \code{pls::mvr} are set to \code{FALSE}.
+#'
+#'          The function always centers the data.
+#'
 #' @return Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
 #'
 #' Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
@@ -52,6 +57,10 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' \code{inputX}: raw input predictor data.
 #'
 #' \code{inputY}: input group labels.
+#'
+#' \code{validation_method}
+#'
+#' \code{validation_segments_type}
 #'
 #' @details The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
 #'
@@ -66,10 +75,12 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' rbioClass_plsda(x, y, ncomp = 20)
 #' }
 #' @export
-rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls", scale = TRUE, validation = c("none", "CV", "LOO"),
-                         segments = 10, segments.type = "random",
-                         jackknife = TRUE, ...,
-                         verbose = TRUE){
+rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
+                            scale = TRUE,
+                            validation = c("none", "CV", "LOO"),
+                            segments = 10, segments.type = "random",
+                            jackknife = TRUE, ...,
+                            verbose = TRUE){
   ## check arguments
   if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
   if (class(x) == "data.frame" | is.vector(x)){
@@ -93,13 +104,22 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
   model_dfm$X <- X  # x is the x matrix as a whole, not the content of x
 
   ## modelling
-  out_model <- plsr(Y ~ X, data = model_dfm, ncomp = ncomp,
-                    method = method, scale = FALSE,
-                    validation = validation, segments = segments, segments.type = segments.type, jackknife = TRUE, ...)
+  if (validation == "LOO") {
+    segments.type <- NA
+    out_model <- plsr(Y ~ X, data = model_dfm, ncomp = ncomp,
+                      method = method, scale = FALSE, center = FALSE,
+                      validation = validation, jackknife = TRUE, ...)
+  } else {
+    out_model <- plsr(Y ~ X, data = model_dfm, ncomp = ncomp,
+                      method = method, scale = FALSE, center = FALSE,
+                      validation = validation, segments = segments, segments.type = segments.type, jackknife = TRUE, ...)
+  }
   out_model$centerX <- centered_X
   out_model$dummy_y <- Y
   out_model$inputX <- x
   out_model$inputY <- y
+  out_model$validation_method <- validation
+  out_model$validation_segments_type <- segments.type
 
   class(out_model) <- c("rbiomvr", "mvr")
   return(out_model)
@@ -592,19 +612,21 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
 #'
 #' @details The function uses RMSEP as the stats for comparing original model with permutatsions.
 #'
-#' Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
+#'          Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
 #'
-#' Data for permutation are object$centerX$centerX, meaning centered X are used if applicable.
+#'          Data for permutation are object$centerX$centerX, meaning centered X are used if applicable.
 #'
-#' Permutation methods are according to:
+#'          Permutation methods are according to:
 #'
-#' Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance. J Mach Learn Res. 11: 1833 - 63.
+#'             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
+#'             J Mach Learn Res. 11: 1833 - 63.
 #'
-#' For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
-#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
-#' the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
-#' Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
+#'          For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature.
+#'          Since the permutation is done for the features WITHIN the group,
+#'          the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
+#'          Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 #'
 #' @import ggplot2
 #' @import foreach
@@ -652,7 +674,9 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
       perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
         perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
         perm_model <- rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                      ncomp = ncomp, scale = FALSE, validation = "CV",
+                                      ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                                      segments = length(object$validation$segments),
+                                      segments.type = object$out_model$validation_segments_type,
                                       verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
@@ -680,7 +704,9 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
         }
 
         perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
-                                      ncomp = ncomp, scale = FALSE, validation = "CV",
+                                      ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                                      segments = length(object$validation$segments),
+                                      segments.type = object$out_model$validation_segments_type,
                                       verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
@@ -709,7 +735,9 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
       perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% {
         perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
         perm_model <- RBioFS::rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                              ncomp = ncomp, scale = FALSE, validation = "CV",
+                                              ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                                              segments = length(object$validation$segments),
+                                              segments.type = object$out_model$validation_segments_type,
                                               verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
@@ -737,7 +765,9 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
         }
 
         perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
-                                      ncomp = ncomp, scale = FALSE, validation = "CV",
+                                      ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                                      segments = length(object$validation$segments),
+                                      segments.type = object$out_model$validation_segments_type,
                                       verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
         perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
