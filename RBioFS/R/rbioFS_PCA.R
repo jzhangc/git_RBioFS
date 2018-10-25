@@ -223,9 +223,13 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
         biplt <- RBioplot::rightside_y(biplt)
       }
 
-    } else if (length(biplot.comps) > 2){
+    } else if (length(biplot.comps) > 2) {
       if (rightsideY){ # add the right-side y axis
         cat("Rightside y-axis is not applicable when length(biplot.comps) > 2. Proceed without one.\n")
+      }
+
+      if (biplot.loadingplot) {
+        cat("For now, loadingplot is unavailable when using more then two PCs. \n")
       }
 
       # custom functions for the paired scoreplot

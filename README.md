@@ -75,6 +75,7 @@ Change log
         - Updates to the PCA functions
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
+          - When set, rbioFS_pAC() also displays loadingplot when using more than 2 PCs
           
       (ADDED)
         - New SVM functions:
@@ -103,6 +104,9 @@ Change log
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
           - S3 print method for relevant functions
+
+        - Updates to the PCA functions
+          - Loadingplot disabled message when more than 2 PCs are used
           
         - Other updates
           - Documentation edits for rbioClass_plsda()
