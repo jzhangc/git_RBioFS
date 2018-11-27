@@ -114,7 +114,7 @@ Change log
           - Documentation edits for rbioClass_plsda()
           - Functions updated for R Notebook/Markdown compatibility
           - Dependency ggplot2 now requires version 3.0.0
-          - Updated bioconductor installation instructions
+          - New bioconductor installation instructions added
 
         - Bug fixes
           
