@@ -317,7 +317,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
                  SFS_training_data_matrix = sfsmatrix)
 
   sink(file = paste(objTitle,".SFS.txt",sep = ""), append = FALSE) # dump the results to a file
-  print(outlst)
+  lapply(outlst, print)
   sink() # end dump
   class(outlst) <- "rf_sfs"
 

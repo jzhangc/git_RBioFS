@@ -334,7 +334,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
                  training_initial_FS = training_initFS)
 
   sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
-  print(outlst)
+  lapply(outlst, print)
   sink() # end dump
   class(outlst) <- "rf_ifs"
 

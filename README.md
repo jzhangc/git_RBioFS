@@ -14,17 +14,18 @@ Installation
         
   - Install bioconductor (if not already done)
         
-        source("https://bioconductor.org/biocLite.R")
-      
-        biocLite()
-        
+        if (!requireNamespace("BiocManager"))
+            install.packages("BiocManager")
+            
+        BiocManager::install()
+                
   - Install stable release
         
-        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocInstaller::biocinstallRepos())
+        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories())
         
   - Install development build
         
-        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocInstaller::biocinstallRepos(), ref = "beta")
+        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
         
 
 Change log
@@ -104,6 +105,7 @@ Change log
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
           - S3 print method for relevant functions
+          - Updated method for export a list for rf_ifs and rf_sfs classes
 
         - Updates to the PCA functions
           - Loadingplot disabled message when more than 2 PCs are used
@@ -112,6 +114,7 @@ Change log
           - Documentation edits for rbioClass_plsda()
           - Functions updated for R Notebook/Markdown compatibility
           - Dependency ggplot2 now requires version 3.0.0
+          - Updated bioconductor installation instructions
 
         - Bug fixes
           
