@@ -74,8 +74,6 @@ Additional items for \code{rbiosvm_nestedcv}:
 Nested cross-validation assessment for SVM classification. It evaluates the overall performace of SVM modelling given the training data.
 }
 \details{
-TBA
-
 For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
 Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",

@@ -202,7 +202,7 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
 #'
-#' @details TBA
+#' @details
 #'
 #' For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
 #' Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.

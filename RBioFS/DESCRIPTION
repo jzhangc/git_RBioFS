@@ -17,4 +17,4 @@ Imports:
     shiny (>= 1.0.5), doParallel (>= 1.0.11), foreach (>= 1.4.3), pls (>= 2.6-0), matrixStats (>= 0.53.1), GGally (>= 1.3.2),
     RBioplot (>= 0.5.2), pROC (>= 1.12.1), klaR (>= 0.6-14), e1071 (>= 1.6-8)
 Remotes: jzhangc/git_R_STATS_KBS/package/rbioplot
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
