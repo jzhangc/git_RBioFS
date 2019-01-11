@@ -76,7 +76,7 @@ Change log
         - Updates to the PCA functions
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
-          - When set, rbioFS_pAC() also displays loadingplot when using more than 2 PCs
+          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
           
       (ADDED)
         - New SVM functions:
