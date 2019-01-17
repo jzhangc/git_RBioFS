@@ -31,7 +31,7 @@ Installation
 Change log
 
     0.6.1 (Jan.17.2019)
-        - New SVM functions:
+       - New SVM functions:
           - rbioClass_svm_ncv_fs(): nested SVM cross-validation function with feature selection functionality
         
         - New PLS-DA functions:
