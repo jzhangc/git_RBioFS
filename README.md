@@ -28,7 +28,7 @@ Installation
         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
         
 
-Change log
+Update log
 
   Feature blueprint
         - ANN (artificial neural network) functions added (non-Shiny) (tentative):
