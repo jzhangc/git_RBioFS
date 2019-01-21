@@ -81,6 +81,7 @@ Update log
   (ADDED)
         - Updates to RF-FS functions:
           - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
+          - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data
 
 
     0.6.1 (Jan.17.2019)

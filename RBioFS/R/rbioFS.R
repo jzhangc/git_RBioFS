@@ -6,6 +6,7 @@
 #' @param input Input data frame. The type should be \code{data.frame} or \code{matrix}, with the label column, i.e. the whole dataset. Set either this or \code{file}, but not both.
 #' @param sampleIDVar Sample variable name. It's a character string.
 #' @param groupIDVar Group variable name. It's a character string.
+#' @param annotVarNames String, identifying the annotation variable names to exclude from the FS analysis. Default is \code{c(sampleIDVar, groupIDVar)}.
 #' @param impute Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.
 #' @param imputeMethod The method for data imputation, only set if \code{impute = TRUE}. Default is \code{"rf"}. See \code{\link{rbioIMP}} for details.
 #' @param imputeIter RF imputation iteration value. Default is \code{10}. See \code{\link{rbioIMP}} for details.
@@ -44,7 +45,8 @@
 #' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
 #' }
 #' @export
-rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
+rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
+                   sampleIDVar = NULL, groupIDVar = NULL, annotVarNames = c(sampleIDVar, groupIDVar),
                    impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
                    quantileNorm = FALSE,
                    nTimes = 50, nTree = 1001, SFS_mTry = "recur_default",
@@ -65,6 +67,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
   if (!is.null(file) & !is.null(input)) stop("set only one of the \"file\" and \"input\"")
   if (is.null(file) & is.null(input)) stop("set one of the \"file\" and \"input\"")
   if (is.null(sampleIDVar) | is.null(groupIDVar)) stop("set both sampleIDVar and groupIDVar")
+  if (is.null(annotVarNames)) stop("set annotNarNames variable")
 
   ## input constuction
   if (is.null(input)){
@@ -72,6 +75,9 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
   } else {
     raw <- data.frame(input, check.names = FALSE, stringsAsFactors = FALSE)
   }
+
+  # further input check
+  if (!all(annotVarNames %in% names(raw))) stop("not all annotVarNames present in the input dataframe. ")
   if (!all(c(sampleIDVar, groupIDVar) %in% names(raw))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
 
   tgt <- factor(raw[, groupIDVar], levels = unique(raw[, groupIDVar])) # target variable
@@ -79,7 +85,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
   ## imputation
   if (impute){
     if (verbose) cat(paste("Imputing missing data using ", imputeMethod, " method...", sep = ""))  # initial message
-    imp_data <- RBioFS::rbioIMP(dfm = raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], method = imputeMethod,
+    imp_data <- RBioFS::rbioIMP(dfm = raw[, !names(raw) %in% annotVarNames], method = imputeMethod,
                              iter = imputeIter, ntree = imputeNtree,
                              fct = tgt, annot = raw[, sampleIDVar], transpo = FALSE)
     imp_data <- data.frame(imp_data, check.names = FALSE)
@@ -91,7 +97,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
     assign(paste(deparse(substitute(object)), "_imputed", sep = ""), out, envir = .GlobalEnv)
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   } else {
-    fs_data <- data.frame(raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], check.names = FALSE)
+    fs_data <- data.frame(raw[, !names(raw) %in% annotVarNames], check.names = FALSE)
   }
 
   if (quantileNorm){ # normalization

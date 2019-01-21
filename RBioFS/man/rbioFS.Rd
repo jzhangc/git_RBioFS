@@ -5,7 +5,8 @@
 \title{rbioFS}
 \usage{
 rbioFS(objTitle = "data", file = NULL, input = NULL,
-  sampleIDVar = NULL, groupIDVar = NULL, impute = FALSE,
+  sampleIDVar = NULL, groupIDVar = NULL,
+  annotVarNames = c(sampleIDVar, groupIDVar), impute = FALSE,
   imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
   quantileNorm = FALSE, nTimes = 50, nTree = 1001,
   SFS_mTry = "recur_default", multicore = TRUE, plot = TRUE,
@@ -30,6 +31,8 @@ rbioFS(objTitle = "data", file = NULL, input = NULL,
 \item{sampleIDVar}{Sample variable name. It's a character string.}
 
 \item{groupIDVar}{Group variable name. It's a character string.}
+
+\item{annotVarNames}{String, identifying the annotation variable names to exclude from the FS analysis. Default is \code{c(sampleIDVar, groupIDVar)}.}
 
 \item{impute}{Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.}
 
