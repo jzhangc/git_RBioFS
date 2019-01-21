@@ -88,6 +88,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL, sampleIDVar = N
     # export imputation results
     out <- data.frame(raw[, c(sampleIDVar, groupIDVar)], imp_data, check.names = FALSE)
     write.csv(out, file = paste(objTitle, "_imputed.csv", sep = ""), row.names = FALSE)
+    assign(paste(deparse(substitute(object)), "_imputed", sep = ""), out, envir = .GlobalEnv)
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   } else {
     fs_data <- data.frame(raw[, !names(raw) %in% c(sampleIDVar, groupIDVar)], check.names = FALSE)

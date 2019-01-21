@@ -79,6 +79,8 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
            
   (ADDED)
+        - Updates to RF-FS functions:
+          - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
 
 
     0.6.1 (Jan.17.2019)
