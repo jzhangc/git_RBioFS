@@ -47,6 +47,8 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 
 \item{biplot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
+\item{biplot.sampleLabelSize}{Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.}
+
 \item{biplot.sampleLabel.padding}{Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{biplot.SymbolSize}{The symbol size for the scatter plot portion of the biplot. Default is \code{2}.}
@@ -82,8 +84,6 @@ rbioFS_PCA(input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
 \item{yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
-
-\item{biplot.samopleLabelSize}{Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.}
 }
 \value{
 Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.

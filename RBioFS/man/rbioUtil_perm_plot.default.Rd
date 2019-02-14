@@ -18,13 +18,13 @@
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
-\item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.}
+\item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Permutation"}.}
 
 \item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
 
 \item{plot.xTickLblSize}{X-axis tick label size. Default is \code{10}.}
 
-\item{plot.yLabel}{Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.}
+\item{plot.yLabel}{Y-axis label. Type with quotation marks. Could be NULL.}
 
 \item{plot.yLabelSize}{Y-axis label size. Default is \code{10}.}
 

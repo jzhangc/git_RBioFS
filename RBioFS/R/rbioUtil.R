@@ -96,10 +96,10 @@ rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
-#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Permutation"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
-#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL.
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.

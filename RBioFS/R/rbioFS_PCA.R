@@ -15,7 +15,7 @@
 #' @param biplot.comps Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.
 #' @param biplot.Title The biplot title. Default is \code{NULL}.
 #' @param biplot.sampleLabel.type  If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
-#' @param biplot.samopleLabelSize Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.
+#' @param biplot.sampleLabelSize Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.
 #' @param biplot.sampleLabel.padding Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param biplot.SymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
 #' @param biplot.ellipse If to draw ellipses. Default is \code{FALSE}.
