@@ -468,6 +468,10 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
+  if (class(newdata.label) != "factor"){
+    if (verbose) cat("newdata.label is converted to factor. \n")
+    newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+  }
 
   ## process data
   if (center.scale.newdata){ # using training data mean and sd

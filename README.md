@@ -82,6 +82,11 @@ Update log
         - Updates to RF-FS functions:
           - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
           - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data
+          
+        - Updates to SVM functions
+          - Additional argument check added to rbioClass_svm_roc_auc()
+        
+        - Bug fixes
 
 
     0.6.1 (Jan.17.2019)
