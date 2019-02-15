@@ -31,7 +31,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'
 #' @description PLS-DA modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class or a character vector.
 #' @param ncomp Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.
 #' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
@@ -87,7 +87,10 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
-  if (!is.factor(y))stop("y has to be a factor object.")
+  if (class(y) != "factor"){
+    if (verbose) cat("y is converted to factor. \n")
+    y <- factor(y, levels = unique(y))
+  }
   if (is.null(ncomp))stop("please set the ncomp number.")
 
   ## data processing
@@ -843,7 +846,7 @@ print.rbiomvr_perm <- function(x, ...){
 #'
 #' @description scoreplot function for PLS-DA models.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
-#' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class or a character vector.
 #' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
@@ -900,8 +903,12 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     y <- object$inputY
   } else if (!any(class(object) == "rbiomvr") & any(class(object) == "mvr")){
     if (is.null(y)) stop("for mvr class objects, please provide response factor vector y.")
-    if (!is.factor(y)) stop("for mvr class objects, y has to be a factor vector.")
-    y <- y
+    if (class(y) != "factor"){
+      if (verbose) cat("y is converted to factor. \n")
+      y <- factor(y, levels = unique(y))
+    } else {
+      y <- y
+    }
   } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from rbioClass_plsda() function.")
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
@@ -1782,6 +1789,10 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
+  if (class(newdata.y) != "factor"){
+    if (verbose) cat("y is converted to factor. \n")
+    newdata.y <- factor(newdata.y, levels = unique(newdata.y))
+  }
   if (missing(newdata) || is.null(newdata) || missing(newdata.y) || is.null(newdata.y)) {
     cat("Note: newdata or newdata.y info isn't complete. Proceed with training data.\n")
     newdata <- object$centerX$centerX
@@ -1795,6 +1806,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
     }
     outcome <- newdata.y
   }
+
 
   ## calcuate ROC-AUC
   pred_raw <- predict(object, newdata = newdata)

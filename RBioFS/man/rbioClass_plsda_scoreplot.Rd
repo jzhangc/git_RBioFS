@@ -19,7 +19,7 @@ rbioClass_plsda_scoreplot(object, y = NULL, comps = c(1, 2),
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
 
-\item{y}{Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
+\item{y}{Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class or a character vector.}
 
 \item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 

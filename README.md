@@ -84,7 +84,7 @@ Update log
           - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data
           
         - Updates to SVM functions
-          - Additional argument check added to rbioClass_svm_roc_auc()
+          - Additional argument check added to rbioClass_svm_roc_auc(), rbioClass_plsda() and rbioClass_plsda_scoreplot()
         
         - Bug fixes
 
