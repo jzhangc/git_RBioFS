@@ -179,7 +179,7 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
 #' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
-#' rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
+#' rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, parallelComputing = TRUE)
 #' }
 #' @export
 rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
@@ -201,7 +201,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   singleerrmtx <- matrix(nrow = 1, ncol = nTimes) # for the recursive OOB error rates from a single tree
   ooberrmtx <- matrix(nrow = ncol(training), ncol = nTimes) # for the recursive OOB error rates from all trees.
 
-  if (!multicore){
+  if (!parallelComputing){
 
     ## signle core computing: recursive structure
     tmpFunc <- function(n, m, tmperrmtx, tmpTraining, tmpTgt,

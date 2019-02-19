@@ -45,6 +45,6 @@ Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., co
 }
 \examples{
 \dontrun{
-rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, multicore = TRUE)
+rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, parallelComputing = TRUE)
 }
 }
