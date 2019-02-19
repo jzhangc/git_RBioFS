@@ -5,8 +5,9 @@
 \title{rbioFS_rf_initialFS}
 \usage{
 rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
-  nTree = 1001, mTry = max(floor(ncol(x)/3), 2), multicore = TRUE,
-  plot = TRUE, n = "all", ...)
+  nTree = 1001, mTry = max(floor(ncol(x)/3), 2),
+  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
+  clusterType = "PSOCK", plot = TRUE, n = "all", ...)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
@@ -21,7 +22,11 @@ rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 
 \item{mTry}{Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)}.}
 
-\item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
+\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
+
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
 \item{plot}{If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}}
 

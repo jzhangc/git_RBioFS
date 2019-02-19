@@ -15,7 +15,9 @@
 #' @param nTimes Number of random forest for both initial FS and SFS-like FS. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run for both initial FS and SFS-like FS. Default is \code{1001} trees.
 #' @param SFS_mTry Number of randomly selected featurs for constructing trees for SFS-like FS step. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.
-#' @param multicore If to use parallel computing. Default is \code{TRUE}.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to plot results, bar graph for initial FS and joint-point curve for SFS-like FS. Default is \code{TRUE}
 #' @param initialFS_Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param initialFS_xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -50,7 +52,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
                    impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
                    quantileNorm = FALSE,
                    nTimes = 50, nTree = 1001, SFS_mTry = "recur_default",
-                   multicore = TRUE,
+                   parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                    plot = TRUE,
                    initialFS_n = "all",
                    initialFS_Title = NULL, initialFS_xLabel = "Mean Decrease in Accuracy", initialFS_yLabel = NULL,
@@ -113,20 +115,22 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
   if (plot){
     if (verbose) cat(paste("Initial selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
-                             nTimes = nTimes, nTree = nTree,
-                             plot = TRUE, n = initialFS_n,
-                             plot.title = initialFS_Title,
-                             plot.errorbar = initialFS_errorbar, plot.errorbarWidth = initialFS_errorbarWidth,
-                             plot.xLabel = initialFS_xLabel, plot.yLabel = initialFS_yLabel,
-                             plot.xTickLblSize = initialFS_xTickLblSize, plot.yTickLblSize = initialFS_yTickLblSize,
-                             plot.Width = initialFS_plotWidth, plot.Height = initialFS_plotHeight,
-                             verbose = FALSE) # initial FS
+                                nTimes = nTimes, nTree = nTree,
+                                parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
+                                plot = TRUE, n = initialFS_n,
+                                plot.title = initialFS_Title,
+                                plot.errorbar = initialFS_errorbar, plot.errorbarWidth = initialFS_errorbarWidth,
+                                plot.xLabel = initialFS_xLabel, plot.yLabel = initialFS_yLabel,
+                                plot.xTickLblSize = initialFS_xTickLblSize, plot.yTickLblSize = initialFS_yTickLblSize,
+                                plot.Width = initialFS_plotWidth, plot.Height = initialFS_plotHeight,
+                                verbose = FALSE) # initial FS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
+                       parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                        plot = TRUE,
                        n = SFS_n,
                        plot.title = SFS_Title, plot.xLabel = SFS_xLabel, plot.yLabel = SFS_yLabel,
@@ -141,6 +145,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
                              nTimes = nTimes, nTree = nTree,
+                             parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                              plot = FALSE, verbose = FALSE) # initial FS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
@@ -148,6 +153,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
                        targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
+                       parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                        plot = FALSE, verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   }

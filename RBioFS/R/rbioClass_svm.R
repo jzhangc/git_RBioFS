@@ -174,6 +174,7 @@ print.rbiosvm <- function(x, ...){
 #' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.
 #' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
@@ -233,7 +234,7 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
                                  tune.cross.k = 10, tune.boot.n = 10, ...,
                                  fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                  fs.count.cutoff = cross.k,
-                                 parallelComputing = TRUE, clusterType = "PSOCK",
+                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                                  verbose = TRUE){
   ## check arguments
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
@@ -263,7 +264,7 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   if (verbose) cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...")
   nested.cv.list <- vector(mode = "list", length = cross.k)
   if (!parallelComputing){  # single core
-    nested.cv.list[] <- foreach(i = 1:cross.k) %do% {
+    nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% {
       training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
       # fs
       if (center.scale){
@@ -304,8 +305,8 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
     }
   } else {  # multiple cores
     # set clusters
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, clusterType = clusterType)
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
@@ -390,6 +391,7 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   class(out) <- "rbiosvm_nestedcv"
   return(out)
 }
+
 
 
 #' @export
@@ -567,6 +569,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
 #' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return The function returns \code{CSV} files for all intermediate permuatation accuracy values as well as the p-value resutls.
@@ -614,7 +617,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 rbioClass_svm_perm <- function(object,
                                perm.method = "by_y", nperm = 999,
                                perm.plot = TRUE, ...,
-                               parallelComputing = TRUE, clusterType = "PSOCK",
+                               parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,clusterType = "PSOCK",
                                verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
@@ -668,8 +671,8 @@ rbioClass_svm_perm <- function(object,
     }
   } else {  # parallel computing
     # set up cpu cluster
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, clusterType = clusterType)
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 

@@ -85,6 +85,9 @@ Update log
           
         - Updates to SVM functions
           - Additional argument check added to rbioClass_svm_roc_auc(), rbioClass_plsda() and rbioClass_plsda_scoreplot()
+          
+        - Other updates
+          - CPU cores now can be set for the functions suppporting parallel computing
         
         - Bug fixes
 

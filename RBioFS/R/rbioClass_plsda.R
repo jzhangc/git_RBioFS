@@ -593,6 +593,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
 #' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
 #' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return The function returns \code{CSV} files for all intermediate permuatation RMSEP values as well as the p-value resutls.
@@ -644,7 +645,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
 rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
                                  perm.plot = TRUE, ...,
                                  perm.method = "by_y", nperm = 999,
-                                 parallelComputing = TRUE, clusterType = "PSOCK",
+                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                                  verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.")
@@ -728,8 +729,8 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     }
   } else {  # parallel computing
     # set up cpu cluster
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, clusterType = clusterType)
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
@@ -1293,6 +1294,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @param bootstrap If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{FALSE}.
 #' @param boot.n Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.
 #' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.
+#' @param boot.n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param boot.clusterType Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to generate a plot. Default is \code{TRUE}.
 #' @param ... Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.
@@ -1340,7 +1342,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #' @export
 rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
                              bootstrap = TRUE,
-                             boot.n = 50, boot.parallelComputing = TRUE, boot.clusterType = "PSOCK",
+                             boot.n = 50, boot.parallelComputing = TRUE, boot.n_cores = parallel::detectCores() - 1, boot.clusterType = "PSOCK",
                              plot = TRUE,...,
                              verbose = TRUE){
   ## argument check
@@ -1400,8 +1402,8 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
       }
     } else {  # boot parallel computing
       # set up cluster
-      n_cores <- detectCores() - 1
-      cl <- makeCluster(n_cores, clusterType = boot.clusterType)
+      n_cores <- boot.n_cores
+      cl <- makeCluster(n_cores, type = boot.clusterType)
       registerDoParallel(cl)
       on.exit(stopCluster(cl)) # close connect when exiting the function
 

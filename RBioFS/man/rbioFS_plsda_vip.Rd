@@ -6,6 +6,7 @@
 \usage{
 rbioFS_plsda_vip(object, vip.alpha = 1, comps = c(1, 2),
   bootstrap = TRUE, boot.n = 50, boot.parallelComputing = TRUE,
+  boot.n_cores = parallel::detectCores() - 1,
   boot.clusterType = "PSOCK", plot = TRUE, ..., verbose = TRUE)
 }
 \arguments{
@@ -20,6 +21,8 @@ rbioFS_plsda_vip(object, vip.alpha = 1, comps = c(1, 2),
 \item{boot.n}{Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.}
 
 \item{boot.parallelComputing}{Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.}
+
+\item{boot.n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{boot.clusterType}{Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 

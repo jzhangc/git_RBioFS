@@ -6,7 +6,8 @@
 \usage{
 rbioClass_plsda_perm(object, ncomp = object$ncomp, adjCV = FALSE,
   perm.plot = TRUE, ..., perm.method = "by_y", nperm = 999,
-  parallelComputing = TRUE, clusterType = "PSOCK", verbose = TRUE)
+  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
+  clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
@@ -24,6 +25,8 @@ rbioClass_plsda_perm(object, ncomp = object$ncomp, adjCV = FALSE,
 \item{nperm}{Number of permutations to run. Default is \code{999}.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 

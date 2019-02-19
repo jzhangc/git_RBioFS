@@ -161,7 +161,9 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
 #' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
 #' @param mTry Number of randomly selected featurs for constructing trees. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.
-#' @param multicore If to use parallel computing. Default is \code{TRUE}.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param ... Additional arguments passed to the plot function \code{\link{rbioFS_rf_SFS_plot}}.
@@ -182,7 +184,7 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
 #' @export
 rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
                        x, targetVar, nTimes = 50, nTree = 1001, mTry = "recur_default",
-                       multicore = TRUE,
+                       parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                        plot = TRUE, n = "all", ...){
   ## prepare the dataframe
   training <- data.frame(x, check.names = FALSE)
@@ -254,8 +256,8 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
 
   } else { ## parallel computing
     # set up cpu cluster
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores)
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 

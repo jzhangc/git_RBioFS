@@ -9,8 +9,9 @@ rbioFS(objTitle = "data", file = NULL, input = NULL,
   annotVarNames = c(sampleIDVar, groupIDVar), impute = FALSE,
   imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
   quantileNorm = FALSE, nTimes = 50, nTree = 1001,
-  SFS_mTry = "recur_default", multicore = TRUE, plot = TRUE,
-  initialFS_n = "all", initialFS_Title = NULL,
+  SFS_mTry = "recur_default", parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
+  plot = TRUE, initialFS_n = "all", initialFS_Title = NULL,
   initialFS_xLabel = "Mean Decrease in Accuracy",
   initialFS_yLabel = NULL, initialFS_errorbar = "SEM",
   initialFS_errorbarWidth = 0.2, initialFS_xTickLblSize = 10,
@@ -50,7 +51,11 @@ rbioFS(objTitle = "data", file = NULL, input = NULL,
 
 \item{SFS_mTry}{Number of randomly selected featurs for constructing trees for SFS-like FS step. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.}
 
-\item{multicore}{If to use parallel computing. Default is \code{TRUE}.}
+\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
+
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
 \item{plot}{If to plot results, bar graph for initial FS and joint-point curve for SFS-like FS. Default is \code{TRUE}}
 
