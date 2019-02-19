@@ -37,7 +37,7 @@ rbioClass_plsda_tuplot(object, comps = 1,
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
-\item{plot.Title}{Scoreplot title. Default is \code{NULL}.}
+\item{plot.Title}{tuplot title. Default is \code{NULL}.}
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
@@ -51,9 +51,9 @@ rbioClass_plsda_tuplot(object, comps = 1,
 
 \item{plot.legendSize}{Legend size. Default is \code{9}.}
 
-\item{plot.Width}{Scoreplot width. Default is \code{170}.}
+\item{plot.Width}{tuplot width. Default is \code{170}.}
 
-\item{plot.Height}{Scoreplot height. Default is \code{150}.}
+\item{plot.Height}{tuplot height. Default is \code{150}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }

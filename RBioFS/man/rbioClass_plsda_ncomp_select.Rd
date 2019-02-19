@@ -60,9 +60,9 @@ rbioClass_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 
 \item{plot.legendSize}{Legend size. Default is \code{9}.}
 
-\item{plot.Width}{Scoreplot width. Default is \code{170}.}
+\item{plot.Width}{Plot width. Default is \code{170}.}
 
-\item{plot.Height}{Scoreplot height. Default is \code{150}.}
+\item{plot.Height}{Plot height. Default is \code{150}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }

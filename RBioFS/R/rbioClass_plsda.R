@@ -142,7 +142,7 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
-#' @param plot.Title Scoreplot title. Default is \code{NULL}.
+#' @param plot.Title tuplot title. Default is \code{NULL}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
@@ -150,8 +150,8 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Scoreplot width. Default is \code{170}.
-#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.Width tuplot width. Default is \code{170}.
+#' @param plot.Height tuplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Returns a pdf file for scoreplot.
 #' @details The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
@@ -188,7 +188,7 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
     }
   }
 
-  ## extract and construt t-u score plot dataframe
+  ## extract and construt t-u plot dataframe
   tu_dfm <- data.frame(y = object$inputY)
 
   varpp_x <- 100 * object$Xvar / object$Xtotvar
@@ -287,8 +287,8 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Scoreplot width. Default is \code{170}.
-#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.Width Plot width. Default is \code{170}.
+#' @param plot.Height Plot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details A vertical line indicating the number of component with minimum q2-r2 distance.
@@ -436,8 +436,8 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Scoreplot width. Default is \code{170}.
-#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.Width Plot width. Default is \code{170}.
+#' @param plot.Height Plot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
@@ -948,7 +948,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       if (tolower(plot.sampleLabel.type) == "direct"){
         scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
-        scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
+        scoreplt <- scoreplt + geom_point(size = plot.SymbolSize, aes(colour = group, shape = group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
                           size = plot.sampleLabelSize, show.legend = FALSE)
       }
@@ -1759,8 +1759,8 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Scoreplot width. Default is \code{170}.
-#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.Width ROC width. Default is \code{170}.
+#' @param plot.Height ROC height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Prints AUC values in the console. And a pdf file for ROC plot
 #' @details Uses pROC module to calculate ROC.
@@ -1940,8 +1940,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Scoreplot width. Default is \code{170}.
-#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param plot.Width Predplot width. Default is \code{170}.
+#' @param plot.Height Predplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 #'

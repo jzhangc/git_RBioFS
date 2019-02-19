@@ -50,9 +50,9 @@ rbioClass_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
 
 \item{plot.legendSize}{Legend size. Default is \code{9}.}
 
-\item{plot.Width}{Scoreplot width. Default is \code{170}.}
+\item{plot.Width}{Plot width. Default is \code{170}.}
 
-\item{plot.Height}{Scoreplot height. Default is \code{150}.}
+\item{plot.Height}{Plot height. Default is \code{150}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
