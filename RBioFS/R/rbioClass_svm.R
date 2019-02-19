@@ -320,10 +320,10 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
         fs_training <- training[, -1]
       }
       rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
-                          nTree = rf.ifs.ntree, multicore = FALSE, plot = FALSE)
+                          nTree = rf.ifs.ntree, parallelComputing = FALSE, plot = FALSE)
       # fs <- svm_nested_initial_FS$feature_initial_FS
       rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-                    nTree = rf.sfs.ntree, mTry = "recur_default", multicore = FALSE, plot = FALSE)
+                    nTree = rf.sfs.ntree, mTry = "recur_default", parallelComputing = FALSE, plot = FALSE)
       if (length(svm_nested_SFS$selected_features) > 1){
         fs <- svm_nested_SFS$selected_features
       } else {
