@@ -439,8 +439,12 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.Width Plot width. Default is \code{170}.
 #' @param plot.Height Plot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
-#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+#' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment as a \code{rbiomvr_ncomp_select} object,
+#'         as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
+#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
+#'          Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
+#'          reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation;
+#'          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 #' @import ggplot2
 #' @import foreach
 #' @importFrom GGally ggpairs
@@ -578,7 +582,18 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   }
 
   ## return RMSEP values
-  assign(paste(deparse(substitute(object)), "_plsda_rmsep_list", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
+  rmsep_dfm_list$ncomp_selected <- ncompsel_mtx
+  class(rmsep_dfm_list) <- "rbiomvr_ncomp_select"
+  assign(paste(deparse(substitute(object)), "_plsda_ncomp_select", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
+}
+
+
+#' @export
+print.rbiomvr_ncomp_select <- function(x, ...){
+  cat(paste0("PLS-DA ncomp selection results:\n"))
+  cat("\n")
+  print(x$ncomp_selected)
+  cat("\n")
 }
 
 
@@ -839,7 +854,7 @@ print.rbiomvr_perm <- function(x, ...){
   cat(paste0("PLS-DA permuatation results with ", x$nperm, " permutations:\n"))
   cat("\n")
   print(x$p.value.summary)
-  cat("\n\n")
+  cat("\n")
 }
 
 

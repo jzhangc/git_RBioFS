@@ -85,6 +85,11 @@ Update log
           
         - Updates to SVM functions
           - Additional argument check added to rbioClass_svm_roc_auc(), rbioClass_plsda() and rbioClass_plsda_scoreplot()
+        
+        - Updates to PLS-DA functions
+          - The output object from rbioClass_plsda_ncomp_select() now a "rbiomvr_ncomp_select" class
+          - The "rbiomvr_ncomp_select" class now includes the "ncomp_selected" matrix
+          - Print function added for the "rbiomvr_ncomp_select" class
           
         - Other updates
           - CPU cores now can be set for the functions suppporting parallel computing

@@ -67,13 +67,17 @@ rbioClass_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
-Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
+Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment as a \code{rbiomvr_ncomp_select} object,
+        as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 }
 \description{
 Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
 }
 \details{
-The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias. Three methods are used for components number selection: \code{"min"} simply chooses the number of components to reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation; For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
+         Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
+         reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation;
+         For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 }
 \examples{
 \dontrun{

@@ -153,7 +153,7 @@ print.rbiosvm <- function(x, ...){
       cat("Sigma: ", x$sigma, "\n\n")
   }
   cat("\nNumber of Support Vectors: ", x$tot.nSV)
-  cat("\n\n")
+  cat("\n")
 }
 
 
@@ -398,10 +398,10 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
 print.rbiosvm_nestedcv <- function(x, ...){
   cat("Total nested cross-validation accuracy:\n")
   print(x$tot.nested.accuracy.summary)
-  cat("\n\n")
+  cat("\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
   print(x$selected.features)
-  cat("\n\n")
+  cat("\n")
 }
 
 
@@ -746,7 +746,7 @@ print.rbiosvm_perm <- function(x, ...){
   cat("\n")
   cat("p-value: \n")
   print(x$p.value)
-  cat("\n\n")
+  cat("\n")
 }
 
 
@@ -891,8 +891,8 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
 print.prediction <- function(x, ...){
   cat("The prediction results:\n")
   print(x$probability.summary[, c(1:2, 5)])
-  cat("\n\n")
+  cat("\n")
   cat(paste0("Classifier class:\n"))
   print(x$classifier.class)
-  cat("\n\n")
+  cat("\n")
 }
