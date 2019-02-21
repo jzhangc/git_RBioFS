@@ -1755,8 +1755,8 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @description ROC-AUC analysis and ploting for plsda model
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param newdata Newdata (test data) for ROC-AUC analysis, excluding labels, i.e. y. If missing, the function will use the transformed data from the model object.
-#' @param newdata.y Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.
-#' @param center.newdasta Only set when both \code{newdata} and \code{newdata.y} are set, if to center.scale newdata. Default is \code{TRUE}.
+#' @param newdata.label Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.
+#' @param center.newdasta Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -1791,7 +1791,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
 #' }
 #' @export
-rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata = TRUE,
+rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newdata = TRUE,
                                     rocplot = TRUE,
                                     plot.comps = 1:object$ncomp,
                                     plot.smooth = FALSE,
@@ -1807,12 +1807,12 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
-  if (class(newdata.y) != "factor"){
+  if (class(newdata.label) != "factor"){
     if (verbose) cat("y is converted to factor. \n")
-    newdata.y <- factor(newdata.y, levels = unique(newdata.y))
+    newdata.label <- factor(newdata.label, levels = unique(newdata.label))
   }
-  if (missing(newdata) || is.null(newdata) || missing(newdata.y) || is.null(newdata.y)) {
-    cat("Note: newdata or newdata.y info isn't complete. Proceed with training data.\n")
+  if (missing(newdata) || is.null(newdata) || missing(newdata.label) || is.null(newdata.label)) {
+    cat("Note: newdata or newdata.label info isn't complete. Proceed with training data.\n")
     newdata <- object$centerX$centerX
     outcome <- object$inputY
   } else {
@@ -1822,7 +1822,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.y, center.newdata =
       centerdata <- t((t(newdata) - object$centerX$meanX) / object$centerX$columnSD)
       newdata <- centerdata
     }
-    outcome <- newdata.y
+    outcome <- newdata.label
   }
 
 

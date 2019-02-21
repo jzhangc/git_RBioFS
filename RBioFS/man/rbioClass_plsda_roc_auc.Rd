@@ -4,7 +4,7 @@
 \alias{rbioClass_plsda_roc_auc}
 \title{rbioClass_plsda_roc_auc()}
 \usage{
-rbioClass_plsda_roc_auc(object, newdata, newdata.y,
+rbioClass_plsda_roc_auc(object, newdata, newdata.label,
   center.newdata = TRUE, rocplot = TRUE, plot.comps = 1:object$ncomp,
   plot.smooth = FALSE, multi_plot.ncol = length(plot.comps),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
@@ -21,7 +21,7 @@ rbioClass_plsda_roc_auc(object, newdata, newdata.y,
 
 \item{newdata}{Newdata (test data) for ROC-AUC analysis, excluding labels, i.e. y. If missing, the function will use the transformed data from the model object.}
 
-\item{newdata.y}{Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.}
+\item{newdata.label}{Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
@@ -65,7 +65,7 @@ rbioClass_plsda_roc_auc(object, newdata, newdata.y,
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
-\item{center.newdasta}{Only set when both \code{newdata} and \code{newdata.y} are set, if to center.scale newdata. Default is \code{TRUE}.}
+\item{center.newdasta}{Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.}
 }
 \value{
 Prints AUC values in the console. And a pdf file for ROC plot

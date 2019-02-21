@@ -90,6 +90,7 @@ Update log
           - The output object from rbioClass_plsda_ncomp_select() now a "rbiomvr_ncomp_select" class
           - The "rbiomvr_ncomp_select" class now includes the "ncomp_selected" matrix
           - Print function added for the "rbiomvr_ncomp_select" class
+          - The "newdata.y" argument changed to "newdata.label" for rbioClass_plsda_roc_auc()
           
         - Other updates
           - CPU cores now can be set for the functions suppporting parallel computing
