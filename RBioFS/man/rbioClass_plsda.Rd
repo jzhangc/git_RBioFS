@@ -15,13 +15,14 @@ rbioClass_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 
 \item{ncomp}{Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.}
 
-\item{method}{PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls"}.}
+\item{method}{PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"),
+SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls"}.}
 
 \item{scale}{Logical, whether to scale the data or not. Default is \code{TRUE}.}
 
 \item{validation}{Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.}
 
-\item{segments}{Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.}
+\item{segments}{Set only when \code{validation = "CV"}, the number of segement to be set. Default is \code{10}.}
 
 \item{segments.type}{Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.}
 
@@ -34,19 +35,19 @@ rbioClass_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
 \value{
 Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
 
-Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
+       Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
 
-\code{centerX}: centered X data if applicable, with scale option.
+       \code{centerX}: centered X data if applicable, with scale option.
 
-\code{dummy_y}: dummified y
+       \code{dummy_y}: dummified y
 
-\code{inputX}: raw input predictor data.
+       \code{inputX}: raw input predictor data.
 
-\code{inputY}: input group labels.
+       \code{inputY}: input group labels.
 
-\code{validation_method}
+       \code{validation_method}
 
-\code{validation_segments_type}
+       \code{validation_segments_type}
 }
 \description{
 PLS-DA modelling
@@ -59,10 +60,10 @@ The center and scale processes are handled by \code{\link{center_scale}} functio
 
 The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
 
-For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
+         For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
 
-For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
-or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+         For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
+         or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 }
 \examples{
 \dontrun{

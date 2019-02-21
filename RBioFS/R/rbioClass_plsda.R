@@ -33,10 +33,11 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class or a character vector.
 #' @param ncomp Number of components to be used for modelling. Default is \code{length(unique(y)) - 1}.
-#' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"), SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls"}.
+#' @param method PLS-DA modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"),
+#'               SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls"}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
-#' @param segments Set only when \code{validation = "CV}, the number of segement to be set. Default is \code{10}.
+#' @param segments Set only when \code{validation = "CV"}, the number of segement to be set. Default is \code{10}.
 #' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
@@ -48,26 +49,26 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'
 #' @return Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
 #'
-#' Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
+#'        Additional items for \code{rbiomvr} object to \code{mvr} object from pls package:
 #'
-#' \code{centerX}: centered X data if applicable, with scale option.
+#'        \code{centerX}: centered X data if applicable, with scale option.
 #'
-#' \code{dummy_y}: dummified y
+#'        \code{dummy_y}: dummified y
 #'
-#' \code{inputX}: raw input predictor data.
+#'        \code{inputX}: raw input predictor data.
 #'
-#' \code{inputY}: input group labels.
+#'        \code{inputY}: input group labels.
 #'
-#' \code{validation_method}
+#'        \code{validation_method}
 #'
-#' \code{validation_segments_type}
+#'        \code{validation_segments_type}
 #'
 #' @details The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
 #'
-#' For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
+#'          For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
 #'
-#' For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
-#' or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#'          For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
+#'          or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
 #'
 #' @importFrom pls plsr
 #' @examples
