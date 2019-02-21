@@ -1805,17 +1805,15 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
                                     plot.Width = 170, plot.Height = 150,
                                     verbose = TRUE){
   ## check arguments
-  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
-  if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
-  if (class(newdata.label) != "factor"){
-    if (verbose) cat("y is converted to factor. \n")
-    newdata.label <- factor(newdata.label, levels = unique(newdata.label))
-  }
   if (missing(newdata) || is.null(newdata) || missing(newdata.label) || is.null(newdata.label)) {
     cat("Note: newdata or newdata.label info isn't complete. Proceed with training data.\n")
     newdata <- object$centerX$centerX
     outcome <- object$inputY
   } else {
+    if (class(newdata.label) != "factor"){
+      if (verbose) cat("y is converted to factor. \n")
+      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+    }
     ## center data with the option of scaling
     if (center.newdata){
       if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.\n")
@@ -1824,6 +1822,9 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
     }
     outcome <- newdata.label
   }
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
+  if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
+
 
 
   ## calcuate ROC-AUC
