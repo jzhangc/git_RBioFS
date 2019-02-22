@@ -532,7 +532,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   rownames(ncompsel_mtx) <- names(rmsep_dfm_list)
   colnames(ncompsel_mtx) <- c("CV", "adjCV")
   if (verbose) cat(paste0("Optimial ncomp (selection method: ", ncomp.selection.method, ") : \n", sep = ""))
-  print(ncompsel_mtx)
+  if (verbose) print(ncompsel_mtx)
 
   # plotting
   if (rmsepplot){
