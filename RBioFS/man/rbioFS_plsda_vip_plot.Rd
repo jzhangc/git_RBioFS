@@ -33,7 +33,7 @@ rbioFS_plsda_vip_plot(vip_obj, plot.preview = TRUE, plot.title = TRUE,
 
 \item{plot.outlineCol}{The outline colour for the bar gars. Default is \code{"black"}.}
 
-\item{plot.errorbar}{Set the type of errorbar. Only applicable if the object model is built using more than one component. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.}
+\item{plot.errorbar}{Set the type of errorbar. Only applicable if the object model is built with bootstrapping. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.}
 
 \item{plot.errorbarWidth}{Set the width for errorbar. Default is \code{0.2}.}
 

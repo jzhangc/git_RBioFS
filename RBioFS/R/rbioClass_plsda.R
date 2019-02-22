@@ -1587,7 +1587,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.sig.line Wether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.
 #' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
-#' @param plot.errorbar Set the type of errorbar. Only applicable if the object model is built using more than one component. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbar Set the type of errorbar. Only applicable if the object model is built with bootstrapping. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
