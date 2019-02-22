@@ -23,6 +23,8 @@ rbioClass_plsda_roc_auc(object, newdata, newdata.label,
 
 \item{newdata.label}{Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.}
 
+\item{center.newdata}{Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.}
+
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
@@ -64,8 +66,6 @@ rbioClass_plsda_roc_auc(object, newdata, newdata.label,
 \item{plot.Height}{ROC height. Default is \code{150}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
-
-\item{center.newdasta}{Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.}
 }
 \value{
 Prints AUC values in the console. And a pdf file for ROC plot

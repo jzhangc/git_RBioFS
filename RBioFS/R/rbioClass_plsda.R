@@ -1756,7 +1756,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param newdata Newdata (test data) for ROC-AUC analysis, excluding labels, i.e. y. If missing, the function will use the transformed data from the model object.
 #' @param newdata.label Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.
-#' @param center.newdasta Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.
+#' @param center.newdata Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
