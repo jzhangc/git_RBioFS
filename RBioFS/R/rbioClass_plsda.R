@@ -1825,8 +1825,6 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
 
-
-
   ## calcuate ROC-AUC
   pred_raw <- predict(object, newdata = newdata)
 
@@ -1852,7 +1850,6 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
       } else {
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
       }
-
       #      fpr <- as.numeric(unlist(perf@x.values))
       #      tpr <- as.numeric(unlist(perf@y.values))
       fpr <- 1 - perf$specificities
