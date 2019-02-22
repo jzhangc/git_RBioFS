@@ -14,9 +14,9 @@ rbioFS_plsda_vip(object, vip.alpha = 1, comps = c(1, 2),
 
 \item{vip.alpha}{Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.}
 
-\item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
+\item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.}
 
-\item{bootstrap}{If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{FALSE}.}
+\item{bootstrap}{If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{TRUE}.}
 
 \item{boot.n}{Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.}
 
