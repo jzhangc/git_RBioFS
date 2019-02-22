@@ -823,8 +823,8 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 
   ## output
   if (verbose) cat("\n")
-  cat("Permutation test restuls: \n")
-  print(perm_results_p_val)
+  if (verbose) cat("Permutation test restuls: \n")
+  if (verbose) print(perm_results_p_val)
   if (verbose) cat("\n")
 
   # env
@@ -845,7 +845,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   ## plot
   if (perm.plot){
     plsda_permutation_test <- out
-    rbioUtil_perm_plot(perm_res = plsda_permutation_test, ...)
+    rbioUtil_perm_plot(perm_res = plsda_permutation_test, ..., verbose = verbose)
   }
 }
 
