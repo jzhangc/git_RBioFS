@@ -91,7 +91,7 @@ Update log
           - The "rbiomvr_ncomp_select" class now includes the "ncomp_selected" matrix
           - Print function added for the "rbiomvr_ncomp_select" class
           - The "newdata.y" argument changed to "newdata.label" for rbioClass_plsda_roc_auc()
-          - A bug fixed for the verbose functionality for rbioClass_plsda_perm()
+          - A bug fixed for the verbose functionality for rbioClass_plsda_perm() and rbioClass_plsda_ncomp_select()
           
         - Other updates
           - CPU cores now can be set for the functions suppporting parallel computing
