@@ -418,7 +418,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @description Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ... Additional argument for \code{RMSEP} function from \code{pls} package.
-#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1sd"}, and \code{"randomization"}. Default is \code{"1sd"}.
+#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1sd"}.
 #' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
 #' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
 #' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
@@ -444,7 +444,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #'         as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
 #'          Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
-#'          reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation;
+#'          reach te minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
 #'          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 #' @import ggplot2
 #' @import foreach
@@ -459,23 +459,23 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' }
 #' @export
 rbioClass_plsda_ncomp_select <- function(object, ...,
-                                      ncomp.selection.method = "1sd", randomization.nperm = 999, randomization.alpha = 0.05,
-                                      rmsepplot = TRUE,
-                                      plot.rightsideY = TRUE,
-                                      plot.optm.ncomp.line = TRUE,
-                                      multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-                                      plot.display.Title = TRUE,
-                                      plot.SymbolSize = 2,
-                                      plot.fontType = "sans",
-                                      plot.xLabel = "Components", plot.xLabelSize = 10, plot.xTickLblSize = 10,
-                                      plot.yLabel = "RMSEP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                                      plot.legendSize = 9,
-                                      plot.Width = 170, plot.Height = 150,
-                                      verbose = TRUE){
+                                         ncomp.selection.method = "1err", randomization.nperm = 999, randomization.alpha = 0.05,
+                                         rmsepplot = TRUE,
+                                         plot.rightsideY = TRUE,
+                                         plot.optm.ncomp.line = TRUE,
+                                         multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                         plot.display.Title = TRUE,
+                                         plot.SymbolSize = 2,
+                                         plot.fontType = "sans",
+                                         plot.xLabel = "Components", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                         plot.yLabel = "RMSEP", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                         plot.legendSize = 9,
+                                         plot.Width = 170, plot.Height = 150,
+                                         verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
   if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.")
-  if (!tolower(ncomp.selection.method) %in% c("min", "1sd", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1sd\", or \"randomization\" exactly.")
+  if (!tolower(ncomp.selection.method) %in% c("min", "1err", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1err\", or \"randomization\" exactly.")
 
   ## calcuate RMSEP
   rmsep <- RMSEP(object, ...)
@@ -505,7 +505,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
                          object$validation$pred[,i,] - origResponse)  # CV prediction for all the comps used
       residsds <- apply(allresids, 2, sd) / sqrt(nrow(allresids))
 
-      if (ncomp.selection.method == "1sd"){
+      if (ncomp.selection.method == "1err"){
         dfm_cv$SD <- residsds
         min_rmsep_cv_idx <- which.min(dfm_cv$value)  # index for the minimum mean oob feature group
         sd_min_cv <- dfm_cv$SD[min_rmsep_cv_idx]  # oob SD for the feature group above

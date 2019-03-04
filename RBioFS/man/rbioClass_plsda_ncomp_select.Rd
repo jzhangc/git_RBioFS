@@ -4,10 +4,10 @@
 \alias{rbioClass_plsda_ncomp_select}
 \title{rbioClass_plsda_ncomp_select()}
 \usage{
-rbioClass_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
-  randomization.nperm = 999, randomization.alpha = 0.05,
-  rmsepplot = TRUE, plot.rightsideY = TRUE,
-  plot.optm.ncomp.line = TRUE,
+rbioClass_plsda_ncomp_select(object, ...,
+  ncomp.selection.method = "1err", randomization.nperm = 999,
+  randomization.alpha = 0.05, rmsepplot = TRUE,
+  plot.rightsideY = TRUE, plot.optm.ncomp.line = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
   multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
   plot.display.Title = TRUE, plot.SymbolSize = 2,
@@ -22,7 +22,7 @@ rbioClass_plsda_ncomp_select(object, ..., ncomp.selection.method = "1sd",
 
 \item{...}{Additional argument for \code{RMSEP} function from \code{pls} package.}
 
-\item{ncomp.selection.method}{Optimal numbers of components selection method. Options are \code{"min"}, \code{"1sd"}, and \code{"randomization"}. Default is \code{"1sd"}.}
+\item{ncomp.selection.method}{Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1sd"}.}
 
 \item{randomization.nperm}{Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.}
 
@@ -76,7 +76,7 @@ Optimal number of components selection for PLS-DA model, with RMSEP plot funcito
 \details{
 The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
          Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
-         reach te minimum RMSEP; \code{"1sd"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard deviation;
+         reach te minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
 }
 \examples{
