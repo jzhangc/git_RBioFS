@@ -30,7 +30,7 @@ Installation
 
 Update log
 
-  Feature blueprint
+    Feature blueprint
         - ANN (artificial neural network) functions added (non-Shiny) (tentative):
           - rbioClass_ann()
           - rbioClass_ann_plot()
@@ -53,8 +53,8 @@ Update log
         - ROC-AUC now a seperate function that can be used for other classification/FS methods
         
   
-  0.6.2 (Feature preview)
-  (ICEBOX)
+    0.6.2 (Feature preview)
+    (ICEBOX)
         - All-in-one classification solution functions added:
           - rbioClass()
                  
@@ -78,7 +78,7 @@ Update log
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
            
-  (ADDED)
+    (ADDED)
         - Updates to RF-FS functions:
           - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
           - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data
