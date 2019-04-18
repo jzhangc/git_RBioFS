@@ -612,7 +612,7 @@ print.rbiomvr_ncomp_select <- function(x, ...){
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return The function returns \code{CSV} files for all intermediate permuatation RMSEP values as well as the p-value resutls.
+#' @return The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value resutls.
 #'
 #' The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
 #'
@@ -641,7 +641,7 @@ print.rbiomvr_ncomp_select <- function(x, ...){
 #'             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
 #'             J Mach Learn Res. 11: 1833 - 63.
 #'
-#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
 #'          For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature.
 #'          Since the permutation is done for the features WITHIN the group,
@@ -852,7 +852,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 
 #' @export
 print.rbiomvr_perm <- function(x, ...){
-  cat(paste0("PLS-DA permuatation results with ", x$nperm, " permutations:\n"))
+  cat(paste0("PLS-DA permutation results with ", x$nperm, " permutations:\n"))
   cat("\n")
   print(x$p.value.summary)
   cat("\n")
