@@ -29,6 +29,64 @@ Installation
         
 
 Update log
+
+    Feature blueprint
+        - ANN (artificial neural network) functions added (non-Shiny) (tentative):
+          - rbioClass_ann()
+          - rbioClass_ann_plot()
+              
+        - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
+          - rbioClass_knn()
+          - rbioClass_knn_plot()
+                
+        - sPLS-DA functions added (non-Shiny) (tentative):
+          - rbioClass_splsda()
+          - rbioClass_splsda_plot()
+        
+        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
+          - rbioClass_rf_class()
+          - rbioClass_rf_class_plot()
+                
+        - All shiny apps' interface updated with a new look
+                
+        - Updates to rbioFS_PCA():
+          - 3D score plot option for rbioFS_PCA (non-shiny)
+          - 3D socre plot option for rbioFS_PCA_app (shiny)
+          - Legend style adjusted for the sample labels
+                
+        - ROC-AUC now a seperate function that can be used for other classification/FS methods
+        
+        - All-in-one classification solution functions added:
+          - rbioClass()
+        
+    
+    0.6.3 (Feature preview)
+    (ICEBOX)
+        - New SVM functions:
+          - rbioReg_svr() function added for support vector regression anaylysis
+
+        - New PLS-DA functions:
+          - rbioReg_plsr() function added for PLS regression analysis
+          
+        - Update to SVM functions:
+          - rbioClass_svm_perm() plot output file name fixed
+                 
+        - Updates to PLS-DA functions:
+          - New function rbioReg_plsr() function added for PLS regression analysis
+          - Multi-category Y modelling now possible with rbioFS_plsda
+          - rbioFS_plsda_vip_plot() plot output file name fixed
+          - rbioClass_plsda_perm() plot output file name fixed
+
+        - Updates to RF-FS functions:
+          - RF-FS now accepts regression analysis
+                 
+        - Updates to the PCA functions
+          - rbioFS_PCA() now exports a "rbiofs_pca" class object
+          - rbioFS_PCA() updated with S3 print method
+          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
+          
+    (ADDED)
+          
            
     0.6.2 (Apr.25.2019)
         - Updates to RF-FS functions:
