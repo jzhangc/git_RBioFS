@@ -4,23 +4,20 @@
 \alias{rbioFS_rf_SFS}
 \title{rbioFS_rf_SFS}
 \usage{
-rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
-  nTree = 1001, mTry = "recur_default", parallelComputing = TRUE,
-  n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
-  plot = TRUE, n = "all", ...)
+rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, y, nTimes = 50, nTree = 1001,
+  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
+  clusterType = "PSOCK", plot = TRUE, n = "all", ...)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
 
 \item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.}
 
-\item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
+\item{y}{The target (outcome) variable for random forest feature selection.}
 
 \item{nTimes}{Number of random forest vi computation runs. Default is \code{50} times.}
 
 \item{nTree}{Number of trees generated for each random forest run. Default is \code{1001} trees.}
-
-\item{mTry}{Number of randomly selected featurs for constructing trees. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
 

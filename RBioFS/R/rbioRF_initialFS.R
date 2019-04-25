@@ -195,7 +195,7 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
 #' rbioFS_rf_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
 #' }
 #' @export
-rbioFS_rf_initialFS <- function(objTitle = "data",
+rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
                                 x, y, nTimes = 50, nTree = 1001,
                                 mTry = if (!is.factor(y))
                                   max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))),

@@ -4,14 +4,14 @@
 \alias{rbioFS}
 \title{rbioFS}
 \usage{
-rbioFS(objTitle = "data", file = NULL, input = NULL,
-  sampleIDVar = NULL, groupIDVar = NULL,
+rbioFS(objTitle = "data", rf_type = "classification", file = NULL,
+  input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   annotVarNames = c(sampleIDVar, groupIDVar), impute = FALSE,
   imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
   quantileNorm = FALSE, nTimes = 50, nTree = 1001,
-  SFS_mTry = "recur_default", parallelComputing = TRUE,
-  n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
-  plot = TRUE, initialFS_n = "all", initialFS_Title = NULL,
+  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
+  clusterType = "PSOCK", plot = TRUE, initialFS_n = "all",
+  initialFS_Title = NULL,
   initialFS_xLabel = "Mean Decrease in Accuracy",
   initialFS_yLabel = NULL, initialFS_errorbar = "SEM",
   initialFS_errorbarWidth = 0.2, initialFS_xTickLblSize = 10,
@@ -24,6 +24,8 @@ rbioFS(objTitle = "data", file = NULL, input = NULL,
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"data"}}
+
+\item{rf_type}{RF modelling type, either \code{"classification"} or \code{"regression"}. Default is \code{"classifiation"}.}
 
 \item{file}{Input file. Only takes \code{.csv} format, with the label column, i.e. the whole dataset. Set either this or \code{input}, but not both.}
 
@@ -48,8 +50,6 @@ rbioFS(objTitle = "data", file = NULL, input = NULL,
 \item{nTimes}{Number of random forest for both initial FS and SFS-like FS. Default is \code{50} times.}
 
 \item{nTree}{Number of trees generated for each random forest run for both initial FS and SFS-like FS. Default is \code{1001} trees.}
-
-\item{SFS_mTry}{Number of randomly selected featurs for constructing trees for SFS-like FS step. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
 
@@ -109,6 +109,7 @@ Recursive nested random forest variable importance (vi) and OOB error rate compu
 }
 \details{
 Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+         \code{groupIDVar} also takes continuous variable for regression study.
 }
 \examples{
 \dontrun{

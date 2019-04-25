@@ -4,7 +4,7 @@
 \alias{rbioFS_rf_initialFS}
 \title{rbioFS_rf_initialFS}
 \usage{
-rbioFS_rf_initialFS(objTitle = "data", x, y, nTimes = 50,
+rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, y, nTimes = 50,
   nTree = 1001, mTry = if (!is.factor(y)) max(floor(ncol(x)/3), 1) else
   floor(sqrt(ncol(x))), parallelComputing = TRUE,
   n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
