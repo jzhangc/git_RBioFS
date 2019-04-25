@@ -62,25 +62,25 @@ Update log
     
     0.6.3 (Feature preview)
     (ICEBOX)
-        - New SVM functions:
+        - New SVM function(s)
           - rbioReg_svr() function added for support vector regression anaylysis
 
-        - New PLS-DA functions:
+        - New PLS-DA function(s)
           - rbioReg_plsr() function added for PLS regression analysis
           
-        - Update to SVM functions:
+        - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
                  
-        - Updates to PLS-DA functions:
+        - Updates to PLS-DA function(s)
           - New function rbioReg_plsr() function added for PLS regression analysis
           - Multi-category Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
 
-        - Updates to RF-FS functions:
+        - Updates to RF-FS function(s)
           - RF-FS now accepts regression analysis
                  
-        - Updates to the PCA functions
+        - Updates to the PCA function(s)
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
