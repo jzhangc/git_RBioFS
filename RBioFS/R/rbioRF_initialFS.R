@@ -310,12 +310,18 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   #### export results
   ## run time
   runtime <- Sys.time() - start_time
+  if (is.factor(y)){
+    err_type <- "OOB"
+  } else {
+    err_type <- "MSE"
+  }
 
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
                  vi_summary = outdfm_vi,
-                 initial_FS_OOB_err_summary = outdfm_OOB_err,
+                 error_evaluation_type = err_type,
+                 initial_FS_err_summary = outdfm_OOB_err,
                  training_initial_FS = training_initFS,
                  initial_FS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(outlst) <- "rf_ifs"

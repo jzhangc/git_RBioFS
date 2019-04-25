@@ -263,10 +263,17 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   ## run time
   runtime <- Sys.time() - start_time
 
+  if (is.factor(y)){
+    err_type <- "OOB"
+  } else {
+    err_type <- "MSE"
+  }
+
   ## object
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
-                 OOB_error_rate_summary = ooberrsummary,
+                 error_evaluation_type = err_type,
+                 error_summary = ooberrsummary,
                  SFS_training_data_matrix = sfsmatrix,
                  SFS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(outlst) <- "rf_sfs"
