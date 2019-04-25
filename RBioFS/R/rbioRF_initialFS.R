@@ -340,5 +340,5 @@ print.rf_ifs <- function(x, ...){
   print(x$feature_initial_FS)
   cat("\n")
   cat("Initial FS run time: ")
-  initial_FS_run_time
+  x$initial_FS_run_time
 }
