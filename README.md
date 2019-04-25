@@ -78,14 +78,24 @@ Update log
           - rbioClass_plsda_perm() plot output file name fixed
 
         - Updates to RF-FS function(s)
-          - RF-FS now accepts regression analysis
-                 
+          - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
+          - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
+            - rf_ifs class: "initial_FS_run_time""
+            - rf_sfs class: "SFS_run_time"
+
         - Updates to the PCA function(s)
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
           
     (ADDED)
+        - Updates to RF-FS function(s)
+          - RF-FS now accepts regression analysis
+          - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
+          - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
+            - rf_ifs class: "initial_FS_run_time""
+            - rf_sfs class: "SFS_run_time"
+          - Small syntax fixes   
           
            
     0.6.2 (Apr.25.2019)

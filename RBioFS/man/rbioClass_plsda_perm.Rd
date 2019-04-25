@@ -33,7 +33,7 @@ rbioClass_plsda_perm(object, ncomp = object$ncomp, adjCV = FALSE,
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
-The function returns \code{CSV} files for all intermediate permuatation RMSEP values as well as the p-value resutls.
+The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value resutls.
 
 The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
 
@@ -66,7 +66,7 @@ The function uses RMSEP as the stats for comparing original model with permutats
             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
             J Mach Learn Res. 11: 1833 - 63.
 
-         For \code{perm.method = "by_y"}, labels (i.e. y) are permuated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+         For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 
          For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature.
          Since the permutation is done for the features WITHIN the group,
