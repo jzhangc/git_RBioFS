@@ -95,6 +95,7 @@ Update log
           - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
             - rf_ifs class: "initial_FS_run_time""
             - rf_sfs class: "SFS_run_time"
+          - A bug fixed for rbioFS_rf_SFS_plot() y-axis range
           - Small syntax fixes   
           
            

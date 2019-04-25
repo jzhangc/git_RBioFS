@@ -35,7 +35,7 @@ rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, y, nTimes = 50, nTree = 1001,
 Outputs a \code{rf_sfs} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
 }
 \description{
-Recursive nested random froest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
+Recursive nested random froest variable importance (vi) and error computation in a sequential forward selection (SFS) manner.
 }
 \details{
 Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
