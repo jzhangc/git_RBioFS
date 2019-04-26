@@ -167,6 +167,7 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
   if (verbose) cat("Done!\n")
 }
 
+
 #' @title rbioFS_rf_initialFS
 #'
 #' @description Recursive random froest variable importance (vi) and OOB error rate computation.
@@ -319,15 +320,20 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
-                 vi_summary = outdfm_vi,
                  error_evaluation_type = err_type,
+                 ntree = nTree,
+                 rf_iteration = nTimes,
                  initial_FS_err_summary = outdfm_OOB_err,
+                 vi_summary = outdfm_vi,
                  training_initial_FS = training_initFS,
                  initial_FS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(outlst) <- "rf_ifs"
 
+  ## export to files
+  write.csv(file = paste0(objTitle, ".initialFS.vi.csv"), outlst$vi_summary, row.names = FALSE)
+
   sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
-  lapply(outlst, print)
+  lapply(outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")], print)
   sink() # end dump
 
   ## plot
@@ -346,5 +352,5 @@ print.rf_ifs <- function(x, ...){
   print(x$feature_initial_FS)
   cat("\n")
   cat("Initial FS run time: ")
-  x$initial_FS_run_time
+  print(x$initial_FS_run_time)
 }

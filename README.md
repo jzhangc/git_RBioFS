@@ -93,8 +93,10 @@ Update log
           - RF-FS now accepts regression analysis
           - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
           - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
-            - rf_ifs class: "initial_FS_run_time""
-            - rf_sfs class: "SFS_run_time"
+          - rbioFS_rf_initialFS() now exports vi_summary into a CSV file
+          - rbioFS_rf_sfs() now exports error_summary into a CSV file
+          - New items added to the rf_ifs class: ntree, rf_iteration, initial_FS_run_time
+          - New items added to the rf_sfs class: ntree, rf_iteration, SFS_run_time
           - A bug fixed for rbioFS_rf_SFS_plot() y-axis range
           - Small syntax fixes   
           
