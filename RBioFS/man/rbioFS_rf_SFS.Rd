@@ -33,6 +33,8 @@ rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, y, nTimes = 50, nTree = 1001,
 }
 \value{
 Outputs a \code{rf_sfs} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
+        When \code{plot = TRUE}, a error curve is also generated and exported as a \code{pdf} file.
+        Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 }
 \description{
 Recursive nested random froest variable importance (vi) and error computation in a sequential forward selection (SFS) manner.

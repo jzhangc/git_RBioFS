@@ -167,6 +167,8 @@ rbioFS_rf_SFS_plot <- function(object, n = "all",
 #' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param ... Additional arguments passed to the plot function \code{\link{rbioFS_rf_SFS_plot}}.
 #' @return Outputs a \code{rf_sfs} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
+#'         When \code{plot = TRUE}, a error curve is also generated and exported as a \code{pdf} file.
+#'         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @import foreach
@@ -273,13 +275,18 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
                  error_evaluation_type = err_type,
+                 ntree = nTree,
+                 rf_iteration = nTimes,
                  error_summary = ooberrsummary,
                  SFS_training_data_matrix = sfsmatrix,
                  SFS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(outlst) <- "rf_sfs"
 
+  ## export to files
+  write.csv(file = paste0(objTitle, ".SFS.error_table.csv"), outlst$error_summary , row.names = FALSE)
+
   sink(file = paste(objTitle,".SFS.txt",sep = ""), append = FALSE) # dump the results to a file
-  lapply(outlst, print)
+  outlst[!names(outlist) %in% c("error_summary", "SFS_training_data_matrix")]
   sink() # end dump
 
   ## plot
@@ -307,5 +314,5 @@ print.rf_sfs <- function(x, ...){
   if (length(x$selected_features) == 1) cat("Note: SFS might be overfitted as only one feature is selected.")
   cat("\n")
   cat("SFS run time: ")
-  x$SFS_run_time
+  print(x$SFS_run_time)
 }

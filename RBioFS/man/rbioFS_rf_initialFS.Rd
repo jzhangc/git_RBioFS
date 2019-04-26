@@ -36,7 +36,9 @@ rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, y, nTimes = 50,
 \item{...}{Additional arguments passed to the plot function \code{\link{rbioFS_rf_initialFS_plot}}.}
 }
 \value{
-Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate.
+        When \code{plot = TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+        Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 }
 \description{
 Recursive random froest variable importance (vi) and OOB error rate computation.

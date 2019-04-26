@@ -183,7 +183,9 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param ... Additional arguments passed to the plot function \code{\link{rbioFS_rf_initialFS_plot}}.
-#' @return Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+#' @return Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate.
+#'         When \code{plot = TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+#'         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @import foreach
@@ -333,7 +335,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   write.csv(file = paste0(objTitle, ".initialFS.vi.csv"), outlst$vi_summary, row.names = FALSE)
 
   sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
-  lapply(outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")], print)
+  outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")]
   sink() # end dump
 
   ## plot
