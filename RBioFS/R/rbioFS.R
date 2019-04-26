@@ -121,7 +121,7 @@ rbioFS <- function(objTitle = "data", rf_type = "classification",
   ## FS
   if (plot){
     if (verbose) cat(paste("Initial selection with plotting...", sep = ""))  # initial message
-    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, y = tgt,
                                 nTimes = nTimes, nTree = nTree,
                                 parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                                 plot = TRUE, n = initialFS_n,
@@ -136,7 +136,7 @@ rbioFS <- function(objTitle = "data", rf_type = "classification",
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
-                       targetVar = tgt, nTimes = nTimes,
+                       y = tgt, nTimes = nTimes,
                        parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                        plot = TRUE,
                        n = SFS_n,
@@ -150,7 +150,7 @@ rbioFS <- function(objTitle = "data", rf_type = "classification",
 
   } else {
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, yr = tgt,
                              nTimes = nTimes, nTree = nTree,
                              parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                              plot = FALSE, verbose = FALSE) # initial FS
@@ -159,7 +159,7 @@ rbioFS <- function(objTitle = "data", rf_type = "classification",
     if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
-                       targetVar = tgt, nTimes = nTimes,
+                       y = tgt, nTimes = nTimes,
                        parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                        plot = FALSE, verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
