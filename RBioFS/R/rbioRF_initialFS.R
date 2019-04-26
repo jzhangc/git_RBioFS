@@ -335,7 +335,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   write.csv(file = paste0(objTitle, ".initialFS.vi.csv"), outlst$vi_summary, row.names = FALSE)
 
   sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
-  outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")]
+  print(outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")])
   sink() # end dump
 
   ## plot

@@ -286,7 +286,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   write.csv(file = paste0(objTitle, ".SFS.error_table.csv"), outlst$error_summary , row.names = FALSE)
 
   sink(file = paste(objTitle,".SFS.txt",sep = ""), append = FALSE) # dump the results to a file
-  outlst[!names(outlst) %in% c("error_summary", "SFS_training_data_matrix")]
+  print(outlst[!names(outlst) %in% c("error_summary", "SFS_training_data_matrix")])
   sink() # end dump
 
   ## plot
