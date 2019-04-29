@@ -31,6 +31,8 @@
 #'
 #' \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
 #'
+#' \cdoe{model.type}: the SVM model type, "classification" or "regression".
+#'
 #' @details Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
 #'
 #' Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
@@ -56,20 +58,26 @@
 #' }
 #' @export
 rbioClass_svm <- function(x, y, center.scale = TRUE,
-                       kernel = "radial", svm.cross.k = 10,
-                       tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
-                       verbose = TRUE){
+                          kernel = "radial", svm.cross.k = 10,
+                          tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
+                          verbose = TRUE){
   ## check arguments
-  if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+  if (is.factor(y)){
+    if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+    model_type <- "classification"
+    y <- factor(y, levels = unique(y))
+  } else {
+    model_type <- "regression"
+  }
   if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
   if (class(x) == "data.frame" | is.vector(x)){
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
-  if (class(y) != "factor"){
-    if (verbose) cat("y is converted to factor. \n")
-    y <- factor(y, levels = unique(y))
-  }
+  # if (class(y) != "factor"){
+  #   if (verbose) cat("y is converted to factor. \n")
+  #   y <- factor(y, levels = unique(y))
+  # }
   if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
 
   ## data processing
@@ -83,17 +91,21 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   }
   y <- y
 
-  ## weight evaluation
-  if (length(unique(table(y))) != 1){  # test if the sample is balanced
-    if(any(table(y) == 0)) {
-      warning("Not all groups present in the unbalanced training data, discard missing group and set weight for other groups as 1")
-      wgt <- rep(1, length(unique(y)))
-      names(wgt) <- unique(y)
-    } else {
-      wgt <- length(y) / table(y)
+  ## weight evaluation according to the model type
+  if (model_type == "classif"){
+    if (length(unique(table(y))) != 1){  # test if the sample is balanced
+      if(any(table(y) == 0)) {
+        warning("Not all groups present in the unbalanced training data, discard missing group and set weight for other groups as 1")
+        wgt <- rep(1, length(unique(y)))
+        names(wgt) <- unique(y)
+      } else {
+        wgt <- length(y) / table(y)
+      }
+    } else {  # balanced sample, each class weight is 1
+      wgt <- unique(table(y)) / table(y)
     }
-  } else {  # balanced sample, each class weight is 1
-    wgt <- unique(table(y)) / table(y)
+  } else{
+    wgt <- NULL
   }
 
   ## svm
@@ -125,10 +137,10 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   m$tune.method <- tune.method
   m$tune.cross.k <- if(tune.method == "cross") tune.cross.k else NULL
   m$tune.boot.n <- if(tune.method == "boot") tune.boot.n else NULL
+  m$model.type <- model_type
   class(m) <- c("rbiosvm", "svm")
   return(m)
 }
-
 
 #' @export
 print.rbiosvm <- function(x, ...){

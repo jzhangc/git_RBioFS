@@ -62,9 +62,6 @@ Update log
     
     0.6.3 (Feature preview)
     (ICEBOX)
-        - New SVM function(s)
-          - rbioReg_svr() function added for support vector regression anaylysis
-
         - New PLS-DA function(s)
           - rbioReg_plsr() function added for PLS regression analysis
           
@@ -89,6 +86,10 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
           
     (ADDED)
+        - Update to SVM function(s)
+          - rbioClass_svm() updated to support vector regression anaylysis
+            - "rbiosvm" class also updated with the "model.type" item, to reflect "classification" or "regression"
+          
         - Updates to RF-FS function(s)
           - RF-FS now accepts regression analysis
           - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
