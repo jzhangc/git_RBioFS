@@ -49,6 +49,8 @@ Additional items for \code{rbiosvm} object to \code{svm} object from e1071 packa
 \code{tune.cross.k}: fold number for grid search when using cross validation method, i.e. \code{tune.method = "cross"}.
 
 \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
+
+\code{model.type}: the SVM model type, "classification" or "regression".
 }
 \description{
 Support Vector Machine (SVM) modelling

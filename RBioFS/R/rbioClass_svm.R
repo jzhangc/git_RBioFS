@@ -31,7 +31,7 @@
 #'
 #' \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
 #'
-#' \cdoe{model.type}: the SVM model type, "classification" or "regression".
+#' \code{model.type}: the SVM model type, "classification" or "regression".
 #'
 #' @details Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
 #'
