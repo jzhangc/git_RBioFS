@@ -55,7 +55,11 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
 
-\code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accouracy
+\code{model.type}: the SVM model type, "classification" or "regression".
+
+\code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
+
+\code{tot.nested.rmse.summary}: total (i.e. mean) nested cross-validation rmse, if \code{model_type = "regression"}
 
 \code{nested.accuracy}: accuracy for each cross-validation iteration
 
@@ -79,8 +83,11 @@ Nested cross-validation assessment for SVM classification. It evaluates the over
 \details{
 For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
 Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.
+
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
+
+The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
 \examples{
 \dontrun{

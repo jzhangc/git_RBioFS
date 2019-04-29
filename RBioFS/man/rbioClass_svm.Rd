@@ -71,6 +71,8 @@ center.scale process for the test data for ROC-AUC analysis. Usually, we center.
 
 The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
 Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
+
+The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
 \examples{
 \dontrun{
