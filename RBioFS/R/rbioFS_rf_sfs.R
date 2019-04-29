@@ -220,7 +220,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
 
   if (!parallelComputing){
     l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %do% {
-      tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
+      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
       errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
       lst <- list(errmtx = errmtx)
     }
