@@ -256,6 +256,9 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
                                  fs.count.cutoff = cross.k,
                                  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                                  verbose = TRUE){
+  ## initiate the run time
+  start_time <- Sys.time()
+
   ## check arguments
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
   if (is.factor(y)) {
@@ -356,6 +359,9 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   fs.count <- sort(table(nested.fs), decreasing = TRUE)
   if (verbose) cat("Done!\n")
 
+  # end time
+  end_time <- Sys.time()
+
   ## output
   if (model_type == "classification"){
     tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
@@ -376,6 +382,9 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   if (verbose) cat("Nested cross-validation selected features: \n")
   if (verbose) print(selected.features)
 
+  # run time
+  runtime <- end_time - start_time
+
   # export to environment
   out <- list(cv.fold = fold,
               randomized.sample.index = random_sample_idx,
@@ -390,11 +399,11 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
               nested.fs.count = fs.count,
               tune.method = tune.method,
               tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
-              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL)
+              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(out) <- "rbiosvm_nestedcv"
   return(out)
 }
-
 
 
 #' @export
@@ -412,6 +421,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
   print(x$selected.features)
   cat("\n")
+  cat("Nested CV run time: ")
+  print(x$run.time)
 }
 
 

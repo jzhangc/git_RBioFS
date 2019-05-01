@@ -92,7 +92,10 @@ Update log
           - rbioClass_svm_ncv_fs() updated with support vector regression analysis support
             - "rbiosvm_nestedcv" class updated accordingly with the "model.type" item, to reflect "classification" or "regression"
             - The print function for "rbiosvm_nestedcv" updated accordingly with the regression study support
-          - Parallel module re-written for rbioClass_svm_ncv_fs() for higher stability
+          - Parallel module re-written for rbioClass_svm_ncv_fs() for higher stability`
+          - rbioClass_svm_ncv_fs() now records the run time
+            - "rbiosvm_nestedcv" class now has a "nestedcv_run_time" item to store the run time
+            - The print function for "rbiosvm_nestedcv" class updated to display the run time
           
         - Updates to RF-FS function(s)
           - RF-FS now accepts regression analysis
