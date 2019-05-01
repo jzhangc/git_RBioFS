@@ -143,6 +143,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   return(m)
 }
 
+
 #' @export
 print.rbiosvm <- function(x, ...){
   cat("Parameters:\n")
@@ -379,13 +380,18 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   # display
   if (verbose) {
     cat("\n")
+    cat("SVM model type: ")
+    cat(model_type)
     if (model_type == "classification"){
+      cat("\n")
       cat("Nested cross-validation accuracy summary: \n")
       print(tot.nested.acc.summary)
     } else {
+      cat("\n")
       cat("Nested cross-validation RMSE summary: \n")
       print(tot.nested.rmse.summary)
     }
+    cat("\n")
     cat("Nested cross-validation selected features: \n")
     cat(selected.features)
   }
