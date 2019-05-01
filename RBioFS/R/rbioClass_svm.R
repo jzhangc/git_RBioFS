@@ -377,17 +377,18 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   selected.features <- names(fs.count[which(fs.count >= fs.count.cutoff)])
 
   # display
-  if (verbose) cat("\n")
-  if (model_type == "classification"){
-    if (verbose) cat("Nested cross-validation accuracy summary: \n")
-    if (verbose) cat(tot.nested.acc.summary)
-  } else {
-    if (verbose) cat("Nested cross-validation RMSE summary: \n")
-    if (verbose) cat(tot.nested.rmse.summary)
+  if (verbose) {
+    cat("\n")
+    if (model_type == "classification"){
+      cat("Nested cross-validation accuracy summary: \n")
+      print(tot.nested.acc.summary)
+    } else {
+      cat("Nested cross-validation RMSE summary: \n")
+      print(tot.nested.rmse.summary)
+    }
+    cat("Nested cross-validation selected features: \n")
+    cat(selected.features)
   }
-  if (verbose) cat("\n")
-  if (verbose) cat("Nested cross-validation selected features: \n")
-  if (verbose) cat(selected.features)
 
   # run time
   runtime <- end_time - start_time
@@ -415,20 +416,20 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
 
 #' @export
 print.rbiosvm_nestedcv <- function(x, ...){
-  cat("SVM model type:\n")
-  print(x$model.type)
-  cat("\n")
+  cat("SVM model type: ")
+  cat(x$model.type)
+  cat("\n\n")
   if (x$model.type == "classification") {
     cat("Total nested cross-validation accuracy:\n")
-    cat(x$tot.nested.accuracy.summary)
+    print(x$tot.nested.accuracy.summary)
   } else {
     cat("Total nested cross-validation RMSE:\n")
-    cat(x$tot.nested.rmse.summary)
+    print(x$tot.nested.rmse.summary)
   }
   cat("\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
-  print(x$selected.features)
-  cat("\n")
+  cat(x$selected.features)
+  cat("\n\n")
   cat("Nested CV run time: ")
   cat(x$run.time)
 }
