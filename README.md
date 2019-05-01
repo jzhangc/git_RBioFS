@@ -74,12 +74,6 @@ Update log
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
 
-        - Updates to RF-FS function(s)
-          - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
-          - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
-            - rf_ifs class: "initial_FS_run_time""
-            - rf_sfs class: "SFS_run_time"
-
         - Updates to the PCA function(s)
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
