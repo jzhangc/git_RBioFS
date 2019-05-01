@@ -383,11 +383,11 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
     cat("SVM model type: ")
     cat(model_type)
     if (model_type == "classification"){
-      cat("\n")
+      cat("\n\n")
       cat("Nested cross-validation accuracy summary: \n")
       print(tot.nested.acc.summary)
     } else {
-      cat("\n")
+      cat("\n\n")
       cat("Nested cross-validation RMSE summary: \n")
       print(tot.nested.rmse.summary)
     }
