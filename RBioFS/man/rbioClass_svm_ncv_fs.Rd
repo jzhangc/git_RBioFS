@@ -76,6 +76,8 @@ Additional items for \code{rbiosvm_nestedcv}:
 \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 
 \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+
+\code{run.time}: total run time
 }
 \description{
 Nested cross-validation assessment for SVM classification. It evaluates the overall performace of SVM modelling given the training data.

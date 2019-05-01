@@ -220,6 +220,8 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
 #'
+#' \code{run.time}: total run time
+#'
 #' @details
 #'
 #' For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
@@ -376,11 +378,16 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
 
   # display
   if (verbose) cat("\n")
-  if (verbose) cat("Nested cross-validation accuracy summary: \n")
-  if (verbose) print(tot.nested.acc.summary)
+  if (model_type == "classification"){
+    if (verbose) cat("Nested cross-validation accuracy summary: \n")
+    if (verbose) cat(tot.nested.acc.summary)
+  } else {
+    if (verbose) cat("Nested cross-validation RMSE summary: \n")
+    if (verbose) cat(tot.nested.rmse.summary)
+  }
   if (verbose) cat("\n")
   if (verbose) cat("Nested cross-validation selected features: \n")
-  if (verbose) print(selected.features)
+  if (verbose) cat(selected.features)
 
   # run time
   runtime <- end_time - start_time
@@ -410,19 +417,20 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
 print.rbiosvm_nestedcv <- function(x, ...){
   cat("SVM model type:\n")
   print(x$model.type)
+  cat("\n")
   if (x$model.type == "classification") {
     cat("Total nested cross-validation accuracy:\n")
-    print(x$tot.nested.accuracy.summary)
+    cat(x$tot.nested.accuracy.summary)
   } else {
     cat("Total nested cross-validation RMSE:\n")
-    print(x$tot.nested.rmse.summary)
+    cat(x$tot.nested.rmse.summary)
   }
   cat("\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
   print(x$selected.features)
   cat("\n")
   cat("Nested CV run time: ")
-  print(x$run.time)
+  cat(x$run.time)
 }
 
 
