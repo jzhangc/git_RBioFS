@@ -80,6 +80,9 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
           
     (ADDED)
+        - General updates
+          - match.arg() method added to relevant functions for better user experience
+        
         - Update to SVM function(s)
           - rbioClass_svm() updated with support vector regression analysis support
             - "rbiosvm" class updated accordingly with the "model.type" item, to reflect "classification" or "regression"

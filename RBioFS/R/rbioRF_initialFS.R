@@ -8,7 +8,7 @@
 #' @param plot.fs.line Wether to display the vi line at the feature selection threshold. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
-#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"sem"}) or standard deviation (\code{"sd"}, case insensitive. Default is \code{"sem"}.
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
@@ -38,7 +38,7 @@
 #' @examples
 #' \dontrun{
 #' rbioFS_rf_initialFS_plot(object = data_initial_FS, n = "all",plot.title = TRUE, plot.titleSize = 10,
-#'                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                        plot.outlineCol = "black", plot.errorbar = "sem", plot.errorbarWidth = 0.2,
 #'                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
 #'                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
 #'                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
@@ -52,7 +52,7 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
                                      plot.file.title = deparse(substitute(object)),
                                      plot.title = NULL, plot.fs.line = TRUE,
                                      plot.titleSize = 10,
-                                     plot.errorbar = "sem", plot.errorbarWidth = 0.2, plot.outlineCol = "black",
+                                     plot.errorbar = c("sem", "sd"), plot.errorbarWidth = 0.2, plot.outlineCol = "black",
                                      plot.fontType = "sans",
                                      plot.xLabel = "Features", plot.xLabelSize = 10,
                                      plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
@@ -67,7 +67,9 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
   if (is.null(object$vi_at_threshold) & plot.fs.line){
     cat("No vi_at_threshold item detected in the input oject, plot.fs.line set to FALSE. \n")
     plot.fs.line <- FALSE
-    }
+  }
+
+  plot.errorbar <- match.arg(tolower(plot.errorbar), c("sem", "sd"))
 
   ## construuct plot dataframe
   if (any(names(object) %in% "recur_vi_summary")){
@@ -93,9 +95,9 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
   if (plot.xTickLblSize == 0) cat("Due to plot.xTickLblSize = 0, x-axis ticks are hidden for the VI boxplot.\n")
 
   # error bar
-  if (tolower(plot.errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
+  if (tolower(plot.errorbar) %in% c("sem")){  # error bar
     err <- pltdfm$SEM
-  } else if (tolower(plot.errorbar) %in% c("sd", "standard deviation")){
+  } else if (tolower(plot.errorbar) %in% c("sd")){
     err <- pltdfm$SD
   }
 
@@ -202,11 +204,16 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
                                 x, y, nTimes = 50, nTree = 1001,
                                 mTry = if (!is.factor(y))
                                   max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))),
-                                parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
+                                parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                 plot = TRUE,
                                 n = "all", ...){
   #### run time initiation
   start_time <- Sys.time()
+
+  #### check arguments
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   #### check the variables
   if (ncol(x) == 1){

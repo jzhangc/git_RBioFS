@@ -48,7 +48,7 @@
 #' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
 #' }
 #' @export
-rbioFS <- function(objTitle = "data", rf_type = "classification",
+rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"),
                    file = NULL, input = NULL,
                    sampleIDVar = NULL, groupIDVar = NULL, annotVarNames = c(sampleIDVar, groupIDVar),
                    impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
@@ -72,7 +72,11 @@ rbioFS <- function(objTitle = "data", rf_type = "classification",
   if (is.null(file) & is.null(input)) stop("set one of the \"file\" and \"input\"")
   if (is.null(sampleIDVar) | is.null(groupIDVar)) stop("set both sampleIDVar and groupIDVar")
   if (is.null(annotVarNames)) stop("set annotNarNames variable")
-  if (!tolower(rf_type) %in% c("classification", "regression")) stop("set rf_type to either \"classification\" or \"regression\".")
+  # if (!tolower(rf_type) %in% c("classification", "regression")) stop("set rf_type to either \"classification\" or \"regression\".")
+  rf_type <- match.arg(tolower(rf_type), c("classification", "regression"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   ## input constuction
   if (is.null(input)){

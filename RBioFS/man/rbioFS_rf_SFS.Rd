@@ -6,7 +6,7 @@
 \usage{
 rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, y, nTimes = 50, nTree = 1001,
   parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
-  clusterType = "PSOCK", plot = TRUE, n = "all", ...)
+  clusterType = c("PSOCK", "FORK"), plot = TRUE, n = "all", ...)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}

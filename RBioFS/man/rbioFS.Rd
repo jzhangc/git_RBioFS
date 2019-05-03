@@ -4,8 +4,8 @@
 \alias{rbioFS}
 \title{rbioFS}
 \usage{
-rbioFS(objTitle = "data", rf_type = "classification", file = NULL,
-  input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
+rbioFS(objTitle = "data", rf_type = c("classification", "regression"),
+  file = NULL, input = NULL, sampleIDVar = NULL, groupIDVar = NULL,
   annotVarNames = c(sampleIDVar, groupIDVar), impute = FALSE,
   imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
   quantileNorm = FALSE, nTimes = 50, nTree = 1001,

@@ -59,7 +59,7 @@
 #' }
 #' @export
 rbioClass_svm <- function(x, y, center.scale = TRUE,
-                          kernel = "radial", svm.cross.k = 10,
+                          kernel = c("radial", "linear", "polynomial", "sigmoid"), svm.cross.k = 10,
                           tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
                           verbose = TRUE){
   ## check arguments
@@ -79,7 +79,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   #   if (verbose) cat("y is converted to factor. \n")
   #   y <- factor(y, levels = unique(y))
   # }
-  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
 
   ## data processing
   if (center.scale){
@@ -251,13 +252,13 @@ print.rbiosvm <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
-                                 kernel = "radial",
+                                 kernel = c("radial", "linear", "polynomial", "sigmoid"),
                                  cross.k = 10,
-                                 tune.method = "cross",
+                                 tune.method = c("cross", "boot", "fix"),
                                  tune.cross.k = 10, tune.boot.n = 10, ...,
                                  fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                  fs.count.cutoff = cross.k,
-                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
+                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                  verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
@@ -280,8 +281,13 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
-  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
   if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
+  # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
+  tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   ## nested cv
   # processing training data
@@ -651,17 +657,22 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #' }
 #' @export
 rbioClass_svm_perm <- function(object,
-                               perm.method = "by_y", nperm = 999,
+                               perm.method = c("by_y", "by_feature_per_y"), nperm = 999,
                                perm.plot = TRUE, ...,
-                               parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,clusterType = "PSOCK",
+                               parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
   if (!"tot.accuracy" %in% names(object) || is.null(object$tot.accuracy)) stop("SVM model has to include tot.accuracy value from Cross-Validation.\n")
-  if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
+  # if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
   if (length(nperm) != 1) stop("nperm can only contain one integer. \n")
   if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
   if (nperm < 1) stop("nperm can only take interger equal to or greater than 1. \n")
+
+  perm.method <- match.arg(tolower(perm.method), c("by_y", "by_feature_per_y"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   ## test
   ## calcuate RMSEP and construct original RMSEP data frame
@@ -829,13 +840,13 @@ print.rbiosvm_perm <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
-                                  center.scale.newdata = TRUE, prob.method = "logistic",
+                                  center.scale.newdata = TRUE, prob.method = c("logistic",  "Bayes", "softmax"),
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
   if (!class(newdata) %in% c("matrix", "data.frame")) stop("newdata has to be either a matrix or data.frame object.")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
-  if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
+  # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
@@ -845,6 +856,8 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
       sampleLabel.vector <- NULL
     }
   }
+
+  prob.method <- match.arg(prob.method, c("logistic",  "Bayes", "softmax"))
 
   ## center data with the option of scaling
   if (class(newdata) == "data.frame"){
