@@ -60,7 +60,7 @@
 #' @export
 rbioClass_svm <- function(x, y, center.scale = TRUE,
                           kernel = c("radial", "linear", "polynomial", "sigmoid"), svm.cross.k = 10,
-                          tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
+                          tune.method = c("cross", "boot", "fix"), tune.cross.k = 10, tune.boot.n = 10, ...,
                           verbose = TRUE){
   ## check arguments
   if (is.factor(y)){
@@ -81,6 +81,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   # }
   # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
   kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
+  tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
+
 
   ## data processing
   if (center.scale){
