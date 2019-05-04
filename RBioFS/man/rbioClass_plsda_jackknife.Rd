@@ -7,7 +7,7 @@
 rbioClass_plsda_jackknife(object, ncomp = object$ncomp,
   use.mean = FALSE, sig.p = 0.05, plot = TRUE, plot.title = FALSE,
   plot.titleSize = 10, plot.outlineCol = "black",
-  plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+  plot.errorbar = c("sem", "sd"), plot.errorbarWidth = 0.2,
   plot.errorbarLblSize = 6, plot.fontType = "sans",
   plot.xLabel = NULL, plot.xLabelSize = 10, plot.xTickLblSize = 10,
   plot.xTickItalic = FALSE, plot.xTickBold = FALSE, plot.xAngle = 0,
@@ -31,7 +31,7 @@ rbioClass_plsda_jackknife(object, ncomp = object$ncomp,
 
 \item{plot.outlineCol}{The outline colour for the bar gars. Default is \code{"black"}.}
 
-\item{plot.errorbar}{Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.}
+\item{plot.errorbar}{Set the type of errorbar. Options are standard error of the mean (\code{"sem"}), or standard deviation (\code{"sd"}), case insensitive. Default is \code{"sem"}.}
 
 \item{plot.errorbarWidth}{Set the width for errorbar. Default is \code{0.2}.}
 

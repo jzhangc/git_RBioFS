@@ -69,8 +69,7 @@ Update log
           - rbioClass_svm_perm() plot output file name fixed
                  
         - Updates to PLS-DA function(s)
-          - New function rbioReg_plsr() function added for PLS regression analysis
-          - Multi-category Y modelling now possible with rbioFS_plsda
+          - Multivariate Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
 
@@ -86,13 +85,25 @@ Update log
         - Update to SVM function(s)
           - rbioClass_svm() updated with support vector regression analysis support
             - "rbiosvm" class updated accordingly with the "model.type" item, to reflect "classification" or "regression"
+          - The print function for "rbiosvm" class adjusted for better presentation
           - rbioClass_svm_ncv_fs() updated with support vector regression analysis support
             - "rbiosvm_nestedcv" class updated accordingly with the "model.type" item, to reflect "classification" or "regression"
             - The print function for "rbiosvm_nestedcv" updated accordingly with the regression study support
           - Parallel module re-written for rbioClass_svm_ncv_fs() for higher stability`
           - rbioClass_svm_ncv_fs() now records the run time
-            - "rbiosvm_nestedcv" class now has a "nestedcv_run_time" item to store the run time
+            - "rbiosvm_nestedcv" class now has a "run.time" item to store the run time
             - The print function for "rbiosvm_nestedcv" class updated to display the run time
+          - rbioClass_svm_perm() now supports regression SVM models
+            - "rbiosvm_perm" class item names adjusted for the perforamce metric type according to the SVM model type
+            - "rbiosvm_perm" class now has "model.type" to reflect regression or classification
+          - rbioClass_svm_perm() now records run time
+            - "rbiosvm_perm" class now has a "run.time" item to store the run time
+          - A bug fixed for rbioClass_svm_perm() where parallel computing fails to different random resampling results
+          - A bug fixed for rbioClass_svm_perm() where "by_feature_per_y" method fails to permutate columns
+
+        - Updates to PLS-DA function(s)
+          - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to different random resampling results
+          - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
           
         - Updates to RF-FS function(s)
           - RF-FS now accepts regression analysis

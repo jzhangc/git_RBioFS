@@ -66,6 +66,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
                        verbose = TRUE){
   ## check the argument
   if (!all(c(sampleIDVar, groupIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
+  biplot.sampleLabel.type <- match.arg(tolower(biplot.sampleLabel.type), c("none", "direct", "indirect"))
 
   ## set up input
   x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar)]

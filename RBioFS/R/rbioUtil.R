@@ -36,12 +36,21 @@ rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
   perm_res_dfm <- perm_res$perm.results
 
   # plot
-  baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = stats)) +
-    geom_line(linetype = "dashed") +
-    geom_point(size = plot.SymbolSize) +
-    geom_hline(yintercept = perm_res_dfm[1, 2], linetype = "dashed", colour = "red")
+  if (perm_res$model.type == "regression"){
+    baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = tot.RMSE)) +
+      geom_line(linetype = "dashed") +
+      geom_point(size = plot.SymbolSize) +
+      geom_hline(yintercept = perm_res_dfm[1, 2], linetype = "dashed", colour = "red")
 
-  plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "Accuracy", ...)
+    plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "tot.RMSE", ...)
+  } else {
+    baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = tot.accuracy)) +
+      geom_line(linetype = "dashed") +
+      geom_point(size = plot.SymbolSize) +
+      geom_hline(yintercept = perm_res_dfm[1, 2], linetype = "dashed", colour = "red")
+
+    plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "tot.Accuracy", ...)
+  }
 
   # save
   if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(perm_res)),".svm.perm.plot.pdf...", sep = ""))  # initial message

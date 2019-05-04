@@ -182,12 +182,14 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.")
-  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  # if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
   if (plot.rightsideY){
     if (length(comps) > 1){
       cat("right side y-axis ignored for multi-plot figure.\n")
     }
   }
+  plot.sampleLabel.type <- match.arg(tolower(plot.sampleLabel.type), c("none", "direct", "indirect"))
+
 
   ## extract and construt t-u plot dataframe
   tu_dfm <- data.frame(y = object$inputY)
@@ -317,6 +319,7 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
   if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls pacakge
+  multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom"))
 
   ## construct q2r2 dataframes
   # calculate q2 and r2
@@ -459,11 +462,12 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' }
 #' @export
 rbioClass_plsda_ncomp_select <- function(object, ...,
-                                         ncomp.selection.method = "1err", randomization.nperm = 999, randomization.alpha = 0.05,
+                                         ncomp.selection.method = c("1err", "min", "randomization"), randomization.nperm = 999, randomization.alpha = 0.05,
                                          rmsepplot = TRUE,
                                          plot.rightsideY = TRUE,
                                          plot.optm.ncomp.line = TRUE,
-                                         multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                         multi_plot.ncol = length(dimnames(object$coefficients)[[2]]), multi_plot.nrow = 1,
+                                         multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                          plot.display.Title = TRUE,
                                          plot.SymbolSize = 2,
                                          plot.fontType = "sans",
@@ -475,7 +479,9 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
   if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.")
-  if (!tolower(ncomp.selection.method) %in% c("min", "1err", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1err\", or \"randomization\" exactly.")
+  # if (!tolower(ncomp.selection.method) %in% c("min", "1err", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1err\", or \"randomization\" exactly.")
+  ncomp.selection.method <- match.arg(tolower(ncomp.selection.method), c("1err", "min", "randomization"))
+  multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
 
   ## calcuate RMSEP
   rmsep <- RMSEP(object, ...)
@@ -660,17 +666,21 @@ print.rbiomvr_ncomp_select <- function(x, ...){
 #' @export
 rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
                                  perm.plot = TRUE, ...,
-                                 perm.method = "by_y", nperm = 999,
-                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
+                                 perm.method = c("by_y", "by_feature_per_y"), nperm = 999,
+                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                  verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.")
   if (!"validation" %in% names(object) || is.null(object$validation)) stop("PLS-DA model has to include Cross-Validation.")
   if (!all(ncomp %in% seq(object$ncomp))) stop("ncomp contain non-existant comp.")
-  if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\".")
+  # if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\".")
   if (length(nperm) != 1) stop("nperm can only contain one integer.")
   if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
   if (nperm < 1) stop("nperm can only take interger equal to or greater than 1.")
+  perm.method <- match.arg(tolower(perm.method), c("by_y", "by_feature_per_y"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   ## calcuate RMSEP and construct original RMSEP data frame
   rmsep <- pls::RMSEP(object)
@@ -686,62 +696,71 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   }
 
   ## permutation test
+  # permutation test functions
+  by_y_func <- function(i){
+    set.seed(i)
+    perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
+    perm_model <- rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
+                                  ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                                  segments = length(object$validation$segments),
+                                  segments.type = object$out_model$validation_segments_type,
+                                  verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
+
+    perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
+      if (adjCV){
+        stats <- dfm[, "adjCV"]
+      } else {
+        stats <- dfm[, "CV"]
+      }
+      dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
+                        comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
+    }
+    return(perm_rmsep_dfm)
+  }
+  by_feature_per_y_func <- function(i){
+    set.seed(i)
+    perm_x <- foreach(m = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
+      sub_dat <- object$centerX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
+      sub_dat_colnames <- colnames(sub_dat)
+      perm_dat <- sub_dat[, sample(1:ncol(sub_dat))]
+      # perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
+      #   col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
+      #   col
+      # }
+      colnames(perm_dat) <- sub_dat_colnames
+      perm_dat
+    }
+
+    perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
+                                  ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                                  segments = length(object$validation$segments),
+                                  segments.type = object$out_model$validation_segments_type,
+                                  verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
+
+    perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
+      if (adjCV){
+        stats <- dfm[, "adjCV"]
+      } else {
+        stats <- dfm[, "CV"]
+      }
+      dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
+                        comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
+    }
+    perm_rmsep_dfm
+  }
+
   if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
   if (verbose) cat(paste0("Running permutation test using ", perm.method, " method ","with ", nperm, " permutations (speed depending on hardware configurations)..."))
   # consolidated permutation model RMSEP data frame
   if (!parallelComputing){
     if (perm.method == "by_y"){  # permutate label
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
-        perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                      ncomp = ncomp, scale = FALSE, validation = object$validation_method,
-                                      segments = length(object$validation$segments),
-                                      segments.type = object$out_model$validation_segments_type,
-                                      verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
-
-        perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-          dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
-          if (adjCV){
-            stats <- dfm[, "adjCV"]
-          } else {
-            stats <- dfm[, "CV"]
-          }
-          dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
-                            comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
-        }
-        perm_rmsep_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
-        perm_x <- foreach(m = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
-          sub_dat <- object$centerX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
-          perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
-            col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
-            col
-          }
-          perm_dat
-        }
-
-        perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
-                                      ncomp = ncomp, scale = FALSE, validation = object$validation_method,
-                                      segments = length(object$validation$segments),
-                                      segments.type = object$out_model$validation_segments_type,
-                                      verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
-
-        perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-          dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
-          if (adjCV){
-            stats <- dfm[, "adjCV"]
-          } else {
-            stats <- dfm[, "CV"]
-          }
-          dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
-                            comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
-        }
-        perm_rmsep_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_feature_per_y_func(i)
     }
   } else {  # parallel computing
     # set up cpu cluster
@@ -752,57 +771,9 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 
     # permutation test
     if (perm.method == "by_y"){  # permutate label
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% {
-        perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- RBioFS::rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                              ncomp = ncomp, scale = FALSE, validation = object$validation_method,
-                                              segments = length(object$validation$segments),
-                                              segments.type = object$out_model$validation_segments_type,
-                                              verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
-
-        perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-          dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
-          if (adjCV){
-            stats <- dfm[, "adjCV"]
-          } else {
-            stats <- dfm[, "CV"]
-          }
-          dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
-                            comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
-        }
-        perm_rmsep_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% {
-        perm_x <- foreach(m = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
-          sub_dat <- object$centerX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
-          perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
-            col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
-            col
-          }
-          perm_dat
-        }
-
-        perm_model <- rbioClass_plsda(x = perm_x, y = object$inputY,
-                                      ncomp = ncomp, scale = FALSE, validation = object$validation_method,
-                                      segments = length(object$validation$segments),
-                                      segments.type = object$out_model$validation_segments_type,
-                                      verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
-
-        perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-          dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
-          if (adjCV){
-            stats <- dfm[, "adjCV"]
-          } else {
-            stats <- dfm[, "CV"]
-          }
-          dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
-                            comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
-        }
-        perm_rmsep_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% by_feature_per_y_func(i)
     }
   }
 
@@ -903,7 +874,7 @@ print.rbiomvr_perm <- function(x, ...){
 rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.rightsideY = FALSE,
                                    plot.Title = NULL,
-                                   plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
+                                   plot.sampleLabel.type = c("none", "direct", "indirect"), plot.sampleLabel.vector = NULL,
                                    plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
                                    plot.SymbolSize = 2,
                                    plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
@@ -929,7 +900,8 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
   } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from rbioClass_plsda() function.")
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
-  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  # if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  plot.sampleLabel.type <- match.arg(tolower(plot.sampleLabel.type), c("none", "direct", "indirect"))
   if (tolower(plot.sampleLabel.type != "none")){
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(object$inputX)) {
       stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX).")}
@@ -1118,7 +1090,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
-#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"sem"}), or standard deviation (\code{"sd"}), case insensitive. Default is \code{"sem"}.
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
@@ -1165,7 +1137,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                                    plot = TRUE,
                                    plot.title = FALSE, plot.titleSize = 10,
                                    plot.outlineCol = "black",
-                                   plot.errorbar = "SEM", plot.errorbarWidth = 0.2, plot.errorbarLblSize = 6,
+                                   plot.errorbar = c("sem", "sd"), plot.errorbarWidth = 0.2, plot.errorbarLblSize = 6,
                                    plot.fontType = "sans",
                                    plot.xLabel = NULL, plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
                                    plot.xTickBold = FALSE, plot.xAngle = 0,
@@ -1176,6 +1148,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                                    verbose = TRUE){
   # check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
+  plot.errorbar <- match.arg(tolower(plot.errorbar), c("sem", "sd"))
 
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]
@@ -1213,9 +1186,9 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
       if (verbose) cat(paste("Plot saved to file: ", deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf...", sep = "")) # initial message
       DfPlt <- plot_list[[i]]
 
-      if (tolower(plot.errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
+      if (tolower(plot.errorbar) %in% c("sem")){  # error bar
         err <- DfPlt$sem
-      } else if (tolower(plot.errorbar) %in% c("sd", "standard deviation")){
+      } else if (tolower(plot.errorbar) %in% c("sd")){
         err <- DfPlt$sd
       }
 
@@ -1632,7 +1605,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @export
 rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
                                   plot.title = TRUE, plot.titleSize = 10,
-                                  multi_plot.ncol = length(unique(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                  multi_plot.ncol = length(unique(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                   plot.sig.line = TRUE,
                                   plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
                                   plot.errorbarLblSize = 6, plot.fontType = "sans",
@@ -1645,6 +1618,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
                                   plot.Height = 150, verbose = TRUE){
   ## argument check
   if (!any(class(vip_obj) %in% c("rbiomvr_vip"))) stop("object needs to be a \"rbiomvr_vip\" class.")
+  multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
 
   ## plot
   # set up bootstrap setting
@@ -1795,7 +1769,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
                                     rocplot = TRUE,
                                     plot.comps = 1:object$ncomp,
                                     plot.smooth = FALSE,
-                                    multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                    multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                     plot.rightsideY = TRUE,
                                     plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
                                     plot.fontType = "sans",
@@ -1824,6 +1798,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
   }
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
+  multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
 
   ## calcuate ROC-AUC
   pred_raw <- predict(object, newdata = newdata)
@@ -2019,7 +1994,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
                                  predplot = TRUE,
                                  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
                                  plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
-                                 multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                                 multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                  plot.rightsideY = TRUE,
                                  plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
                                  plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
@@ -2039,7 +2014,8 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   }
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
-  if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  # if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  multi_plot.legend.pos <- match.arg(multi_plot.legend.pos, c("bottom", "top", "left", "right"))
   if (tolower(plot.sampleLabel.type != "none")){
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {
       stop("plot.sampleLabel.vector has to be the same length as nrow(newdata).")}

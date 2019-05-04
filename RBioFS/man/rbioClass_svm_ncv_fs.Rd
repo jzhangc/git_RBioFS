@@ -60,9 +60,11 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
 
-\code{tot.nested.rmse.summary}: total (i.e. mean) nested cross-validation rmse, if \code{model_type = "regression"}
+\code{tot.nested.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
 
-\code{nested.accuracy}: accuracy for each cross-validation iteration
+\code{nested.accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
+
+\code{nested.RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
 
 \code{fs.method}: feature selection method
 
