@@ -798,11 +798,11 @@ rbioClass_svm_perm <- function(object,
   out <- list(perm.method = perm.method,
               nperm = nperm,
               performance.type = perfm_type,
-              original.stats = orig_perfm,
+              original.performance = orig_perfm,
               perm.results = complete_perfm,
               p.value = p.val,
-              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]),
-              model.type = object$model.type)
+              model.type = object$model.type,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(out) <- "rbiosvm_perm"
   assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
 
