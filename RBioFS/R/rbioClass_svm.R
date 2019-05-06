@@ -647,7 +647,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #'
 #' For \code{perm.method = "by_y"}, labels (i.e. y) are permutatedted. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
-#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
+#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature by column. Since the permutation is done for the features WITHIN the group,
 #' the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
 #' Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 #'
@@ -670,57 +670,82 @@ rbioClass_svm_perm <- function(object,
 
   ## check arguments
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
-  if (!"tot.accuracy" %in% names(object) || is.null(object$tot.accuracy)) stop("SVM model has to include tot.accuracy value from Cross-Validation.\n")
+  if (object$model.type == "regression") {
+    if (!"tot.MSE" %in% names(object) || is.null(object$tot.MSE)) stop("Regression SVM model object has to include tot.accuracy value from Cross-Validation for permutation test. \n")
+  } else {
+    if (!"tot.accuracy" %in% names(object) || is.null(object$tot.accuracy)) stop("Classification SVM model object has to include tot.accuracy value from Cross-Validation for permutation test. \n")
+  }
   # if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
   if (length(nperm) != 1) stop("nperm can only contain one integer. \n")
   if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
   if (nperm < 1) stop("nperm can only take interger equal to or greater than 1. \n")
   perm.method <- match.arg(tolower(perm.method), c("by_y", "by_feature_per_y"))
+  if (object$model.type == "regression" && perm.method == "by_feature_per_y") stop("perm.method cannot be \"by_feature_per_y\" when SVM model type is regression.")
+
   if (parallelComputing){
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
 
-  ## test
-  ## calcuate RMSEP and construct original RMSEP data frame
-  orig_accu <- object$tot.accuracy
+  ## Perm test
+  # calcuate permutation error and construct original error data frame
+  if (object$model.type == "regression"){
+    orig_perfm <- object$tot.MSE
+    orig_perfm <- sqrt(orig_perfm)  # tot.RMSE
+  } else {
+    orig_perfm <- object$tot.accuracy
+    # orig_accu <- object$tot.accuracy
+  }
 
-  ## permutation test
-  if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
-  if (verbose) cat(paste0("Running permutation test using ", perm.method, " method ","with ", nperm, " permutations (speed depending on hardware configurations)..."))
-  # consolidated permutation model RMSEP data frame
+  # perm functions
+  by_y_func <- function(i){
+    perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
+    perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = perm_y,
+                                center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
+                                tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
+                                verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    if (object$model.type == "regression"){
+      perm_perfm <- perm_model$tot.MSE
+      perm_perfm <- sqrt(perm_perfm)  # RMSE
+    } else {
+      perm_perfm <- perm_model$tot.accuracy  # permutation model accuracy
+    }
+    perm_perfm_dfm <- data.frame(nperm = i, stats = perm_perfm, row.names = NULL)
+    return(perm_perfm_dfm)
+  }
+  by_feature_per_y <- function(i){
+    perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
+      sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
+      sub_dat_colnames <- colnames(sub_dat)
+      perm_dat <- sub_dat[, sample(1:ncol(sub_dat))]
+      colnames(perm_dat) <- sub_dat_colnames
+    }
+
+    perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
+                                center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
+                                tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
+                                verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+
+    if (object$model.type == "regression"){
+      perm_perfm <- perm_model$tot.MSE
+      perm_perfm <- sqrt(perm_perfm)  # RMSE
+    } else {
+      perm_perfm <- perm_model$tot.accuracy  # permutation model accuracy
+    }
+    perm_perfm_dfm <- data.frame(nperm = i, stats = perm_perfm, row.names = NULL)
+    return(perm_perfm_dfm)
+  }
+
+  # permutation test: consolidated permutation model error data frame
+  if (verbose){
+    cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
+    cat(paste0("Running permutation test using ", perm.method, " method ","with ", nperm, " permutations (speed depending on hardware configurations)..."))
+  }
+
   if (!parallelComputing){
     if (perm.method == "by_y"){  # permutate label
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
-        perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy  # permutation model accuracy
-
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
-
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
-        perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
-          sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
-          perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
-            col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
-            col
-          }
-          perm_dat
-        }
-
-        perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy   # permutation model accuracy
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_feature_per_y(i)
     }
   } else {  # parallel computing
     # set up cpu cluster
@@ -731,41 +756,18 @@ rbioClass_svm_perm <- function(object,
 
     # permutation test
     if (perm.method == "by_y"){  # permutate label
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "RBioFS")) %dopar% {
-        perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy  # permutation model accuracy
-
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "RBioFS")) %dopar% {
-        perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
-          sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
-          perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
-            col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
-            col
-          }
-          perm_dat
-        }
-
-        perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy   # permutation model accuracy
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_feature_per_y(i)
     }
   }
 
-  perm_accu_val <- perm_dfm$stats
-  p.val <- (length(which(perm_accu_val >= orig_accu)) + 1) / (nperm + 1)
+  perm_perfm_val <- perm_dfm$stats
+  if (object$model.type == "regression"){
+    p.val <- (length(which(perm_perfm_val <= orig_perfm)) + 1) / (nperm + 1)  # MSE the smaller the better
+  } else {
+    p.val <- (length(which(perm_perfm_val >= orig_perfm)) + 1) / (nperm + 1)  # accuracy the bigger the better
+  }
   if (verbose) cat("Done!\n")
 
   ## output
@@ -774,14 +776,23 @@ rbioClass_svm_perm <- function(object,
   runtime <- end_time - start_time
 
   # output
-  perm_stats <- rbind(data.frame(nperm = 0, stats = orig_accu, row.names = NULL), perm_dfm)
+  if (object$model.type == "regression"){
+    perfm_type <- "tot.RMSE"
+    names(perm_dfm)[2] <- "tot.RMSE"
+  } else {
+    perfm_type <- "tot.accuracy"
+    names(perm_dfm)[2] <- "tot.accuracy"
+
+  }
+  complete_perfm <- rbind(data.frame(nperm = 0, stats = orig_perfm, row.names = NULL), perm_dfm)
   out <- list(perm.method = perm.method,
               nperm = nperm,
-              perm.stats = "tot.accuracy",
-              original.stats = orig_accu,
+              performance.type = perfm_type,
+              original.stats = orig_perfm,
+              perm.results = complete_perfm,
               p.value = p.val,
-              perm.results = perm_stats,
-              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]),
+              model.type = object$model.type)
   class(out) <- "rbiosvm_perm"
   assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
 
@@ -803,7 +814,6 @@ rbioClass_svm_perm <- function(object,
     cat("\n")
   }
 }
-
 
 #' @export
 print.rbiosvm_perm <- function(x, ...){
@@ -890,9 +900,11 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
   if (object$model.type == "classification"){
     y <- NULL
     prob.method <- match.arg(prob.method, c("logistic",  "Bayes", "softmax"))
+    probability <- TRUE
   } else {
     if (missing(y) || is.null(y) || length(y) != nrow(newdata)) stop("Please set the correct outcome value vector y.")
     prob.method <- NULL
+    probability <- FALSE
   }
 
   ## center data with the option of scaling
@@ -904,11 +916,9 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
     if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")
     centerdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
     test <- centerdata
-    probability <- FALSE
   } else {
     centerdata <- NULL
     test <- newdata
-    probability <- TRUE
   }
 
   ## predict
