@@ -95,6 +95,8 @@ A \code{prediction} obejct, as well as pdf figure file for predicted values if \
 
 The items of the object are:
 
+\code{model.type}
+
 \code{classifier.class}
 
 \code{predited.value}
@@ -108,6 +110,8 @@ The items of the object are:
 \code{center.scale}
 
 \code{center.scaled.newdata}
+
+\code{input.y}
 }
 \description{
 Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.

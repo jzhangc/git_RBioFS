@@ -48,6 +48,8 @@ Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
        \code{validation_method}
 
        \code{validation_segments_type}
+
+       \code{model.type}
 }
 \description{
 PLS-DA modelling

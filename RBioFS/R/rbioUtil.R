@@ -177,7 +177,7 @@ rbioUtil_perm_plot.default <- function(baseplt,
 #' rbioUtil_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
 #' }
 #' @export
-rbioUtil_classplot<- function(pred.obj,
+rbioUtil_classplot <- function(pred.obj,
                               multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               multi_plot.stripLblSize = 10,
                               plot.Title = NULL, plot.titleSize = 10,
@@ -189,6 +189,7 @@ rbioUtil_classplot<- function(pred.obj,
                               verbose = TRUE){
   ## check arguments
   if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioClass_plsda_predict() to generate one.")
+  if (pred.obj$model.type != "classification") stop("the function only supports \"classification\".")
 
   ## plot
   if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj$raw.newdata)){

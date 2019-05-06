@@ -64,6 +64,7 @@ Update log
     (ICEBOX)
         - New PLS-DA function(s)
           - rbioReg_plsr() function added for PLS regression analysis
+          - rbioReg_plsr_predict() function added for PLS regression analysis
           
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
@@ -81,6 +82,7 @@ Update log
     (ADDED)
         - General updates
           - match.arg() method added to relevant functions for better user experience
+          - rbioUtil_classplot() updated accordingly to accommodate the regression study
         
         - Update to SVM function(s)
           - rbioClass_svm() updated with support vector regression analysis support
@@ -98,10 +100,15 @@ Update log
             - "rbiosvm_perm" class now has "model.type" to reflect regression or classification
           - rbioClass_svm_perm() now records run time
             - "rbiosvm_perm" class now has a "run.time" item to store the run time
-          - A bug fixed for rbioClass_svm_perm() where parallel computing fails to different random resampling results
+          - A bug fixed for rbioClass_svm_perm() where parallel computing fails to generate different random resampling results
           - A bug fixed for rbioClass_svm_perm() where "by_feature_per_y" method fails to permutate columns
+          - rbioClass_svm_predict() updated with regression study support. In such case, the function also requires outcome y input and outputs total RMSE
+            - Accordingly, the "prediction" class updated with new items "model.type", "tot.predict.RMSE", and "input.y"
+            - Accordingly, the print function of the "prediction" adjusted for regression study
 
         - Updates to PLS-DA function(s)
+          - "rbiomvr" class updated with new item "model.type" for compatibility with the regression study
+          - The output from rbioClass_plsda_predict() now includes the updated "prediction" class
           - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to different random resampling results
           - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
           

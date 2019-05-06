@@ -34,21 +34,17 @@ The function returns \code{CSV} files for all intermediate permutation accuracy 
 
 The final results are also exported to the environment as a \code{rbiosvm_perm} object with the following items:
 
-\code{perm.method} Permutation method.
-
-\code{nperm} The number of permutation runs.
-
-\code{performance.type} The stats metric used for the permutation test.
-
-\code{original.performance} The original accuracy for the SVM model.
-
-\code{perm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
+\code{original.accuracy} The original accuracy for the SVM model.
 
 \code{p.value} P value for the permutation test.
 
-\code{model.type} SVM model type.
+\code{perm.method} Permutation method.
 
-\code{run.time} run time
+\code{perm.stats} The stats metric used for the permutation test.
+
+\code{nperm} The number of permutation runs.
+
+\code{perm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
 
 A scatter plot is also generaeted when \code{perm.plot = TRUE}.
 }
@@ -66,7 +62,7 @@ Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
 
 For \code{perm.method = "by_y"}, labels (i.e. y) are permutatedted. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 
-For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature, i.e. by column. Since the permutation is done for the features WITHIN the group,
+For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
 the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
 Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 }

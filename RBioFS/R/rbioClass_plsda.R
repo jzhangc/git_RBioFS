@@ -63,6 +63,8 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'
 #'        \code{validation_segments_type}
 #'
+#'        \code{model.type}
+#'
 #' @details The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
 #'
 #'          For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
@@ -124,6 +126,7 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
   out_model$inputY <- y
   out_model$validation_method <- validation
   out_model$validation_segments_type <- segments.type
+  out_model$model.type <- "classification"
 
   class(out_model) <- c("rbiomvr", "mvr")
   return(out_model)
@@ -1936,6 +1939,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'
 #' The items of the object are:
 #'
+#' \code{model.type}
+#'
 #' \code{classifier.class}
 #'
 #' \code{predited.value}
@@ -1949,6 +1954,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' \code{center.scale}
 #'
 #' \code{center.scaled.newdata}
+#'
+#' \code{input.y}
 #'
 #' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option \code{center.newdata = FALSE} is
 #' for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
@@ -1989,23 +1996,24 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' }
 #' @export
 rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, center.newdata = TRUE,
-                                 prob.method = "Bayes",
-                                 threshold = 0.2,
-                                 predplot = TRUE,
-                                 plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
-                                 plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
-                                 multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
-                                 plot.rightsideY = TRUE,
-                                 plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
-                                 plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
-                                 plot.xLabel = "Samples", plot.xLabelSize = 10, plot.xTickLblSize = 6, plot.xTickItalic = FALSE,
-                                 plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
-                                 plot.yLabel = "Predicted values", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                                 plot.legendSize = 9,
-                                 plot.Width = 170, plot.Height = 150,
-                                 verbose = TRUE){
+                                    prob.method = "Bayes",
+                                    threshold = 0.2,
+                                    predplot = TRUE,
+                                    plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
+                                    plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
+                                    multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
+                                    plot.rightsideY = TRUE,
+                                    plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                    plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
+                                    plot.xLabel = "Samples", plot.xLabelSize = 10, plot.xTickLblSize = 6, plot.xTickItalic = FALSE,
+                                    plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+                                    plot.yLabel = "Predicted values", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                    plot.legendSize = 9,
+                                    plot.Width = 170, plot.Height = 150,
+                                    verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.")
+  if (object$model.type == "regression") stop("the function only supports \"classification\" model type.")
 
   if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
@@ -2175,8 +2183,16 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   }
 
   ## export
-  out <- list(classifier.class = class(object), predicted.value = pred_mtx, probability.method = prob.method, probability.summary = prob_dfm,
-              raw.newdata = newdata, center.scale = center.newdata, center.scaled.newdata = centerdata)
+  out <- list(model.type = "classification",
+              classifier.class = class(object),
+              predicted.value = pred_mtx,
+              tot.predict.RMSE = NULL,
+              probability.method = prob.method,
+              probability.summary = prob_dfm,
+              raw.newdata = newdata,
+              center.scale = center.newdata,
+              center.scaled.newdata = centerdata,
+              input.y <- NULL)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
 }
