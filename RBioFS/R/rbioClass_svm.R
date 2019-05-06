@@ -623,17 +623,21 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #'
 #' The final results are also exported to the environment as a \code{rbiosvm_perm} object with the following items:
 #'
-#' \code{original.accuracy} The original accuracy for the SVM model.
-#'
-#' \code{p.value} P value for the permutation test.
-#'
 #' \code{perm.method} Permutation method.
-#'
-#' \code{perm.stats} The stats metric used for the permutation test.
 #'
 #' \code{nperm} The number of permutation runs.
 #'
+#' \code{performance.type} The stats metric used for the permutation test.
+#'
+#' \code{original.performance} The original accuracy for the SVM model.
+#'
 #' \code{perm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
+#'
+#' \code{p.value} P value for the permutation test.
+#'
+#' \code{model.type} SVM model type.
+#'
+#' \code{run.time} run time
 #'
 #' A scatter plot is also generaeted when \code{perm.plot = TRUE}.
 #'
@@ -647,7 +651,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #'
 #' For \code{perm.method = "by_y"}, labels (i.e. y) are permutatedted. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
-#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature by column. Since the permutation is done for the features WITHIN the group,
+#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature, i.e. by column. Since the permutation is done for the features WITHIN the group,
 #' the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
 #' Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 #'
@@ -713,13 +717,18 @@ rbioClass_svm_perm <- function(object,
     perm_perfm_dfm <- data.frame(nperm = i, stats = perm_perfm, row.names = NULL)
     return(perm_perfm_dfm)
   }
-  by_feature_per_y <- function(i){
+  by_feature_per_y_func <- function(i){
     set.seed(i)
     perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
       sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
       sub_dat_colnames <- colnames(sub_dat)
       perm_dat <- sub_dat[, sample(1:ncol(sub_dat))]
+      # perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
+      #   col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
+      #   col
+      # }
       colnames(perm_dat) <- sub_dat_colnames
+      perm_dat
     }
 
     perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
@@ -747,7 +756,7 @@ rbioClass_svm_perm <- function(object,
     if (perm.method == "by_y"){  # permutate label
       perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_feature_per_y(i)
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_feature_per_y_func(i)
     }
   } else {  # parallel computing
     # set up cpu cluster
@@ -760,7 +769,7 @@ rbioClass_svm_perm <- function(object,
     if (perm.method == "by_y"){  # permutate label
       perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_feature_per_y(i)
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_feature_per_y_func(i)
     }
   }
 
@@ -784,23 +793,22 @@ rbioClass_svm_perm <- function(object,
   } else {
     perfm_type <- "tot.accuracy"
     names(perm_dfm)[2] <- "tot.accuracy"
-
   }
-  complete_perfm <- rbind(data.frame(nperm = 0, stats = orig_perfm, row.names = NULL), perm_dfm)
+  complete_perfm <- rbind(c(0, orig_perfm), perm_dfm)
   out <- list(perm.method = perm.method,
               nperm = nperm,
               performance.type = perfm_type,
-              original.stats = orig_perfm,
+              original.performance = orig_perfm,
               perm.results = complete_perfm,
               p.value = p.val,
-              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]),
-              model.type = object$model.type)
+              model.type = object$model.type,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(out) <- "rbiosvm_perm"
   assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
 
   # export to the directory
   if (verbose) cat(paste0("Permutation stats results stored in csv file: ", paste(deparse(substitute(object)), "_perm.csv", sep = ""), ". \n"))
-  write.csv(file = paste0(deparse(substitute(object)), ".perm.csv"), perm_stats, row.names = FALSE)
+  write.csv(file = paste0(deparse(substitute(object)), ".perm.csv"), complete_perfm, row.names = FALSE)
 
   ## plot
   if (perm.plot){
@@ -816,6 +824,7 @@ rbioClass_svm_perm <- function(object,
     cat("\n")
   }
 }
+
 
 #' @export
 print.rbiosvm_perm <- function(x, ...){
