@@ -95,6 +95,7 @@ Update log
           - rbioClass_svm_ncv_fs() now records the run time
             - "rbiosvm_nestedcv" class now has a "run.time" item to store the run time
             - The print function for "rbiosvm_nestedcv" class updated to display the run time
+          - rbioClass_svm_ncv_fs() now exports all iteration RF-FS results to both the working directory and the global environment
           - rbioClass_svm_perm() now supports regression SVM models
             - "rbiosvm_perm" class item names adjusted for the perforamce metric type according to the SVM model type
             - "rbiosvm_perm" class now has "model.type" to reflect regression or classification

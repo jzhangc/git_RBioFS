@@ -300,15 +300,9 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   dfm_randomized <- dfm[random_sample_idx, ]  # randomize samples
   fold <- cut(seq(1:nrow(dfm_randomized)), breaks = cross.k, labels = FALSE)  # create a factor object with fold indices
 
-  # nested cv
-  if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
-  if (verbose) cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
-  if (verbose) cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...")
-
-  # computing
-  nested.cv.list <- vector(mode = "list", length = cross.k)
-
-  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% {
+  # nested CV function
+  nestedcv_func <- function(i) {
+    if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
     training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     # fs
     if (center.scale){
@@ -316,15 +310,17 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
     } else {
       fs_training <- training[, -1]
     }
-    rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, y = training$y, nTimes = 50,
+    rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training, y = training$y, nTimes = 50,
                         nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
     # fs <- svm_nested_initial_FS$feature_initial_FS
-    rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, y = training$y, nTimes = 50,
+    rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
+                  x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = training$y, nTimes = 50,
                   nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
-    if (length(svm_nested_SFS$selected_features) > 1){
-      fs <- svm_nested_SFS$selected_features
+
+    if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
+      fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
     } else {
-      fs <- svm_nested_initial_FS$feature_initial_FS
+      fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
     }
 
     # cv svm
@@ -349,9 +345,20 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
       rmse <- sqrt(mean(error^2))
       tmp_out <- list(selected.features = fs, nested.cv.rmse = rmse)
     }
+    if (verbose) cat("Done!\n")
     # foreach output
-    tmp_out
+    return(tmp_out)
   }
+
+  # computing
+  if (verbose){
+    cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
+    cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
+    cat("\n")
+    cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...\n")
+  }
+  nested.cv.list <- vector(mode = "list", length = cross.k)
+  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% nestedcv_func(i)
   names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
   if (model_type == "classification"){
@@ -370,7 +377,6 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
     nested.cv.list[[i]]$selected.features
   }
   fs.count <- sort(table(nested.fs), decreasing = TRUE)
-  if (verbose) cat("Done!\n")
 
   # end time
   end_time <- Sys.time()
@@ -429,7 +435,6 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   return(out)
 }
 
-
 #' @export
 print.rbiosvm_nestedcv <- function(x, ...){
   cat("SVM model type: ")
@@ -440,7 +445,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
     print(x$tot.nested.accuracy.summary)
   } else {
     cat("Total nested cross-validation RMSE:\n")
-    print(x$tot.nested.rmse.summary)
+    print(x$tot.nested.RMSE.summary)
   }
   cat("\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
