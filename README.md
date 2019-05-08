@@ -106,6 +106,9 @@ Update log
           - rbioClass_svm_predict() updated with regression study support. In such case, the function also requires outcome y input and outputs total RMSE
             - Accordingly, the "prediction" class updated with new items "model.type", "tot.predict.RMSE", and "newdata.y"
             - Accordingly, the print function of the "prediction" adjusted for regression study
+          - rbioClass_svm_roc_auc() now supports regression study
+            - Accordingly, and due to the required by ROC-AUC analysis, new argument "y.threshold" and "newdata.y" arguments added to convert continuous variable into categorical
+            - The output is now a S3 class "svm_roc_auc", with all the appropriate items
 
         - Updates to PLS-DA function(s)
           - "rbiomvr" class updated with new item "model.type" for compatibility with the regression study

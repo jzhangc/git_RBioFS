@@ -4,13 +4,15 @@
 \alias{rbioClass_svm_roc_auc}
 \title{rbioClass_svm_roc_auc()}
 \usage{
-rbioClass_svm_roc_auc(object, newdata, newdata.label,
-  center.scale.newdata = TRUE, rocplot = TRUE, plot.smooth = FALSE,
-  plot.SymbolSize = 2, plot.display.Title = TRUE,
-  plot.titleSize = 10, plot.fontType = "sans",
-  plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
-  plot.xTickLblSize = 10, plot.yLabel = "sensitivity",
-  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
+rbioClass_svm_roc_auc(object, newdata, newdata.label, newdata.y = NULL,
+  y.threshold = if (object$model.type == "regression")
+  round(median(object$inputY)) else NULL, center.scale.newdata = TRUE,
+  rocplot = TRUE, plot.smooth = FALSE, plot.SymbolSize = 2,
+  plot.display.Title = TRUE, plot.titleSize = 10,
+  plot.fontType = "sans", plot.xLabel = "1 - specificity",
+  plot.xLabelSize = 10, plot.xTickLblSize = 10,
+  plot.yLabel = "sensitivity", plot.yLabelSize = 10,
+  plot.yTickLblSize = 10, plot.legendSize = 9,
   plot.rightsideY = TRUE, plot.Width = 170, plot.Height = 150,
   verbose = TRUE)
 }
@@ -19,7 +21,11 @@ rbioClass_svm_roc_auc(object, newdata, newdata.label,
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 
-\item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object.}
+\item{newdata.label}{For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object.}
+
+\item{newdata.y}{For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}}
+
+\item{y.threshold}{For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}}
 
 \item{center.scale.newdata}{Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 
@@ -60,16 +66,31 @@ rbioClass_svm_roc_auc(object, newdata, newdata.label,
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
 }
 \value{
-Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list to the environment.
+Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list as a \code{svm_roc_auc} class to the environment.
+
+        Items of the \code{svm_roc_auc} class:
+        \code{model.type}
+        \code{y.threshold}
+        \code{regression.categories}
+        \code{svm.roc}
+        \code{input.newdata}
+        \code{input.newdata.y}
+        \code{input.newdata.label}
+        \code{newdata.center.scaled}
 }
 \description{
 ROC-AUC analysis and ploting for SVM model
 }
 \details{
-Uses pROC module to calculate ROC.
+Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
 
-Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to enter.scale prior to ROC-AUC analysis.
-The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+         Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
+         The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+
+         For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
+
+         Known issue: due to the AUC calculation method, the resulting \code{svm_roc_auc} class doesn't include the AUC score. It will be fixed in a future update.
+         For now, the AUC scores will be printed in the console upon the execution of the function.
 }
 \examples{
 \dontrun{

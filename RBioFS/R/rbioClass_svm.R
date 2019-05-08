@@ -461,7 +461,9 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @description ROC-AUC analysis and ploting for SVM model
 #' @param object A \code{rbiosvm} object.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
-#' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object.
+#' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
+#' @param y.threshold For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}
+#' @param newdata.label For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object.
 #' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
@@ -481,11 +483,27 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list to the environment.
-#' @details Uses pROC module to calculate ROC.
+#' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list as a \code{svm_roc_auc} class to the environment.
 #'
-#' Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to enter.scale prior to ROC-AUC analysis.
-#' The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+#'         Items of the \code{svm_roc_auc} class:
+#'         \code{model.type}
+#'         \code{y.threshold}
+#'         \code{regression.categories}
+#'         \code{svm.roc}
+#'         \code{input.newdata}
+#'         \code{input.newdata.y}
+#'         \code{input.newdata.label}
+#'         \code{newdata.center.scaled}
+#'
+#' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
+#'
+#'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
+#'          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+#'
+#'          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
+#'
+#'          Known issue: due to the AUC calculation method, the resulting \code{svm_roc_auc} class doesn't include the AUC score. It will be fixed in a future update.
+#'          For now, the AUC scores will be printed in the console upon the execution of the function.
 #'
 #' @import ggplot2
 #' @import foreach
@@ -500,6 +518,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
+                                  newdata.y = NULL,
+                                  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else NULL,
                                   center.scale.newdata = TRUE,
                                   rocplot = TRUE,
                                   plot.smooth = FALSE,
@@ -512,7 +532,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
-  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata)))stop("x needs to be a matrix, data.frame or vector.")
+  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("x needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
@@ -521,9 +541,30 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
-  if (class(newdata.label) != "factor"){
-    if (verbose) cat("newdata.label is converted to factor. \n")
-    newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+  y <- newdata.y
+  if (object$model.type == "classification"){
+    if (verbose && !is.null(newdata.y)) {
+      cat("newdata.y set to NULL for classification model. \n")
+      newdata.y <- NULL
+    }
+    y <- NULL
+    if (class(newdata.label) != "factor"){
+      if (verbose) cat("newdata.label is converted to factor. \n")
+      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+    }
+    reg.group <- NULL
+  } else {  # for regression
+    if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
+    if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
+    if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
+    y.threshold <- sort(unique(y.threshold))
+    threshold.length <- length(y.threshold)
+    reg.group.names <- paste0("case", seq(threshold.length + 1))
+    rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
+    newdata.label <- cut(y, rg)
+    reg.group <- levels(newdata.label)
+    names(reg.group) <- reg.group.names
+    levels(newdata.label) <- reg.group.names
   }
 
   ## process data
@@ -538,39 +579,53 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 
   ## ROC-AUC calculation
   pred <- predict(object, newdata = test)  # prediction
+  if (object$model.type == "regression"){
+    pred <- cut(pred, rg, labels = reg.group.names)
+  }
 
   outcome <- newdata.label  # origial label
-
-  roc_dfm <- foreach(j = 1:length(levels(outcome)), .combine = "rbind") %do% {
+  roc_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
     response <- outcome
-    levels(response)[-j] <- "others"
+    levels(response)[-i] <- "others"
     predictor <- dummy(pred)
-    predictor <- as.matrix(predictor[, j], ncol = 1)
+    predictor <- as.matrix(predictor[, i], ncol = 1)
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
-    cases <- splt[[levels(outcome)[j]]]
+    cases <- splt[[levels(outcome)[i]]]
     perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
                      error = function(err){
                        cat("Curve not smoothable. Proceed without smooth.\n")
                        pROC::roc(controls = controls, cases = cases, smooth = FALSE)
                      })
     if (length(levels(outcome)) == 2){
-      cat(paste0("AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
+      cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))
     } else {
-      cat(paste0(" AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
+      cat(paste0(" AUC - ", levels(outcome)[i], " (vs Others): ", perf$auc, "\n"))
     }
 
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
     mtx <- cbind(fpr, tpr)
     if (length(levels(outcome)) == 2){
-      df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      df <- data.frame(mtx, group = rep(levels(outcome)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     } else {
-      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     }
     df <- df[order(df$tpr), ]
     return(df)
   }
+
+  ## return
+  out <- list(model.type = object$model.type,
+              y.threshold = y.threshold,
+              regression.categories = reg.group,
+              svm.roc = roc_dfm,
+              input.newdata = newdata,
+              input.newdata.y = newdata.y,
+              input.newdata.label = newdata.label,
+              newdata.center.scaled = centered_newdata)
+  class(out) <- "svm_roc_auc"
+  assign(paste(deparse(substitute(object)), "_svm_roc_auc", sep = ""), out, envir = .GlobalEnv)
 
   ## plotting
   if (rocplot){
@@ -604,10 +659,6 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     grid.draw(plt)
     if (verbose) cat("Done!\n")
   }
-  ## return
-  out <- list(svm.roc = roc_dfm, input.newdata = newdata, input.newdata.label = newdata.label,
-              newdata.center.scaled = centered_newdata)
-  assign(paste(deparse(substitute(object)), "_svm_roc_list", sep = ""), out, envir = .GlobalEnv)
 }
 
 
@@ -919,7 +970,7 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
     prob.method <- match.arg(prob.method, c("logistic",  "Bayes", "softmax"))
     probability <- TRUE
   } else {
-    if (missing(newdata.y) || is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector y.")
+    if (missing(newdata.y) || is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression study.")
     y <- newdata.y
     prob.method <- NULL
     probability <- FALSE
