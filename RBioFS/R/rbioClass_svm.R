@@ -463,7 +463,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
 #' @param y.threshold For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}
-#' @param newdata.label For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object.
+#' @param newdata.label For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
@@ -497,6 +497,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'
 #' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
 #'
+#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object.
+#'
 #'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
 #'          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
 #'
@@ -517,7 +519,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
 #' }
 #' @export
-rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
+rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
                                   newdata.y = NULL,
                                   y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else NULL,
                                   center.scale.newdata = TRUE,
@@ -532,7 +534,16 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
-  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("x needs to be a matrix, data.frame or vector.")
+  if (is.null(newdata)) {
+    cat("No newdata input, proceed with training data.\n\n")
+    newdata <- object$inputX
+    if (object$model.type == "classification") {
+      newdata.label <- object$inputY
+    } else {
+      newdata.y <- object$inputY
+    }
+  }
+  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
@@ -660,7 +671,6 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     if (verbose) cat("Done!\n")
   }
 }
-
 
 #' @title rbioClass_svm_perm()
 #'

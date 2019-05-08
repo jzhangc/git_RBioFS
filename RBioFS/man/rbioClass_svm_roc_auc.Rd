@@ -4,15 +4,15 @@
 \alias{rbioClass_svm_roc_auc}
 \title{rbioClass_svm_roc_auc()}
 \usage{
-rbioClass_svm_roc_auc(object, newdata, newdata.label, newdata.y = NULL,
-  y.threshold = if (object$model.type == "regression")
-  round(median(object$inputY)) else NULL, center.scale.newdata = TRUE,
-  rocplot = TRUE, plot.smooth = FALSE, plot.SymbolSize = 2,
-  plot.display.Title = TRUE, plot.titleSize = 10,
-  plot.fontType = "sans", plot.xLabel = "1 - specificity",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10,
-  plot.yLabel = "sensitivity", plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9,
+rbioClass_svm_roc_auc(object, newdata = NULL, newdata.label = NULL,
+  newdata.y = NULL, y.threshold = if (object$model.type ==
+  "regression") round(median(object$inputY)) else NULL,
+  center.scale.newdata = TRUE, rocplot = TRUE, plot.smooth = FALSE,
+  plot.SymbolSize = 2, plot.display.Title = TRUE,
+  plot.titleSize = 10, plot.fontType = "sans",
+  plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
+  plot.xTickLblSize = 10, plot.yLabel = "sensitivity",
+  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
   plot.rightsideY = TRUE, plot.Width = 170, plot.Height = 150,
   verbose = TRUE)
 }
@@ -21,7 +21,7 @@ rbioClass_svm_roc_auc(object, newdata, newdata.label, newdata.y = NULL,
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 
-\item{newdata.label}{For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object.}
+\item{newdata.label}{For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
 
 \item{newdata.y}{For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}}
 
@@ -83,6 +83,8 @@ ROC-AUC analysis and ploting for SVM model
 }
 \details{
 Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
+
+         When \code{newdata} is not provided, the function uses the training data from the input SVM object.
 
          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
