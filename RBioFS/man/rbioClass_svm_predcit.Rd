@@ -5,8 +5,8 @@
 \title{rbioClass_svm_predict}
 \usage{
 rbioClass_svm_predcit(object, newdata, center.scale.newdata = TRUE,
-  sampleLabel.vector = NULL, y = NULL, prob.method = c("logistic",
-  "Bayes", "softmax"), verbose = TRUE)
+  sampleLabel.vector = NULL, newdata.y = NULL,
+  prob.method = c("logistic", "Bayes", "softmax"), verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}
@@ -17,7 +17,7 @@ rbioClass_svm_predcit(object, newdata, center.scale.newdata = TRUE,
 
 \item{sampleLabel.vector}{A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{y}{Only requried for regression study. The default is \code{NULL}.}
+\item{newdata.y}{Only requried for regression study. The default is \code{NULL}.}
 
 \item{prob.method}{Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.}
 
@@ -44,7 +44,7 @@ A \code{prediction} obejct. The items of the object are:
 
 \code{center.scaled.newdata}
 
-\code{input.y}
+\code{newdata.y}
 }
 \description{
 Prediction function for SVM analysis. The function calculates the predicted value for unknown sample data using the input SVM model.
@@ -60,7 +60,7 @@ Although optional, the \code{newdata} matrix should be centered prior to testing
          If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
 
          When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
-         \code{input.y} and \code{tot.predict.RMSE} are set to \code{NULL}
+         \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 }
 \examples{
 \dontrun{

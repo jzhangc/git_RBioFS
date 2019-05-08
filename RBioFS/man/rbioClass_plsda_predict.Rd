@@ -111,7 +111,7 @@ The items of the object are:
 
 \code{center.scaled.newdata}
 
-\code{input.y}
+\code{newdata.y}
 }
 \description{
 Prediction function for PLS-DA analysis. The function calculates the predicted value for unknown sample data using the input PLS-DA model.

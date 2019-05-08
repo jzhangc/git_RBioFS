@@ -1955,7 +1955,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'
 #' \code{center.scaled.newdata}
 #'
-#' \code{input.y}
+#' \code{newdata.y}
 #'
 #' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiomvr} object. The option \code{center.newdata = FALSE} is
 #' for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
@@ -2192,7 +2192,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
               raw.newdata = newdata,
               center.scale = center.newdata,
               center.scaled.newdata = centerdata,
-              input.y <- NULL)
+              newdata.y <- NULL)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
 }

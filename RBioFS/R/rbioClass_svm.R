@@ -848,7 +848,7 @@ print.rbiosvm_perm <- function(x, ...){
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param sampleLabel.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
-#' @param y Only requried for regression study. The default is \code{NULL}.
+#' @param newdata.y Only requried for regression study. The default is \code{NULL}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return  A \code{prediction} obejct. The items of the object are:
@@ -871,7 +871,7 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' \code{center.scaled.newdata}
 #'
-#' \code{input.y}
+#' \code{newdata.y}
 #'
 #' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object.
 #'          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
@@ -883,7 +883,7 @@ print.rbiosvm_perm <- function(x, ...){
 #'          If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
 #'
 #'          When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
-#'          \code{input.y} and \code{tot.predict.RMSE} are set to \code{NULL}
+#'          \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 #'
 #' @import ggplot2
 #' @import pls
@@ -895,7 +895,7 @@ print.rbiosvm_perm <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
-                                  sampleLabel.vector = NULL, y = NULL,
+                                  sampleLabel.vector = NULL, newdata.y = NULL,
                                   prob.method = c("logistic",  "Bayes", "softmax"),
                                   verbose = TRUE){
   ## argument check
@@ -914,11 +914,13 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
     }
   }
   if (object$model.type == "classification"){
-    y <- NULL
+    newdata.y <- NULL
+    y <- newdata.y
     prob.method <- match.arg(prob.method, c("logistic",  "Bayes", "softmax"))
     probability <- TRUE
   } else {
-    if (missing(y) || is.null(y) || length(y) != nrow(newdata)) stop("Please set the correct outcome value vector y.")
+    if (missing(newdata.y) || is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector y.")
+    y <- newdata.y
     prob.method <- NULL
     probability <- FALSE
   }
@@ -1002,7 +1004,7 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
               raw.newdata = newdata,
               center.scale = center.scale.newdata,
               center.scaled.newdata = centerdata,
-              input.y = y)
+              newdata.y = y)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
 }

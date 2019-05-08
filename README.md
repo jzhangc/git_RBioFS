@@ -104,7 +104,7 @@ Update log
           - A bug fixed for rbioClass_svm_perm() where parallel computing fails to generate different random resampling results
           - A bug fixed for rbioClass_svm_perm() where "by_feature_per_y" method fails to permutate columns
           - rbioClass_svm_predict() updated with regression study support. In such case, the function also requires outcome y input and outputs total RMSE
-            - Accordingly, the "prediction" class updated with new items "model.type", "tot.predict.RMSE", and "input.y"
+            - Accordingly, the "prediction" class updated with new items "model.type", "tot.predict.RMSE", and "newdata.y"
             - Accordingly, the print function of the "prediction" adjusted for regression study
 
         - Updates to PLS-DA function(s)
