@@ -271,7 +271,6 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
   if (is.factor(y)) {
     if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
-    y <- factor(y, levels = unique(y))
     model_type <- "classification"
   } else {
     model_type <- "regression"

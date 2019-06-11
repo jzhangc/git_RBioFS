@@ -31,10 +31,6 @@ Installation
 Update log
 
     Feature blueprint
-        - ANN (artificial neural network) functions added (non-Shiny) (tentative):
-          - rbioClass_ann()
-          - rbioClass_ann_plot()
-              
         - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
           - rbioClass_knn()
           - rbioClass_knn_plot()
@@ -83,6 +79,9 @@ Update log
         - General updates
           - match.arg() method added to relevant functions for better user experience
           - rbioUtil_classplot() updated accordingly to accommodate the regression study
+
+        - Updates to the PCA function(s)
+          - rbioFS_PCA now can display more than six groups
         
         - Update to SVM function(s)
           - rbioClass_svm() updated with support vector regression analysis support

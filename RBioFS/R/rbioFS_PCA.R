@@ -142,11 +142,13 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
                           show.legend = FALSE, size = biplot.sampleLabelSize)
       } else {
         biplt <- biplt +
-          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
+          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
       }
 
       biplt <- biplt +
@@ -178,11 +180,13 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
-                          show.legend = FALSE, size = biplot.sampleLabelSize)
+          scale_shape_manual(values=1:nlevels(score_x$group))
+        geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
+                        show.legend = FALSE, size = biplot.sampleLabelSize)
       } else {
         biplt <- biplt +
-          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize)
+          geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
       }
 
       biplt <- biplt +
@@ -243,10 +247,12 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
           g <- g + geom_text(aes(colour = group, label = sample.label), ...)
         } else if (label.method == "indirect"){
           g <- g +  geom_point(...) +
+            scale_shape_manual(values = 1:nlevels(data$group)) +
             geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
                             show.legend = FALSE, size = biplot.sampleLabelSize)
         } else {
-          g <- g + geom_point(...)
+          g <- g + geom_point(...) +
+            scale_shape_manual(values = 1:nlevels(data$group))
         }
         if (ellipse){
           g <- g +
@@ -263,7 +269,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
         return(g)
       }
 
-      # matrx scoreplot
+      # matrix scoreplot
       if (verbose) cat(paste("Biplot matrix being saved to file: ", deparse(substitute(input)),".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggpairs(score_x, columns = biplot.comps, aes(colour = group, shape = group),
                        axisLabels = "show", columnLabels = pc_axis_lbl,
