@@ -154,7 +154,7 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
 
   } else {
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, yr = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, y = tgt,
                              nTimes = nTimes, nTree = nTree,
                              parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                              plot = FALSE, verbose = FALSE) # initial FS
