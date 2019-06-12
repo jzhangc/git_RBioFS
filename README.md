@@ -79,6 +79,7 @@ Update log
         - General updates
           - match.arg() method added to relevant functions for better user experience
           - rbioUtil_classplot() updated accordingly to accommodate the regression study
+          - Manual pages cominbed for S3 methods
 
         - Updates to the PCA function(s)
           - rbioFS_PCA now can display more than six groups
