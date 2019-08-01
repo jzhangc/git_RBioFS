@@ -69,7 +69,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
   biplot.sampleLabel.type <- match.arg(tolower(biplot.sampleLabel.type), c("none", "direct", "indirect"))
 
   ## set up input
-  x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar)]
+  x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar), drop = FALSE]
 
   ## argument check
   if (biplot & length(biplot.comps) > ncol(x))stop("biplot.comps length exceeded the maximum PC length.")

@@ -1386,7 +1386,10 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
           boot.ss <- c(ylod)^2 * colSums(boot.score^2)
           boot.ssw <- sweep(boot.lodw^2, 2, boot.ss / boot.Wnorm2, "*")
           boot.vip <- sqrt(nrow(boot.ssw) * apply(boot.ssw, 1, cumsum) / cumsum(boot.ss))  # cumsum: cucmulative sum
-          boot.vip <- boot.vip[comps, ]
+          if (object$ncomp == 1) {
+            boot.vip <- matrix(boot.vip, nrow = 1, dimnames = list('Comp 1', names(boot.vip)))
+          }
+          boot.vip <- boot.vip[comps, , drop = FALSE]
           return(boot.vip)
         }
         names(boot.vip_raw_list) <- dimnames(boot.m$Yloadings)[[1]]
@@ -1428,6 +1431,9 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
           boot.ss <- c(ylod)^2 * colSums(boot.score^2)
           boot.ssw <- sweep(boot.lodw^2, 2, boot.ss / boot.Wnorm2, "*")
           boot.vip <- sqrt(nrow(boot.ssw) * apply(boot.ssw, 1, cumsum) / cumsum(boot.ss))  # cumsum: cucmulative sum
+          if (object$ncomp == 1) {
+            boot.vip <- matrix(boot.vip, nrow = 1, dimnames = list('Comp 1', names(boot.vip)))
+          }
           boot.vip <- boot.vip[comps, , drop = FALSE]
           return(boot.vip)
         }
@@ -1552,6 +1558,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     RBioFS::rbioFS_plsda_vip_plot(vip_obj = out, ...)
   }
 }
+
 
 
 #' @title rbioFS_plsda_vip_plot

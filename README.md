@@ -83,6 +83,7 @@ Update log
 
         - Updates to the PCA function(s)
           - rbioFS_PCA now can display more than six groups
+          - (not final) rbioFS_PCA now can handle single variable data matrix
         
         - Update to SVM function(s)
           - rbioClass_svm() updated with support vector regression analysis support
@@ -115,6 +116,7 @@ Update log
           - The output from rbioClass_plsda_predict() now includes the updated "prediction" class
           - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to different random resampling results
           - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
+          - A bug fixed for rbioFS_plsda_vip() where the function will crash if the input object only have one comp
           
         - Updates to RF-FS function(s)
           - RF-FS now accepts regression analysis
