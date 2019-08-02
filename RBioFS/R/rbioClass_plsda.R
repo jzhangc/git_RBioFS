@@ -937,14 +937,19 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 
     if (plot.sampleLabel.type != "none"){  # labels
       if (tolower(plot.sampleLabel.type) == "direct"){
-        scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
+        scoreplt <- scoreplt +
+          geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
-        scoreplt <- scoreplt + geom_point(size = plot.SymbolSize, aes(colour = group, shape = group)) +
+        scoreplt <- scoreplt +
+          geom_point(size = plot.SymbolSize, aes(colour = group, shape = group)) +
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
                           size = plot.sampleLabelSize, show.legend = FALSE)
       }
     } else {
-      scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
+      scoreplt <- scoreplt +
+        geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) + # plot the sample score scatter plot
+        scale_shape_manual(values=1:nlevels(score_x$group))
     }
 
     scoreplt <- scoreplt +
@@ -976,14 +981,19 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 
     if (plot.sampleLabel.type != "none"){  # labels
       if (tolower(plot.sampleLabel.type) == "direct"){
-        scoreplt <- scoreplt + geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
+        scoreplt <- scoreplt +
+          geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
       } else if (tolower(plot.sampleLabel.type) == "indirect") {
-        scoreplt <- scoreplt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(colour = group, shape = group)) +
+        scoreplt <- scoreplt +
+          geom_point(size = plot.SymbolSize, aes(colour = group, shape = group)) +
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
                           size = plot.sampleLabelSize, show.legend = FALSE)
       }
     } else {
-      scoreplt <- scoreplt + geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) # plot the sample score scatter plot
+      scoreplt <- scoreplt +
+        geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) + # plot the sample score scatter plot
+        scale_shape_manual(values=1:nlevels(score_x$group))
     }
 
     scoreplt <- scoreplt +
@@ -1027,10 +1037,12 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         g <- g + geom_text(aes(colour = group, label = sample.label), ...)
       } else if (label.method == "indirect"){
         g <- g +  geom_point(...) +
+          scale_shape_manual(values=1:nlevels(data$group)) +
           geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
                           size = plot.sampleLabelSize, show.legend = FALSE)
       } else {
-        g <- g + geom_point(...)
+        g <- g + geom_point(...) +
+          scale_shape_manual(values=1:nlevels(data$group))
       }
       if (ellipse){
         g <- g +

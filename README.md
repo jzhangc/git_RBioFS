@@ -74,6 +74,8 @@ Update log
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
+        
+        - Appropriate version pump
           
     (ADDED)
         - General updates
@@ -114,6 +116,7 @@ Update log
         - Updates to PLS-DA function(s)
           - "rbiomvr" class updated with new item "model.type" for compatibility with the regression study
           - The output from rbioClass_plsda_predict() now includes the updated "prediction" class
+          - rbioClass_plsda_scoreplot() now supports more than six groups
           - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to different random resampling results
           - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
           - A bug fixed for rbioFS_plsda_vip() where the function will crash if the input object only have one comp
