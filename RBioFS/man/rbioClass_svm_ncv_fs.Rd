@@ -4,12 +4,13 @@
 \alias{rbioClass_svm_ncv_fs}
 \title{rbioClass_svm_ncv_fs}
 \usage{
-rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = "radial",
-  cross.k = 10, tune.method = "cross", tune.cross.k = 10,
+rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = c("radial",
+  "linear", "polynomial", "sigmoid"), cross.k = 10,
+  tune.method = c("cross", "boot", "fix"), tune.cross.k = 10,
   tune.boot.n = 10, ..., fs.method = "rf", rf.ifs.ntree = 1001,
   rf.sfs.ntree = 1001, fs.count.cutoff = cross.k,
   parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
-  clusterType = "PSOCK", verbose = TRUE)
+  clusterType = c("PSOCK", "FORK"), verbose = TRUE)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
@@ -55,9 +56,15 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
 
-\code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accouracy
+\code{model.type}: the SVM model type, "classification" or "regression".
 
-\code{nested.accuracy}: accuracy for each cross-validation iteration
+\code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
+
+\code{tot.nested.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
+
+\code{nested.accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
+
+\code{nested.RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
 
 \code{fs.method}: feature selection method
 
@@ -72,6 +79,8 @@ Additional items for \code{rbiosvm_nestedcv}:
 \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 
 \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+
+\code{run.time}: total run time
 }
 \description{
 Nested cross-validation assessment for SVM classification. It evaluates the overall performace of SVM modelling given the training data.
@@ -79,8 +88,11 @@ Nested cross-validation assessment for SVM classification. It evaluates the over
 \details{
 For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
 Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.
+
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
+
+The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
 \examples{
 \dontrun{

@@ -4,9 +4,10 @@
 \alias{rbioClass_svm}
 \title{rbioClass_svm}
 \usage{
-rbioClass_svm(x, y, center.scale = TRUE, kernel = "radial",
-  svm.cross.k = 10, tune.method = "cross", tune.cross.k = 10,
-  tune.boot.n = 10, ..., verbose = TRUE)
+rbioClass_svm(x, y, center.scale = TRUE, kernel = c("radial", "linear",
+  "polynomial", "sigmoid"), svm.cross.k = 10, tune.method = c("cross",
+  "boot", "fix"), tune.cross.k = 10, tune.boot.n = 10, ...,
+  verbose = TRUE)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
@@ -49,6 +50,8 @@ Additional items for \code{rbiosvm} object to \code{svm} object from e1071 packa
 \code{tune.cross.k}: fold number for grid search when using cross validation method, i.e. \code{tune.method = "cross"}.
 
 \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
+
+\code{model.type}: the SVM model type, "classification" or "regression".
 }
 \description{
 Support Vector Machine (SVM) modelling
@@ -69,6 +72,8 @@ center.scale process for the test data for ROC-AUC analysis. Usually, we center.
 
 The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
 Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
+
+The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
 \examples{
 \dontrun{

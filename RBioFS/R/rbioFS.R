@@ -2,6 +2,7 @@
 #'
 #' @description Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"data"}
+#' @param rf_type RF modelling type, either \code{"classification"} or \code{"regression"}. Default is \code{"classifiation"}.
 #' @param file Input file. Only takes \code{.csv} format, with the label column, i.e. the whole dataset. Set either this or \code{input}, but not both.
 #' @param input Input data frame. The type should be \code{data.frame} or \code{matrix}, with the label column, i.e. the whole dataset. Set either this or \code{file}, but not both.
 #' @param sampleIDVar Sample variable name. It's a character string.
@@ -14,7 +15,6 @@
 #' @param quantileNorm Wehter ot use quantile nomalization on the raw data. Default is \code{FALSE}.
 #' @param nTimes Number of random forest for both initial FS and SFS-like FS. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run for both initial FS and SFS-like FS. Default is \code{1001} trees.
-#' @param SFS_mTry Number of randomly selected featurs for constructing trees for SFS-like FS step. When \code{"recur_default"}, it'll be based on \code{p / 3}; when \code{"rf_default"}, it will use the default setting in \code{randomForest} package. Default is \code{"recur_default"}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -42,16 +42,18 @@
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
 #' @details Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+#'          \code{groupIDVar} also takes continuous variable for regression study.
 #' @examples
 #' \dontrun{
 #' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
 #' }
 #' @export
-rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
+rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"),
+                   file = NULL, input = NULL,
                    sampleIDVar = NULL, groupIDVar = NULL, annotVarNames = c(sampleIDVar, groupIDVar),
                    impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
                    quantileNorm = FALSE,
-                   nTimes = 50, nTree = 1001, SFS_mTry = "recur_default",
+                   nTimes = 50, nTree = 1001,
                    parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                    plot = TRUE,
                    initialFS_n = "all",
@@ -70,6 +72,11 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
   if (is.null(file) & is.null(input)) stop("set one of the \"file\" and \"input\"")
   if (is.null(sampleIDVar) | is.null(groupIDVar)) stop("set both sampleIDVar and groupIDVar")
   if (is.null(annotVarNames)) stop("set annotNarNames variable")
+  # if (!tolower(rf_type) %in% c("classification", "regression")) stop("set rf_type to either \"classification\" or \"regression\".")
+  rf_type <- match.arg(tolower(rf_type), c("classification", "regression"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   ## input constuction
   if (is.null(input)){
@@ -82,7 +89,11 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
   if (!all(annotVarNames %in% names(raw))) stop("not all annotVarNames present in the input dataframe. ")
   if (!all(c(sampleIDVar, groupIDVar) %in% names(raw))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
 
-  tgt <- factor(raw[, groupIDVar], levels = unique(raw[, groupIDVar])) # target variable
+  if (rf_type == "classification"){
+    tgt <- factor(raw[, groupIDVar], levels = unique(raw[, groupIDVar])) # target variable
+  } else {  # regression
+    tgt <- raw[, groupIDVar] # target variable
+  }
 
   ## imputation
   if (impute){
@@ -114,7 +125,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
   ## FS
   if (plot){
     if (verbose) cat(paste("Initial selection with plotting...", sep = ""))  # initial message
-    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, y = tgt,
                                 nTimes = nTimes, nTree = nTree,
                                 parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                                 plot = TRUE, n = initialFS_n,
@@ -129,7 +140,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
-                       targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
+                       y = tgt, nTimes = nTimes,
                        parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                        plot = TRUE,
                        n = SFS_n,
@@ -143,7 +154,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
 
   } else {
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
-    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, targetVar = tgt,
+    RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, y = tgt,
                              nTimes = nTimes, nTree = nTree,
                              parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                              plot = FALSE, verbose = FALSE) # initial FS
@@ -152,7 +163,7 @@ rbioFS <- function(objTitle = "data", file = NULL, input = NULL,
     if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
                        x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
-                       targetVar = tgt, nTimes = nTimes, mTry = SFS_mTry,
+                       y = tgt, nTimes = nTimes,
                        parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                        plot = FALSE, verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message

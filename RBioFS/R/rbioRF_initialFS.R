@@ -8,7 +8,7 @@
 #' @param plot.fs.line Wether to display the vi line at the feature selection threshold. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
-#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"sem"}) or standard deviation (\code{"sd"}, case insensitive. Default is \code{"sem"}.
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
@@ -38,7 +38,7 @@
 #' @examples
 #' \dontrun{
 #' rbioFS_rf_initialFS_plot(object = data_initial_FS, n = "all",plot.title = TRUE, plot.titleSize = 10,
-#'                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                        plot.outlineCol = "black", plot.errorbar = "sem", plot.errorbarWidth = 0.2,
 #'                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
 #'                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
 #'                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
@@ -52,7 +52,7 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
                                      plot.file.title = deparse(substitute(object)),
                                      plot.title = NULL, plot.fs.line = TRUE,
                                      plot.titleSize = 10,
-                                     plot.errorbar = "sem", plot.errorbarWidth = 0.2, plot.outlineCol = "black",
+                                     plot.errorbar = c("sem", "sd"), plot.errorbarWidth = 0.2, plot.outlineCol = "black",
                                      plot.fontType = "sans",
                                      plot.xLabel = "Features", plot.xLabelSize = 10,
                                      plot.xAngle = 90, plot.xhAlign = 0.95, plot.xvAlign = 0.5,
@@ -67,7 +67,9 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
   if (is.null(object$vi_at_threshold) & plot.fs.line){
     cat("No vi_at_threshold item detected in the input oject, plot.fs.line set to FALSE. \n")
     plot.fs.line <- FALSE
-    }
+  }
+
+  plot.errorbar <- match.arg(tolower(plot.errorbar), c("sem", "sd"))
 
   ## construuct plot dataframe
   if (any(names(object) %in% "recur_vi_summary")){
@@ -93,9 +95,9 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
   if (plot.xTickLblSize == 0) cat("Due to plot.xTickLblSize = 0, x-axis ticks are hidden for the VI boxplot.\n")
 
   # error bar
-  if (tolower(plot.errorbar) %in% c("sem", "standard error", "standard error of the mean")){  # error bar
+  if (tolower(plot.errorbar) %in% c("sem")){  # error bar
     err <- pltdfm$SEM
-  } else if (tolower(plot.errorbar) %in% c("sd", "standard deviation")){
+  } else if (tolower(plot.errorbar) %in% c("sd")){
     err <- pltdfm$SD
   }
 
@@ -167,22 +169,25 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
   if (verbose) cat("Done!\n")
 }
 
+
 #' @title rbioFS_rf_initialFS
 #'
 #' @description Recursive random froest variable importance (vi) and OOB error rate computation.
 #' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
 #' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.
-#' @param targetVar The target variable for random forest feature selection. This is a factor object.
+#' @param y The target (outcome) variable for random forest feature selection.
 #' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
-#' @param mTry Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)}.
+#' @param mTry Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)} for classification, and \code{floor(sqrt(ncol(x)))}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
 #' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param ... Additional arguments passed to the plot function \code{\link{rbioFS_rf_initialFS_plot}}.
-#' @return Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+#' @return Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate.
+#'         When \code{plot = TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+#'         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 #' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
 #' @import ggplot2
 #' @import foreach
@@ -196,10 +201,19 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
 #' }
 #' @export
 rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
-                             x, targetVar, nTimes = 50, nTree = 1001, mTry = max(floor(ncol(x) / 3), 2),
-                             parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
-                             plot = TRUE,
-                             n = "all", ...){
+                                x, y, nTimes = 50, nTree = 1001,
+                                mTry = if (!is.factor(y))
+                                  max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))),
+                                parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                plot = TRUE,
+                                n = "all", ...){
+  #### run time initiation
+  start_time <- Sys.time()
+
+  #### check arguments
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   #### check the variables
   if (ncol(x) == 1){
@@ -208,18 +222,17 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   if (class(x) == "data.frame"){
     x <- as.matrix(sapply(x, as.numeric))
   }
+  ### pepare the target variable
+  tgt <- y
 
   #### recursive RF
   ### load the dataframe/matrix
   training <- x
 
-  ### pepare the target variable
-  tgt <- factor(as.character(targetVar), levels = unique(targetVar))
-
   ### prepare draw size. this uses down-sampling if the samples are unbalanced
-  nlvl <- length(levels(tgt))
-  size <- min(as.vector(table(tgt))) # down-sampling
-  drawSize <- rep(size, nlvl)
+  # nlvl <- length(levels(tgt))
+  # size <- min(as.vector(table(tgt))) # down-sampling
+  # drawSize <- rep(size, nlvl)
 
   ### repeating random forest - recursive approach
   # pre-set an empty matrix with the number of columns same as the number of RF runs
@@ -227,37 +240,25 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   vimtx <- matrix(nrow = ncol(training), ncol = nTimes)
   errmtx <- matrix(nrow = 1, ncol = nTimes)
 
-  if (!parallelComputing){ ## signle core computing: recursive structure
-    tmpFunc <- function(n, m, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
-                        tmpTree, tmpTry, tmpSize){
+  ## RF modelling
+  rf_modelling_func <- function(i){
+    rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
+                                     proximity = TRUE)
 
-      tmploclEnv <- environment() # save the environment local to tmpFunc
-      if (n == 0){
-        rownames(tmpvimtx) <- colnames(tmpTraining)
-        colnames(tmpvimtx) <- c(paste("vi", seq(m - 1), sep = "_"))
-        rownames(tmperrmtx) <- "OOB_error_rate"
-        colnames(tmperrmtx) <- c(paste("OOB_error_tree", seq(m - 1), sep = "_"))
-
-        tmplst <- list(raw_vi = tmpvimtx, raw_OOB_error = tmperrmtx)
-        return(tmplst)
-
-      } else {
-        rf <- randomForest(x = tmpTraining, y = tmpTgt, ntree = tmpTree, mtry = tmpTry, importance = TRUE,
-                           proximity = TRUE, drawSize = tmpSize)
-        impt <- importance(rf, type = 1)
-        tmpvimtx[, m] <- impt[, 1] # fill the vi matrix
-        tmperrmtx[, m] <- rf$err.rate[tmptimes, 1] # fill the OOB error rate
-        tmpFunc(n - 1, m + 1, tmptimes, tmpvimtx, tmperrmtx, tmpTraining, tmpTgt,
-                tmpTree, tmpTry, tmpSize)
-      }
+    impt <- randomForest::importance(rf, type = 1)
+    tmpvimtx <- impt[, 1] # fill the vi matrix
+    if (is.factor(tgt)){
+      tmperrmtx <- rf$err.rate[nTree, 1] # fill the OOB error rate
+    } else {
+      tmperrmtx <- rf$mse[nTree]
     }
-
-    lst <- tmpFunc(n = nTimes, m = 1, tmptimes = nTree, tmpvimtx = vimtx, tmperrmtx = errmtx, tmpTraining = training, tmpTgt = tgt,
-                   tmpTree = nTree, tmpTry = mTry, tmpSize = drawSize)
-
-    phase0mtx_vi <- lst$raw_vi
-    phase0mtx_OOB_err <- lst$raw_OOB_error
-
+    lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
+  }
+  if (!parallelComputing){
+    # non-parallel
+    tmp <- foreach(i = 1:nTimes) %do% rf_modelling_func(i)
+    vimtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmpvimtx
+    errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
   } else { ## parallel computing
     # set up cpu cluster
     n_cores <- n_cores
@@ -265,31 +266,19 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    # recursive RF using par-apply functions
-    tmpfunc2 <- function(i){
-      rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
-                                       proximity = TRUE, drawSize = drawSize)
-
-      impt <- randomForest::importance(rf, type = 1)
-      tmpvimtx <- impt[, 1] # fill the vi matrix
-      tmperrmtx <- rf$err.rate[nTree, 1] # fill the OOB error rate
-      lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
-    }
-
     # foreach parallel
-    tmp <- foreach(i = 1:nTimes) %dopar% tmpfunc2(i)
+    tmp <- foreach(i = 1:nTimes) %dopar% rf_modelling_func(i)
     vimtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmpvimtx
     errmtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
-
-    rownames(vimtx) <- colnames(training)
-    colnames(vimtx) <- c(paste("vi", seq(nTimes), sep = "_"))
-
-    rownames(errmtx) <- "OOB_error_rate"
-    colnames(errmtx) <- c(paste("OOB_error_tree", seq(nTimes), sep = "_"))
-
-    phase0mtx_vi <- vimtx
-    phase0mtx_OOB_err <- errmtx
   }
+  rownames(vimtx) <- colnames(training)
+  colnames(vimtx) <- c(paste("vi", seq(nTimes), sep = "_"))
+
+  rownames(errmtx) <- "OOB_error_rate"
+  colnames(errmtx) <- c(paste("OOB_error_tree", seq(nTimes), sep = "_"))
+
+  phase0mtx_vi <- vimtx
+  phase0mtx_OOB_err <- errmtx
 
   ####prepare output vi and OOB error dataframes
   ## prepare the vi dataframe
@@ -328,17 +317,33 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   feature_initFS <- as.character(outdfm_vi$Target[1:thsd]) # extract selected features
   training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
 
+  #### export results
+  ## run time
+  runtime <- Sys.time() - start_time
+  if (is.factor(y)){
+    err_type <- "OOB"
+  } else {
+    err_type <- "MSE"
+  }
+
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
+                 error_evaluation_type = err_type,
+                 ntree = nTree,
+                 rf_iteration = nTimes,
+                 initial_FS_err_summary = outdfm_OOB_err,
                  vi_summary = outdfm_vi,
-                 initial_FS_OOB_err_summary = outdfm_OOB_err,
-                 training_initial_FS = training_initFS)
+                 training_initial_FS = training_initFS,
+                 initial_FS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+  class(outlst) <- "rf_ifs"
+
+  ## export to files
+  write.csv(file = paste0(objTitle, ".initialFS.vi.csv"), outlst$vi_summary, row.names = FALSE)
 
   sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
-  lapply(outlst, print)
+  print(outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")])
   sink() # end dump
-  class(outlst) <- "rf_ifs"
 
   ## plot
   if (plot){
@@ -354,5 +359,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
 print.rf_ifs <- function(x, ...){
   cat("Feature selected from initial selection:\n")
   print(x$feature_initial_FS)
-  cat("\n\n")
+  cat("\n")
+  cat("Initial FS run time: ")
+  print(x$initial_FS_run_time)
 }

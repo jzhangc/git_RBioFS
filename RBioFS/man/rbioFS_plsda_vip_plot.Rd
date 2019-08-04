@@ -6,8 +6,8 @@
 \usage{
 rbioFS_plsda_vip_plot(vip_obj, plot.preview = TRUE, plot.title = TRUE,
   plot.titleSize = 10, multi_plot.ncol = length(unique(object$inputY)),
-  multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-  plot.sig.line = TRUE, plot.outlineCol = "black",
+  multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top",
+  "left", "right"), plot.sig.line = TRUE, plot.outlineCol = "black",
   plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
   plot.errorbarLblSize = 6, plot.fontType = "sans",
   plot.xLabel = "Features", plot.xLabelSize = 10,

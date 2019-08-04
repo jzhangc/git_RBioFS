@@ -7,7 +7,7 @@
 center_scale(x, scale = TRUE)
 }
 \arguments{
-\item{x}{Input matrix. Make sure it is a matrix}
+\item{x}{Input matrix. Make sure it is a matrix. Typically, row is samples, and column the features.}
 
 \item{scale}{Logical, whether to scale the data or not. Default is \code{TRUE}.}
 }
@@ -18,7 +18,10 @@ Outputs a list containing centered matrix.
 data centering function with scale opiton
 }
 \details{
-This function is needed to pre-process data when conducting plsda analysis. And the function can also be used for other purposes when needed. With the colSds function from matrixStats pacakge to calcualte column standard deviation, this function is faster than the native \code{scale} function when \code{scale = TRUE}.
+This function is needed to pre-process data when conducting plsda analysis.
+         And the function can also be used for other purposes when needed.
+         With the colSds function from matrixStats pacakge to calcualte column standard deviation,
+         this function is faster than the native \code{scale} function when \code{scale = TRUE}.
 }
 \examples{
 \dontrun{

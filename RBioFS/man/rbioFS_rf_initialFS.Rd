@@ -4,23 +4,24 @@
 \alias{rbioFS_rf_initialFS}
 \title{rbioFS_rf_initialFS}
 \usage{
-rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
-  nTree = 1001, mTry = max(floor(ncol(x)/3), 2),
-  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
-  clusterType = "PSOCK", plot = TRUE, n = "all", ...)
+rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, y, nTimes = 50,
+  nTree = 1001, mTry = if (!is.factor(y)) max(floor(ncol(x)/3), 1) else
+  floor(sqrt(ncol(x))), parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK",
+  "FORK"), plot = TRUE, n = "all", ...)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}
 
 \item{x}{Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.}
 
-\item{targetVar}{The target variable for random forest feature selection. This is a factor object.}
+\item{y}{The target (outcome) variable for random forest feature selection.}
 
 \item{nTimes}{Number of random forest vi computation runs. Default is \code{50} times.}
 
 \item{nTree}{Number of trees generated for each random forest run. Default is \code{1001} trees.}
 
-\item{mTry}{Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)}.}
+\item{mTry}{Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)} for classification, and \code{floor(sqrt(ncol(x)))}.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
 
@@ -35,7 +36,9 @@ rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, targetVar, nTimes = 50,
 \item{...}{Additional arguments passed to the plot function \code{\link{rbioFS_rf_initialFS_plot}}.}
 }
 \value{
-Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate. When \code{TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate.
+        When \code{plot = TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+        Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 }
 \description{
 Recursive random froest variable importance (vi) and OOB error rate computation.

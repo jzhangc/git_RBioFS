@@ -4,18 +4,20 @@
 \alias{rbioClass_svm_predcit}
 \title{rbioClass_svm_predict}
 \usage{
-rbioClass_svm_predcit(object, newdata, sampleLabel.vector = NULL,
-  center.scale.newdata = TRUE, prob.method = "logistic",
-  verbose = TRUE)
+rbioClass_svm_predcit(object, newdata, center.scale.newdata = TRUE,
+  sampleLabel.vector = NULL, newdata.y = NULL,
+  prob.method = c("logistic", "Bayes", "softmax"), verbose = TRUE)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}
 
 \item{newdata}{Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.}
 
+\item{center.scale.newdata}{If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.}
+
 \item{sampleLabel.vector}{A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{center.scale.newdata}{If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.}
+\item{newdata.y}{Only requried for regression study. The default is \code{NULL}.}
 
 \item{prob.method}{Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.}
 
@@ -24,11 +26,15 @@ rbioClass_svm_predcit(object, newdata, sampleLabel.vector = NULL,
 \value{
 A \code{prediction} obejct. The items of the object are:
 
+\code{model.type}
+
 \code{classifier.class}
 
 \code{predited.value}
 
-\code{prob.method}  Method to caluculate posterier probability
+\code{tot.predict.RMSE}
+
+\code{prob.method}: Method to caluculate posterier probability
 
 \code{probability.summary}
 
@@ -37,18 +43,24 @@ A \code{prediction} obejct. The items of the object are:
 \code{center.scale}
 
 \code{center.scaled.newdata}
+
+\code{newdata.y}
 }
 \description{
 Prediction function for SVM analysis. The function calculates the predicted value for unknown sample data using the input SVM model.
 }
 \details{
-Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object. The option \code{center.scale.newdata = FALSE} is
-for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
+Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object.
+         The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
+         column mean and column standard deviation.
 
-The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
-See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
+         The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
+         See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
 
-If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+         If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+
+         When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
+         \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 }
 \examples{
 \dontrun{

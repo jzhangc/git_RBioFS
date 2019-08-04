@@ -107,10 +107,13 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
 #' @title center_scale
 #'
 #' @description data centering function with scale opiton
-#' @param x Input matrix. Make sure it is a matrix
+#' @param x Input matrix. Make sure it is a matrix. Typically, row is samples, and column the features.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @return Outputs a list containing centered matrix.
-#' @details This function is needed to pre-process data when conducting plsda analysis. And the function can also be used for other purposes when needed. With the colSds function from matrixStats pacakge to calcualte column standard deviation, this function is faster than the native \code{scale} function when \code{scale = TRUE}.
+#' @details This function is needed to pre-process data when conducting plsda analysis.
+#'          And the function can also be used for other purposes when needed.
+#'          With the colSds function from matrixStats pacakge to calcualte column standard deviation,
+#'          this function is faster than the native \code{scale} function when \code{scale = TRUE}.
 #' @importFrom matrixStats colSds
 #' @examples
 #' \dontrun{

@@ -29,8 +29,64 @@ Installation
         
 
 Update log
+    
+    0.6.3 (Aug.4.2019)
+        - General updates
+          - match.arg() method added to relevant functions for better user experience
+          - rbioUtil_classplot() updated accordingly to accommodate the regression study
+          - Manual pages cominbed for S3 methods
+
+        - Updates to the PCA function(s)
+          - rbioFS_PCA now can display more than six groups
+          - (not final) rbioFS_PCA now can handle single variable data matrix
+        
+        - Update to SVM function(s)
+          - rbioClass_svm() updated with support vector regression analysis support
+            - "rbiosvm" class updated accordingly with the "model.type" item, to reflect "classification" or "regression"
+          - The print function for "rbiosvm" class adjusted for better presentation
+          - rbioClass_svm_ncv_fs() updated with support vector regression analysis support
+            - "rbiosvm_nestedcv" class updated accordingly with the "model.type" item, to reflect "classification" or "regression"
+            - The print function for "rbiosvm_nestedcv" updated accordingly with the regression study support
+          - Parallel module re-written for rbioClass_svm_ncv_fs() for higher stability`
+          - rbioClass_svm_ncv_fs() now records the run time
+            - "rbiosvm_nestedcv" class now has a "run.time" item to store the run time
+            - The print function for "rbiosvm_nestedcv" class updated to display the run time
+          - rbioClass_svm_ncv_fs() now exports all iteration RF-FS results to both the working directory and the global environment
+          - rbioClass_svm_perm() now supports regression SVM models
+            - "rbiosvm_perm" class item names adjusted for the perforamce metric type according to the SVM model type
+            - "rbiosvm_perm" class now has "model.type" to reflect regression or classification
+          - rbioClass_svm_perm() now records run time
+            - "rbiosvm_perm" class now has a "run.time" item to store the run time
+          - A bug fixed for rbioClass_svm_perm() where parallel computing fails to generate different random resampling results
+          - A bug fixed for rbioClass_svm_perm() where "by_feature_per_y" method fails to permutate columns
+          - rbioClass_svm_predict() updated with regression study support. In such case, the function also requires outcome y input and outputs total RMSE
+            - Accordingly, the "prediction" class updated with new items "model.type", "tot.predict.RMSE", and "newdata.y"
+            - Accordingly, the print function of the "prediction" adjusted for regression study
+          - rbioClass_svm_roc_auc() now supports regression study
+            - Accordingly, and due to the required by ROC-AUC analysis, new argument "y.threshold" and "newdata.y" arguments added to convert continuous variable into categorical
+            - The output is now a S3 class "svm_roc_auc", with all the appropriate items
+
+        - Updates to PLS-DA function(s)
+          - "rbiomvr" class updated with new item "model.type" for compatibility with the regression study
+          - The output from rbioClass_plsda_predict() now includes the updated "prediction" class
+          - rbioClass_plsda_scoreplot() now supports more than six groups
+          - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to different random resampling results
+          - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
+          - A bug fixed for rbioFS_plsda_vip() where the function will crash if the input object only have one comp
+          
+        - Updates to RF-FS function(s)
+          - RF-FS now accepts regression analysis
+          - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
+          - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
+          - rbioFS_rf_initialFS() now exports vi_summary into a CSV file
+          - rbioFS_rf_sfs() now exports error_summary into a CSV file
+          - New items added to the rf_ifs class: ntree, rf_iteration, initial_FS_run_time
+          - New items added to the rf_sfs class: ntree, rf_iteration, SFS_run_time
+          - A bug fixed for rbioFS_rf_SFS_plot() y-axis range
+          - Small syntax fixes   
+          
            
-    0.6.2 (Apr.25.2019)
+    0.6.2
         - Updates to RF-FS functions:
           - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
           - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data

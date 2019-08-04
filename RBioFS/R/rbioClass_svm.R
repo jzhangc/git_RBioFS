@@ -31,6 +31,8 @@
 #'
 #' \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
 #'
+#' \code{model.type}: the SVM model type, "classification" or "regression".
+#'
 #' @details Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
 #'
 #' Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
@@ -47,6 +49,7 @@
 #' The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
 #' Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
 #'
+#' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
 #' @importFrom e1071 svm tune tune.control
 #' @importFrom matrixStats colSds
@@ -56,21 +59,30 @@
 #' }
 #' @export
 rbioClass_svm <- function(x, y, center.scale = TRUE,
-                       kernel = "radial", svm.cross.k = 10,
-                       tune.method = "cross", tune.cross.k = 10, tune.boot.n = 10, ...,
-                       verbose = TRUE){
+                          kernel = c("radial", "linear", "polynomial", "sigmoid"), svm.cross.k = 10,
+                          tune.method = c("cross", "boot", "fix"), tune.cross.k = 10, tune.boot.n = 10, ...,
+                          verbose = TRUE){
   ## check arguments
-  if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+  if (is.factor(y)){
+    if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+    model_type <- "classification"
+    y <- factor(y, levels = unique(y))
+  } else {
+    model_type <- "regression"
+  }
   if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
   if (class(x) == "data.frame" | is.vector(x)){
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
-  if (class(y) != "factor"){
-    if (verbose) cat("y is converted to factor. \n")
-    y <- factor(y, levels = unique(y))
-  }
-  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  # if (class(y) != "factor"){
+  #   if (verbose) cat("y is converted to factor. \n")
+  #   y <- factor(y, levels = unique(y))
+  # }
+  # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
+  tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
+
 
   ## data processing
   if (center.scale){
@@ -83,17 +95,21 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   }
   y <- y
 
-  ## weight evaluation
-  if (length(unique(table(y))) != 1){  # test if the sample is balanced
-    if(any(table(y) == 0)) {
-      warning("Not all groups present in the unbalanced training data, discard missing group and set weight for other groups as 1")
-      wgt <- rep(1, length(unique(y)))
-      names(wgt) <- unique(y)
-    } else {
-      wgt <- length(y) / table(y)
+  ## weight evaluation according to the model type
+  if (model_type == "classification"){
+    if (length(unique(table(y))) != 1){  # test if the sample is balanced
+      if(any(table(y) == 0)) {
+        warning("Not all groups present in the unbalanced training data, discard missing group and set weight for other groups as 1")
+        wgt <- rep(1, length(unique(y)))
+        names(wgt) <- unique(y)
+      } else {
+        wgt <- length(y) / table(y)
+      }
+    } else {  # balanced sample, each class weight is 1
+      wgt <- unique(table(y)) / table(y)
     }
-  } else {  # balanced sample, each class weight is 1
-    wgt <- unique(table(y)) / table(y)
+  } else{
+    wgt <- NULL
   }
 
   ## svm
@@ -125,6 +141,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   m$tune.method <- tune.method
   m$tune.cross.k <- if(tune.method == "cross") tune.cross.k else NULL
   m$tune.boot.n <- if(tune.method == "boot") tune.boot.n else NULL
+  m$model.type <- model_type
   class(m) <- c("rbiosvm", "svm")
   return(m)
 }
@@ -148,9 +165,9 @@ print.rbiosvm <- function(x, ...){
   if (x$type == 1 || x$type == 2 || x$type == 4)
     cat("         nu: ", x$nu, "\n")
   if (x$type == 3) {
-    cat("    epsilon: ", x$epsilon, "\n\n")
+    cat("    epsilon: ", x$epsilon, "\n")
     if (x$compprob)
-      cat("Sigma: ", x$sigma, "\n\n")
+      cat("Sigma: ", x$sigma, "\n")
   }
   cat("\nNumber of Support Vectors: ", x$tot.nSV)
   cat("\n")
@@ -185,9 +202,15 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
 #'
-#' \code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accouracy
+#' \code{model.type}: the SVM model type, "classification" or "regression".
 #'
-#' \code{nested.accuracy}: accuracy for each cross-validation iteration
+#' \code{tot.nested.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
+#'
+#' \code{tot.nested.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
+#'
+#' \code{nested.accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
+#'
+#' \code{nested.RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
 #'
 #' \code{fs.method}: feature selection method
 #'
@@ -203,12 +226,17 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
 #'
+#' \code{run.time}: total run time
+#'
 #' @details
 #'
 #' For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
 #' Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.
+#'
 #' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 #' meaning maximum number of features selected from the nested cross-validation are reported.
+#'
+#' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
 #' @import foreach
 #' @import doParallel
@@ -228,28 +256,41 @@ print.rbiosvm <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
-                                 kernel = "radial",
+                                 kernel = c("radial", "linear", "polynomial", "sigmoid"),
                                  cross.k = 10,
-                                 tune.method = "cross",
+                                 tune.method = c("cross", "boot", "fix"),
                                  tune.cross.k = 10, tune.boot.n = 10, ...,
                                  fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                  fs.count.cutoff = cross.k,
-                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
+                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                  verbose = TRUE){
+  ## initiate the run time
+  start_time <- Sys.time()
+
   ## check arguments
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
-  if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+  if (is.factor(y)) {
+    if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+    model_type <- "classification"
+  } else {
+    model_type <- "regression"
+  }
+  # if (class(y) != "factor"){
+  #   if (verbose) cat("y is converted to factor. \n")
+  #   y <- factor(y, levels = unique(y))
+  # }
   if (cross.k > nrow(x)) stop("Cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
   if (class(x) == "data.frame"){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
-  if (class(y) != "factor"){
-    if (verbose) cat("y is converted to factor. \n")
-    y <- factor(y, levels = unique(y))
-  }
-  if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
   if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
+  # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
+  kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
+  tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
   ## nested cv
   # processing training data
@@ -258,150 +299,159 @@ rbioClass_svm_ncv_fs <- function(x, y, center.scale = TRUE,
   dfm_randomized <- dfm[random_sample_idx, ]  # randomize samples
   fold <- cut(seq(1:nrow(dfm_randomized)), breaks = cross.k, labels = FALSE)  # create a factor object with fold indices
 
-  # nested cv
-  if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
-  if (verbose) cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
-  if (verbose) cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...")
-  nested.cv.list <- vector(mode = "list", length = cross.k)
-  if (!parallelComputing){  # single core
-    nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% {
-      training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
-      # fs
-      if (center.scale){
-        fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
-      } else {
-        fs_training <- training[, -1]
-      }
-      rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
-                          nTree = rf.ifs.ntree, parallelComputing = FALSE, plot = FALSE)
-      # fs <- svm_nested_initial_FS$feature_initial_FS
-      rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-                    nTree = rf.sfs.ntree, mTry = "recur_default", parallelComputing = FALSE, plot = FALSE)
-      if (length(svm_nested_SFS$selected_features) > 1){
-        fs <- svm_nested_SFS$selected_features
-      } else {
-        fs <- svm_nested_initial_FS$feature_initial_FS
-      }
-
-      # cv svm
-      m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
-                         svm.cross.k = 0, tune.method = tune.method,
-                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
-
-      # processing test data
-      test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
-      if (center.scale){ # using training data mean and sd
-        centered_newdata <- t((t(test[, -1]) - m$center.scaledX$meanX) / m$center.scaledX$columnSD)
-        test[, -1] <- centered_newdata
-      } else {
-        centered_newdata <- NULL
-      }
-      pred <- predict(m, newdata = test[, -1])
-      accu <- sum(diag(table(pred, test$y))) / length(test$y)  # accuracy = total TP / total (TP: true positive)
-
-      # foreach output
-      tmp_out <- list(selected.features = fs, nested.cv.accuracy = accu)
-      tmp_out
+  # nested CV function
+  nestedcv_func <- function(i) {
+    if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
+    training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
+    # fs
+    if (center.scale){
+      fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
+    } else {
+      fs_training <- training[, -1]
     }
-  } else {  # multiple cores
-    # set clusters
-    n_cores <- n_cores
-    cl <- makeCluster(n_cores, type = clusterType)
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl)) # close connect when exiting the function
+    rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training, y = training$y, nTimes = 50,
+                        nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+    # fs <- svm_nested_initial_FS$feature_initial_FS
+    rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
+                  x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = training$y, nTimes = 50,
+                  nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
 
-    # computing
-    nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %dopar% {
-      training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
-      # fs
-      if (center.scale){
-        fs_training <- center_scale(training[, -1], scale = TRUE)$centerX  # without y
-      } else {
-        fs_training <- training[, -1]
-      }
-      rbioFS_rf_initialFS(objTitle = "svm_nested", x = fs_training, targetVar = training$y, nTimes = 50,
-                          nTree = rf.ifs.ntree, parallelComputing = FALSE, plot = FALSE)
-      # fs <- svm_nested_initial_FS$feature_initial_FS
-      rbioFS_rf_SFS(objTitle = "svm_nested", x = svm_nested_initial_FS$training_initial_FS, targetVar = training$y, nTimes = 50,
-                    nTree = rf.sfs.ntree, mTry = "recur_default", parallelComputing = FALSE, plot = FALSE)
-      if (length(svm_nested_SFS$selected_features) > 1){
-        fs <- svm_nested_SFS$selected_features
-      } else {
-        fs <- svm_nested_initial_FS$feature_initial_FS
-      }
-
-      # cv svm
-      m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
-                         svm.cross.k = 0, tune.method = tune.method,
-                         tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
-
-      # processing test data
-      test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
-      if (center.scale){ # using training data mean and sd
-        centered_newdata <- t((t(test[, -1]) - m$center.scaledX$meanX) / m$center.scaledX$columnSD)
-        test[, -1] <- centered_newdata
-      } else {
-        centered_newdata <- NULL
-      }
-      pred <- predict(m, newdata = test[, -1])
-      accu <- sum(diag(table(pred, test$y))) / length(test$y)  # accuracy = total TP / total (TP: true positive)
-
-      # foreach output
-      tmp_out <- list(selected.features = fs, nested.cv.accuracy = accu)
-      tmp_out
+    if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
+      fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
+    } else {
+      fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
     }
+
+    # cv svm
+    m <- rbioClass_svm(x = training[, -1][, fs], y = training$y, center.scale = center.scale,
+                       svm.cross.k = 0, tune.method = tune.method,
+                       tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+
+    # processing test data
+    test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
+    if (center.scale){ # using training data mean and sd
+      centered_newdata <- t((t(test[, -1]) - m$center.scaledX$meanX) / m$center.scaledX$columnSD)
+      test[, -1] <- centered_newdata
+    } else {
+      centered_newdata <- NULL
+    }
+    pred <- predict(m, newdata = test[, -1])
+    if (model_type == "classification"){
+      accu <- sum(diag(table(pred, test$y))) / length(test$y)  # accuracy = total TP / total (TP: true positive)
+      tmp_out <- list(selected.features = fs, nested.cv.accuracy = accu)
+    } else {
+      error <- pred - test$y
+      rmse <- sqrt(mean(error^2))
+      tmp_out <- list(selected.features = fs, nested.cv.rmse = rmse)
+    }
+    if (verbose) cat("Done!\n")
+    # foreach output
+    return(tmp_out)
   }
+
+  # computing
+  if (verbose){
+    cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
+    cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
+    cat("\n")
+    cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...\n")
+  }
+  nested.cv.list <- vector(mode = "list", length = cross.k)
+  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% nestedcv_func(i)
   names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
-  nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
-    nested.cv.list[[i]]$nested.cv.accuracy
+  if (model_type == "classification"){
+    nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
+      nested.cv.list[[i]]$nested.cv.accuracy
+    }
+    nested.rmse <- NULL
+  } else {
+    nested.accu <- NULL
+    nested.rmse <- foreach(i = 1:cross.k, .combine = "c") %do% {
+      nested.cv.list[[i]]$nested.cv.rmse
+    }
   }
+
   nested.fs <- foreach(i = 1:cross.k, .combine = "c") %do% {
     nested.cv.list[[i]]$selected.features
   }
   fs.count <- sort(table(nested.fs), decreasing = TRUE)
-  if (verbose) cat("Done!\n")
+
+  # end time
+  end_time <- Sys.time()
 
   ## output
-  tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
-  names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
+  if (model_type == "classification"){
+    tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
+    tot.nested.rmse.summary <- NULL
+    names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
+  } else {
+    tot.nested.acc.summary <- NULL
+    tot.nested.rmse.summary <- c(mean(nested.rmse), sd(nested.rmse), sd(nested.rmse)/sqrt(cross.k))
+    names(tot.nested.rmse.summary) <- c("tot.nested.RMSE", "sd", "sem")
+  }
   selected.features <- names(fs.count[which(fs.count >= fs.count.cutoff)])
 
   # display
-  if (verbose) cat("\n")
-  if (verbose) cat("Nested cross-validation accuracy summary: \n")
-  if (verbose) print(tot.nested.acc.summary)
-  if (verbose) cat("\n")
-  if (verbose) cat("Nested cross-validation selected features: \n")
-  if (verbose) print(selected.features)
+  if (verbose) {
+    cat("\n")
+    cat("SVM model type: ")
+    cat(model_type)
+    if (model_type == "classification"){
+      cat("\n\n")
+      cat("Nested cross-validation accuracy summary: \n")
+      print(tot.nested.acc.summary)
+    } else {
+      cat("\n\n")
+      cat("Nested cross-validation RMSE summary: \n")
+      print(tot.nested.rmse.summary)
+    }
+    cat("\n")
+    cat("Nested cross-validation selected features: \n")
+    cat(selected.features)
+  }
+
+  # run time
+  runtime <- end_time - start_time
 
   # export to environment
   out <- list(cv.fold = fold,
               randomized.sample.index = random_sample_idx,
+              model.type = model_type,
               tot.nested.accuracy.summary = tot.nested.acc.summary,
+              tot.nested.RMSE.summary = tot.nested.rmse.summary,
               nested.accuracy = nested.accu,
+              nested.RMSE = nested.rmse,
               fs.method = fs.method,
               fs.count.threshold = fs.count.cutoff,
               selected.features = selected.features,
               nested.fs.count = fs.count,
               tune.method = tune.method,
               tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
-              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL)
-
+              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(out) <- "rbiosvm_nestedcv"
   return(out)
 }
 
-
-
 #' @export
 print.rbiosvm_nestedcv <- function(x, ...){
-  cat("Total nested cross-validation accuracy:\n")
-  print(x$tot.nested.accuracy.summary)
+  cat("SVM model type: ")
+  cat(x$model.type)
+  cat("\n\n")
+  if (x$model.type == "classification") {
+    cat("Total nested cross-validation accuracy:\n")
+    print(x$tot.nested.accuracy.summary)
+  } else {
+    cat("Total nested cross-validation RMSE:\n")
+    print(x$tot.nested.RMSE.summary)
+  }
   cat("\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
-  print(x$selected.features)
-  cat("\n")
+  cat(x$selected.features)
+  cat("\n\n")
+  cat("Nested CV run time: ")
+  cat(x$run.time)
 }
 
 
@@ -410,7 +460,9 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @description ROC-AUC analysis and ploting for SVM model
 #' @param object A \code{rbiosvm} object.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
-#' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object.
+#' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
+#' @param y.threshold For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}
+#' @param newdata.label For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
@@ -430,11 +482,29 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list to the environment.
-#' @details Uses pROC module to calculate ROC.
+#' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list as a \code{svm_roc_auc} class to the environment.
 #'
-#' Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to enter.scale prior to ROC-AUC analysis.
-#' The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+#'         Items of the \code{svm_roc_auc} class:
+#'         \code{model.type}
+#'         \code{y.threshold}
+#'         \code{regression.categories}
+#'         \code{svm.roc}
+#'         \code{input.newdata}
+#'         \code{input.newdata.y}
+#'         \code{input.newdata.label}
+#'         \code{newdata.center.scaled}
+#'
+#' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
+#'
+#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object.
+#'
+#'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
+#'          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+#'
+#'          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
+#'
+#'          Known issue: due to the AUC calculation method, the resulting \code{svm_roc_auc} class doesn't include the AUC score. It will be fixed in a future update.
+#'          For now, the AUC scores will be printed in the console upon the execution of the function.
 #'
 #' @import ggplot2
 #' @import foreach
@@ -448,7 +518,9 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
 #' }
 #' @export
-rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
+rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
+                                  newdata.y = NULL,
+                                  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else NULL,
                                   center.scale.newdata = TRUE,
                                   rocplot = TRUE,
                                   plot.smooth = FALSE,
@@ -461,7 +533,16 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
-  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata)))stop("x needs to be a matrix, data.frame or vector.")
+  if (is.null(newdata)) {
+    cat("No newdata input, proceed with training data.\n\n")
+    newdata <- object$inputX
+    if (object$model.type == "classification") {
+      newdata.label <- object$inputY
+    } else {
+      newdata.y <- object$inputY
+    }
+  }
+  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
@@ -470,9 +551,30 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
-  if (class(newdata.label) != "factor"){
-    if (verbose) cat("newdata.label is converted to factor. \n")
-    newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+  y <- newdata.y
+  if (object$model.type == "classification"){
+    if (verbose && !is.null(newdata.y)) {
+      cat("newdata.y set to NULL for classification model. \n")
+      newdata.y <- NULL
+    }
+    y <- NULL
+    if (class(newdata.label) != "factor"){
+      if (verbose) cat("newdata.label is converted to factor. \n")
+      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+    }
+    reg.group <- NULL
+  } else {  # for regression
+    if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
+    if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
+    if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
+    y.threshold <- sort(unique(y.threshold))
+    threshold.length <- length(y.threshold)
+    reg.group.names <- paste0("case", seq(threshold.length + 1))
+    rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
+    newdata.label <- cut(y, rg)
+    reg.group <- levels(newdata.label)
+    names(reg.group) <- reg.group.names
+    levels(newdata.label) <- reg.group.names
   }
 
   ## process data
@@ -487,39 +589,53 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 
   ## ROC-AUC calculation
   pred <- predict(object, newdata = test)  # prediction
+  if (object$model.type == "regression"){
+    pred <- cut(pred, rg, labels = reg.group.names)
+  }
 
   outcome <- newdata.label  # origial label
-
-  roc_dfm <- foreach(j = 1:length(levels(outcome)), .combine = "rbind") %do% {
+  roc_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
     response <- outcome
-    levels(response)[-j] <- "others"
+    levels(response)[-i] <- "others"
     predictor <- dummy(pred)
-    predictor <- as.matrix(predictor[, j], ncol = 1)
+    predictor <- as.matrix(predictor[, i], ncol = 1)
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
-    cases <- splt[[levels(outcome)[j]]]
+    cases <- splt[[levels(outcome)[i]]]
     perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
                      error = function(err){
                        cat("Curve not smoothable. Proceed without smooth.\n")
                        pROC::roc(controls = controls, cases = cases, smooth = FALSE)
                      })
     if (length(levels(outcome)) == 2){
-      cat(paste0("AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
+      cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))
     } else {
-      cat(paste0(" AUC - ", levels(outcome)[j], " (vs Others): ", perf$auc, "\n"))
+      cat(paste0(" AUC - ", levels(outcome)[i], " (vs Others): ", perf$auc, "\n"))
     }
 
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
     mtx <- cbind(fpr, tpr)
     if (length(levels(outcome)) == 2){
-      df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      df <- data.frame(mtx, group = rep(levels(outcome)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     } else {
-      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     }
     df <- df[order(df$tpr), ]
     return(df)
   }
+
+  ## return
+  out <- list(model.type = object$model.type,
+              y.threshold = y.threshold,
+              regression.categories = reg.group,
+              svm.roc = roc_dfm,
+              input.newdata = newdata,
+              input.newdata.y = newdata.y,
+              input.newdata.label = newdata.label,
+              newdata.center.scaled = centered_newdata)
+  class(out) <- "svm_roc_auc"
+  assign(paste(deparse(substitute(object)), "_svm_roc_auc", sep = ""), out, envir = .GlobalEnv)
 
   ## plotting
   if (rocplot){
@@ -553,12 +669,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
     grid.draw(plt)
     if (verbose) cat("Done!\n")
   }
-  ## return
-  out <- list(svm.roc = roc_dfm, input.newdata = newdata, input.newdata.label = newdata.label,
-              newdata.center.scaled = centered_newdata)
-  assign(paste(deparse(substitute(object)), "_svm_roc_list", sep = ""), out, envir = .GlobalEnv)
 }
-
 
 #' @title rbioClass_svm_perm()
 #'
@@ -577,17 +688,21 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #'
 #' The final results are also exported to the environment as a \code{rbiosvm_perm} object with the following items:
 #'
-#' \code{original.accuracy} The original accuracy for the SVM model.
-#'
-#' \code{p.value} P value for the permutation test.
-#'
 #' \code{perm.method} Permutation method.
-#'
-#' \code{perm.stats} The stats metric used for the permutation test.
 #'
 #' \code{nperm} The number of permutation runs.
 #'
+#' \code{performance.type} The stats metric used for the permutation test.
+#'
+#' \code{original.performance} The original accuracy for the SVM model.
+#'
 #' \code{perm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
+#'
+#' \code{p.value} P value for the permutation test.
+#'
+#' \code{model.type} SVM model type.
+#'
+#' \code{run.time} run time
 #'
 #' A scatter plot is also generaeted when \code{perm.plot = TRUE}.
 #'
@@ -601,7 +716,7 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #'
 #' For \code{perm.method = "by_y"}, labels (i.e. y) are permutatedted. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
-#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature. Since the permutation is done for the features WITHIN the group,
+#' For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature, i.e. by column. Since the permutation is done for the features WITHIN the group,
 #' the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
 #' Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 #'
@@ -615,59 +730,98 @@ rbioClass_svm_roc_auc <- function(object, newdata, newdata.label,
 #' }
 #' @export
 rbioClass_svm_perm <- function(object,
-                               perm.method = "by_y", nperm = 999,
+                               perm.method = c("by_y", "by_feature_per_y"), nperm = 999,
                                perm.plot = TRUE, ...,
-                               parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,clusterType = "PSOCK",
+                               parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                verbose = TRUE){
+  ## initiate the run time
+  start_time <- Sys.time()
+
   ## check arguments
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
-  if (!"tot.accuracy" %in% names(object) || is.null(object$tot.accuracy)) stop("SVM model has to include tot.accuracy value from Cross-Validation.\n")
-  if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
+  if (object$model.type == "regression") {
+    if (!"tot.MSE" %in% names(object) || is.null(object$tot.MSE)) stop("Regression SVM model object has to include tot.accuracy value from Cross-Validation for permutation test. \n")
+  } else {
+    if (!"tot.accuracy" %in% names(object) || is.null(object$tot.accuracy)) stop("Classification SVM model object has to include tot.accuracy value from Cross-Validation for permutation test. \n")
+  }
+  # if (!perm.method %in% c("by_y", "by_feature_per_y")) stop("perm.method needs to be either \"by_y\" or \"by_feature_per_y\". \n")
   if (length(nperm) != 1) stop("nperm can only contain one integer. \n")
   if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
   if (nperm < 1) stop("nperm can only take interger equal to or greater than 1. \n")
+  perm.method <- match.arg(tolower(perm.method), c("by_y", "by_feature_per_y"))
+  if (object$model.type == "regression" && perm.method == "by_feature_per_y") stop("perm.method cannot be \"by_feature_per_y\" when SVM model type is regression.")
 
-  ## test
-  ## calcuate RMSEP and construct original RMSEP data frame
-  orig_accu <- object$tot.accuracy
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
-  ## permutation test
-  if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
-  if (verbose) cat(paste0("Running permutation test using ", perm.method, " method ","with ", nperm, " permutations (speed depending on hardware configurations)..."))
-  # consolidated permutation model RMSEP data frame
+  ## Perm test
+  # calcuate permutation error and construct original error data frame
+  if (object$model.type == "regression"){
+    orig_perfm <- object$tot.MSE
+    orig_perfm <- sqrt(orig_perfm)  # tot.RMSE
+  } else {
+    orig_perfm <- object$tot.accuracy
+    # orig_accu <- object$tot.accuracy
+  }
+
+  # perm functions
+  by_y_func <- function(i){
+    set.seed(i)
+    perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
+    perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = perm_y,
+                                center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
+                                tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
+                                verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    if (object$model.type == "regression"){
+      perm_perfm <- perm_model$tot.MSE
+      perm_perfm <- sqrt(perm_perfm)  # RMSE
+    } else {
+      perm_perfm <- perm_model$tot.accuracy  # permutation model accuracy
+    }
+    perm_perfm_dfm <- data.frame(nperm = i, stats = perm_perfm, row.names = NULL)
+    return(perm_perfm_dfm)
+  }
+  by_feature_per_y_func <- function(i){
+    set.seed(i)
+    perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
+      sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
+      sub_dat_colnames <- colnames(sub_dat)
+      perm_dat <- sub_dat[, sample(1:ncol(sub_dat))]
+      # perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
+      #   col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
+      #   col
+      # }
+      colnames(perm_dat) <- sub_dat_colnames
+      perm_dat
+    }
+
+    perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
+                                center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
+                                tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
+                                verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+
+    if (object$model.type == "regression"){
+      perm_perfm <- perm_model$tot.MSE
+      perm_perfm <- sqrt(perm_perfm)  # RMSE
+    } else {
+      perm_perfm <- perm_model$tot.accuracy  # permutation model accuracy
+    }
+    perm_perfm_dfm <- data.frame(nperm = i, stats = perm_perfm, row.names = NULL)
+    return(perm_perfm_dfm)
+  }
+
+  # permutation test: consolidated permutation model error data frame
+  if (verbose){
+    cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
+    cat(paste0("Running permutation test using ", perm.method, " method ","with ", nperm, " permutations (speed depending on hardware configurations)..."))
+  }
+
   if (!parallelComputing){
     if (perm.method == "by_y"){  # permutate label
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
-        perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy  # permutation model accuracy
-
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
-
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
-        perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
-          sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
-          perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
-            col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
-            col
-          }
-          perm_dat
-        }
-
-        perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy   # permutation model accuracy
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_feature_per_y_func(i)
     }
   } else {  # parallel computing
     # set up cpu cluster
@@ -678,64 +832,61 @@ rbioClass_svm_perm <- function(object,
 
     # permutation test
     if (perm.method == "by_y"){  # permutate label
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "RBioFS")) %dopar% {
-        perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-        perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = factor(perm_y, levels = unique(perm_y)),
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy  # permutation model accuracy
-
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_y_func(i)
     } else {  # subset by label first, then permutate data per feature
-      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "RBioFS")) %dopar% {
-        perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
-          sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
-          perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {
-            col <- sub_dat[sample(1:nrow(sub_dat)), n, drop = FALSE]  # permutation for each feature
-            col
-          }
-          perm_dat
-        }
-
-        perm_model <- rbioClass_svm(x = perm_x, y = object$inputY,
-                                    center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                    tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                    verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
-        perm_accu <- perm_model$tot.accuracy   # permutation model accuracy
-        perm_accu_dfm <- data.frame(nperm = i, stats = perm_accu, row.names = NULL)
-        perm_accu_dfm
-      }
+      perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %dopar% by_feature_per_y_func(i)
     }
   }
 
-  perm_accu_val <- perm_dfm$tot.accuracy
-  p.val <- (length(which(perm_accu_val >= orig_accu)) + 1) / (nperm + 1)
+  perm_perfm_val <- perm_dfm$stats
+  if (object$model.type == "regression"){
+    p.val <- (length(which(perm_perfm_val <= orig_perfm)) + 1) / (nperm + 1)  # MSE the smaller the better
+  } else {
+    p.val <- (length(which(perm_perfm_val >= orig_perfm)) + 1) / (nperm + 1)  # accuracy the bigger the better
+  }
   if (verbose) cat("Done!\n")
 
   ## output
-  perm_stats <- rbind(data.frame(nperm = 0, stats = orig_accu, row.names = NULL), perm_dfm)
-  out <- list(perm.method = perm.method, nperm = nperm,  perm.stats = "tot.accuracy",
-                       original.stats = orig_accu, p.value = p.val, perm.results = perm_stats)
+  # end time
+  end_time <- Sys.time()
+  runtime <- end_time - start_time
+
+  # output
+  if (object$model.type == "regression"){
+    perfm_type <- "tot.RMSE"
+    names(perm_dfm)[2] <- "tot.RMSE"
+  } else {
+    perfm_type <- "tot.accuracy"
+    names(perm_dfm)[2] <- "tot.accuracy"
+  }
+  complete_perfm <- rbind(c(0, orig_perfm), perm_dfm)
+  out <- list(perm.method = perm.method,
+              nperm = nperm,
+              performance.type = perfm_type,
+              original.performance = orig_perfm,
+              perm.results = complete_perfm,
+              p.value = p.val,
+              model.type = object$model.type,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
   class(out) <- "rbiosvm_perm"
   assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
 
-  # print results
-  if (verbose) cat("\n")
-  if (verbose) cat("Permutation test restuls (p value):")
-  if (verbose) cat(p.val)
-  if (verbose) cat("\n")
-
   # export to the directory
   if (verbose) cat(paste0("Permutation stats results stored in csv file: ", paste(deparse(substitute(object)), "_perm.csv", sep = ""), ". \n"))
-  write.csv(file = paste0(deparse(substitute(object)), ".perm.csv"), perm_stats, row.names = FALSE)
+  write.csv(file = paste0(deparse(substitute(object)), ".perm.csv"), complete_perfm, row.names = FALSE)
 
   ## plot
   if (perm.plot){
     svm_permutation_test <- out
     rbioUtil_perm_plot(perm_res = svm_permutation_test, ...)
+  }
+
+  # print results
+  if (verbose){
+    cat("\n")
+    cat("Permutation test restuls (p value):")
+    cat(p.val)
+    cat("\n")
   }
 }
 
@@ -757,15 +908,20 @@ print.rbiosvm_perm <- function(x, ...){
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param sampleLabel.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
+#' @param newdata.y Only requried for regression study. The default is \code{NULL}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return  A \code{prediction} obejct. The items of the object are:
+#'
+#' \code{model.type}
 #'
 #' \code{classifier.class}
 #'
 #' \code{predited.value}
 #'
-#' \code{prob.method}  Method to caluculate posterier probability
+#' \code{tot.predict.RMSE}
+#'
+#' \code{prob.method}: Method to caluculate posterier probability
 #'
 #' \code{probability.summary}
 #'
@@ -775,13 +931,19 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' \code{center.scaled.newdata}
 #'
-#' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object. The option \code{center.scale.newdata = FALSE} is
-#' for the already centered the data matrix. This center.scale process should use training data's column mean and column standard deviation.
+#' \code{newdata.y}
 #'
-#' The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
-#' See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
+#' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object.
+#'          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
+#'          column mean and column standard deviation.
 #'
-#' If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
+#'          See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
+#'
+#'          If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#'
+#'          When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
+#'          \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 #'
 #' @import ggplot2
 #' @import pls
@@ -792,14 +954,16 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' }
 #' @export
-rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
-                                  center.scale.newdata = TRUE, prob.method = "logistic",
+rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
+                                  sampleLabel.vector = NULL, newdata.y = NULL,
+                                  prob.method = c("logistic",  "Bayes", "softmax"),
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
+  if (missing(newdata) || is.null(newdata)) stop("please provide newdata.")
   if (!class(newdata) %in% c("matrix", "data.frame")) stop("newdata has to be either a matrix or data.frame object.")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
-  if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
+  # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
@@ -808,6 +972,17 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
       cat("Sample label vector not the same length as newdata. Proceed without custom sample labels.\n")
       sampleLabel.vector <- NULL
     }
+  }
+  if (object$model.type == "classification"){
+    newdata.y <- NULL
+    y <- newdata.y
+    prob.method <- match.arg(prob.method, c("logistic",  "Bayes", "softmax"))
+    probability <- TRUE
+  } else {
+    if (missing(newdata.y) || is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression study.")
+    y <- newdata.y
+    prob.method <- NULL
+    probability <- FALSE
   }
 
   ## center data with the option of scaling
@@ -827,70 +1002,87 @@ rbioClass_svm_predcit <- function(object, newdata, sampleLabel.vector = NULL,
   ## predict
   rownames(test) <- 1:nrow(test)
   # pred <- predict(object = object, newdata = test, type = "response", probability = TRUE)
-  pred <- predict(object = object, newdata = test, probability = TRUE)
-  pred_mtx <- attr(pred, "probabilities")  # probability matrix
+  pred <- predict(object = object, newdata = test, probability = probability)
 
-  if (is.null(dim(pred_mtx))) {  # if only one sample
-    pred_mtx <- t(as.matrix(pred_mtx))
-  }
-  if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
-    rownames(pred_mtx) <- sampleLabel.vector
-  }
-
-  ## posterior
-  if (prob.method == "logistic"){
-    prob <- pred_mtx  # probability matrix
-  } else if (prob.method == "Bayes"){
-    if (!is.null(object$center.scaledX)){
-      training_mtx <- as.matrix(object$center.scaledX$centerX)
-    } else {
-      training_mtx <- as.matrix(object$inputX)
+  if (object$model.type == "classification"){
+    pred_mtx <- attr(pred, "probabilities")  # probability matrix
+    if (is.null(dim(pred_mtx))) {  # if only one sample
+      pred_mtx <- t(as.matrix(pred_mtx))
     }
-    trainingpred <- predict(object = object, newdata = training_mtx, type = "response", probability = TRUE)
-    trainingpred <- attributes(trainingpred)$probabilities
-    bayes.prob <- klaR::NaiveBayes(x = trainingpred, grouping = object$inputY, usekernel = TRUE)
-    bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calcuate posterior probability for
-    bayes.prob$x <- NULL
+    if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
+      rownames(pred_mtx) <- sampleLabel.vector
+    }
+    ## posterior
+    if (prob.method == "logistic"){
+      prob <- pred_mtx  # probability matrix
+    } else if (prob.method == "Bayes"){
+      if (!is.null(object$center.scaledX)){
+        training_mtx <- as.matrix(object$center.scaledX$centerX)
+      } else {
+        training_mtx <- as.matrix(object$inputX)
+      }
+      trainingpred <- predict(object = object, newdata = training_mtx, type = "response", probability = TRUE)
+      trainingpred <- attributes(trainingpred)$probabilities
+      bayes.prob <- klaR::NaiveBayes(x = trainingpred, grouping = object$inputY, usekernel = TRUE)
+      bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calcuate posterior probability for
+      bayes.prob$x <- NULL
 
-    bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
-    prob <- bayespred$posterior
-  } else {
-    group <- colnames(pred_mtx)
-    # calcuate probability
-    prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
-    rownames(prob_mtx) <- group
-    prob <- t(prob_mtx)
-  }
-
-  prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
-    prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
-                           Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE, row.names = NULL)
-    prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-    prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
-    prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
-    prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
-    return(prob_dfm)
+      bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
+      prob <- bayespred$posterior
+    } else {
+      group <- colnames(pred_mtx)
+      # calcuate probability
+      prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
+      rownames(prob_mtx) <- group
+      prob <- t(prob_mtx)
+    }
+    prob_dfm <- foreach(i = 1:nrow(pred_mtx), .combine = "rbind") %do% {
+      prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
+                             Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE, row.names = NULL)
+      prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
+      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+      prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
+      prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
+      return(prob_dfm)
+    }
+    tot.pred.rmse <- NULL
+  } else {  # for regression study
+    prob_dfm <- NULL
+    error <- pred - y
+    tot.pred.rmse <- sqrt(mean(error^2))
   }
 
   ## output
   predicted.value <- pred
   attributes(predicted.value) <- NULL
-  out <- list(classifier.class = class(object),
+  out <- list(model.type = object$model.type,
+              classifier.class = class(object),
               predicted.value = predicted.value,
+              tot.predict.RMSE = tot.pred.rmse,
               prob.method = prob.method,
               probability.summary = prob_dfm,
               raw.newdata = newdata,
               center.scale = center.scale.newdata,
-              center.scaled.newdata = centerdata)
+              center.scaled.newdata = centerdata,
+              newdata.y = y)
   class(out) <- "prediction"
   assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
 }
 
 
+
 #' @export
 print.prediction <- function(x, ...){
-  cat("The prediction results:\n")
-  print(x$probability.summary[, c(1:2, 5)])
+  cat("Model type: ", x$model.type, "\n")
+  cat("\n")
+  if (x$model.type == "classification"){
+    cat("Prediction results:\n")
+    print(x$probability.summary[, c(1:2, 5)])
+  } else {
+    cat("Total RMSE on test set: ")
+    cat(x$tot.predict.RMSE)
+    cat("\n")
+  }
   cat("\n")
   cat(paste0("Classifier class:\n"))
   print(x$classifier.class)
