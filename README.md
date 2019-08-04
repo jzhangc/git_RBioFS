@@ -29,55 +29,8 @@ Installation
         
 
 Update log
-
-    Feature blueprint
-        - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
-          - rbioClass_knn()
-          - rbioClass_knn_plot()
-                
-        - sPLS-DA functions added (non-Shiny) (tentative):
-          - rbioClass_splsda()
-          - rbioClass_splsda_plot()
-        
-        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
-          - rbioClass_rf_class()
-          - rbioClass_rf_class_plot()
-                
-        - All shiny apps' interface updated with a new look
-                
-        - Updates to rbioFS_PCA():
-          - 3D score plot option for rbioFS_PCA (non-shiny)
-          - 3D socre plot option for rbioFS_PCA_app (shiny)
-          - Legend style adjusted for the sample labels
-                
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods
-        
-        - All-in-one classification solution functions added:
-          - rbioClass()
-        
     
-    0.6.3 (Feature preview)
-    (ICEBOX)
-        - New PLS-DA function(s)
-          - rbioReg_plsr() function added for PLS regression analysis
-          - rbioReg_plsr_predict() function added for PLS regression analysis
-          
-        - Update to SVM function(s)
-          - rbioClass_svm_perm() plot output file name fixed
-                 
-        - Updates to PLS-DA function(s)
-          - Multivariate Y modelling now possible with rbioFS_plsda
-          - rbioFS_plsda_vip_plot() plot output file name fixed
-          - rbioClass_plsda_perm() plot output file name fixed
-
-        - Updates to the PCA function(s)
-          - rbioFS_PCA() now exports a "rbiofs_pca" class object
-          - rbioFS_PCA() updated with S3 print method
-          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
-        
-        - Appropriate version pump
-          
-    (ADDED)
+    0.6.3 (Aug.4.2019)
         - General updates
           - match.arg() method added to relevant functions for better user experience
           - rbioUtil_classplot() updated accordingly to accommodate the regression study
@@ -133,7 +86,7 @@ Update log
           - Small syntax fixes   
           
            
-    0.6.2 (Apr.25.2019)
+    0.6.2
         - Updates to RF-FS functions:
           - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
           - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data
