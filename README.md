@@ -88,7 +88,7 @@ Update log
           - rbioReg_plsr_ncomp_select() added
           - rbioReg_plsr_perm() added
           - rbioReg_plsr_vip() added
-          - rbioReg_plsr_vip_plot() added
+            - NOTE: the plot function is the same as the classification model: rbioFS_plsda_vip_plot()
 
         - Updates to PLS-DA function(s)
           - Print function for relevant functions to accommodate the new plsr functions

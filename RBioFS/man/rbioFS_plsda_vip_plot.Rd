@@ -83,6 +83,7 @@ Plotting function for \code{\link{rbioFS_plsda_VIP}}.
 }
 \details{
 Only works with \code{rbiomvr_vip} objects. Set \code{plot.preview = FALSE} to speed up the process as preview rendering may be slow.
+         The function also applies to the regression model (model.type = "regression").
 }
 \examples{
 \dontrun{
