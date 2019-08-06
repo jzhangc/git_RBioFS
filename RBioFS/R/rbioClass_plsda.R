@@ -1361,6 +1361,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
   if (bootstrap & (boot.n < 2 | boot.n %% 1 != 0)) stop("when boostrap = TRUE, boot.n needs to be an integer greater than 1.")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## VIP process
   if (verbose) cat(paste0("Boostrap: ", ifelse(bootstrap, "ON\n", "OFF\n")))
@@ -1526,7 +1527,6 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     vip_list <- vector(mode = "list", length = length(levels(object$inputY)))
     vip_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
       plt_list.comp <- vector(mode = "list", length = length(comps))
-      j = 1
       plt_list.comp[] <- foreach(j = comps) %do% {
         vip <- vip_raw_list[[i]][j, ]
         outdfm <- data.frame(Features = colnames(vip_raw_list[[i]]),
@@ -1549,7 +1549,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
   # important features lsit
   final.ipf_list <- vector(mode = "list", length = length(vip_list))
   final.ipf_list <- foreach(m = 1:length(vip_list)) %do% {
-    ipf_list <- vector(mode = "list", length = length(vip_list))
+    ipf_list <- vector(mode = "list", length = length(vip_list[[m]]))
     ipf_list[] <- foreach(n = 1:length(vip_list[[m]])) %do% {
       as.character(vip_list[[m]][[n]][which(vip_list[[m]][[n]]$VIP > vip.alpha), 1])
     }
@@ -1565,7 +1565,8 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
               comps = comps,
               bootstrap = bootstrap,
               boot.n = if (bootstrap) boot.n else NULL,
-              bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL)
+              bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL,
+              model.type = object$model.type)
   class(out) <- "rbiomvr_vip"
   assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
 

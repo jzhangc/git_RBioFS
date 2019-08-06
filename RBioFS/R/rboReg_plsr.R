@@ -318,7 +318,7 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
 #'             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
 #'             J Mach Learn Res. 11: 1833 - 63.
 #'
-#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'          For this function, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
 #'
 #' @import ggplot2
@@ -451,3 +451,254 @@ rbioReg_plsr_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     rbioUtil_perm_plot(perm_res = plsda_permutation_test, ..., verbose = verbose)
   }
 }
+
+
+#' @title rbioReg_plsr_vip
+#'
+#' @description VIP, or variable importance in projection, calcualtion and plotting for PLSR models. This is another FS method, and can be used independently.
+#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
+#' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
+#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.
+#' @param bootstrap If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{TRUE}.
+#' @param boot.n Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.
+#' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.
+#' @param boot.n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
+#' @param boot.clusterType Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param plot If to generate a plot. Default is \code{TRUE}.
+#' @param ... Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return Outputs a \code{rbiomvr_vip} class object to the environment.
+#'
+#'         \code{rbiomvr_vip} items are:
+#'
+#'         \code{vip_summary}
+#'
+#'         \code{comps}: number of PLSR components calculated fro VIP
+#'
+#'         \code{vip.alpha}: cutoff VIP value for a feature to be considered as important
+#'
+#'         \code{features_above_alpha}: selected features according to vip.alpha, i.e. features with VIP >= vip.alpha
+#'
+#'         \code{boostrap}
+#'
+#'         \code{boot.n}: boostrap iterations
+#'
+#'         \code{bootstrap.iteration.results}: raw VIP values for each bootstrap iteration
+#'
+#'         \code{mode.type}
+#'
+#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
+#'
+#' The \code{vip.alpha} of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
+#' @import foreach
+#' @import doParallel
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @examples
+#' \dontrun{
+#' rbioReg_plsr_vip(object = new_model_optm, boostrap = TRUE, boot.m = 50,
+#'                  vip.alpha = 0.8,
+#'                  plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+#'                  plot.sig.line = TRUE,
+#'                  plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                  plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+#'                  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+#'                  plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2,
+#'                  plot.rightsideY = TRUE,
+#'                  plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+#'                  plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+#'                  plot.Height = 150)
+#' }
+#' @export
+rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
+                             bootstrap = TRUE,
+                             boot.n = 50, boot.parallelComputing = TRUE, boot.n_cores = parallel::detectCores() - 1, boot.clusterType = "PSOCK",
+                             plot = TRUE,...,
+                             verbose = TRUE){
+  ## argument check
+  if (!any(class(object) %in% c("rbiomvr", "mvr"))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
+  if (object$model.type != "regression") stop("object needs to have model.type = \"regression\"")
+  if (object$method != "oscorespls") stop("Object needs to fit using oscorespls (i.e. NIPALS) algorithm. Please re-fit using rbioClass_plsda with method = \"oscorespls\".") # only oscorespls algorithm is applicable to VIP
+  if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
+  if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
+  if (bootstrap & (boot.n < 2 | boot.n %% 1 != 0)) stop("when boostrap = TRUE, boot.n needs to be an integer greater than 1.")
+
+  ## VIP process
+  if (verbose) cat(paste0("Boostrap: ", ifelse(bootstrap, "ON\n", "OFF\n")))
+  if (bootstrap){  # bootstrap VIP process
+    # message
+    if (verbose) cat(paste0("Parallel computing: ", ifelse(boot.parallelComputing, "ON\n", "OFF\n")))
+    if (verbose) cat(paste0("Boostrap interation: ", boot.n, "\n"))
+    if (verbose) cat("Boostrap VIP calculation (speed depending on hardware configuration)...")
+
+    # set up data
+    orig.dat <- data.frame(Y = object$inputY, object$inputX, row.names = NULL, check.names = FALSE, stringsAsFactors = FALSE)
+    sum.boot.vip_raw_list <- vector(mode = "list", length = boot.n)
+
+    # set up boot function
+    boot.func <- function(i){
+      # bootstrap resampling
+      idx <- seq(nrow(orig.dat))
+      boot.idx <- sample(group.idx, replace = TRUE)
+      boot.dat <- orig.dat[boot.idx, ]
+
+      # bootstrap modelling
+      boot.X <- boot.dat[, -1]
+      boot.Y <- boot.dat[, 1]
+      boot.m <- rbioReg_plsr(x = boot.X, y = boot.Y,
+                             ncomp = object$ncomp, validation = "CV", method = "oscorespls",
+                             verbose = FALSE)
+
+      # boostrap VIP
+      boot.score <- boot.m$scores
+      boot.lodw <- boot.m$loading.weights
+      boot.Wnorm2 <- colSums(boot.lodw^2)
+
+      # vip_raw_list contains VIP for all the components
+      boot.vip_raw_list <- vector(mode = "list", length = dim(boot.m$Yloadings)[1])
+      boot.vip_raw_list[] <- foreach(m = 1:dim(boot.m$Yloadings)[1]) %do% {
+        ylod <- boot.m$Yloadings[m, ] # one y variable at a time
+        boot.ss <- c(ylod)^2 * colSums(boot.score^2)
+        boot.ssw <- sweep(boot.lodw^2, 2, boot.ss / boot.Wnorm2, "*")
+        boot.vip <- sqrt(nrow(boot.ssw) * apply(boot.ssw, 1, cumsum) / cumsum(boot.ss))  # cumsum: cucmulative sum
+        if (object$ncomp == 1) {
+          boot.vip <- matrix(boot.vip, nrow = 1, dimnames = list('Comp 1', names(boot.vip)))
+        }
+        boot.vip <- boot.vip[comps, , drop = FALSE]
+        return(boot.vip)
+      }
+      names(boot.vip_raw_list) <- dimnames(boot.m$Yloadings)[[1]]
+      boot.vip_raw_list
+    }
+
+    # bootstrap modelling and VIP calculation
+    if (!boot.parallelComputing){  # non-parallel
+      sum.boot.vip_raw_list[] <- foreach(i = 1:boot.n) %do% boot.func(i)
+    } else {  # boot parallel computing
+      # set up cluster
+      n_cores <- boot.n_cores
+      cl <- makeCluster(n_cores, type = boot.clusterType)
+      registerDoParallel(cl)
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+      # computing
+      sum.boot.vip_raw_list[] <- foreach(i = 1:boot.n, .packages = c("foreach", "RBioFS")) %dopar% boot.func(i)
+    }
+    names(sum.boot.vip_raw_list) <- paste0("boot ", seq(boot.n))
+
+    # sum.boot.vip_raw_list structure: boot$group$: (row)`comp 1`|`comp 2`|`comp 3`...
+    # targeted format: group$`comp 1`: (colums)`boot 1`|`boot 2`|`boot 3`...
+    group.comp.boot.vip_list <- vector(mode = "list", length = length(levels(object$inputY)))
+    group.comp.boot.vip_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+      group.comp.list <- vector(mode = "list", length = length(comps))
+      group.comp.list[] <- foreach(j = comps) %do% {
+        group.comp.boot_mtx <- foreach(m = 1:boot.n, .combine = "cbind") %do% {
+          sum.boot.vip_raw_list[[m]][[i]][j, ]  # i: groups, j: boot, 1: comp
+        }
+        colnames(group.comp.boot_mtx) <- paste0("boot ", seq(boot.n))
+        group.comp.boot_mtx
+      }
+      names(group.comp.list) <- paste0("comp ", comps)
+      group.comp.list
+    }
+    names(group.comp.boot.vip_list) <- levels(object$inputY)
+
+    # plot list
+    boot.vip.plt_dat_list <- vector(mode = "list", length = length(levels(object$inputY)))
+    boot.vip.plt_dat_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+      boot.plt_list.comp <- vector(mode = "list", length = length(comps))
+      boot.plt_list.comp[] <- foreach(j = comps) %do% {
+        boot.mean <- rowMeans(group.comp.boot.vip_list[[i]][[j]])
+        boot.sd <- matrixStats::rowSds(group.comp.boot.vip_list[[i]][[j]])
+        boot.sem <- matrixStats::rowSds(group.comp.boot.vip_list[[i]][[j]])/sqrt(boot.n)
+        outdfm <- data.frame(Features = rownames(group.comp.boot.vip_list[[i]][[j]]),
+                             VIP = boot.mean,
+                             sd = boot.sd,
+                             sem = boot.sem,
+                             row.names = NULL,
+                             check.names = FALSE)
+        outdfm <- outdfm[order(outdfm$VIP, decreasing = TRUE),]
+        outdfm$Features <- factor(outdfm$Features, levels = unique(outdfm$Features))
+        rownames(outdfm) <- NULL
+        outdfm
+      }
+      names(boot.plt_list.comp) <- paste0("comp ", comps)
+      boot.plt_list.comp
+    }
+    names(boot.vip.plt_dat_list) <- levels(object$inputY)
+    vip_list <- boot.vip.plt_dat_list
+  } else {  # non bootstrap VIP process
+    # message
+    if (verbose) cat("VIP calculation...")
+
+    # VIP calculation
+    score <- object$scores
+    lodw <- object$loading.weights
+    Wnorm2 <- colSums(lodw^2)
+
+    # vip_raw_list contains VIP for all the components
+    vip_raw_list <- vector(mode = "list", length = dim(object$Yloadings)[1])
+    vip_raw_list[] <- foreach(i = 1:dim(object$Yloadings)[1]) %do% {
+      ylod <- object$Yloadings[i, ] # one y variable at a time
+      ss <- c(ylod)^2 * colSums(score^2)
+      ssw <- sweep(lodw^2, 2, ss / Wnorm2, "*")
+      vip <- sqrt(nrow(ssw) * apply(ssw, 1, cumsum) / cumsum(ss))  # cumsum: cucmulative sum
+      vip <- vip[comps, , drop = FALSE]
+      vip
+    }
+    names(vip_raw_list) <- dimnames(object$Yloadings)[[1]]
+
+    vip_list <- vector(mode = "list", length = 1)
+    vip_list[] <- foreach(i = 1) %do% {
+      plt_list.comp <- vector(mode = "list", length = length(comps))
+      plt_list.comp[] <- foreach(j = comps) %do% {
+        vip <- vip_raw_list[[i]][j, ]
+        outdfm <- data.frame(Features = colnames(vip_raw_list[[i]]),
+                             VIP = vip,
+                             row.names = NULL,
+                             check.names = FALSE)
+        outdfm <- outdfm[order(outdfm$VIP, decreasing = TRUE),]
+        outdfm$Features <- factor(outdfm$Features, levels = unique(outdfm$Features))
+        rownames(outdfm) <- NULL
+        outdfm
+      }
+      names(plt_list.comp) <- paste0("comp ", comps)
+      plt_list.comp
+    }
+    names(vip_list) <- "Y"
+  }
+  if (verbose) cat("Done!\n")
+
+  ## output
+  # important features lsit
+  final.ipf_list <- vector(mode = "list", length = length(vip_list))
+  final.ipf_list <- foreach(m = 1:length(vip_list)) %do% {
+    ipf_list <- vector(mode = "list", length = length(vip_list[[m]]))
+    ipf_list[] <- foreach(n = 1:length(vip_list[[m]])) %do% {
+      as.character(vip_list[[m]][[n]][which(vip_list[[m]][[n]]$VIP > vip.alpha), 1])
+    }
+    names(ipf_list) <- names(vip_list[[m]])
+    ipf_list
+  }
+  names(final.ipf_list) <- names(vip_list)
+
+  # output
+  out <- list(vip_summary = vip_list,
+              vip.alpha = vip.alpha,
+              features_above_alpha = final.ipf_list,
+              comps = comps,
+              bootstrap = bootstrap,
+              boot.n = if (bootstrap) boot.n else NULL,
+              bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL,
+              model.type = object$model.type)
+  class(out) <- "rbiomvr_vip"
+  assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
+
+  ## plot
+  if (plot){
+    # message
+    if (verbose) cat("\n")
+    RBioFS::rbioReg_plsr_vip_plot(vip_obj = out, ...)
+  }
+}
+
