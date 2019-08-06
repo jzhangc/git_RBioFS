@@ -588,8 +588,8 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 
     # sum.boot.vip_raw_list structure: boot$group$: (row)`comp 1`|`comp 2`|`comp 3`...
     # targeted format: group$`comp 1`: (colums)`boot 1`|`boot 2`|`boot 3`...
-    group.comp.boot.vip_list <- vector(mode = "list", length = length(levels(object$inputY)))
-    group.comp.boot.vip_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+    group.comp.boot.vip_list <- vector(mode = "list", length = 1)
+    group.comp.boot.vip_list[] <- foreach(i = 1) %do% {
       group.comp.list <- vector(mode = "list", length = length(comps))
       group.comp.list[] <- foreach(j = comps) %do% {
         group.comp.boot_mtx <- foreach(m = 1:boot.n, .combine = "cbind") %do% {
@@ -692,7 +692,7 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
               bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL,
               model.type = object$model.type)
   class(out) <- "rbiomvr_vip"
-  assign(paste(deparse(substitute(object)), "_plsr_vip", sep = ""), out, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
 
   ## plot
   if (plot){
@@ -701,4 +701,5 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     RBioFS::rbioReg_plsr_vip_plot(vip_obj = out, ...)
   }
 }
+
 
