@@ -265,7 +265,7 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
 
     ## save
     # grid.newpage()
-    ggsave(filename = paste(deparse(substitute(object)),".plsda.rmsepplot.pdf", sep = ""), plot = plt,
+    ggsave(filename = paste(deparse(substitute(object)),".plsr.rmsepplot.pdf", sep = ""), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)
     if (verbose) cat("Done!\n")
@@ -539,7 +539,7 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     boot.func <- function(i){
       # bootstrap resampling
       idx <- seq(nrow(orig.dat))
-      boot.idx <- sample(group.idx, replace = TRUE)
+      boot.idx <- sample(idx, replace = TRUE)
       boot.dat <- orig.dat[boot.idx, ]
 
       # bootstrap modelling
@@ -692,7 +692,7 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
               bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL,
               model.type = object$model.type)
   class(out) <- "rbiomvr_vip"
-  assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsr_vip", sep = ""), out, envir = .GlobalEnv)
 
   ## plot
   if (plot){
