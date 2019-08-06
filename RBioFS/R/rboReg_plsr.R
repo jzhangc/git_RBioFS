@@ -274,5 +274,6 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
   ## return RMSEP values
   rmsep_dfm_list$ncomp_selected <- ncompsel_mtx
   class(rmsep_dfm_list) <- "rbiomvr_ncomp_select"
-  assign(paste(deparse(substitute(object)), "_plsda_ncomp_select", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsr_ncomp_select", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
 }
+

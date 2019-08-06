@@ -71,21 +71,25 @@ Update log
           - Multivariate Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
+          - Print function for relevant functions to accommodate the new plsr functions
 
         - Updates to the PCA function(s)
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
         
-        - Version pump to 0.7.0
-        
-      (ADDED)
+    (ADDED)
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
             - "rbiomvr" object from this function has model.type = "regression"
           - rbioReg_plsr_ncomp_select() added
           - rbioReg_plsr_perm() added
           - rbioReg_plsr_vip() added
+
+        - Updates to PLS-DA function(s)
+          - Print function for relevant functions to accommodate the new plsr functions
+
+        - Version pump to 0.7.0
     
     
     0.6.3 (Aug.4.2019)
