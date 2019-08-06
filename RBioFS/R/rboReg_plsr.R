@@ -44,7 +44,7 @@
 #' @importFrom pls plsr
 #' @examples
 #' \dontrun{
-#' rbioClass_plsda(x, y, ncomp = 20)
+#' rbioReg_plsr(x, y, ncomp = 20)
 #' }
 #' @export
 rbioReg_plsr <- function(x, y, method = "simpls",
@@ -138,7 +138,7 @@ rbioReg_plsr <- function(x, y, method = "simpls",
 #' @importFrom pls RMSEP
 #' @examples
 #' \dontrun{
-#' rbioClass_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
+#' rbioReg_plsr_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
 #'          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
 #' }
 #' @export
@@ -277,3 +277,177 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
   assign(paste(deparse(substitute(object)), "_plsr_ncomp_select", sep = ""), rmsep_dfm_list, envir = .GlobalEnv)
 }
 
+
+#' @title rbioReg_plsr_perm()
+#'
+#' @description Permutation test for PLSR models.
+#' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
+#' @param ncomp Model complexity, i.e. number of components to model. Default is \code{object$ncomp}, i.e. maximum complexity.
+#' @param adjCV If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.
+#' @param nperm Number of permutations to run. Default is \code{999}.
+#' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
+#' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value resutls.
+#'
+#' The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
+#'
+#' \code{nperm} The number of permutation runs.
+#'
+#' \code{perm.stats} The stats metric used for the permutation test.
+#'
+#' \code{adjCV} If the adjusted cross-validation stats is used.
+#'
+#' \code{p.value.summary} P values for the permutation test.
+#'
+#' \code{poerm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
+#'
+#' A scatter plot is also generaeted when \code{perm.plot = TRUE}.
+#'
+#' @details The function uses RMSEP as the stats for comparing original model with permutatsions.
+#'
+#'          Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
+#'
+#'          Data for permutation are object$centerX$centerX, meaning centered X are used if applicable.
+#'
+#'          Permutation methods are according to:
+#'
+#'             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
+#'             J Mach Learn Res. 11: 1833 - 63.
+#'
+#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'
+#'
+#' @import ggplot2
+#' @import foreach
+#' @import doParallel
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom pls RMSEP
+#' @examples
+#' \dontrun{
+#' rbioReg_plsr_perm(object = new_model_optm, nperm = 999, adjCV = TRUE, parallelComputing = TRUE)
+#' }
+#' @export
+rbioReg_plsr_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
+                              perm.plot = TRUE, ...,
+                              nperm = 999,
+                              parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                              verbose = TRUE){
+  ## check arguments
+  if (!any(class(object) %in% c("rbiomvr"))) stop("object has to be a \"rbiomvr\" class.")
+  if (!"validation" %in% names(object) || is.null(object$validation)) stop("PLS-DA model has to include Cross-Validation.")
+  if (!all(ncomp %in% seq(object$ncomp))) stop("ncomp contain non-existant comp.")
+  if (length(nperm) != 1) stop("nperm can only contain one integer.")
+  if (nperm %% 1 != 0) stop("nperm can only be integer. \n")
+  if (nperm < 1) stop("nperm can only take interger equal to or greater than 1.")
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
+  if (object$model.type != "regression") stop("object needs to have model.type = \"regression\"")
+
+  ## calcuate RMSEP and construct original RMSEP data frame
+  rmsep <- pls::RMSEP(object)
+  rmsep_dfm <- foreach(i = 1:dim(rmsep$val)[2], .combine = "rbind") %do% {
+    dfm <- as.data.frame(t(rmsep$val[, i, ncomp]))
+    if (adjCV){
+      stats <- dfm[, "adjCV"]
+    } else {
+      stats <- dfm[, "CV"]
+    }
+    dfm <- data.frame(comparison = dimnames(rmsep$val)[[2]][i], comps = object$ncomp, RMSEP = stats,
+                      adjCV = adjCV, row.names = NULL)
+  }
+
+  ## permutation test
+  # permutation test functions
+  by_y_func <- function(i){
+    set.seed(i)
+    perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
+    perm_model <- rbioReg_plsr(x = object$centerX$centerX, y = perm_y,
+                               ncomp = ncomp, scale = FALSE, validation = object$validation_method,
+                               segments = length(object$validation$segments),
+                               segments.type = object$out_model$validation_segments_type,
+                               verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
+
+    perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp + 1]))
+      if (adjCV){
+        stats <- dfm[, "adjCV"]
+      } else {
+        stats <- dfm[, "CV"]
+      }
+      dfm <- data.frame(nperm = i, comparison = dimnames(perm_rmsep$val)[[2]][j],
+                        comps = ncomp, RMSEP = stats, adjCV = adjCV, row.names = NULL)
+    }
+    return(perm_rmsep_dfm)
+  }
+
+  if (verbose) cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
+  if (verbose) cat(paste0("Running permutation test using ", perm.method, " method ","with ", nperm, " permutations (speed depending on hardware configurations)..."))
+  # consolidated permutation model RMSEP data frame
+  if (!parallelComputing){
+    perm_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% by_y_func(i)
+  } else {  # parallel computing
+    # set up cpu cluster
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # permutation test
+    perm_dfm <- foreach(i = 1:nperm, .combine = "rbind", .packages = c("foreach", "pls", "RBioFS")) %dopar% by_y_func(i)
+  }
+
+  # calculate total perm RMSEP
+  perm_tot_rmsep_dfm <- foreach(i = 1:nperm, .combine = "rbind") %do% {
+    subdfm <- perm_dfm[perm_dfm$nperm == i, , drop = FALSE]
+    # below: RMSEP is total RMSEP across Y
+    tot_rmsep <- data.frame(nperm = i, comparison = "Y", comps = ncomp, RMSEP = sum(subdfm$RMSEP), adjCV = adjCV)
+  }
+
+  # permutation model data frame
+  perm_results_p_val <- foreach(i = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
+    tmp <- perm_tot_rmsep_dfm[perm_tot_rmsep_dfm$comparison == i, ]
+    orig_rmsep <- data.frame(nperm = 0, rmsep_dfm[rmsep_dfm$comparison == i, ], row.names = NULL)
+    tmp <- rbind(orig_rmsep, tmp)
+    rownames(tmp) <- NULL
+    write.csv(file = paste0(deparse(substitute(object)),"_", i ,"_vs_rest" , "_perm_intermediate.csv"), tmp, row.names = FALSE)  # export full permutation results to working directory
+    orig.val <- tmp$RMSEP[which(tmp$nperm == 0)]
+    perm.val <- tmp$RMSEP[which(tmp$nperm != 0)]
+    p.val <- (length(which(perm.val <= orig.val)) + 1) / (nperm + 1)
+    out <- data.frame(comparison = i, original.RMSEP = orig.val, p.value = p.val,
+                      row.names = NULL, stringsAsFactors = FALSE)
+  }
+  if (verbose) cat("Done!\n")
+
+  ## output
+  if (verbose) cat("\n")
+  if (verbose) cat("Permutation test restuls: \n")
+  if (verbose) print(perm_results_p_val)
+  if (verbose) cat("\n")
+
+  # env
+  perm_stats <- rbind(data.frame(nperm = rep(0, times = nrow(rmsep_dfm)), comparison = rmsep_dfm$comparison, RMSEP = rmsep_dfm$RMSEP, row.names = NULL),
+                      data.frame(nperm = perm_tot_rmsep_dfm$nperm, comparison = perm_tot_rmsep_dfm$comparison, RMSEP = perm_tot_rmsep_dfm$RMSEP, row.names = NULL))
+
+  out <- list(perm.method = "by_y", nperm = nperm, perm.stats = "RMSEP", adjCV = adjCV,
+              p.value.summary = perm_results_p_val, perm.results =  perm_stats, model.type = object$model.type)
+
+  class(out) <- "rbiomvr_perm"
+  assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
+
+  # directory
+  if (verbose) cat(paste0("Permutation RMSEP values stored in csv files with suffix: _perm_intermediate.csv. \n"))
+  if (verbose) cat(paste0("Permutation results stored in csv file: ", paste(deparse(substitute(object)), "_perm.csv", sep = ""), ". \n"))
+  write.csv(file = paste(deparse(substitute(object)), "_perm.csv", sep = ""), perm_results_p_val, row.names = FALSE)
+
+  ## plot
+  if (perm.plot){
+    plsda_permutation_test <- out
+    rbioUtil_perm_plot(perm_res = plsda_permutation_test, ..., verbose = verbose)
+  }
+}

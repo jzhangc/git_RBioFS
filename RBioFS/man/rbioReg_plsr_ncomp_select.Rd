@@ -81,7 +81,7 @@ The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV 
 }
 \examples{
 \dontrun{
-rbioClass_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
+rbioReg_plsr_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
 }
 }

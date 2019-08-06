@@ -66,6 +66,6 @@ The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus n
 }
 \examples{
 \dontrun{
-rbioClass_plsda(x, y, ncomp = 20)
+rbioReg_plsr(x, y, ncomp = 20)
 }
 }

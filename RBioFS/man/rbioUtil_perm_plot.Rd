@@ -78,14 +78,13 @@ rbioUtil_perm_plot(perm_res, ...)
 \value{
 A pdf file containing a scatter plot for permutation results.
 
-A pdf file containing a scatter plot for permutation results.
-
-A pdf file containing a scatter plot for permutation results.
-
 A baseplot object for permutation results.
 }
 \description{
 Plotting function for permutation test results.
+}
+\details{
+The function automatically adjust for the regression or classification types for rbiomvr object.
 }
 \examples{
 

@@ -30,7 +30,7 @@ Installation
 
 Update log
 
-    Feature blueprint
+    Feature wishlist
         - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
           - rbioClass_knn()
           - rbioClass_knn_plot()
@@ -79,6 +79,9 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
         
     (ADDED)
+        - General update
+          - rbioUtil_perm_plot() updated to accommodate PLSR functions
+          
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
             - "rbiomvr" object from this function has model.type = "regression"
@@ -88,6 +91,7 @@ Update log
 
         - Updates to PLS-DA function(s)
           - Print function for relevant functions to accommodate the new plsr functions
+          - A bug fixed for rbioClass_plsda_perm() where intercept was counted for ncomp
 
         - Version pump to 0.7.0
     

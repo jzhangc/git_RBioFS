@@ -692,7 +692,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   ## calcuate RMSEP and construct original RMSEP data frame
   rmsep <- pls::RMSEP(object)
   rmsep_dfm <- foreach(i = 1:dim(rmsep$val)[2], .combine = "rbind") %do% {
-    dfm <- as.data.frame(t(rmsep$val[, i, ncomp]))
+    dfm <- as.data.frame(t(rmsep$val[, i, ncomp + 1]))  # +1 becuase intercept
     if (adjCV){
       stats <- dfm[, "adjCV"]
     } else {
@@ -810,7 +810,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
                       data.frame(nperm = perm_dfm$nperm, comparison = perm_dfm$comparison, RMSEP = perm_dfm$RMSEP, row.names = NULL))
 
   out <- list(perm.method = perm.method, nperm = nperm, perm.stats = "RMSEP", adjCV = adjCV,
-              p.value.summary = perm_results_p_val, perm.results =  perm_stats)
+              p.value.summary = perm_results_p_val, perm.results =  perm_stats, model.type = object$model.type)
 
   class(out) <- "rbiomvr_perm"
   assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)

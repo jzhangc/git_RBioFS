@@ -26,7 +26,6 @@ rbioUtil_perm_plot <- function(perm_res, ...){
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param ... Additional argument for the plot settings.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return A pdf file containing a scatter plot for permutation results.
 #' @method rbioUtil_perm_plot rbiosvm_perm
 #' @export
 rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
@@ -73,7 +72,7 @@ rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param ... Additional argument for the plot settings.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return A pdf file containing a scatter plot for permutation results.
+#' @details The function automatically adjust for the regression or classification types for rbiomvr object.
 #' @method rbioUtil_perm_plot rbiomvr_perm
 #' @export
 rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
@@ -84,10 +83,18 @@ rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
   perm_res_dfm <- perm_res$perm.results
 
   # plot
-  baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = RMSEP, group = comparison)) +
-    geom_line(aes(linetype = comparison, color = comparison)) +
-    geom_point(aes(shape = comparison, color = comparison), size = plot.SymbolSize) +
-    geom_hline(yintercept = perm_res_dfm[perm_res_dfm$nperm == 0, 3], linetype = "dashed", colour = "red")
+  if (perm_res$model.type == "classification"){
+    baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = RMSEP, group = comparison)) +
+      geom_line(aes(linetype = comparison, color = comparison)) +
+      geom_point(aes(shape = comparison, color = comparison), size = plot.SymbolSize) +
+      geom_hline(yintercept = perm_res_dfm[perm_res_dfm$nperm == 0, 3], linetype = "dashed", colour = "red")
+  } else {
+    baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = RMSEP)) +
+      geom_line(aes(linetype = comparison, color = comparison)) +
+      geom_point(aes(shape = comparison, color = comparison), size = plot.SymbolSize) +
+      geom_hline(yintercept = perm_res_dfm[perm_res_dfm$nperm == 0, 3], linetype = "dashed", colour = "red")
+  }
+
   plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "RMSEP", ...)
 
   # save
