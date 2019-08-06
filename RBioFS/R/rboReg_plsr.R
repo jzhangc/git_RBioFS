@@ -604,8 +604,8 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     names(group.comp.boot.vip_list) <- levels(object$inputY)
 
     # plot list
-    boot.vip.plt_dat_list <- vector(mode = "list", length = length(levels(object$inputY)))
-    boot.vip.plt_dat_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
+    boot.vip.plt_dat_list <- vector(mode = "list", length = 1)
+    boot.vip.plt_dat_list[] <- foreach(i = 1) %do% {
       boot.plt_list.comp <- vector(mode = "list", length = length(comps))
       boot.plt_list.comp[] <- foreach(j = comps) %do% {
         boot.mean <- rowMeans(group.comp.boot.vip_list[[i]][[j]])
@@ -701,5 +701,6 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     RBioFS::rbioReg_plsr_vip_plot(vip_obj = out, ...)
   }
 }
+
 
 
