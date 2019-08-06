@@ -88,14 +88,17 @@ rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
       geom_line(aes(linetype = comparison, color = comparison)) +
       geom_point(aes(shape = comparison, color = comparison), size = plot.SymbolSize) +
       geom_hline(yintercept = perm_res_dfm[perm_res_dfm$nperm == 0, 3], linetype = "dashed", colour = "red")
+
+    plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "RMSEP", ...)
   } else {
     baseplt <- ggplot(data = perm_res_dfm, aes(x = nperm, y = RMSEP)) +
       geom_line(aes(linetype = comparison)) +
       geom_point(aes(shape = comparison), size = plot.SymbolSize) +
       geom_hline(yintercept = perm_res_dfm[perm_res_dfm$nperm == 0, 3], linetype = "dashed", colour = "red")
+
+    plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "Total RMSEP", ...)
   }
 
-  plt <- rbioUtil_perm_plot.default(baseplt = baseplt, plot.yLabel = "RMSEP", ...)
 
   # save
   if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(perm_res)),".plsda.perm.plot.pdf...", sep = ""))  # initial message
