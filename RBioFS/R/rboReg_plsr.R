@@ -692,7 +692,7 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
               bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL,
               model.type = object$model.type)
   class(out) <- "rbiomvr_vip"
-  assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(object)), "_plsr_vip", sep = ""), out, envir = .GlobalEnv)
 
   ## plot
   if (plot){

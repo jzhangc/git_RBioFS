@@ -62,7 +62,7 @@ The function uses RMSEP as the stats for comparing original model with permutats
             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
             J Mach Learn Res. 11: 1833 - 63.
 
-         For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+         For this function, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 }
 \examples{
 \dontrun{
