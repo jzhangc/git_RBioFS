@@ -191,6 +191,7 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
       cat("right side y-axis ignored for multi-plot figure.\n")
     }
   }
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   plot.sampleLabel.type <- match.arg(tolower(plot.sampleLabel.type), c("none", "direct", "indirect"))
 
 
@@ -322,6 +323,7 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
   if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls pacakge
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom"))
 
   ## construct q2r2 dataframes
@@ -482,6 +484,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
   if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   # if (!tolower(ncomp.selection.method) %in% c("min", "1err", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1err\", or \"randomization\" exactly.")
   ncomp.selection.method <- match.arg(tolower(ncomp.selection.method), c("1err", "min", "randomization"))
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
@@ -684,6 +687,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   if (parallelComputing){
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## calcuate RMSEP and construct original RMSEP data frame
   rmsep <- pls::RMSEP(object)
@@ -909,6 +913,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(object$inputX)) {
       stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX).")}
   }
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## extract information
   score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
@@ -1163,6 +1168,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                                    verbose = TRUE){
   # check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   plot.errorbar <- match.arg(tolower(plot.errorbar), c("sem", "sd"))
 
   # compute sd, df, t-value, p-value for jackknife
@@ -1820,6 +1826,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
   }
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
 
   ## calcuate ROC-AUC
@@ -2032,8 +2039,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
                                     verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.")
-  if (object$model.type == "regression") stop("the function only supports \"classification\" model type.")
-
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")

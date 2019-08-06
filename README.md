@@ -56,11 +56,13 @@ Update log
           - rbioClass()
           
 
-    0.6.4 (feature preview)
+    0.7.0 (feature preview)
     (ICEBOX)
-        - New PLS-DA function(s)
+        - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
+            - "rbiomvr" object from this function has model.type = "regression"
           - rbioReg_plsr_predict() function added for PLS regression analysis
+          - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
           
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
@@ -75,7 +77,15 @@ Update log
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
         
-        - Appropriate version pump
+        - Version pump to 0.7.0
+        
+      (ADDED)
+        - New PLSR function(s)
+          - rbioReg_plsr() function added for PLS regression analysis
+            - "rbiomvr" object from this function has model.type = "regression"
+          - rbioReg_plsr_ncomp_select() added
+          - rbioReg_plsr_perm() added
+          - rbioReg_plsr_vip() added
     
     
     0.6.3 (Aug.4.2019)
