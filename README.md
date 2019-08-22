@@ -93,6 +93,7 @@ Update log
         - Updates to PLS-DA function(s)
           - Print function for relevant functions to accommodate the new plsr functions
           - rbiomvr_vip object now also has a model.type variable
+          - rbioFS_plsda_vip_plot() fixed for small aesthetic settings
           - A bug fixed for rbioClass_plsda_perm() where intercept was counted for ncomp
           - A bug fixed for rbioFS_plsda_vip() where comps fixed to 1 when set bootstrap OFF
           - A bug fixed for rbioFS_plsda_vip() the function would crash when only two groups and when set bootstrap OFF

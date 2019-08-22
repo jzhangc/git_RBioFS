@@ -1635,7 +1635,6 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @export
 rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
                                   plot.title = TRUE, plot.titleSize = 10,
-                                  multi_plot.ncol = length(unique(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                   plot.sig.line = TRUE,
                                   plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
                                   plot.errorbarLblSize = 6, plot.fontType = "sans",
@@ -1648,7 +1647,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
                                   plot.Height = 150, verbose = TRUE){
   ## argument check
   if (!any(class(vip_obj) %in% c("rbiomvr_vip"))) stop("object needs to be a \"rbiomvr_vip\" class.")
-  multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
+  # if (vip_obj$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## plot
   # set up bootstrap setting
@@ -1677,7 +1676,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 
       baseplt <- ggplot(data = vip_list[[i]][[j]], aes(x = Features, y = VIP)) +
         geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
-        scale_x_discrete(expand = c(0.05, 0.05)) +
+        # scale_x_discrete(expand = c(0.05, 0.05)) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
