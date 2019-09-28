@@ -84,7 +84,7 @@ Update log
           
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
-          - R2 calculate added to rbioClass_svm_ncv_fs for regression study
+          - R2 calculation added to rbioClass_svm_ncv_fs for regression study
           - print function updated accordingly for rbiosvm_nestedcv class
 
         - New PLSR function(s)
