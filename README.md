@@ -81,6 +81,11 @@ Update log
     (ADDED)
         - General update
           - rbioUtil_perm_plot() updated to accommodate PLSR functions
+          
+        - Update to SVM function(s)
+          - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
+          - R2 calculate added to rbioClass_svm_ncv_fs for regression study
+          - print function updated accordingly for rbiosvm_nestedcv class
 
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis

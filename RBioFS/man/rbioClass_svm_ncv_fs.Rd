@@ -4,18 +4,30 @@
 \alias{rbioClass_svm_ncv_fs}
 \title{rbioClass_svm_ncv_fs}
 \usage{
-rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = c("radial",
-  "linear", "polynomial", "sigmoid"), cross.k = 10,
-  tune.method = c("cross", "boot", "fix"), tune.cross.k = 10,
-  tune.boot.n = 10, ..., fs.method = "rf", rf.ifs.ntree = 1001,
-  rf.sfs.ntree = 1001, fs.count.cutoff = cross.k,
-  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
-  clusterType = c("PSOCK", "FORK"), verbose = TRUE)
+rbioClass_svm_ncv_fs(x, y, univariate.fs = FALSE, uni.log2trans = TRUE,
+  uni.contrast = NULL, uni.alpha = 0.05, uni.fdr = FALSE,
+  center.scale = TRUE, kernel = c("radial", "linear", "polynomial",
+  "sigmoid"), cross.k = 10, tune.method = c("cross", "boot", "fix"),
+  tune.cross.k = 10, tune.boot.n = 10, ..., fs.method = "rf",
+  rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+  fs.count.cutoff = cross.k, parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK",
+  "FORK"), verbose = TRUE)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
+
+\item{univariate.fs}{If to use limma-based univariate reduction. Default is \code{FALSE}.}
+
+\item{uni.log2trans}{Only set if \code{univariate.fs = TRUE}, if to log2 transform data before univariate reduction.}
+
+\item{uni.contrast}{Only set if \code{univariate.fs = TRUE} and for a classificaiton study, the contrast for the univariate analysis. Default is \code{NULL}.}
+
+\item{uni.alpha}{Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.}
+
+\item{uni.fdr}{Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.}
 
 \item{center.scale}{Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
 
@@ -62,9 +74,13 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{tot.nested.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
 
+\code{tot.nested.rsq.summary}: total (i.e. mean) nested cross-validation R2, if \code{model_type = "regression"}
+
 \code{nested.accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
 
 \code{nested.RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
+
+\code{nested.rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
 
 \code{fs.method}: feature selection method
 
