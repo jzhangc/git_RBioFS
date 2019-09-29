@@ -279,7 +279,6 @@ rbioClass_svm_ncv_fs <- function(x, y,
                                  verbose = TRUE){
   ## initiate the run time and set seed
   start_time <- Sys.time()
-  set.seed(12)
 
   ## check arguments
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
