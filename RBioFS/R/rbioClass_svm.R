@@ -251,6 +251,7 @@ print.rbiosvm <- function(x, ...){
 #' @import doParallel
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom limma lmFit topTable makeContrasts eBayes
+#' @importFrom splines ns
 #' @examples
 #' \dontrun{
 #' svm_nestedcv <- rbioClass_svm_ncv_fs(x = mydata[, -c(1:2)],
@@ -322,8 +323,6 @@ rbioClass_svm_ncv_fs <- function(x, y,
   fold <- cut(seq(1:nrow(dfm_randomized)), breaks = cross.k, labels = FALSE)  # create a factor object with fold indices
 
   # nested CV function
-  i = 4
-
   nestedcv_func <- function(i) {
     if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
@@ -333,8 +332,13 @@ rbioClass_svm_ncv_fs <- function(x, y,
     # optional uni
     # outcome should be a list of features to subset the cv_training first
     if (univariate.fs){
-      cv_design <- model.matrix(~ 0 + cv_training_y)
-      colnames(cv_design) <- levels(cv_training_y)
+      if (model_type == "classification") {
+        cv_design <- model.matrix(~ 0 + cv_training_y)
+        colnames(cv_design) <- levels(cv_training_y)
+      } else {
+        nsy <- splines::ns(cv_training_y)
+        cv_design <- model.matrix(~ nsy)
+      }
 
       if (uni.log2trans) {
         E <- apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2))
@@ -357,7 +361,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
         cv_fit <- contrasts.fit(cv_fit, contrasts = cv_contra)
       }
       cv_fit <- eBayes(cv_fit)
-      cv_fit_dfm <- topTable(cv_fit, number = Inf)
+      cv_fit_dfm <- suppressMessages(topTable(cv_fit, number = Inf))
       cv_fit_dfm$feature <- rownames(cv_fit_dfm)
 
       if (uni.fdr){ # FDR
@@ -475,7 +479,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     tot.nested.rmse.summary <- c(mean(nested.rmse), sd(nested.rmse), sd(nested.rmse)/sqrt(cross.k))
     names(tot.nested.rmse.summary) <- c("tot.nested.RMSE", "sd", "sem")
     tot.nested.rsq.summary <- c(mean(nested.rsq), sd(nested.rsq), sd(nested.rsq)/sqrt(cross.k))
-    names(tot.nested.rmse.summary) <- c("tot.nested.rsq", "sd", "sem")
+    names(tot.nested.rsq.summary) <- c("tot.nested.rsq", "sd", "sem")
   }
   selected.features <- names(fs.count[which(fs.count >= fs.count.cutoff)])
 
@@ -523,8 +527,6 @@ rbioClass_svm_ncv_fs <- function(x, y,
   class(out) <- "rbiosvm_nestedcv"
   return(out)
 }
-
-
 #' @export
 print.rbiosvm_nestedcv <- function(x, ...){
   cat("SVM model type: ")
