@@ -4,10 +4,19 @@
 \alias{rbioReg_plsr_vip}
 \title{rbioReg_plsr_vip}
 \usage{
-rbioReg_plsr_vip(object, vip.alpha = 1, comps = c(1, 2),
-  bootstrap = TRUE, boot.n = 50, boot.parallelComputing = TRUE,
+rbioReg_plsr_vip(
+  object,
+  vip.alpha = 1,
+  comps = c(1, 2),
+  bootstrap = TRUE,
+  boot.n = 50,
+  boot.parallelComputing = TRUE,
   boot.n_cores = parallel::detectCores() - 1,
-  boot.clusterType = "PSOCK", plot = TRUE, ..., verbose = TRUE)
+  boot.clusterType = "PSOCK",
+  plot = TRUE,
+  ...,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.}

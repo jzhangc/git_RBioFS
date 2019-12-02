@@ -4,15 +4,30 @@
 \alias{rbioClass_svm_ncv_fs}
 \title{rbioClass_svm_ncv_fs}
 \usage{
-rbioClass_svm_ncv_fs(x, y, univariate.fs = FALSE, uni.log2trans = TRUE,
-  uni.contrast = NULL, uni.alpha = 0.05, uni.fdr = FALSE,
-  center.scale = TRUE, kernel = c("radial", "linear", "polynomial",
-  "sigmoid"), cross.k = 10, tune.method = c("cross", "boot", "fix"),
-  tune.cross.k = 10, tune.boot.n = 10, ..., fs.method = "rf",
-  rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-  fs.count.cutoff = cross.k, parallelComputing = TRUE,
-  n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK",
-  "FORK"), verbose = TRUE)
+rbioClass_svm_ncv_fs(
+  x,
+  y,
+  univariate.fs = FALSE,
+  uni.log2trans = TRUE,
+  uni.contrast = NULL,
+  uni.alpha = 0.05,
+  uni.fdr = FALSE,
+  center.scale = TRUE,
+  kernel = c("radial", "linear", "polynomial", "sigmoid"),
+  cross.k = 10,
+  tune.method = c("cross", "boot", "fix"),
+  tune.cross.k = 10,
+  tune.boot.n = 10,
+  ...,
+  fs.method = "rf",
+  rf.ifs.ntree = 1001,
+  rf.sfs.ntree = 1001,
+  fs.count.cutoff = cross.k,
+  parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1,
+  clusterType = c("PSOCK", "FORK"),
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}

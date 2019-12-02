@@ -711,7 +711,8 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
-    mtx <- cbind(fpr, tpr)
+    thresholds <- perf$thresholds
+    mtx <- cbind(fpr, tpr, thresholds)
     if (length(levels(outcome)) == 2){
       df <- data.frame(mtx, group = rep(levels(outcome)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
     } else {

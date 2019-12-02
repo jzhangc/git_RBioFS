@@ -4,18 +4,32 @@
 \alias{rbioReg_plsr_ncomp_select}
 \title{rbioReg_plsr_ncomp_select()}
 \usage{
-rbioReg_plsr_ncomp_select(object, ..., ncomp.selection.method = c("1err",
-  "min", "randomization"), randomization.nperm = 999,
-  randomization.alpha = 0.05, rmsepplot = TRUE,
-  plot.rightsideY = TRUE, plot.optm.ncomp.line = TRUE,
+rbioReg_plsr_ncomp_select(
+  object,
+  ...,
+  ncomp.selection.method = c("1err", "min", "randomization"),
+  randomization.nperm = 999,
+  randomization.alpha = 0.05,
+  rmsepplot = TRUE,
+  plot.rightsideY = TRUE,
+  plot.optm.ncomp.line = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
-  multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top",
-  "left", "right"), plot.display.Title = TRUE, plot.SymbolSize = 2,
-  plot.fontType = "sans", plot.xLabel = "Components",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10,
-  plot.yLabel = "RMSEP", plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+  multi_plot.nrow = 1,
+  multi_plot.legend.pos = c("bottom", "top", "left", "right"),
+  plot.display.Title = TRUE,
+  plot.SymbolSize = 2,
+  plot.fontType = "sans",
+  plot.xLabel = "Components",
+  plot.xLabelSize = 10,
+  plot.xTickLblSize = 10,
+  plot.yLabel = "RMSEP",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.legendSize = 9,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}

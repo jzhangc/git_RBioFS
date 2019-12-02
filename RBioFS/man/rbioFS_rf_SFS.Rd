@@ -4,9 +4,19 @@
 \alias{rbioFS_rf_SFS}
 \title{rbioFS_rf_SFS}
 \usage{
-rbioFS_rf_SFS(objTitle = "x_vs_tgt", x, y, nTimes = 50, nTree = 1001,
-  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
-  clusterType = c("PSOCK", "FORK"), plot = TRUE, n = "all", ...)
+rbioFS_rf_SFS(
+  objTitle = "x_vs_tgt",
+  x,
+  y,
+  nTimes = 50,
+  nTree = 1001,
+  parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1,
+  clusterType = c("PSOCK", "FORK"),
+  plot = TRUE,
+  n = "all",
+  ...
+)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}

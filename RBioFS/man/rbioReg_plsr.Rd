@@ -4,9 +4,18 @@
 \alias{rbioReg_plsr}
 \title{rbioReg_plsr}
 \usage{
-rbioReg_plsr(x, y, method = "simpls", scale = TRUE,
-  validation = c("none", "CV", "LOO"), segments = 10,
-  segments.type = "random", jackknife = TRUE, ..., verbose = TRUE)
+rbioReg_plsr(
+  x,
+  y,
+  method = "simpls",
+  scale = TRUE,
+  validation = c("none", "CV", "LOO"),
+  segments = 10,
+  segments.type = "random",
+  jackknife = TRUE,
+  ...,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}

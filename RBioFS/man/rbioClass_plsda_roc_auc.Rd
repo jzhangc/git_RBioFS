@@ -4,17 +4,33 @@
 \alias{rbioClass_plsda_roc_auc}
 \title{rbioClass_plsda_roc_auc()}
 \usage{
-rbioClass_plsda_roc_auc(object, newdata, newdata.label,
-  center.newdata = TRUE, rocplot = TRUE, plot.comps = 1:object$ncomp,
-  plot.smooth = FALSE, multi_plot.ncol = length(plot.comps),
-  multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top",
-  "left", "right"), plot.rightsideY = TRUE, plot.SymbolSize = 2,
-  plot.display.Title = TRUE, plot.titleSize = 10,
-  plot.fontType = "sans", plot.xLabel = "1 - specificity",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10,
-  plot.yLabel = "sensitivity", plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+rbioClass_plsda_roc_auc(
+  object,
+  newdata,
+  newdata.label,
+  center.newdata = TRUE,
+  rocplot = TRUE,
+  plot.comps = 1:object$ncomp,
+  plot.smooth = FALSE,
+  multi_plot.ncol = length(plot.comps),
+  multi_plot.nrow = 1,
+  multi_plot.legend.pos = c("bottom", "top", "left", "right"),
+  plot.rightsideY = TRUE,
+  plot.SymbolSize = 2,
+  plot.display.Title = TRUE,
+  plot.titleSize = 10,
+  plot.fontType = "sans",
+  plot.xLabel = "1 - specificity",
+  plot.xLabelSize = 10,
+  plot.xTickLblSize = 10,
+  plot.yLabel = "sensitivity",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.legendSize = 9,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}

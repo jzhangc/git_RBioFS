@@ -4,11 +4,19 @@
 \alias{rbioClass_plsda_perm}
 \title{rbioClass_plsda_perm()}
 \usage{
-rbioClass_plsda_perm(object, ncomp = object$ncomp, adjCV = FALSE,
-  perm.plot = TRUE, ..., perm.method = c("by_y", "by_feature_per_y"),
-  nperm = 999, parallelComputing = TRUE,
-  n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK",
-  "FORK"), verbose = TRUE)
+rbioClass_plsda_perm(
+  object,
+  ncomp = object$ncomp,
+  adjCV = FALSE,
+  perm.plot = TRUE,
+  ...,
+  perm.method = c("by_y", "by_feature_per_y"),
+  nperm = 999,
+  parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1,
+  clusterType = c("PSOCK", "FORK"),
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}

@@ -4,9 +4,16 @@
 \alias{uni_PreProc}
 \title{uni_PreProc}
 \usage{
-uni_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
-  logTransObjT = "data", logTransParallelComputing = FALSE,
-  bgMethod = "auto", normMethod = "quantile", ...)
+uni_PreProc(
+  rawlist,
+  logTrans = FALSE,
+  logTransMethod = "log2",
+  logTransObjT = "data",
+  logTransParallelComputing = FALSE,
+  bgMethod = "auto",
+  normMethod = "quantile",
+  ...
+)
 }
 \arguments{
 \item{rawlist}{Input data, either a list, \code{EList} or \code{MAList} object.}

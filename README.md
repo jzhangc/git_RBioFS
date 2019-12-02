@@ -85,7 +85,8 @@ Update log
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
           - R2 calculation added to rbioClass_svm_ncv_fs for regression study
-          - print function updated accordingly for rbiosvm_nestedcv class
+          - print function updated accordingly for rbiosvm_nestedcv class\
+          - rbioClass_svm_roc_auc() now outputs thresholds values
 
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
@@ -99,6 +100,7 @@ Update log
           - Print function for relevant functions to accommodate the new plsr functions
           - rbiomvr_vip object now also has a model.type variable
           - rbioFS_plsda_vip_plot() fixed for small aesthetic settings
+          - rbioClass_plsda_roc_auc() now outputs thresholds values
           - A bug fixed for rbioClass_plsda_perm() where intercept was counted for ncomp
           - A bug fixed for rbioFS_plsda_vip() where comps fixed to 1 when set bootstrap OFF
           - A bug fixed for rbioFS_plsda_vip() the function would crash when only two groups and when set bootstrap OFF

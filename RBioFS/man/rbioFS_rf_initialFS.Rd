@@ -4,11 +4,20 @@
 \alias{rbioFS_rf_initialFS}
 \title{rbioFS_rf_initialFS}
 \usage{
-rbioFS_rf_initialFS(objTitle = "x_vs_tgt", x, y, nTimes = 50,
-  nTree = 1001, mTry = if (!is.factor(y)) max(floor(ncol(x)/3), 1) else
-  floor(sqrt(ncol(x))), parallelComputing = TRUE,
-  n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK",
-  "FORK"), plot = TRUE, n = "all", ...)
+rbioFS_rf_initialFS(
+  objTitle = "x_vs_tgt",
+  x,
+  y,
+  nTimes = 50,
+  nTree = 1001,
+  mTry = if (!is.factor(y)) max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))),
+  parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1,
+  clusterType = c("PSOCK", "FORK"),
+  plot = TRUE,
+  n = "all",
+  ...
+)
 }
 \arguments{
 \item{objTitle}{The title for the output data frame. Default is \code{"x_vs_tgt"}}

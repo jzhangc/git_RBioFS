@@ -4,18 +4,35 @@
 \alias{rbioFS_rf_initialFS_plot}
 \title{rbioFS_rf_initialFS_plot}
 \usage{
-rbioFS_rf_initialFS_plot(object, n = "all",
-  plot.file.title = deparse(substitute(object)), plot.title = NULL,
-  plot.fs.line = TRUE, plot.titleSize = 10, plot.errorbar = c("sem",
-  "sd"), plot.errorbarWidth = 0.2, plot.outlineCol = "black",
-  plot.fontType = "sans", plot.xLabel = "Features",
-  plot.xLabelSize = 10, plot.xAngle = 90, plot.xhAlign = 0.95,
-  plot.xvAlign = 0.5, plot.xTickLblSize = 10,
-  plot.xTickItalic = FALSE, plot.xTickBold = FALSE,
-  plot.rightsideY = TRUE, plot.yLabel = "Feature Importance",
-  plot.yLabelSize = 10, plot.yTickLblSize = 10,
-  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+rbioFS_rf_initialFS_plot(
+  object,
+  n = "all",
+  plot.file.title = deparse(substitute(object)),
+  plot.title = NULL,
+  plot.fs.line = TRUE,
+  plot.titleSize = 10,
+  plot.errorbar = c("sem", "sd"),
+  plot.errorbarWidth = 0.2,
+  plot.outlineCol = "black",
+  plot.fontType = "sans",
+  plot.xLabel = "Features",
+  plot.xLabelSize = 10,
+  plot.xAngle = 90,
+  plot.xhAlign = 0.95,
+  plot.xvAlign = 0.5,
+  plot.xTickLblSize = 10,
+  plot.xTickItalic = FALSE,
+  plot.xTickBold = FALSE,
+  plot.rightsideY = TRUE,
+  plot.yLabel = "Feature Importance",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.yTickItalic = FALSE,
+  plot.yTickBold = FALSE,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rf_ifs} object. Make sure the object is generated with a \code{validation} section.}

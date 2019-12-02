@@ -4,15 +4,29 @@
 \alias{rbioClass_plsda_tuplot}
 \title{rbioClass_plsda_tuplot}
 \usage{
-rbioClass_plsda_tuplot(object, comps = 1,
-  multi_plot.ncol = length(comps), multi_plot.nrow = 1,
-  multi_plot.legend.pos = "bottom", plot.rightsideY = TRUE,
-  plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
-  plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
-  plot.SymbolSize = 5, plot.Title = NULL, plot.fontType = "sans",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+rbioClass_plsda_tuplot(
+  object,
+  comps = 1,
+  multi_plot.ncol = length(comps),
+  multi_plot.nrow = 1,
+  multi_plot.legend.pos = "bottom",
+  plot.rightsideY = TRUE,
+  plot.sampleLabel.type = "none",
+  plot.sampleLabel.vector = NULL,
+  plot.sampleLabelSize = 2,
+  plot.sampleLabel.padding = 0.5,
+  plot.SymbolSize = 5,
+  plot.Title = NULL,
+  plot.fontType = "sans",
+  plot.xLabelSize = 10,
+  plot.xTickLblSize = 10,
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.legendSize = 9,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}

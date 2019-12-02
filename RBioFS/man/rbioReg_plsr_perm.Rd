@@ -4,10 +4,18 @@
 \alias{rbioReg_plsr_perm}
 \title{rbioReg_plsr_perm()}
 \usage{
-rbioReg_plsr_perm(object, ncomp = object$ncomp, adjCV = FALSE,
-  perm.plot = TRUE, ..., nperm = 999, parallelComputing = TRUE,
-  n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK",
-  "FORK"), verbose = TRUE)
+rbioReg_plsr_perm(
+  object,
+  ncomp = object$ncomp,
+  adjCV = FALSE,
+  perm.plot = TRUE,
+  ...,
+  nperm = 999,
+  parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1,
+  clusterType = c("PSOCK", "FORK"),
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}

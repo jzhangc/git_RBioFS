@@ -26,7 +26,6 @@ rbioUtil_perm_plot <- function(perm_res, ...){
 #' @param plot.Height Scoreplot height. Default is \code{150}.
 #' @param ... Additional argument for the plot settings.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @method rbioUtil_perm_plot rbiosvm_perm
 #' @export
 rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
                                             plot.Width = 170, plot.Height = 150,
@@ -73,7 +72,6 @@ rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
 #' @param ... Additional argument for the plot settings.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details The function automatically adjust for the regression or classification types for rbiomvr object.
-#' @method rbioUtil_perm_plot rbiomvr_perm
 #' @export
 rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
                                             plot.Width = 170, plot.Height = 150,

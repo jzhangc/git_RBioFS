@@ -4,9 +4,19 @@
 \alias{rbioClass_plsda}
 \title{rbioClass_plsda}
 \usage{
-rbioClass_plsda(x, y, ncomp = length(unique(y)) - 1, method = "simpls",
-  scale = TRUE, validation = c("none", "CV", "LOO"), segments = 10,
-  segments.type = "random", jackknife = TRUE, ..., verbose = TRUE)
+rbioClass_plsda(
+  x,
+  y,
+  ncomp = length(unique(y)) - 1,
+  method = "simpls",
+  scale = TRUE,
+  validation = c("none", "CV", "LOO"),
+  segments = 10,
+  segments.type = "random",
+  jackknife = TRUE,
+  ...,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}

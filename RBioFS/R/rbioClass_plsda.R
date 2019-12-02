@@ -1859,7 +1859,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
       #      tpr <- as.numeric(unlist(perf@y.values))
       fpr <- 1 - perf$specificities
       tpr <- perf$sensitivities
-      mtx <- cbind(fpr, tpr)
+      thresholds <- perf$thresholds
+      mtx <- cbind(fpr, tpr, thresholds)
       if (length(levels(outcome)) == 2){
         df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       } else {
