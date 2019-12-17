@@ -66,11 +66,14 @@ Update log
           
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
+          - rbioClass_svm_roc_auc() plot.lineSize argument added
+
                  
         - Updates to PLS-DA function(s)
           - Multivariate Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed
           - rbioClass_plsda_perm() plot output file name fixed
+          - rbioClass_plsda_roc_auc() plot.lineSize argument added
           - Print function for relevant functions to accommodate the new plsr functions
 
         - Updates to the PCA function(s)

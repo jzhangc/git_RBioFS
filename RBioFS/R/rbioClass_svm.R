@@ -567,6 +567,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
@@ -620,7 +621,8 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
                                   center.scale.newdata = TRUE,
                                   rocplot = TRUE,
                                   plot.smooth = FALSE,
-                                  plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                  plot.SymbolSize = 2, plot.lineSize = 1,
+                                  plot.display.Title = TRUE, plot.titleSize = 10,
                                   plot.fontType = "sans",
                                   plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
                                   plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
@@ -739,7 +741,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".svm.roc.pdf...", sep = ""))  # initial message
 
     plt <- ggplot(data = roc_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
-      geom_line(aes(linetype = group)) +
+      geom_line(aes(linetype = group), size = plot.lineSize) +
       geom_point(aes(shape = group), size = plot.SymbolSize) +
       geom_abline(intercept = 0) +
       ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +

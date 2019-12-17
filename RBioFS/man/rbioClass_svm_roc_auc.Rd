@@ -15,6 +15,7 @@ rbioClass_svm_roc_auc(
   rocplot = TRUE,
   plot.smooth = FALSE,
   plot.SymbolSize = 2,
+  plot.lineSize = 1,
   plot.display.Title = TRUE,
   plot.titleSize = 10,
   plot.fontType = "sans",
@@ -49,6 +50,8 @@ rbioClass_svm_roc_auc(
 \item{plot.smooth}{If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
+
+\item{plot.lineSize}{Line size. Default is \code{1}.}
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 

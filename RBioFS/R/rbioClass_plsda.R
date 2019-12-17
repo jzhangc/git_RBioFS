@@ -1771,6 +1771,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
@@ -1800,7 +1801,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
                                     plot.smooth = FALSE,
                                     multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                     plot.rightsideY = TRUE,
-                                    plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                    plot.SymbolSize = 2, plot.lineSize = 1,
+                                    plot.display.Title = TRUE, plot.titleSize = 10,
                                     plot.fontType = "sans",
                                     plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
                                     plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
@@ -1885,7 +1887,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
     plt_list <- vector(mode = "list", length = length(plot.comps))
     plt_list[] <- foreach(k = 1:length(plot.comps)) %do% {
       plt <- ggplot(data = roc_dfm_list[[k]], aes(x = fpr, y = tpr, group = group, colour = group)) +
-        geom_line(aes(linetype = group)) +
+        geom_line(aes(linetype = group), size = plot.lineSize) +
         geom_point(aes(shape = group), size = plot.SymbolSize) +
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +

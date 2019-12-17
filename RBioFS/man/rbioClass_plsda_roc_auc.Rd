@@ -17,6 +17,7 @@ rbioClass_plsda_roc_auc(
   multi_plot.legend.pos = c("bottom", "top", "left", "right"),
   plot.rightsideY = TRUE,
   plot.SymbolSize = 2,
+  plot.lineSize = 1,
   plot.display.Title = TRUE,
   plot.titleSize = 10,
   plot.fontType = "sans",
@@ -56,6 +57,8 @@ rbioClass_plsda_roc_auc(
 \item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
+
+\item{plot.lineSize}{Line size. Default is \code{1}.}
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 
