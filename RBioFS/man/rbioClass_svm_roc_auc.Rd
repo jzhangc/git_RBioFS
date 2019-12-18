@@ -90,7 +90,8 @@ Prints AUC values in the console. And a pdf file for ROC plot. The function also
         \code{model.type}
         \code{y.threshold}
         \code{regression.categories}
-        \code{svm.roc}
+        \code{svm.roc_object}
+        \code{svm.roc_dataframe}
         \code{input.newdata}
         \code{input.newdata.y}
         \code{input.newdata.label}
@@ -109,8 +110,7 @@ Uses pROC module to calculate ROC. The function supports more than two groups or
 
          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
 
-         Known issue: due to the AUC calculation method, the resulting \code{svm_roc_auc} class doesn't include the AUC score. It will be fixed in a future update.
-         For now, the AUC scores will be printed in the console upon the execution of the function.
+         Along with the data frame, the \code{svm_roc_auc} output includes the \code{roc} object from the \code{pROC} package, with which the stats can be done to compare ROCs.
 }
 \examples{
 \dontrun{

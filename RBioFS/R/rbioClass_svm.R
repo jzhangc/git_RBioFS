@@ -585,7 +585,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'         \code{model.type}
 #'         \code{y.threshold}
 #'         \code{regression.categories}
-#'         \code{svm.roc}
+#'         \code{svm.roc_object}
+#'         \code{svm.roc_dataframe}
 #'         \code{input.newdata}
 #'         \code{input.newdata.y}
 #'         \code{input.newdata.label}
@@ -600,8 +601,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'
 #'          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
 #'
-#'          Known issue: due to the AUC calculation method, the resulting \code{svm_roc_auc} class doesn't include the AUC score. It will be fixed in a future update.
-#'          For now, the AUC scores will be printed in the console upon the execution of the function.
+#'          Along with the data frame, the \code{svm_roc_auc} output includes the \code{roc} object from the \code{pROC} package, with which the stats can be done to compare ROCs.
+#'
 #'
 #' @import ggplot2
 #' @import foreach
@@ -690,9 +691,11 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   if (object$model.type == "regression"){
     pred <- cut(pred, rg, labels = reg.group.names)
   }
-
   outcome <- newdata.label  # origial label
-  roc_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
+
+  # auc
+  roc_auc_list <- vector(mode = "list", length = length(levels(outcome)))
+  roc_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
     response <- outcome
     levels(response)[-i] <- "others"
     predictor <- dummy(pred)
@@ -710,7 +713,12 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     } else {
       cat(paste0(" AUC - ", levels(outcome)[i], " (vs Others): ", perf$auc, "\n"))
     }
+    perf
+  }
+  names(roc_auc_list) <- unique(outcome)
 
+  roc_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
+    perf <- roc_auc_list[[i]]
     fpr <- 1 - perf$specificities
     tpr <- perf$sensitivities
     thresholds <- perf$thresholds
@@ -728,7 +736,8 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   out <- list(model.type = object$model.type,
               y.threshold = y.threshold,
               regression.categories = reg.group,
-              svm.roc = roc_dfm,
+              svm.roc_object = roc_auc_list,
+              svm.roc_dataframe = roc_dfm,
               input.newdata = newdata,
               input.newdata.y = newdata.y,
               input.newdata.label = newdata.label,
@@ -769,6 +778,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     if (verbose) cat("Done!\n")
   }
 }
+
 
 #' @title rbioClass_svm_perm()
 #'

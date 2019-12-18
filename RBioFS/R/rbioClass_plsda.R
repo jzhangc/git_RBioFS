@@ -1869,8 +1869,9 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
         df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       }
       df <- df[order(df$tpr), ]  # order by tpr so that all the points will be connected on graph
-      return(df)
+      df
     }
+    out
   }
   names(roc_dfm_list) <- paste0("comp ", 1:length(plot.comps))
 

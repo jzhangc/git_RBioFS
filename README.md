@@ -90,6 +90,8 @@ Update log
           - R2 calculation added to rbioClass_svm_ncv_fs for regression study
           - print function updated accordingly for rbiosvm_nestedcv class\
           - rbioClass_svm_roc_auc() now outputs thresholds values
+            - The svm_roc_auc class now includes the roc object from the pROC package named "svm.auc_object", with which the stats can be done to compare ROCs.
+            - The svm_roc_auc class item "svm.auc" now changed to "svm.auc_dataframe"
 
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
