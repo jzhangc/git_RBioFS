@@ -63,6 +63,7 @@ Update log
             - "rbiomvr" object from this function has model.type = "regression"
           - rbioReg_plsr_predict() function added for PLS regression analysis
           - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
+          - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
           
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
@@ -74,6 +75,7 @@ Update log
           - rbioClass_plsda_perm() plot output file name fixed
           - rbioClass_plsda_roc_auc() plot.lineSize argument added
           - Print function for relevant functions to accommodate the new plsr functions
+          - A bug fixed for rbioClass_plsda_perm() where the intercept term wasn't excluded
 
         - Updates to the PCA function(s)
           - rbioFS_PCA() now exports a "rbiofs_pca" class object

@@ -714,7 +714,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
     perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp + 1]))
       if (adjCV){
         stats <- dfm[, "adjCV"]
       } else {
@@ -746,7 +746,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
     perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp + 1]))
       if (adjCV){
         stats <- dfm[, "adjCV"]
       } else {

@@ -351,7 +351,7 @@ rbioReg_plsr_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   ## calcuate RMSEP and construct original RMSEP data frame
   rmsep <- pls::RMSEP(object)
   rmsep_dfm <- foreach(i = 1:dim(rmsep$val)[2], .combine = "rbind") %do% {
-    dfm <- as.data.frame(t(rmsep$val[, i, ncomp]))
+    dfm <- as.data.frame(t(rmsep$val[, i, ncomp + 1]))
     if (adjCV){
       stats <- dfm[, "adjCV"]
     } else {
