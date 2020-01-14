@@ -67,7 +67,6 @@ Update log
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
           - rbioClass_svm_roc_auc() plot.lineSize argument added
-
                  
         - Updates to PLS-DA function(s)
           - Multivariate Y modelling now possible with rbioFS_plsda
@@ -153,7 +152,7 @@ Update log
           - "rbiomvr" class updated with new item "model.type" for compatibility with the regression study
           - The output from rbioClass_plsda_predict() now includes the updated "prediction" class
           - rbioClass_plsda_scoreplot() now supports more than six groups
-          - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to different random resampling results
+          - A bug fixed for rbioClass_plsda_perm() where parallel computing fails to differ random resampling results
           - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
           - A bug fixed for rbioFS_plsda_vip() where the function will crash if the input object only have one comp
           
