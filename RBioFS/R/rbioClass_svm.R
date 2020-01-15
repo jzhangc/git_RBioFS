@@ -876,7 +876,7 @@ rbioClass_svm_perm <- function(object,
 
   # perm functions
   by_y_func <- function(i){
-    # set.seed(i)
+    set.seed(i)
     perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
     perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = perm_y,
                                 center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
@@ -892,7 +892,7 @@ rbioClass_svm_perm <- function(object,
     return(perm_perfm_dfm)
   }
   by_feature_per_y_func <- function(i){
-    # set.seed(i)
+    set.seed(i)
     perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
       sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
       sub_dat_colnames <- colnames(sub_dat)

@@ -705,6 +705,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   ## permutation test
   # permutation test functions
   by_y_func <- function(i){
+    set.seed(i)
     perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
     perm_model <- rbioClass_plsda(x = object$centerX$centerX, y = factor(perm_y, levels = unique(perm_y)),
                                   ncomp = ncomp, scale = FALSE, validation = object$validation_method,
@@ -726,6 +727,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     return(perm_rmsep_dfm)
   }
   by_feature_per_y_func <- function(i){
+    set.seed(i)
     perm_x <- foreach(m = dimnames(rmsep$val)[[2]], .combine = "rbind") %do% {
       sub_dat <- object$centerX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
       sub_dat_colnames <- colnames(sub_dat)
