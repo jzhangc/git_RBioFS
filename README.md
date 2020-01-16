@@ -88,6 +88,10 @@ Update log
           
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
+          - rbioClass_svm_ncv_fs() now outputs the CV models and the sample partitioning status
+            - rbiosvm_nestedcv class now incluldes nested.cv.models to include full CV models
+          - rbioClass_svm_ncv_fs() now can use "median" method to select the best CV models for feature selection
+            - rbiosvm_nestedcv class now incluldes accuracy/RMSE/rsq/fs.count for the "best" cv models selected by the "median" method
           - R2 calculation added to rbioClass_svm_ncv_fs for regression study
           - print function updated accordingly for rbiosvm_nestedcv class\
           - rbioClass_svm_roc_auc() now outputs thresholds values

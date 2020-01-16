@@ -15,6 +15,7 @@ rbioClass_svm_ncv_fs(
   center.scale = TRUE,
   kernel = c("radial", "linear", "polynomial", "sigmoid"),
   cross.k = 10,
+  cross.best.model.method = c("none", "median"),
   tune.method = c("cross", "boot", "fix"),
   tune.cross.k = 10,
   tune.boot.n = 10,
@@ -50,6 +51,8 @@ rbioClass_svm_ncv_fs(
 
 \item{cross.k}{Fold of nested cross validation, i.e. outer loop. Default is \code{10}.}
 
+\item{cross.best.model.method}{The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.}
+
 \item{tune.method}{Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
 
 \item{tune.cross.k}{Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.}
@@ -79,6 +82,8 @@ Returns a SVM model object, with classes "svm" and "rbiosvm".
 
 Additional items for \code{rbiosvm_nestedcv}:
 
+\code{univariate.fs}
+
 \code{cv.fold}: number of (outer) cross-validation fold
 
 \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
@@ -97,13 +102,33 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{nested.rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
 
+\code{nested.fs.count}: fs count for all the cv models
+
+\code{nested.cv.models}: all the cv models
+
+\code{best.nested.method}
+
+\code{best.nested.index}: index of the best models in the total model list
+
+\code{best.nested.acc.summary}
+
+\code{best.nested.rmse.summary}
+
+\code{best.nested.rsq.summary}
+
+\code{best.nested.accu}
+
+\code{best.nested.rmse}
+
+\code{best.nested.rsq}
+
+\code{best.nested.fs.count}: fs count for only the best models
+
 \code{fs.method}: feature selection method
 
 \code{fs.count.threshold}: count threshold for generating consensus feature list
 
 \code{selected.features}
-
-\code{nested.fs.count}: total vote counts for each selected feature
 
 \code{tune.method}: (inner) loop method for SVM grid search
 
@@ -122,6 +147,10 @@ Resulted features from each nested cross-validation round are voted. Features wi
 
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
+
+When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
+for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }

@@ -187,6 +187,7 @@ print.rbiosvm <- function(x, ...){
 #' @param center.scale Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
+#' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
 #' @param tune.method Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
@@ -202,6 +203,8 @@ print.rbiosvm <- function(x, ...){
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
 #'
 #' Additional items for \code{rbiosvm_nestedcv}:
+#'
+#' \code{univariate.fs}
 #'
 #' \code{cv.fold}: number of (outer) cross-validation fold
 #'
@@ -221,13 +224,33 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{nested.rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
 #'
+#' \code{nested.fs.count}: fs count for all the cv models
+#'
+#' \code{nested.cv.models}: all the cv models
+#'
+#' \code{best.nested.method}
+#'
+#' \code{best.nested.index}: index of the best models in the total model list
+#'
+#' \code{best.nested.acc.summary}
+#'
+#' \code{best.nested.rmse.summary}
+#'
+#' \code{best.nested.rsq.summary}
+#'
+#' \code{best.nested.accu}
+#'
+#' \code{best.nested.rmse}
+#'
+#' \code{best.nested.rsq}
+#'
+#' \code{best.nested.fs.count}: fs count for only the best models
+#'
 #' \code{fs.method}: feature selection method
 #'
 #' \code{fs.count.threshold}: count threshold for generating consensus feature list
 #'
 #' \code{selected.features}
-#'
-#' \code{nested.fs.count}: total vote counts for each selected feature
 #'
 #' \code{tune.method}: (inner) loop method for SVM grid search
 #'
@@ -244,6 +267,10 @@ print.rbiosvm <- function(x, ...){
 #'
 #' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 #' meaning maximum number of features selected from the nested cross-validation are reported.
+#'
+#' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
+#' for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+#'
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
@@ -271,7 +298,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
                                  uni.alpha = 0.05, uni.fdr = FALSE,
                                  center.scale = TRUE,
                                  kernel = c("radial", "linear", "polynomial", "sigmoid"),
-                                 cross.k = 10,
+                                 cross.k = 10, cross.best.model.method = c("none", "median"),
                                  tune.method = c("cross", "boot", "fix"),
                                  tune.cross.k = 10, tune.boot.n = 10, ...,
                                  fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
@@ -310,6 +337,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
   # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
   kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
+  cross.best.model.method <- match.arg(tolower(cross.best.model.method), c("none", "median"))
   tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
   if (parallelComputing){
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
@@ -420,12 +448,14 @@ rbioClass_svm_ncv_fs <- function(x, y,
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
       accu <- sum(diag(table(pred, fs_test$y))) / length(fs_test$y)  # accuracy = total TP / total (TP: true positive)
-      tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs, nested.cv.accuracy = accu)
+      tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
+                      cv_svm_model = cv_m, nested.cv.accuracy = accu)
     } else {
       error <- pred - fs_test$y
       rmse <- sqrt(mean(error^2))
       rsq <- cor(pred, fs_test$y)
-      tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs, nested.cv.rmse = rmse, nested.cv.rsq = rsq)
+      tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
+                      cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq)
     }
     if (verbose) cat("Done!\n")
     # foreach output
@@ -444,26 +474,57 @@ rbioClass_svm_ncv_fs <- function(x, y,
   nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% nestedcv_func(i)
   names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
+  # below: cv.model.idx: best models index
   if (model_type == "classification"){
     nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
       nested.cv.list[[i]]$nested.cv.accuracy
     }
     nested.rmse <- NULL
     nested.rsq <- NULL
+    cv.median <- median(nested.accu)
+    cv.model.idx <- which(nested.accu >= cv.median)  # the higher the better
+    best.nested.accu <- nested.accu[cv.model.idx]
+    best.nested.rmse <- NULL
+    best.nested.rsq <- NULL
   } else {
     nested.accu <- NULL
-    nested.rmse <- foreach(i = 1:cross.k, .combine = "c") %do% {
+    nested.rmse<- foreach(i = 1:cross.k, .combine = "c") %do% {
       nested.cv.list[[i]]$nested.cv.rmse
     }
     nested.rsq <- foreach(i = 1:cross.k, .combine = "c") %do% {
       nested.cv.list[[i]]$nested.cv.rsq
     }
+    cv.median <- median(nested.rmse)
+    cv.model.idx <- which(nested.rmse <= cv.median)  # the lower the better
+
+    best.nested.accu <- NULL
+    best.nested.rmse <- nested.rmse[cv.model.idx]
+    best.nested.rsq <- nested.rsq[cv.model.idx]
   }
 
-  nested.fs <- foreach(i = 1:cross.k, .combine = "c") %do% {
+  if (cross.best.model.method == "median"){
+    final.cv.list <- nested.cv.list[cv.model.idx]
+  } else {
+    final.cv.list <- nested.cv.list
+    cv.model.idx <- seq(cross.k)
+  }
+
+  nested.fs <- foreach(i = 1:length(nested.cv.list), .combine = "c") %do% {
     nested.cv.list[[i]]$selected.features
   }
   fs.count <- sort(table(nested.fs), decreasing = TRUE)
+
+  # we only use best.fs.count for thresholding becuase it is going to be the same as nest.fs when cross.best.model.method = "none"
+  best.nested.fs <- foreach(i = 1:length(final.cv.list), .combine = "c") %do% {
+    final.cv.list[[i]]$selected.features
+  }
+  best.nested.fs.count <- sort(table(best.nested.fs), decreasing = TRUE)
+
+  if (cross.best.model.method == "median"){  # adjust the threshold to 1 if only one model existed
+    if (!any(fs.count >= fs.count.cutoff)) {
+      fs.count.cutoff <-  1
+    }
+  }
 
   # end time
   end_time <- Sys.time()
@@ -472,16 +533,27 @@ rbioClass_svm_ncv_fs <- function(x, y,
   if (model_type == "classification"){
     tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
     names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
+    best.nested.acc.summary <- c(mean(best.nested.accu), sd(best.nested.accu), sd(best.nested.accu)/sqrt(length(cv.model.idx)))
+    names(best.nested.acc.summary) <- c("best.nested.acc.summary", "sd", "sem")
     tot.nested.rmse.summary <- NULL
     tot.nested.rsq.summary <- NULL
+    best.nested.rmse.summary <- NULL
+    best.nested.rsq.summary <- NULL
   } else {
     tot.nested.acc.summary <- NULL
+    best.nested.acc.summary <- NULL
+
     tot.nested.rmse.summary <- c(mean(nested.rmse), sd(nested.rmse), sd(nested.rmse)/sqrt(cross.k))
     names(tot.nested.rmse.summary) <- c("tot.nested.RMSE", "sd", "sem")
+    best.nested.rmse.summary <- c(mean(best.nested.rmse), sd(best.nested.rmse), sd(best.nested.rmse)/sqrt(length(cv.model.idx)))
+    names(best.nested.rmse.summary) <- c("best.nested.RMSE.summary", "sd", "sem")
+
     tot.nested.rsq.summary <- c(mean(nested.rsq), sd(nested.rsq), sd(nested.rsq)/sqrt(cross.k))
     names(tot.nested.rsq.summary) <- c("tot.nested.rsq", "sd", "sem")
+    best.nested.rsq.summary <- c(mean(best.nested.rsq), sd(best.nested.rsq), sd(best.nested.rsq)/sqrt(length(cv.model.idx)))
+    names(best.nested.rsq.summary) <- c("best.nested.rsq.summary", "sd", "sem")
   }
-  selected.features <- names(fs.count[which(fs.count >= fs.count.cutoff)])
+  selected.features <- names(best.nested.fs.count[which(best.nested.fs.count >= fs.count.cutoff)])
 
   # display
   if (verbose) {
@@ -490,15 +562,15 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cat(model_type)
     if (model_type == "classification"){
       cat("\n\n")
-      cat("Nested cross-validation accuracy summary: \n")
-      print(tot.nested.acc.summary)
+      cat("Best cross-validation accuracy summary: \n")
+      print(best.nested.acc.summary)
     } else {
       cat("\n\n")
-      cat("Nested cross-validation RMSE summary: \n")
-      print(tot.nested.rmse.summary)
+      cat("Best cross-validation RMSE summary: \n")
+      print(best.nested.rmse.summary)
     }
     cat("\n")
-    cat("Nested cross-validation selected features: \n")
+    cat("Final (best) cross-validation selected features: \n")
     cat(selected.features)
   }
 
@@ -516,10 +588,20 @@ rbioClass_svm_ncv_fs <- function(x, y,
               nested.accuracy = nested.accu,
               nested.RMSE = nested.rmse,
               nested.rsq = nested.rsq,
+              nested.fs.count = fs.count,
+              nested.cv.models = nested.cv.list,
+              best.nested.method = cross.best.model.method,
+              best.nested.index = cv.model.idx,
+              best.nested.accuracy.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rsq.summary = best.nested.rsq.summary,
+              best.nested.accuracy = best.nested.accu,
+              best.nested.rmse = best.nested.rmse,
+              best.nested.rsq = best.nested.rsq,
+              best.nested.fs.count = best.nested.fs.count,
               fs.method = fs.method,
               fs.count.threshold = fs.count.cutoff,
               selected.features = selected.features,
-              nested.fs.count = fs.count,
               tune.method = tune.method,
               tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
               tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
@@ -527,6 +609,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   class(out) <- "rbiosvm_nestedcv"
   return(out)
 }
+
 #' @export
 print.rbiosvm_nestedcv <- function(x, ...){
   cat("SVM model type: ")
@@ -538,9 +621,15 @@ print.rbiosvm_nestedcv <- function(x, ...){
   if (x$model.type == "classification") {
     cat("Total nested cross-validation accuracy:\n")
     print(x$tot.nested.accuracy.summary)
+    cat("\n")
+    cat("Best nested cross-validation accuracy:\n")
+    print(x$best.nested.accuracy.summary)
   } else {
     cat("Total nested cross-validation RMSE:\n")
     print(x$tot.nested.RMSE.summary)
+    cat("\n")
+    cat("Best nested cross-validation RMSE:\n")
+    print(x$best.nested.RMSE.summary)
   }
   cat("\n")
   cat(paste0("Consensus selected features (count threshold: ", x$fs.count.threshold,"):", "\n"))
