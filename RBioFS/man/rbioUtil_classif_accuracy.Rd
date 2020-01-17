@@ -22,15 +22,18 @@ rbioUtil_classif_accuracy(
 \item{center.scale.newdata}{Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 }
 \value{
-A pdf file containing a scatter plot for permutation results.
+Numerical model accuracy value.
 }
 \description{
 Plotting function for permutation test results.
 }
+\details{
+accuracy = true predictions/total predictions
+}
 \examples{
 
 \dontrun{
-rbioUtil_perm_plot(perm_res = svm_model_perm)
+rbioUtil_classif_accuracy(perm_res = svm_model_perm)
 }
 
 }

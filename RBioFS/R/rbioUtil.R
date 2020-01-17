@@ -5,11 +5,12 @@
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.
 #' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
-#' @return A pdf file containing a scatter plot for permutation results.
+#' @details accuracy = true predictions/total predictions
+#' @return Numerical model accuracy value.
 #' @examples
 #'
 #' \dontrun{
-#' rbioUtil_perm_plot(perm_res = svm_model_perm)
+#' rbioUtil_classif_accuracy(perm_res = svm_model_perm)
 #' }
 #'
 #' @export
