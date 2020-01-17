@@ -38,7 +38,7 @@ rbioUtil_classif_accuracy <- function(object, newdata, newdata.label, center.sca
 
   # accuracy calculation
   newdata.label <- factor(newdata.label, levels = unique(newdata.label))
-  confusion_mtx <- table(predict(object = object, newdata = newdata), newdata.label, dnn = c("Predicted", "Actual"))
+  confusion_mtx <- table(predict(object = object, newdata = test), newdata.label, dnn = c("Predicted", "Actual"))
   accu <- sum(diag(confusion_mtx))/sum(confusion_mtx)  # true prediction/total prediction
 
   return(accu)
