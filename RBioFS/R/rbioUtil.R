@@ -1,3 +1,50 @@
+#' Title rbioUtil_classif_accuracy
+#'
+#' @description Plotting function for permutation test results.
+#' @param object Classification model object. The object should be either \code{rbiosvm}, or \code{rbiomvr} classes.
+#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
+#' @param newdata.label Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.
+#' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @return A pdf file containing a scatter plot for permutation results.
+#' @examples
+#'
+#' \dontrun{
+#' rbioUtil_perm_plot(perm_res = svm_model_perm)
+#' }
+#'
+#' @export
+rbioUtil_classif_accuracy <- function(object, newdata, newdata.label, center.scale.newdata = TRUE, verbose = TRUE) {
+  # check arguments
+  if (!any(class(object) %in% c('rbiosvm', "rbiomvr"))) stop("object needs to be one of \"rbiosvm\" or \"rbiomvr\" classes.")
+  if (object$model.type != "classification") stop("The object should be a classification model type. ")
+  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
+  if (class(newdata) == "data.frame" | is.null(dim(newdata))){
+    if (verbose) cat("newdata converted to a matrix object.\n")
+    newdata <- as.matrix(sapply(newdata, as.numeric))
+  }
+  if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same number of variables as the training data.")
+
+
+  ## process data
+  if (center.scale.newdata){ # using training data mean and sd
+    if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
+    centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    test <- centered_newdata
+  } else {
+    centered_newdata <- NULL
+    test <- newdata
+  }
+
+  # accuracy calculation
+  newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+  confusion_mtx <- table(predict(object = object, newdata = newdata), newdata.label, dnn = c("Predicted", "Actual"))
+  accu <- sum(diag(confusion_mtx))/sum(confusion_mtx)  # true prediction/total prediction
+
+  return(accu)
+}
+
+
+
 #' Title rbioUtil_perm_plot
 #'
 #' @description Plotting function for permutation test results.

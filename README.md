@@ -86,6 +86,9 @@ Update log
         - General update
           - rbioUtil_perm_plot() updated to accommodate PLSR functions
           
+        - New utility function(s)
+          - rbioUtil_classif_accuracy(): calculates classification accuracy with new data
+          
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
           - rbioClass_svm_ncv_fs() now outputs the CV models and the sample partitioning status

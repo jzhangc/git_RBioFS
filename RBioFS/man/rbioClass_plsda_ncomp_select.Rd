@@ -36,7 +36,7 @@ rbioClass_plsda_ncomp_select(
 
 \item{...}{Additional argument for \code{RMSEP} function from \code{pls} package.}
 
-\item{ncomp.selection.method}{Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1sd"}.}
+\item{ncomp.selection.method}{Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1err"}.}
 
 \item{randomization.nperm}{Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.}
 

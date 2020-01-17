@@ -426,7 +426,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @description Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ... Additional argument for \code{RMSEP} function from \code{pls} package.
-#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1sd"}.
+#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1err"}.
 #' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
 #' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
 #' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
@@ -521,12 +521,12 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
         dfm_cv$SD <- residsds
         min_rmsep_cv_idx <- which.min(dfm_cv$value)  # index for the minimum mean oob feature group
         sd_min_cv <- dfm_cv$SD[min_rmsep_cv_idx]  # oob SD for the feature group above
-        cv_x <- min(with(dfm_cv, which(value <= (value[min_rmsep_cv_idx] + sd_min_cv))))  # 1sd minimum selection
+        cv_x <- min(with(dfm_cv, which(value <= (value[min_rmsep_cv_idx] + sd_min_cv))))  # 1err minimum selection
 
         dfm_adjcv$SD <- residsds
         min_rmsep_adjcv_idx <- which.min(dfm_adjcv$value)  # index for the minimum mean oob feature group
         sd_min_adjcv <- dfm_adjcv$SD[min_rmsep_adjcv_idx]  # oob SD for the feature group above
-        adjcv_x <- min(with(dfm_adjcv, which(value <= (value[min_rmsep_adjcv_idx] + sd_min_adjcv))))  # 1sd minimum selection
+        adjcv_x <- min(with(dfm_adjcv, which(value <= (value[min_rmsep_adjcv_idx] + sd_min_adjcv))))  # 1erminimum selection
       } else if (ncomp.selection.method == "randomization"){
         absBest_cv <- which.min(dfm_cv$value)
         pvals_cv <- sapply(seq_len(absBest_cv - 1), function(m) randomiz.test(allresids[, m], allresids[, absBest_cv], nperm = randomization.nperm))
