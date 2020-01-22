@@ -88,6 +88,9 @@ Update log
           
         - New utility function(s)
           - rbioUtil_classif_accuracy(): calculates classification accuracy with new data
+        
+        - Update to file processing function(s)
+          - center_scale() updated with more accurate function documentation
           
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
