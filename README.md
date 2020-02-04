@@ -64,11 +64,15 @@ Update log
           - rbioReg_plsr_predict() function added for PLS regression analysis
           - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
           - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
+        
+        - New SVM function(s)
+          - rbioReg_svm_rmse(): calculates RMSE for the SVR model, either with newdata or training data
+          - rbioReg_svm_r2(): calculate R2 for the SVR model with newdata
           
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
           - rbioClass_svm_roc_auc() plot.lineSize argument added
-                 
+
         - Updates to PLS-DA function(s)
           - Multivariate Y modelling now possible with rbioFS_plsda
           - rbioFS_plsda_vip_plot() plot output file name fixed

@@ -1286,3 +1286,88 @@ print.prediction <- function(x, ...){
   print(x$classifier.class)
   cat("\n")
 }
+
+
+#' @title rbioReg_svm_rmse
+#'
+#' @description Support Vector Regression (SVR) RMSE calculation
+#' @param object A \code{rbiosvm} object.
+#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
+#' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
+#' @return RMSE value with either new data or training data.
+#'
+#' @details
+#'
+#' With newdata, the newdata is center_scaled using training data parameter (SD etc).
+#' Without newdata, the RMSE is based on the CV RMSE.
+#'
+#' @examples
+#' \dontrun{
+#'  test_rmse <- rbioReg_svm_rmse(object = svm_m, newdata = svm_test[,-1], newdata.y = svm_test$y)
+#' }
+#' @export
+rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
+  # argument check
+  if (!any(class(object) %in% "rbiosvm")) stop("The input object needs to be a \"rbiosvm\" class.")
+  if (object$model.type != "regression") stop("The input model type needs to be \"regression\".")
+  if (!is.null(newdata)) {
+    if (is.null(newdata.y)) stop("newdata.y needs to be specified if newdata is available.")
+    if (nrow(newdata) != length(newdata.y)) stop("sample size needs to match the length of newdata.y.")
+  }
+  if (!any(object$tune.method) %in% c("cross", "boot")) stop("The tune.method should be either \"cross\" or \"boot\".")
+
+  # computation
+  if (is.null(newdata)){
+    out_rmse <- sqrt(object$tot.MSE)
+  } else {
+    center_scale_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    pred <- predict(object, center_scale_newdata)
+    err <- newdata.y - pred
+    out_rmse <- sqrt(mean(err^2))
+  }
+
+  return(out_rmse)
+}
+
+
+#' @title rbioReg_svm_r2
+#'
+#' @description Support Vector Regression (SVR) R2 calculation
+#' @param object A \code{rbiosvm} object.
+#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
+#' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
+#' @return RMSE value with either new data or training data.
+#'
+#' @details
+#'
+#' The R2 is calculated as follwoing: 1 - rss/tss.
+#' rss: residual sum of squares: sum((yhat-y)^2)
+#' tss: total sum of squares: sum((y-mean(y))^2)
+#'
+#' @examples
+#' \dontrun{
+#'  test_r2 <- rbioReg_svm_r2(object = svm_m, newdata = svm_test[,-1], newdata.y = svm_test$y)
+#' }
+#' @export
+rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
+  # argument check
+  if (!any(class(object) %in% "rbiosvm")) stop("The input object needs to be a \"rbiosvm\" class.")
+  if (object$model.type != "regression") stop("The input model type needs to be \"regression\".")
+  if (is.null(newdata)) {
+    stop("newdata cannot be NULL.")
+  } else {
+    if (is.null(newdata.y)) stop("newdata.y needs to be specified if newdata is available.")
+    if (nrow(newdata) != length(newdata.y)) stop("sample size needs to match the length of newdata.y.")
+  }
+
+  # computation
+  center_scale_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+  pred <- predict(object, center_scale_newdata)
+  err <- newdata.y - pred
+  ss_res <- sum(err^2)  # sum of residual squares
+  ss_tot <- sum((newdata.y - mean(newdata.y))^2)  # sum of squares
+  out_r2 <- 1 - ss_res/ss_tot
+
+  # output
+  return(out_r2)
+}
