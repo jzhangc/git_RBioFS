@@ -64,10 +64,6 @@ Update log
           - rbioReg_plsr_predict() function added for PLS regression analysis
           - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
           - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
-        
-        - New SVM function(s)
-          - rbioReg_svm_rmse(): calculates RMSE for the SVR model, either with newdata or training data
-          - rbioReg_svm_r2(): calculate R2 for the SVR model with newdata
           
         - Update to SVM function(s)
           - rbioClass_svm_perm() plot output file name fixed
@@ -92,6 +88,10 @@ Update log
           
         - New utility function(s)
           - rbioUtil_classif_accuracy(): calculates classification accuracy with new data
+
+        - New SVM function(s)
+          - rbioReg_svm_rmse(): calculates RMSE for the SVR model, either with newdata or training data
+          - rbioReg_svm_r2(): calculate R2 for the SVR model with newdata
         
         - Update to file processing function(s)
           - center_scale() updated with more accurate function documentation
