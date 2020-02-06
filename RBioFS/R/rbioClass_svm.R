@@ -1314,7 +1314,7 @@ rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
     if (is.null(newdata.y)) stop("newdata.y needs to be specified if newdata is available.")
     if (nrow(newdata) != length(newdata.y)) stop("sample size needs to match the length of newdata.y.")
   }
-  if (!any(object$tune.method) %in% c("cross", "boot")) stop("The tune.method should be either \"cross\" or \"boot\".")
+  if (!any(object$tune.method %in% c("cross", "boot"))) stop("The tune.method should be either \"cross\" or \"boot\".")
 
   # computation
   if (is.null(newdata)){
