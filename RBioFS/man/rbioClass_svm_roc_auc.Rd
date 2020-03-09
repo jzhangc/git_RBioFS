@@ -2,7 +2,7 @@
 % Please edit documentation in R/rbioClass_svm.R
 \name{rbioClass_svm_roc_auc}
 \alias{rbioClass_svm_roc_auc}
-\title{rbioClass_svm_roc_auc()}
+\title{rbioClass_svm_roc_auc}
 \usage{
 rbioClass_svm_roc_auc(
   object,

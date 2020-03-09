@@ -640,7 +640,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 }
 
 
-#' @title rbioClass_svm_roc_auc()
+#' @title rbioClass_svm_roc_auc
 #'
 #' @description ROC-AUC analysis and ploting for SVM model
 #' @param object A \code{rbiosvm} object.
@@ -776,7 +776,11 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   }
 
   ## ROC-AUC calculation
-  pred <- predict(object, newdata = test)  # prediction
+  pred <- predict(object, newdata = test, decision.values = TRUE, probability = TRUE)  # prediction
+
+
+  pred_prob <- attr(pred, "probabilities")
+
   if (object$model.type == "regression"){
     pred <- cut(pred, rg, labels = reg.group.names)
   }
@@ -787,15 +791,16 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   roc_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
     response <- outcome
     levels(response)[-i] <- "others"
-    predictor <- dummy(pred)
-    predictor <- as.matrix(predictor[, i], ncol = 1)
+    # predictor <- dummy(pred)
+    # predictor <- as.matrix(predictor[, i], ncol = 1)
+    predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
     cases <- splt[[levels(outcome)[i]]]
-    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
+    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE),
                      error = function(err){
                        cat("Curve not smoothable. Proceed without smooth.\n")
-                       pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
+                       pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)
                      })
     if (length(levels(outcome)) == 2){
       cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))

@@ -109,6 +109,7 @@ Update log
             - The svm_roc_auc class now includes the roc object from the pROC package named "svm.auc_object", with which the stats can be done to compare ROCs.
             - The svm_roc_auc class item "svm.auc" now changed to "svm.auc_dataframe"
           - rbioClass_svm_roc_auc() now computes 95% CI
+          - rbioClass_svm_roc_auc() now used predicted probablity for ROC analysis (as opposed to predicted class)
 
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
