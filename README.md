@@ -100,6 +100,7 @@ Update log
           - rbioClass_svm_ncv_fs() now includes a limma-based univariate analysis component
           - rbioClass_svm_ncv_fs() now outputs the CV models and the sample partitioning status
             - rbiosvm_nestedcv class now incluldes nested.cv.models to include full CV models
+            - rbiosvm_nestedcv class now also inlucdes CV test data within the nested.cv.models item
           - rbioClass_svm_ncv_fs() now can use "median" method to select the best CV models for feature selection
             - rbiosvm_nestedcv class now incluldes accuracy/RMSE/rsq/fs.count for the "best" cv models selected by the "median" method
           - R2 calculation added to rbioClass_svm_ncv_fs for regression study
@@ -107,6 +108,7 @@ Update log
           - rbioClass_svm_roc_auc() now outputs thresholds values
             - The svm_roc_auc class now includes the roc object from the pROC package named "svm.auc_object", with which the stats can be done to compare ROCs.
             - The svm_roc_auc class item "svm.auc" now changed to "svm.auc_dataframe"
+          - rbioClass_svm_roc_auc() now computes 95% CI
 
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis
@@ -121,6 +123,7 @@ Update log
           - rbiomvr_vip object now also has a model.type variable
           - rbioFS_plsda_vip_plot() fixed for small aesthetic settings
           - rbioClass_plsda_roc_auc() now outputs thresholds values
+          - rbioClass_plsda_roc_auc() now computes 95% CI
           - A bug fixed for rbioClass_plsda_perm() where intercept was counted for ncomp
           - A bug fixed for rbioFS_plsda_vip() where comps fixed to 1 when set bootstrap OFF
           - A bug fixed for rbioFS_plsda_vip() the function would crash when only two groups and when set bootstrap OFF

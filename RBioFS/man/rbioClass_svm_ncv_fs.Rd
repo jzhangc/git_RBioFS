@@ -104,7 +104,7 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{nested.fs.count}: fs count for all the cv models
 
-\code{nested.cv.models}: all the cv models
+\code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
 
 \code{best.nested.method}
 

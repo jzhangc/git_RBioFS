@@ -226,7 +226,7 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{nested.fs.count}: fs count for all the cv models
 #'
-#' \code{nested.cv.models}: all the cv models
+#' \code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
 #'
 #' \code{best.nested.method}
 #'
@@ -449,13 +449,13 @@ rbioClass_svm_ncv_fs <- function(x, y,
     if (model_type == "classification"){
       accu <- sum(diag(table(pred, fs_test$y))) / length(fs_test$y)  # accuracy = total TP / total (TP: true positive)
       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
-                      cv_svm_model = cv_m, nested.cv.accuracy = accu)
+                      cv_svm_model = cv_m, nested.cv.accuracy = accu, cv_test_data = fs_test)
     } else {
       error <- pred - fs_test$y
       rmse <- sqrt(mean(error^2))
       rsq <- cor(pred, fs_test$y)
       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
-                      cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq)
+                      cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq, cv_test_data = fs_test)
     }
     if (verbose) cat("Done!\n")
     # foreach output
@@ -792,10 +792,10 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
     cases <- splt[[levels(outcome)[i]]]
-    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
+    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
                      error = function(err){
                        cat("Curve not smoothable. Proceed without smooth.\n")
-                       pROC::roc(controls = controls, cases = cases, smooth = FALSE)
+                       pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
                      })
     if (length(levels(outcome)) == 2){
       cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))

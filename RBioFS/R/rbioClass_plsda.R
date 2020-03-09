@@ -1847,10 +1847,10 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(outcome)[j]]]
-      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
+      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
                        error = function(err){
                          cat("Curve not smoothable. Proceed without smooth.\n")
-                         pROC::roc(controls = controls, cases = cases, smooth = FALSE)
+                         pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
                        })
       if (length(levels(outcome)) == 2){
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
