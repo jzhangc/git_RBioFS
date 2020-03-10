@@ -110,6 +110,7 @@ Update log
             - The svm_roc_auc class item "svm.auc" now changed to "svm.auc_dataframe"
           - rbioClass_svm_roc_auc() now computes 95% CI
           - rbioClass_svm_roc_auc() now used predicted probablity for ROC analysis (as opposed to predicted class)
+          - rbioClass_svm_roc_auc() updated with control/case availability check
 
         - New PLSR function(s)
           - rbioReg_plsr() function added for PLS regression analysis

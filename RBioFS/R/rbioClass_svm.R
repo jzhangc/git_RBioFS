@@ -64,7 +64,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
                           verbose = TRUE){
   ## check arguments
   if (is.factor(y)){
-    if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+    # if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
     model_type <- "classification"
     y <- factor(y, levels = unique(y))
   } else {
@@ -311,7 +311,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   ## check arguments
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
   if (is.factor(y)) {
-    if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
+    # if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
     model_type <- "classification"
   } else {
     model_type <- "regression"
@@ -777,8 +777,6 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 
   ## ROC-AUC calculation
   pred <- predict(object, newdata = test, decision.values = TRUE, probability = TRUE)  # prediction
-
-
   pred_prob <- attr(pred, "probabilities")
 
   if (object$model.type == "regression"){
@@ -797,17 +795,21 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
     cases <- splt[[levels(outcome)[i]]]
-    perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE),
-                     error = function(err){
-                       cat("Curve not smoothable. Proceed without smooth.\n")
-                       pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)
-                     })
-    if (length(levels(outcome)) == 2){
-      cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))
+    if (length(cases) && length(controls)) {  # check if there are any zero controls or zero cases
+      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE),
+                       error = function(err){
+                         cat("Curve not smoothable. Proceed without smooth.\n")
+                         pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)
+                       })
+      if (length(levels(outcome)) == 2){
+        cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))
+      } else {
+        cat(paste0(" AUC - ", levels(outcome)[i], " (vs Others): ", perf$auc, "\n"))
+      }
+      perf
     } else {
-      cat(paste0(" AUC - ", levels(outcome)[i], " (vs Others): ", perf$auc, "\n"))
+      return(NULL)
     }
-    perf
   }
   names(roc_auc_list) <- unique(outcome)
 
@@ -827,49 +829,54 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   }
 
   ## return
-  out <- list(model.type = object$model.type,
-              y.threshold = y.threshold,
-              regression.categories = reg.group,
-              svm.roc_object = roc_auc_list,
-              svm.roc_dataframe = roc_dfm,
-              input.newdata = newdata,
-              input.newdata.y = newdata.y,
-              input.newdata.label = newdata.label,
-              newdata.center.scaled = centered_newdata)
-  class(out) <- "svm_roc_auc"
-  assign(paste(deparse(substitute(object)), "_svm_roc_auc", sep = ""), out, envir = .GlobalEnv)
+  if (any(sapply(roc_auc_list, is.null))) {
+    cat("Either no control or no case obesevated. ROC-AUC fails. \n")
+    out <- NULL
+  } else {
+    out <- list(model.type = object$model.type,
+                y.threshold = y.threshold,
+                regression.categories = reg.group,
+                svm.roc_object = roc_auc_list,
+                svm.roc_dataframe = roc_dfm,
+                input.newdata = newdata,
+                input.newdata.y = newdata.y,
+                input.newdata.label = newdata.label,
+                newdata.center.scaled = centered_newdata)
+    class(out) <- "svm_roc_auc"
+    assign(paste(deparse(substitute(object)), "_svm_roc_auc", sep = ""), out, envir = .GlobalEnv)
 
-  ## plotting
-  if (rocplot){
-    if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".svm.roc.pdf...", sep = ""))  # initial message
+    ## plotting
+    if (rocplot){
+      if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".svm.roc.pdf...", sep = ""))  # initial message
 
-    plt <- ggplot(data = roc_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
-      geom_line(aes(linetype = group), size = plot.lineSize) +
-      geom_point(aes(shape = group), size = plot.SymbolSize) +
-      geom_abline(intercept = 0) +
-      ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
-      xlab(plot.xLabel) +
-      ylab(plot.yLabel) +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-            legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
-            legend.key = element_blank(),
-            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      plt <- ggplot(data = roc_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
+        geom_line(aes(linetype = group), size = plot.lineSize) +
+        geom_point(aes(shape = group), size = plot.SymbolSize) +
+        geom_abline(intercept = 0) +
+        ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
 
-    if (plot.rightsideY){
-      plt <- RBioplot::rightside_y(plt)
+      if (plot.rightsideY){
+        plt <- RBioplot::rightside_y(plt)
+      }
+
+      # save
+      # grid.newpage()
+      ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
+             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      grid.draw(plt)
+      if (verbose) cat("Done!\n")
     }
-
-    # save
-    # grid.newpage()
-    ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
-           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-    grid.draw(plt)
-    if (verbose) cat("Done!\n")
   }
 }
 
