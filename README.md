@@ -29,8 +29,14 @@ Installation
         
 
 Update log
-
-    0.7.0 (Mar.10.2020)
+    
+    0.7.1 (Mar.10.2020)
+        - Update to SVM function(s)
+          - rbioClass_svm_roc_auc() plot.lineSize argument added
+          - rbioClass_svm_cv_roc_auc() now supports regression study
+          
+    
+    0.7.0 
         - General update(s)
           - rbioUtil_perm_plot() updated to accommodate PLSR functions
           
@@ -82,7 +88,7 @@ Update log
         - Version pump to 0.7.0
     
     
-    0.6.3 (Aug.4.2019)
+    0.6.3
         - General updates
           - match.arg() method added to relevant functions for better user experience
           - rbioUtil_classplot() updated accordingly to accommodate the regression study

@@ -6,6 +6,8 @@
 \usage{
 rbioClass_svm_cv_roc_auc(
   object,
+  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else
+    NULL,
   rocplot = TRUE,
   plot.smooth = FALSE,
   plot.lineSize = 1,
@@ -27,6 +29,8 @@ rbioClass_svm_cv_roc_auc(
 }
 \arguments{
 \item{object}{A \code{rbiosvm_nestedcv} object.}
+
+\item{y.threshold}{For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 

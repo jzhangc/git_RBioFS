@@ -887,6 +887,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #'
 #' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models
 #' @param object A \code{rbiosvm_nestedcv} object.
+#' @param y.threshold For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -930,6 +931,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #' }
 #' @export
 rbioClass_svm_cv_roc_auc <- function(object,
+                                     y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else NULL,
                                      rocplot = TRUE,
                                      plot.smooth = FALSE,
                                      plot.lineSize = 1,
@@ -940,13 +942,28 @@ rbioClass_svm_cv_roc_auc <- function(object,
                                      plot.legendSize = 9, plot.rightsideY = TRUE,
                                      plot.Width = 170, plot.Height = 150,
                                      verbose = TRUE){
-
   # ---- argements check ----
   if (!any(class(object) %in% c('rbiosvm_nestedcv'))) stop("object needs to be \"rbiosvm_nestedcv\" class.")
-  if (object$model.type != "classification") stop("The function only supports classification study for now.")
 
   # ---- read in data ----
   cv_model_list <- object$nested.cv.models
+
+  if (object$model.type == "regression"){  # for regressoin study
+    if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
+    if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
+    y.threshold <- sort(unique(y.threshold))
+    threshold.length <- length(y.threshold)
+    reg.group.names <- paste0("case", seq(threshold.length + 1))
+
+    for (i in 1:length(cv_model_list)){
+      y <- cv_model_list[[i]]$cv_test_data$y
+      rg <- c(0, y.threshold, ceiling(max(y)*1.1))
+      y <- cut(y, rg)
+      reg.group <- levels(y)
+      levels(y) <- reg.group.names
+      cv_model_list[[i]]$cv_test_data$y <- y  # replace y with thresholded groups
+    }
+  }
 
   # ---- intermediate function ----
   cv_auc_func <- function(x){
