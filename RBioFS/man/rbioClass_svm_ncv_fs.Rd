@@ -4,24 +4,54 @@
 \alias{rbioClass_svm_ncv_fs}
 \title{rbioClass_svm_ncv_fs}
 \usage{
-rbioClass_svm_ncv_fs(x, y, center.scale = TRUE, kernel = c("radial",
-  "linear", "polynomial", "sigmoid"), cross.k = 10,
-  tune.method = c("cross", "boot", "fix"), tune.cross.k = 10,
-  tune.boot.n = 10, ..., fs.method = "rf", rf.ifs.ntree = 1001,
-  rf.sfs.ntree = 1001, fs.count.cutoff = cross.k,
-  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1,
-  clusterType = c("PSOCK", "FORK"), verbose = TRUE)
+rbioClass_svm_ncv_fs(
+  x,
+  y,
+  univariate.fs = FALSE,
+  uni.log2trans = TRUE,
+  uni.contrast = NULL,
+  uni.alpha = 0.05,
+  uni.fdr = FALSE,
+  center.scale = TRUE,
+  kernel = c("radial", "linear", "polynomial", "sigmoid"),
+  cross.k = 10,
+  cross.best.model.method = c("none", "median"),
+  tune.method = c("cross", "boot", "fix"),
+  tune.cross.k = 10,
+  tune.boot.n = 10,
+  ...,
+  fs.method = "rf",
+  rf.ifs.ntree = 1001,
+  rf.sfs.ntree = 1001,
+  fs.count.cutoff = cross.k,
+  parallelComputing = TRUE,
+  n_cores = parallel::detectCores() - 1,
+  clusterType = c("PSOCK", "FORK"),
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
+\item{univariate.fs}{If to use limma-based univariate reduction. Default is \code{FALSE}.}
+
+\item{uni.log2trans}{Only set if \code{univariate.fs = TRUE}, if to log2 transform data before univariate reduction.}
+
+\item{uni.contrast}{Only set if \code{univariate.fs = TRUE} and for a classificaiton study, the contrast for the univariate analysis. Default is \code{NULL}.}
+
+\item{uni.alpha}{Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.}
+
+\item{uni.fdr}{Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.}
+
 \item{center.scale}{Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
 \item{cross.k}{Fold of nested cross validation, i.e. outer loop. Default is \code{10}.}
+
+\item{cross.best.model.method}{The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.}
 
 \item{tune.method}{Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
 
@@ -52,6 +82,8 @@ Returns a SVM model object, with classes "svm" and "rbiosvm".
 
 Additional items for \code{rbiosvm_nestedcv}:
 
+\code{univariate.fs}
+
 \code{cv.fold}: number of (outer) cross-validation fold
 
 \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
@@ -62,17 +94,41 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{tot.nested.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
 
+\code{tot.nested.rsq.summary}: total (i.e. mean) nested cross-validation R2, if \code{model_type = "regression"}
+
 \code{nested.accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
 
 \code{nested.RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
+
+\code{nested.rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
+
+\code{nested.fs.count}: fs count for all the cv models
+
+\code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
+
+\code{best.nested.method}
+
+\code{best.nested.index}: index of the best models in the total model list
+
+\code{best.nested.acc.summary}
+
+\code{best.nested.rmse.summary}
+
+\code{best.nested.rsq.summary}
+
+\code{best.nested.accu}
+
+\code{best.nested.rmse}
+
+\code{best.nested.rsq}
+
+\code{best.nested.fs.count}: fs count for only the best models
 
 \code{fs.method}: feature selection method
 
 \code{fs.count.threshold}: count threshold for generating consensus feature list
 
 \code{selected.features}
-
-\code{nested.fs.count}: total vote counts for each selected feature
 
 \code{tune.method}: (inner) loop method for SVM grid search
 
@@ -91,6 +147,10 @@ Resulted features from each nested cross-validation round are voted. Features wi
 
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
+
+When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
+for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }

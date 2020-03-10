@@ -191,6 +191,7 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
       cat("right side y-axis ignored for multi-plot figure.\n")
     }
   }
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   plot.sampleLabel.type <- match.arg(tolower(plot.sampleLabel.type), c("none", "direct", "indirect"))
 
 
@@ -322,6 +323,7 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
   if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls pacakge
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom"))
 
   ## construct q2r2 dataframes
@@ -424,7 +426,7 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @description Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ... Additional argument for \code{RMSEP} function from \code{pls} package.
-#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1sd"}.
+#' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1err"}.
 #' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
 #' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
 #' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
@@ -482,6 +484,7 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   ## check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
   if (!"validation" %in% names(object)) stop("PLS-DA model has to include Cross-Validation.")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   # if (!tolower(ncomp.selection.method) %in% c("min", "1err", "randomization")) stop("ncomp.selection.method needs to be \"min\", \"1err\", or \"randomization\" exactly.")
   ncomp.selection.method <- match.arg(tolower(ncomp.selection.method), c("1err", "min", "randomization"))
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
@@ -518,12 +521,12 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
         dfm_cv$SD <- residsds
         min_rmsep_cv_idx <- which.min(dfm_cv$value)  # index for the minimum mean oob feature group
         sd_min_cv <- dfm_cv$SD[min_rmsep_cv_idx]  # oob SD for the feature group above
-        cv_x <- min(with(dfm_cv, which(value <= (value[min_rmsep_cv_idx] + sd_min_cv))))  # 1sd minimum selection
+        cv_x <- min(with(dfm_cv, which(value <= (value[min_rmsep_cv_idx] + sd_min_cv))))  # 1err minimum selection
 
         dfm_adjcv$SD <- residsds
         min_rmsep_adjcv_idx <- which.min(dfm_adjcv$value)  # index for the minimum mean oob feature group
         sd_min_adjcv <- dfm_adjcv$SD[min_rmsep_adjcv_idx]  # oob SD for the feature group above
-        adjcv_x <- min(with(dfm_adjcv, which(value <= (value[min_rmsep_adjcv_idx] + sd_min_adjcv))))  # 1sd minimum selection
+        adjcv_x <- min(with(dfm_adjcv, which(value <= (value[min_rmsep_adjcv_idx] + sd_min_adjcv))))  # 1erminimum selection
       } else if (ncomp.selection.method == "randomization"){
         absBest_cv <- which.min(dfm_cv$value)
         pvals_cv <- sapply(seq_len(absBest_cv - 1), function(m) randomiz.test(allresids[, m], allresids[, absBest_cv], nperm = randomization.nperm))
@@ -684,11 +687,12 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
   if (parallelComputing){
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## calcuate RMSEP and construct original RMSEP data frame
   rmsep <- pls::RMSEP(object)
   rmsep_dfm <- foreach(i = 1:dim(rmsep$val)[2], .combine = "rbind") %do% {
-    dfm <- as.data.frame(t(rmsep$val[, i, ncomp]))
+    dfm <- as.data.frame(t(rmsep$val[, i, ncomp + 1]))  # +1 becuase intercept
     if (adjCV){
       stats <- dfm[, "adjCV"]
     } else {
@@ -711,7 +715,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
     perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp + 1]))
       if (adjCV){
         stats <- dfm[, "adjCV"]
       } else {
@@ -744,7 +748,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
     perm_rmsep <- pls::RMSEP(perm_model)  # permutation model RMSEP
 
     perm_rmsep_dfm <- foreach(j = 1:dim(perm_rmsep$val)[2], .combine = "rbind") %do% {
-      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp]))
+      dfm <- as.data.frame(t(perm_rmsep$val[, j, ncomp + 1]))
       if (adjCV){
         stats <- dfm[, "adjCV"]
       } else {
@@ -806,7 +810,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
                       data.frame(nperm = perm_dfm$nperm, comparison = perm_dfm$comparison, RMSEP = perm_dfm$RMSEP, row.names = NULL))
 
   out <- list(perm.method = perm.method, nperm = nperm, perm.stats = "RMSEP", adjCV = adjCV,
-              p.value.summary = perm_results_p_val, perm.results =  perm_stats)
+              p.value.summary = perm_results_p_val, perm.results =  perm_stats, model.type = object$model.type)
 
   class(out) <- "rbiomvr_perm"
   assign(paste(deparse(substitute(object)), "_perm", sep = ""), out, envir = .GlobalEnv)
@@ -826,7 +830,7 @@ rbioClass_plsda_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 
 #' @export
 print.rbiomvr_perm <- function(x, ...){
-  cat(paste0("PLS-DA permutation results with ", x$nperm, " permutations:\n"))
+  cat(paste0("PLS permutation results with ", x$nperm, " permutations:\n"))
   cat("\n")
   print(x$p.value.summary)
   cat("\n")
@@ -909,6 +913,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(object$inputX)) {
       stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX).")}
   }
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## extract information
   score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
@@ -1163,6 +1168,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                                    verbose = TRUE){
   # check arguments
   if (!any(class(object) %in% c("mvr", "rbiomvr"))) stop("object has to be a mvr or rbiomvr class.")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   plot.errorbar <- match.arg(tolower(plot.errorbar), c("sem", "sd"))
 
   # compute sd, df, t-value, p-value for jackknife
@@ -1355,6 +1361,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
   if (bootstrap & (boot.n < 2 | boot.n %% 1 != 0)) stop("when boostrap = TRUE, boot.n needs to be an integer greater than 1.")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## VIP process
   if (verbose) cat(paste0("Boostrap: ", ifelse(bootstrap, "ON\n", "OFF\n")))
@@ -1520,7 +1527,6 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     vip_list <- vector(mode = "list", length = length(levels(object$inputY)))
     vip_list[] <- foreach(i = 1:length(levels(object$inputY))) %do% {
       plt_list.comp <- vector(mode = "list", length = length(comps))
-      j = 1
       plt_list.comp[] <- foreach(j = comps) %do% {
         vip <- vip_raw_list[[i]][j, ]
         outdfm <- data.frame(Features = colnames(vip_raw_list[[i]]),
@@ -1543,7 +1549,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
   # important features lsit
   final.ipf_list <- vector(mode = "list", length = length(vip_list))
   final.ipf_list <- foreach(m = 1:length(vip_list)) %do% {
-    ipf_list <- vector(mode = "list", length = length(vip_list))
+    ipf_list <- vector(mode = "list", length = length(vip_list[[m]]))
     ipf_list[] <- foreach(n = 1:length(vip_list[[m]])) %do% {
       as.character(vip_list[[m]][[n]][which(vip_list[[m]][[n]]$VIP > vip.alpha), 1])
     }
@@ -1559,7 +1565,8 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
               comps = comps,
               bootstrap = bootstrap,
               boot.n = if (bootstrap) boot.n else NULL,
-              bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL)
+              bootstrap.iteration.results = if (bootstrap) group.comp.boot.vip_list else NULL,
+              model.type = object$model.type)
   class(out) <- "rbiomvr_vip"
   assign(paste(deparse(substitute(object)), "_plsda_vip", sep = ""), out, envir = .GlobalEnv)
 
@@ -1605,6 +1612,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return Outputs pdf figure files to the working directory.
 #' @details Only works with \code{rbiomvr_vip} objects. Set \code{plot.preview = FALSE} to speed up the process as preview rendering may be slow.
+#'          The function also applies to the regression model (model.type = "regression").
 #' @import ggplot2
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
@@ -1627,7 +1635,6 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @export
 rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
                                   plot.title = TRUE, plot.titleSize = 10,
-                                  multi_plot.ncol = length(unique(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                   plot.sig.line = TRUE,
                                   plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
                                   plot.errorbarLblSize = 6, plot.fontType = "sans",
@@ -1640,7 +1647,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
                                   plot.Height = 150, verbose = TRUE){
   ## argument check
   if (!any(class(vip_obj) %in% c("rbiomvr_vip"))) stop("object needs to be a \"rbiomvr_vip\" class.")
-  multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
+  # if (vip_obj$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## plot
   # set up bootstrap setting
@@ -1669,7 +1676,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 
       baseplt <- ggplot(data = vip_list[[i]][[j]], aes(x = Features, y = VIP)) +
         geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
-        scale_x_discrete(expand = c(0.05, 0.05)) +
+        # scale_x_discrete(expand = c(0.05, 0.05)) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
                            oob = rescale_none) +
         xlab(plot.xLabel) +
@@ -1764,6 +1771,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
@@ -1793,7 +1801,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
                                     plot.smooth = FALSE,
                                     multi_plot.ncol = length(plot.comps), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                     plot.rightsideY = TRUE,
-                                    plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+                                    plot.SymbolSize = 2, plot.lineSize = 1,
+                                    plot.display.Title = TRUE, plot.titleSize = 10,
                                     plot.fontType = "sans",
                                     plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
                                     plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
@@ -1820,6 +1829,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
   }
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if(plot.smooth) cat("ROC smooth: ON.\n") else cat("ROC smooth: OFF.\n")
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom", "top", "left", "right"))
 
   ## calcuate ROC-AUC
@@ -1837,10 +1847,10 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(outcome)[j]]]
-      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth),
+      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci = TRUE),
                        error = function(err){
                          cat("Curve not smoothable. Proceed without smooth.\n")
-                         pROC::roc(controls = controls, cases = cases, smooth = FALSE)
+                         pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci = TRUE)
                        })
       if (length(levels(outcome)) == 2){
         cat(paste0("comp ", i, " AUC - ", levels(outcome)[j], ": ", perf$auc, "\n"))
@@ -1851,15 +1861,17 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
       #      tpr <- as.numeric(unlist(perf@y.values))
       fpr <- 1 - perf$specificities
       tpr <- perf$sensitivities
-      mtx <- cbind(fpr, tpr)
+      thresholds <- perf$thresholds
+      mtx <- cbind(fpr, tpr, thresholds)
       if (length(levels(outcome)) == 2){
         df <- data.frame(mtx, group = rep(levels(outcome)[j], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       } else {
         df <- data.frame(mtx, group = rep(paste0(levels(outcome)[j], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
       }
       df <- df[order(df$tpr), ]  # order by tpr so that all the points will be connected on graph
-      return(df)
+      df
     }
+    out
   }
   names(roc_dfm_list) <- paste0("comp ", 1:length(plot.comps))
 
@@ -1876,7 +1888,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
     plt_list <- vector(mode = "list", length = length(plot.comps))
     plt_list[] <- foreach(k = 1:length(plot.comps)) %do% {
       plt <- ggplot(data = roc_dfm_list[[k]], aes(x = fpr, y = tpr, group = group, colour = group)) +
-        geom_line(aes(linetype = group)) +
+        geom_line(aes(linetype = group), size = plot.lineSize) +
         geom_point(aes(shape = group), size = plot.SymbolSize) +
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +
@@ -2032,8 +2044,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
                                     verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.")
-  if (object$model.type == "regression") stop("the function only supports \"classification\" model type.")
-
+  if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")

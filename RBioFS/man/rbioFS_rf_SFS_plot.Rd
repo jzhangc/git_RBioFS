@@ -4,17 +4,34 @@
 \alias{rbioFS_rf_SFS_plot}
 \title{rbioFS_rf_SFS_plot}
 \usage{
-rbioFS_rf_SFS_plot(object, n = "all",
-  plot.file.title = deparse(substitute(object)), plot.title = NULL,
-  plot.titleSize = 10, plot.symbolSize = 2, plot.errorbar = c("sem",
-  "sd"), plot.errorbarWidth = 0.2, plot.fontType = "sans",
-  plot.xLabel = "Features", plot.xLabelSize = 10, plot.xAngle = 0,
-  plot.xhAlign = 0.5, plot.xvAlign = 0.5, plot.xTickLblSize = 10,
-  plot.xTickItalic = FALSE, plot.xTickBold = FALSE,
-  plot.rightsideY = TRUE, plot.yLabel = "OOB error rate",
-  plot.yLabelSize = 10, plot.yTickLblSize = 10,
-  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+rbioFS_rf_SFS_plot(
+  object,
+  n = "all",
+  plot.file.title = deparse(substitute(object)),
+  plot.title = NULL,
+  plot.titleSize = 10,
+  plot.symbolSize = 2,
+  plot.errorbar = c("sem", "sd"),
+  plot.errorbarWidth = 0.2,
+  plot.fontType = "sans",
+  plot.xLabel = "Features",
+  plot.xLabelSize = 10,
+  plot.xAngle = 0,
+  plot.xhAlign = 0.5,
+  plot.xvAlign = 0.5,
+  plot.xTickLblSize = 10,
+  plot.xTickItalic = FALSE,
+  plot.xTickBold = FALSE,
+  plot.rightsideY = TRUE,
+  plot.yLabel = "OOB error rate",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.yTickItalic = FALSE,
+  plot.yTickBold = FALSE,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rf_sfs} object. Make sure the object is generated with a \code{validation} section.}

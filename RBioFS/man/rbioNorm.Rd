@@ -4,8 +4,13 @@
 \alias{rbioNorm}
 \title{rbioNorm}
 \usage{
-rbioNorm(RawData, NormMtd = "quantile", correctBG = TRUE,
-  BgMtd = "normexp", BgOffst = 0)
+rbioNorm(
+  RawData,
+  NormMtd = "quantile",
+  correctBG = TRUE,
+  BgMtd = "normexp",
+  BgOffst = 0
+)
 }
 \arguments{
 \item{RawData}{Inpule dataframe, which can be the the results from the function \code{\link{rbioIMP}} with transposition.}

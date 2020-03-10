@@ -22,6 +22,8 @@ This function is needed to pre-process data when conducting plsda analysis.
          And the function can also be used for other purposes when needed.
          With the colSds function from matrixStats pacakge to calcualte column standard deviation,
          this function is faster than the native \code{scale} function when \code{scale = TRUE}.
+
+         The scale here really means "z-score normalization": (x - mean(x)) / SD
 }
 \examples{
 \dontrun{

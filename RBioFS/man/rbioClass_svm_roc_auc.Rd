@@ -2,19 +2,35 @@
 % Please edit documentation in R/rbioClass_svm.R
 \name{rbioClass_svm_roc_auc}
 \alias{rbioClass_svm_roc_auc}
-\title{rbioClass_svm_roc_auc()}
+\title{rbioClass_svm_roc_auc}
 \usage{
-rbioClass_svm_roc_auc(object, newdata = NULL, newdata.label = NULL,
-  newdata.y = NULL, y.threshold = if (object$model.type ==
-  "regression") round(median(object$inputY)) else NULL,
-  center.scale.newdata = TRUE, rocplot = TRUE, plot.smooth = FALSE,
-  plot.SymbolSize = 2, plot.display.Title = TRUE,
-  plot.titleSize = 10, plot.fontType = "sans",
-  plot.xLabel = "1 - specificity", plot.xLabelSize = 10,
-  plot.xTickLblSize = 10, plot.yLabel = "sensitivity",
-  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.rightsideY = TRUE, plot.Width = 170, plot.Height = 150,
-  verbose = TRUE)
+rbioClass_svm_roc_auc(
+  object,
+  newdata = NULL,
+  newdata.label = NULL,
+  newdata.y = NULL,
+  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else
+    NULL,
+  center.scale.newdata = TRUE,
+  rocplot = TRUE,
+  plot.smooth = FALSE,
+  plot.SymbolSize = 2,
+  plot.lineSize = 1,
+  plot.display.Title = TRUE,
+  plot.titleSize = 10,
+  plot.fontType = "sans",
+  plot.xLabel = "1 - specificity",
+  plot.xLabelSize = 10,
+  plot.xTickLblSize = 10,
+  plot.yLabel = "sensitivity",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.legendSize = 9,
+  plot.rightsideY = TRUE,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}
@@ -34,6 +50,8 @@ rbioClass_svm_roc_auc(object, newdata = NULL, newdata.label = NULL,
 \item{plot.smooth}{If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
+
+\item{plot.lineSize}{Line size. Default is \code{1}.}
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 
@@ -72,7 +90,8 @@ Prints AUC values in the console. And a pdf file for ROC plot. The function also
         \code{model.type}
         \code{y.threshold}
         \code{regression.categories}
-        \code{svm.roc}
+        \code{svm.roc_object}
+        \code{svm.roc_dataframe}
         \code{input.newdata}
         \code{input.newdata.y}
         \code{input.newdata.label}
@@ -91,11 +110,13 @@ Uses pROC module to calculate ROC. The function supports more than two groups or
 
          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
 
-         Known issue: due to the AUC calculation method, the resulting \code{svm_roc_auc} class doesn't include the AUC score. It will be fixed in a future update.
-         For now, the AUC scores will be printed in the console upon the execution of the function.
+         Along with the data frame, the \code{svm_roc_auc} output includes the \code{roc} object from the \code{pROC} package, with which the stats can be done to compare ROCs.
+
+         Also: a ROC curve with AUC == 1 is always 1-1 for 95% CI and can be misleading.
 }
 \examples{
 \dontrun{
-rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
+rbioClass_svm_roc_auc(object = svm_m, newdata = svm_test[, -1],
+                      newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
 }
 }

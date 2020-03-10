@@ -4,9 +4,15 @@
 \alias{rbioClass_svm_predcit}
 \title{rbioClass_svm_predict}
 \usage{
-rbioClass_svm_predcit(object, newdata, center.scale.newdata = TRUE,
-  sampleLabel.vector = NULL, newdata.y = NULL,
-  prob.method = c("logistic", "Bayes", "softmax"), verbose = TRUE)
+rbioClass_svm_predcit(
+  object,
+  newdata,
+  center.scale.newdata = TRUE,
+  sampleLabel.vector = NULL,
+  newdata.y = NULL,
+  prob.method = c("logistic", "Bayes", "softmax"),
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}

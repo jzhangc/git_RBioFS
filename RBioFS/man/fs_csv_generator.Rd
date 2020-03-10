@@ -4,12 +4,23 @@
 \alias{fs_csv_generator}
 \title{fs_csv_generator}
 \usage{
-fs_csv_generator(objTitle = "data", fltdata = NULL,
-  rmControl = FALSE, anno = NULL, geneSymbol.var = "GeneSymbol",
-  tgt = NULL, group.var = "Group", de.dfm = NULL,
-  probeID.var = "ProbeName", fc.var = "logFC", p.var = "P.Value",
-  adjP.var = "adj.P.Val", q.value = 0.05, fc.value = 1.5,
-  fc.log.trans = TRUE)
+fs_csv_generator(
+  objTitle = "data",
+  fltdata = NULL,
+  rmControl = FALSE,
+  anno = NULL,
+  geneSymbol.var = "GeneSymbol",
+  tgt = NULL,
+  group.var = "Group",
+  de.dfm = NULL,
+  probeID.var = "ProbeName",
+  fc.var = "logFC",
+  p.var = "P.Value",
+  adjP.var = "adj.P.Val",
+  q.value = 0.05,
+  fc.value = 1.5,
+  fc.log.trans = TRUE
+)
 }
 \arguments{
 \item{objTitle}{Prefix for the output file name. Default is \code{"data"}.}

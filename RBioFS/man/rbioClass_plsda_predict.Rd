@@ -4,22 +4,43 @@
 \alias{rbioClass_plsda_predict}
 \title{rbioClass_plsda_predict}
 \usage{
-rbioClass_plsda_predict(object, comps = object$ncomp, newdata,
-  center.newdata = TRUE, prob.method = "Bayes", threshold = 0.2,
-  predplot = TRUE, plot.sampleLabel.type = "none",
-  plot.sampleLabel.vector = NULL, plot.sampleLabelSize = 2,
+rbioClass_plsda_predict(
+  object,
+  comps = object$ncomp,
+  newdata,
+  center.newdata = TRUE,
+  prob.method = "Bayes",
+  threshold = 0.2,
+  predplot = TRUE,
+  plot.sampleLabel.type = "none",
+  plot.sampleLabel.vector = NULL,
+  plot.sampleLabelSize = 2,
   plot.sampleLabel.padding = 0.5,
-  multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1,
+  multi_plot.ncol = length(levels(object$inputY)),
+  multi_plot.nrow = 1,
   multi_plot.legend.pos = c("bottom", "top", "left", "right"),
-  plot.rightsideY = TRUE, plot.SymbolSize = 2,
-  plot.display.Title = TRUE, plot.titleSize = 10,
-  plot.fontType = "sans", plot.unclassifiedColour = "gray",
-  plot.classifiedColour = "red", plot.xLabel = "Samples",
-  plot.xLabelSize = 10, plot.xTickLblSize = 6,
-  plot.xTickItalic = FALSE, plot.xAngle = 0, plot.xhAlign = 0.5,
-  plot.xvAlign = 0.5, plot.yLabel = "Predicted values",
-  plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.legendSize = 9,
-  plot.Width = 170, plot.Height = 150, verbose = TRUE)
+  plot.rightsideY = TRUE,
+  plot.SymbolSize = 2,
+  plot.display.Title = TRUE,
+  plot.titleSize = 10,
+  plot.fontType = "sans",
+  plot.unclassifiedColour = "gray",
+  plot.classifiedColour = "red",
+  plot.xLabel = "Samples",
+  plot.xLabelSize = 10,
+  plot.xTickLblSize = 6,
+  plot.xTickItalic = FALSE,
+  plot.xAngle = 0,
+  plot.xhAlign = 0.5,
+  plot.xvAlign = 0.5,
+  plot.yLabel = "Predicted values",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.legendSize = 9,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} object.}

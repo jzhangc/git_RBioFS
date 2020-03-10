@@ -4,16 +4,28 @@
 \alias{rbioClass_plsda_q2r2}
 \title{rbioClass_plsda_q2r2()}
 \usage{
-rbioClass_plsda_q2r2(object, intercept = TRUE, q2r2plot = TRUE,
+rbioClass_plsda_q2r2(
+  object,
+  intercept = TRUE,
+  q2r2plot = TRUE,
   plot.display.Title = TRUE,
   multi_plot.ncol = length(dimnames(object$coefficients)[[2]]),
-  multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
-  plot.rightsideY = TRUE, plot.fontType = "sans",
-  plot.SymbolSize = 2, plot.xLabel = "Components",
-  plot.xLabelSize = 10, plot.xTickLblSize = 10,
-  plot.yLabel = "R2 & Q2", plot.yLabelSize = 10,
-  plot.yTickLblSize = 10, plot.legendSize = 9, plot.Width = 170,
-  plot.Height = 150, verbose = TRUE)
+  multi_plot.nrow = 1,
+  multi_plot.legend.pos = "bottom",
+  plot.rightsideY = TRUE,
+  plot.fontType = "sans",
+  plot.SymbolSize = 2,
+  plot.xLabel = "Components",
+  plot.xLabelSize = 10,
+  plot.xTickLblSize = 10,
+  plot.yLabel = "R2 & Q2",
+  plot.yLabelSize = 10,
+  plot.yTickLblSize = 10,
+  plot.legendSize = 9,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
