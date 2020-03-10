@@ -30,66 +30,15 @@ Installation
 
 Update log
 
-    Feature wishlist
-        - KNN (k-nearest neighbors) functions added (non-Shiny) (tentative):
-          - rbioClass_knn()
-          - rbioClass_knn_plot()
-                
-        - sPLS-DA functions added (non-Shiny) (tentative):
-          - rbioClass_splsda()
-          - rbioClass_splsda_plot()
-        
-        - RF-class (random forest classification) functions added (non-Shiny) (tentative):
-          - rbioClass_rf_class()
-          - rbioClass_rf_class_plot()
-                
-        - All shiny apps' interface updated with a new look
-                
-        - Updates to rbioFS_PCA():
-          - 3D score plot option for rbioFS_PCA (non-shiny)
-          - 3D socre plot option for rbioFS_PCA_app (shiny)
-          - Legend style adjusted for the sample labels
-                
-        - ROC-AUC now a seperate function that can be used for other classification/FS methods
-        
-        - All-in-one classification solution functions added:
-          - rbioClass()
-          
-
-    0.7.0 (feature preview)
-    (ICEBOX)
-        - New PLSR function(s)
-          - rbioReg_plsr() function added for PLS regression analysis
-            - "rbiomvr" object from this function has model.type = "regression"
-          - rbioReg_plsr_predict() function added for PLS regression analysis
-          - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
-          - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
-          
-        - Update to SVM function(s)
-          - rbioClass_svm_perm() plot output file name fixed
-          - rbioClass_svm_roc_auc() plot.lineSize argument added
-
-        - Updates to PLS-DA function(s)
-          - Multivariate Y modelling now possible with rbioFS_plsda
-          - rbioFS_plsda_vip_plot() plot output file name fixed
-          - rbioClass_plsda_perm() plot output file name fixed
-          - rbioClass_plsda_roc_auc() plot.lineSize argument added
-          - Print function for relevant functions to accommodate the new plsr functions
-          - A bug fixed for rbioClass_plsda_perm() where the intercept term wasn't excluded
-
-        - Updates to the PCA function(s)
-          - rbioFS_PCA() now exports a "rbiofs_pca" class object
-          - rbioFS_PCA() updated with S3 print method
-          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
-        
-    (ADDED)
-        - General update
+    0.7.0 (Mar.10.2020)
+        - General update(s)
           - rbioUtil_perm_plot() updated to accommodate PLSR functions
           
         - New utility function(s)
           - rbioUtil_classif_accuracy(): calculates classification accuracy with new data
 
         - New SVM function(s)
+          - rbioClass_svm_cv_roc_auc(): ROC-AUC analysis for K-fold cross-validation
           - rbioReg_svm_rmse(): calculates RMSE for the SVR model, either with newdata or training data
           - rbioReg_svm_r2(): calculate R2 for the SVR model with newdata
         

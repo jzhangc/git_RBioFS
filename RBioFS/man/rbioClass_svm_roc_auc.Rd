@@ -111,9 +111,12 @@ Uses pROC module to calculate ROC. The function supports more than two groups or
          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
 
          Along with the data frame, the \code{svm_roc_auc} output includes the \code{roc} object from the \code{pROC} package, with which the stats can be done to compare ROCs.
+
+         Also: a ROC curve with AUC == 1 is always 1-1 for 95% CI and can be misleading.
 }
 \examples{
 \dontrun{
-rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
+rbioClass_svm_roc_auc(object = svm_m, newdata = svm_test[, -1],
+                      newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
 }
 }

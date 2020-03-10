@@ -692,6 +692,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'
 #'          Along with the data frame, the \code{svm_roc_auc} output includes the \code{roc} object from the \code{pROC} package, with which the stats can be done to compare ROCs.
 #'
+#'          Also: a ROC curve with AUC == 1 is always 1-1 for 95% CI and can be misleading.
 #'
 #' @import ggplot2
 #' @import foreach
@@ -702,7 +703,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @importFrom RBioplot rightside_y multi_plot_shared_legend
 #' @examples
 #' \dontrun{
-#' rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
+#' rbioClass_svm_roc_auc(object = svm_m, newdata = svm_test[, -1],
+#'                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
 #' }
 #' @export
 rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
@@ -796,10 +798,10 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     controls <- splt$others
     cases <- splt[[levels(outcome)[i]]]
     if (length(cases) && length(controls)) {  # check if there are any zero controls or zero cases
-      perf <- tryCatch(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE),
+      perf <- tryCatch(suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE))),
                        error = function(err){
                          cat("Curve not smoothable. Proceed without smooth.\n")
-                         pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)
+                         suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)))
                        })
       if (length(levels(outcome)) == 2){
         cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))
@@ -876,6 +878,203 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
              width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       grid.draw(plt)
       if (verbose) cat("Done!\n")
+    }
+  }
+}
+
+
+#' @title rbioClass_svm_cv_roc_auc
+#'
+#' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models
+#' @param object A \code{rbiosvm_nestedcv} object.
+#' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
+#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
+#' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return Prints AUC values in the console. And a pdf file for ROC plot.
+#'         The function also exports a ROC results list with an ROC object for each CV fold.
+#'
+#' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold
+#'          for classification and regression model.
+#'
+#'          The test data included in the input \code{rbiosvm_nestedcv} is already normalized with training data information.
+#'          So there is no need for additional data transformation.
+#'
+#'          Also: a ROC curve with AUC == 1 is always 1-1 for 95% CI and can be misleading.
+#'
+#' @import ggplot2
+#' @import foreach
+#' @importFrom pROC roc
+#' @importFrom matrixStats colSds
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @examples
+#' \dontrun{
+#' rbioClass_svm_cv_roc_auc(object = svm_nested_cv)
+#' }
+#' @export
+rbioClass_svm_cv_roc_auc <- function(object,
+                                     rocplot = TRUE,
+                                     plot.smooth = FALSE,
+                                     plot.lineSize = 1,
+                                     plot.display.Title = TRUE, plot.titleSize = 10,
+                                     plot.fontType = "sans",
+                                     plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                     plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                     plot.legendSize = 9, plot.rightsideY = TRUE,
+                                     plot.Width = 170, plot.Height = 150,
+                                     verbose = TRUE){
+
+  # ---- argements check ----
+  if (!any(class(object) %in% c('rbiosvm_nestedcv'))) stop("object needs to be \"rbiosvm_nestedcv\" class.")
+  if (object$model.type != "classification") stop("The function only supports classification study for now.")
+
+  # ---- read in data ----
+  cv_model_list <- object$nested.cv.models
+
+  # ---- intermediate function ----
+  cv_auc_func <- function(x){
+    # data
+    cv_test <- x$cv_test_data
+    cv_test_x <- cv_test[, !names(cv_test) %in% "y"]
+    cv_test_y <- cv_test$y
+
+    # model
+    cv_m <- x$cv_svm_model
+
+    # pred
+    pred <- predict(cv_m, newdata = cv_test_x, decision.values = TRUE, probability = TRUE)  # prediction
+    pred_prob <- attr(pred, "probabilities")
+
+    # ROC-AUC
+    roc_auc_list <- vector(mode = "list", length = length(levels(cv_test_y)))
+    roc_auc_list[] <- foreach(i = 1:length(levels(cv_test_y))) %do% {
+      response <- cv_test_y
+      levels(response)[-i] <- "others"
+      predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
+      splt <- split(predictor, response)  # split function splist array according to a factor
+      controls <- splt$others
+      cases <- splt[[levels(cv_test_y)[i]]]
+      if (length(cases) && length(controls)) {
+        perf <- tryCatch(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE)),
+                         error = function(err){
+                           cat("Curve not smoothable. Proceed without smooth.\n")
+                           suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE))
+                         })
+        if (verbose){
+          if (length(levels(cv_test_y)) == 2){
+            cat(paste0("AUC - ", levels(cv_test_y)[i], ": ", perf$auc, "\n"))
+          } else {
+            cat(paste0(" AUC - ", levels(cv_test_y)[i], " (vs Others): ", perf$auc, "\n"))
+          }
+        }
+
+        perf
+      } else {
+        return(NULL)
+      }
+    }
+    names(roc_auc_list) <- unique(cv_test_y)
+
+    roc_dfm <- foreach(i = 1:length(levels(cv_test_y)), .combine = "rbind") %do% {
+      perf <- roc_auc_list[[i]]
+      fpr <- 1 - perf$specificities
+      tpr <- perf$sensitivities
+      thresholds <- perf$thresholds
+      mtx <- cbind(fpr, tpr, thresholds)
+      if (length(levels(cv_test_y)) == 2){
+        df <- data.frame(mtx, group = rep(levels(cv_test_y)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      } else {
+        df <- data.frame(mtx, group = rep(paste0(levels(cv_test_y)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      }
+      df <- df[order(df$tpr), ]
+      return(df)
+    }
+
+    # return
+    if (any(sapply(roc_auc_list, is.null))) {
+      out <- NULL
+    } else {
+      out <- list(svm.roc_object = roc_auc_list,
+                  svm.roc_dataframe = roc_dfm)
+    }
+    return(out)
+  }
+
+  # ---- compute and return ----
+  auc_res_list <- vector(mode = "list", length = length(cv_model_list))
+  auc_res_list[] <- foreach(i = 1:length(cv_model_list)) %do% {
+    out <- cv_auc_func(cv_model_list[[i]])
+    out
+  }
+  names(auc_res_list) <- names(cv_model_list)
+
+  if (any(sapply(auc_res_list, is.null))){
+    cat("NULL element removed from the CV ROC-AUC list.\n")
+    auc_res_list <- auc_res_list[-which(sapply(auc_res_list, is.null))]
+  }
+  assign(paste(deparse(substitute(object)), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+
+  # ---- plotting ----
+  if (rocplot){
+    if (length(auc_res_list) < 1){
+      cat("ROC data empty. No plots can be genereated. \n")
+    } else {
+      plot_dfm <- foreach(i = 1:length(auc_res_list), .combine = "rbind") %do% {
+        dfm <- auc_res_list[[i]]$svm.roc_dataframe
+        dfm$cv_fold <- names(auc_res_list)[i]
+        dfm
+      }
+      plot_dfm$cv_fold <- factor(plot_dfm$cv_fold, levels = unique(plot_dfm$cv_fold))
+
+      for (i in 1:length(unique(plot_dfm$group))){
+        if (verbose) cat(paste0("Plot being saved to file: ", deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf..."))  # initial message
+
+        plot_dfm_g <- plot_dfm[plot_dfm$group %in% unique(plot_dfm$group)[i], ]
+
+        plt <- ggplot(data = plot_dfm_g, aes(x = fpr, y = tpr, group = cv_fold, colour = cv_fold)) +
+          geom_line(aes(linetype = cv_fold), size = plot.lineSize) +
+          geom_abline(intercept = 0) +
+          ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
+          xlab(plot.xLabel) +
+          ylab(plot.yLabel) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+
+        if (plot.rightsideY){
+          plt <- RBioplot::rightside_y(plt)
+        }
+
+        # save
+        # grid.newpage()
+        ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        grid.draw(plt)
+        if (verbose) cat("Done!\n")
+      }
     }
   }
 }
