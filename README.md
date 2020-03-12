@@ -53,14 +53,17 @@ Update log
         - Updates to the PCA function(s)
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
-          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs 
+          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs    
     
+    (ADDED)
+        - Update to SVM function(s)
+          - fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
+
     
-    0.7.1 (Mar.10.2020)
+    0.7.1
         - Update to SVM function(s)
           - rbioClass_svm_roc_auc() plot.lineSize argument added
           - rbioClass_svm_cv_roc_auc() now supports regression study
-          - fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
            
     
     0.7.0 
