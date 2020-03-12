@@ -790,10 +790,10 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   roc_auc_list <- vector(mode = "list", length = length(levels(outcome)))
   roc_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
     response <- outcome
+    predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
     levels(response)[-i] <- "others"
     # predictor <- dummy(pred)
     # predictor <- as.matrix(predictor[, i], ncol = 1)
-    predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
     splt <- split(predictor, response)  # split function splist array according to a factor
     controls <- splt$others
     cases <- splt[[levels(outcome)[i]]]
@@ -983,8 +983,8 @@ rbioClass_svm_cv_roc_auc <- function(object,
     roc_auc_list <- vector(mode = "list", length = length(levels(cv_test_y)))
     roc_auc_list[] <- foreach(i = 1:length(levels(cv_test_y))) %do% {
       response <- cv_test_y
-      levels(response)[-i] <- "others"
       predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
+      levels(response)[-i] <- "others"
       splt <- split(predictor, response)  # split function splist array according to a factor
       controls <- splt$others
       cases <- splt[[levels(cv_test_y)[i]]]

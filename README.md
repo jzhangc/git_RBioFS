@@ -60,7 +60,8 @@ Update log
         - Update to SVM function(s)
           - rbioClass_svm_roc_auc() plot.lineSize argument added
           - rbioClass_svm_cv_roc_auc() now supports regression study
-          
+          - fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
+           
     
     0.7.0 
         - General update(s)
