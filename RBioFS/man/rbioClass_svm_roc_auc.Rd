@@ -9,8 +9,8 @@ rbioClass_svm_roc_auc(
   newdata = NULL,
   newdata.label = NULL,
   newdata.y = NULL,
-  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else
-    NULL,
+  y.threshold = if (object$model.type == "regression") round(median(object$inputY))
+    else NULL,
   center.scale.newdata = TRUE,
   rocplot = TRUE,
   plot.smooth = FALSE,

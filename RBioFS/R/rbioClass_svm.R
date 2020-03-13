@@ -208,7 +208,7 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{cv.fold}: number of (outer) cross-validation fold
 #'
-#' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation
+#' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
 #'
 #' \code{model.type}: the SVM model type, "classification" or "regression".
 #'
@@ -273,6 +273,8 @@ print.rbiosvm <- function(x, ...){
 #'
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
+#'
+#' For classification modelling, the 10-fold CV segmentation is stratified, whereas the "normal" random resampling is used for regression modelling.
 #'
 #' @import foreach
 #' @import doParallel
@@ -346,9 +348,26 @@ rbioClass_svm_ncv_fs <- function(x, y,
   ## nested cv
   # processing training data
   dfm <- data.frame(y, x, check.names = FALSE)
-  random_sample_idx <- sample(nrow(dfm))
-  dfm_randomized <- dfm[random_sample_idx, ]  # randomize samples
-  fold <- cut(seq(1:nrow(dfm_randomized)), breaks = cross.k, labels = FALSE)  # create a factor object with fold indices
+  if (model_type == "regression"){
+    random_sample_idx <- sample(nrow(dfm))
+    dfm_randomized <- dfm[random_sample_idx, ]  # randomize samples
+    fold <- cut(1:nrow(dfm_randomized), breaks = cross.k, labels = FALSE)  # create a factor object with fold indices
+  } else {
+    dfm_randomized <- dfm  # no randomization at this point yet
+    y_summary <- table(y)
+    fold <- foreach(i = 1:length(levels(y)), .combine = "c") %do% {
+      min_rep <- y_summary[i] %/% cross.k
+      if (min_rep > 0){
+        remain_size <- y_summary[i] %% cross.k
+        v <- rep(1:cross.k, times = min_rep)
+        if (remain_size > 0) v <- c(v, sample(1:cross.k, remain_size))
+        sample(v)  # randomization
+      } else {
+        sample(1:cross.k, size = y_summary[i]) # randomization
+      }
+    }
+    random_sample_idx <- NULL
+  }
 
   # nested CV function
   nestedcv_func <- function(i) {
@@ -434,7 +453,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 
     # cv svm
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
-                          svm.cross.k = 0, tune.method = tune.method,
+                          svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
     # processing test data
@@ -989,10 +1008,10 @@ rbioClass_svm_cv_roc_auc <- function(object,
       controls <- splt$others
       cases <- splt[[levels(cv_test_y)[i]]]
       if (length(cases) && length(controls)) {
-        perf <- tryCatch(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE)),
+        perf <- tryCatch(suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE))),
                          error = function(err){
                            cat("Curve not smoothable. Proceed without smooth.\n")
-                           suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE))
+                           suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)))
                          })
         if (verbose){
           if (length(levels(cv_test_y)) == 2){

@@ -86,7 +86,7 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{cv.fold}: number of (outer) cross-validation fold
 
-\code{randomized.sample.index}: randomized sample order for (outer) cross-validation
+\code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
 
 \code{model.type}: the SVM model type, "classification" or "regression".
 
@@ -153,6 +153,8 @@ for feature count threholding. When there is no change in perforamce across cv m
 
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
+
+For classification modelling, the 10-fold CV segmentation is stratified, whereas the "normal" random resampling is used for regression modelling.
 }
 \examples{
 \dontrun{

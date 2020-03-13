@@ -6,8 +6,8 @@
 \usage{
 rbioClass_svm_cv_roc_auc(
   object,
-  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else
-    NULL,
+  y.threshold = if (object$model.type == "regression") round(median(object$inputY))
+    else NULL,
   rocplot = TRUE,
   plot.smooth = FALSE,
   plot.lineSize = 1,
