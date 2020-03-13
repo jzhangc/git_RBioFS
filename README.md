@@ -58,7 +58,7 @@ Update log
     (ADDED)
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now conducts stratified k-fold CV for CV segmentation for classification modelling
-          - fixed a bug for rbioClass_svm_roc_auc() still redundant displays warning messages
+          - fixed a bug for rbioClass_svm_roc_auc() still displays redundant warning messages
           - fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
 
     
