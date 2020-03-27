@@ -438,18 +438,43 @@ rbioClass_svm_ncv_fs <- function(x, y,
     } else {
       fs_training_x <- cv_training_x
     }
-    rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
-                        nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
-    # fs <- svm_nested_initial_FS$feature_initial_FS
-    rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
-                  x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
-                  nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
 
-    if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
-      fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
-    } else {
-      fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
-    }
+    # rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
+    #                     nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+    # # fs <- svm_nested_initial_FS$feature_initial_FS
+    # rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
+    #               x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
+    #               nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+    #
+    # if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
+    #   fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
+    # } else {
+    #   fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
+    # }
+    fs <- tryCatch({  # rRF-FS with error handling
+      rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
+                          nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+      # fs <- svm_nested_initial_FS$feature_initial_FS
+      rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
+                    x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
+                    nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+
+      if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
+        out <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
+      } else {
+        out <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
+      }
+    },
+    warning = function(w){
+      cat(paste0("Warnings occured during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
+      out <- colnames(fs_training_x)
+      return(out)
+    },
+    error = function(e){
+      cat(paste0("Errors occured during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
+      out <- colnames(fs_training_x)
+      return(out)
+    })
 
     # cv svm
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,

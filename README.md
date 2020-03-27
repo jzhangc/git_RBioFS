@@ -54,7 +54,11 @@ Update log
           - rbioFS_PCA() now exports a "rbiofs_pca" class object
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs    
-          
+
+    (ICEBOX)
+        - Update to SVM function(s)
+          - error handling added for rRF_FS to rbioClass_svm_ncv_fs() 
+              
 
     0.7.2 (Mar.12.2020)
         - Update to SVM function(s)
