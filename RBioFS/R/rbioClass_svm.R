@@ -466,12 +466,12 @@ rbioClass_svm_ncv_fs <- function(x, y,
       }
     },
     warning = function(w){
-      cat(paste0("Warnings occured during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
+      cat(paste0("Warnings occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
       out <- colnames(fs_training_x)
       return(out)
     },
     error = function(e){
-      cat(paste0("Errors occured during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
+      cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
       out <- colnames(fs_training_x)
       return(out)
     })
@@ -515,7 +515,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...\n")
   }
   nested.cv.list <- vector(mode = "list", length = cross.k)
-  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS")) %do% nestedcv_func(i)
+  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %do% nestedcv_func(i)
   names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
   # below: cv.model.idx: best models index
