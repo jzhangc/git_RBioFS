@@ -55,16 +55,16 @@ Update log
           - rbioFS_PCA() updated with S3 print method
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs    
 
-    (ICEBOX)
+    (ADDED)
         - Update to SVM function(s)
-          - error handling added for rRF_FS to rbioClass_svm_ncv_fs() 
+          - Error handling added for rRF_FS to rbioClass_svm_ncv_fs() 
               
 
     0.7.2 (Mar.12.2020)
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now conducts stratified k-fold CV for CV segmentation for classification modelling
-          - fixed a bug for rbioClass_svm_roc_auc() still displays redundant warning messages
-          - fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
+          - Fixed a bug for rbioClass_svm_roc_auc() still displays redundant warning messages
+          - Fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
 
     
     0.7.1
