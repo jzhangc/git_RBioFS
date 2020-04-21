@@ -686,12 +686,10 @@ print.rbiosvm_nestedcv <- function(x, ...){
 
 #' @title rbioClass_svm_roc_auc
 #'
-#' @description ROC-AUC analysis and ploting for SVM model
+#' @description ROC-AUC analysis and ploting for SVM model, for classification model only.
 #' @param object A \code{rbiosvm} object.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
-#' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
-#' @param y.threshold For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}
-#' @param newdata.label For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
+#' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
@@ -752,8 +750,6 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
-                                  newdata.y = NULL,
-                                  y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else NULL,
                                   center.scale.newdata = TRUE,
                                   rocplot = TRUE,
                                   plot.smooth = FALSE,
@@ -798,17 +794,18 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     }
     reg.group <- NULL
   } else {  # for regression
-    if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
-    if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
-    if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
-    y.threshold <- sort(unique(y.threshold))
-    threshold.length <- length(y.threshold)
-    reg.group.names <- paste0("case", seq(threshold.length + 1))
-    rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
-    newdata.label <- cut(y, rg)
-    reg.group <- levels(newdata.label)
-    names(reg.group) <- reg.group.names
-    levels(newdata.label) <- reg.group.names
+    # if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
+    # if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
+    # if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
+    # y.threshold <- sort(unique(y.threshold))
+    # threshold.length <- length(y.threshold)
+    # reg.group.names <- paste0("case", seq(threshold.length + 1))
+    # rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
+    # newdata.label <- cut(y, rg)
+    # reg.group <- levels(newdata.label)
+    # names(reg.group) <- reg.group.names
+    # levels(newdata.label) <- reg.group.names
+    stop("ROC-AUC only applies to classification studies.")
   }
 
   ## process data
@@ -824,10 +821,9 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   ## ROC-AUC calculation
   pred <- predict(object, newdata = test, decision.values = TRUE, probability = TRUE)  # prediction
   pred_prob <- attr(pred, "probabilities")
-
-  if (object$model.type == "regression"){
-    pred <- cut(pred, rg, labels = reg.group.names)
-  }
+  # if (object$model.type == "regression"){
+  #   pred <- cut(pred, rg, labels = reg.group.names)
+  # }
   outcome <- newdata.label  # origial label
 
   # auc
@@ -929,9 +925,8 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 
 #' @title rbioClass_svm_cv_roc_auc
 #'
-#' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models
+#' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models, for classification only.
 #' @param object A \code{rbiosvm_nestedcv} object.
-#' @param y.threshold For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -975,7 +970,6 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #' }
 #' @export
 rbioClass_svm_cv_roc_auc <- function(object,
-                                     y.threshold = if (object$model.type == "regression") round(median(object$inputY)) else NULL,
                                      rocplot = TRUE,
                                      plot.smooth = FALSE,
                                      plot.lineSize = 1,
@@ -993,20 +987,21 @@ rbioClass_svm_cv_roc_auc <- function(object,
   cv_model_list <- object$nested.cv.models
 
   if (object$model.type == "regression"){  # for regressoin study
-    if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
-    if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
-    y.threshold <- sort(unique(y.threshold))
-    threshold.length <- length(y.threshold)
-    reg.group.names <- paste0("case", seq(threshold.length + 1))
-
-    for (i in 1:length(cv_model_list)){
-      y <- cv_model_list[[i]]$cv_test_data$y
-      rg <- c(0, y.threshold, ceiling(max(y)*1.1))
-      y <- cut(y, rg)
-      reg.group <- levels(y)
-      levels(y) <- reg.group.names
-      cv_model_list[[i]]$cv_test_data$y <- y  # replace y with thresholded groups
-    }
+    # if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
+    # if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
+    # y.threshold <- sort(unique(y.threshold))
+    # threshold.length <- length(y.threshold)
+    # reg.group.names <- paste0("case", seq(threshold.length + 1))
+    #
+    # for (i in 1:length(cv_model_list)){
+    #   y <- cv_model_list[[i]]$cv_test_data$y
+    #   rg <- c(0, y.threshold, ceiling(max(y)*1.1))
+    #   y <- cut(y, rg)
+    #   reg.group <- levels(y)
+    #   levels(y) <- reg.group.names
+    #   cv_model_list[[i]]$cv_test_data$y <- y  # replace y with thresholded groups
+    # }
+    stop('ROC-AUC only applies to classfication models.')
   }
 
   # ---- intermediate function ----

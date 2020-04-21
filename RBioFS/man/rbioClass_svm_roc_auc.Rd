@@ -8,9 +8,6 @@ rbioClass_svm_roc_auc(
   object,
   newdata = NULL,
   newdata.label = NULL,
-  newdata.y = NULL,
-  y.threshold = if (object$model.type == "regression") round(median(object$inputY))
-    else NULL,
   center.scale.newdata = TRUE,
   rocplot = TRUE,
   plot.smooth = FALSE,
@@ -37,11 +34,7 @@ rbioClass_svm_roc_auc(
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 
-\item{newdata.label}{For classification model only, the correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
-
-\item{newdata.y}{For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}}
-
-\item{y.threshold}{For regression model only, a numeric vector as the theshold(s) to categorize the continuous outcome variable into groups. Default is \code{if (object$model.type == "regression") round(median(object$inputY)) else NULL}}
+\item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
 
 \item{center.scale.newdata}{Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 
@@ -98,7 +91,7 @@ Prints AUC values in the console. And a pdf file for ROC plot. The function also
         \code{newdata.center.scaled}
 }
 \description{
-ROC-AUC analysis and ploting for SVM model
+ROC-AUC analysis and ploting for SVM model, for classification model only.
 }
 \details{
 Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
