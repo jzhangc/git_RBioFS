@@ -1234,10 +1234,19 @@ rbioClass_svm_perm <- function(object,
   by_y_func <- function(i){
     set.seed(i)
     perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
-    perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = perm_y,
-                                center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
-                                tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
-                                verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    if (is.null(object$center.scaledX$centerX)) {
+      perm_model <- rbioClass_svm(x = svm_m$inputX, y = perm_y,
+                                  center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
+                                  tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
+                                  verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+
+    } else {
+      perm_model <- rbioClass_svm(x = object$center.scaledX$centerX, y = perm_y,
+                                  center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
+                                  tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
+                                  verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
+    }
+
     if (object$model.type == "regression"){
       perm_perfm <- perm_model$tot.MSE
       perm_perfm <- sqrt(perm_perfm)  # RMSE
@@ -1250,7 +1259,12 @@ rbioClass_svm_perm <- function(object,
   by_feature_per_y_func <- function(i){
     set.seed(i)
     perm_x <- foreach(m = unique(levels(object$inputY)), .combine = "rbind") %do% {
-      sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
+      if (is.null(object$center.scaledX$centerX)){
+        sub_dat <- object$inputX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
+      } else {
+        sub_dat <- object$center.scaledX$centerX[which(object$inputY == m), ]  # subsetting the centre-scaled X by label (Y)
+      }
+
       sub_dat_colnames <- colnames(sub_dat)
       perm_dat <- sub_dat[, sample(1:ncol(sub_dat))]
       # perm_dat <- foreach(n = 1:ncol(sub_dat), .combine = "cbind") %do% {

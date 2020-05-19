@@ -60,6 +60,7 @@ Update log
           - Error handling added for rRF_FS to rbioClass_svm_ncv_fs()
           - Regression model support removed from rbioClass_svm_roc_auc()
           - Regression model support removed from rbioClass_svm_cv_roc_auc()
+          - rbioClass_svm_perm updated to accommodate SVM models without center.scaledX
               
 
     0.7.2 (Mar.12.2020)
