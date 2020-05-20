@@ -763,14 +763,20 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
+  if (object$model.type != "classification") stop("object needs to be a \"classification\" model")
   if (is.null(newdata)) {
     cat("No newdata input, proceed with training data.\n\n")
     newdata <- object$inputX
-    if (object$model.type == "classification") {
-      newdata.label <- object$inputY
-    } else {
-      newdata.y <- object$inputY
+    newdata.label <- object$inputY
+    if (class(newdata.label) != "factor"){
+      if (verbose) cat("newdata.label is converted to factor. \n")
+      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
+    # if (object$model.type == "classification") {
+    #   newdata.label <- object$inputY
+    # } else {
+    #   newdata.y <- object$inputY
+    # }
   }
   if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
   if (class(newdata) == "data.frame" | is.null(dim(newdata))){
@@ -781,32 +787,32 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
-  y <- newdata.y
-  if (object$model.type == "classification"){
-    if (verbose && !is.null(newdata.y)) {
-      cat("newdata.y set to NULL for classification model. \n")
-      newdata.y <- NULL
-    }
-    y <- NULL
-    if (class(newdata.label) != "factor"){
-      if (verbose) cat("newdata.label is converted to factor. \n")
-      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
-    }
-    reg.group <- NULL
-  } else {  # for regression
-    # if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
-    # if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
-    # if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
-    # y.threshold <- sort(unique(y.threshold))
-    # threshold.length <- length(y.threshold)
-    # reg.group.names <- paste0("case", seq(threshold.length + 1))
-    # rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
-    # newdata.label <- cut(y, rg)
-    # reg.group <- levels(newdata.label)
-    # names(reg.group) <- reg.group.names
-    # levels(newdata.label) <- reg.group.names
-    stop("ROC-AUC only applies to classification studies.")
-  }
+  # y <- newdata.y
+  # if (object$model.type == "classification"){
+  #   if (verbose && !is.null(newdata.y)) {
+  #     cat("newdata.y set to NULL for classification model. \n")
+  #     newdata.y <- NULL
+  #   }
+  #   y <- NULL
+  #   if (class(newdata.label) != "factor"){
+  #     if (verbose) cat("newdata.label is converted to factor. \n")
+  #     newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+  #   }
+  #   # reg.group <- NULL
+  # } else {  # for regression
+  #   if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
+  #   if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
+  #   if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
+  #   y.threshold <- sort(unique(y.threshold))
+  #   threshold.length <- length(y.threshold)
+  #   reg.group.names <- paste0("case", seq(threshold.length + 1))
+  #   rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
+  #   newdata.label <- cut(y, rg)
+  #   reg.group <- levels(newdata.label)
+  #   names(reg.group) <- reg.group.names
+  #   levels(newdata.label) <- reg.group.names
+  #   stop("ROC-AUC only applies to classification studies.")
+  # }
 
   ## process data
   if (center.scale.newdata){ # using training data mean and sd
@@ -876,12 +882,9 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     out <- NULL
   } else {
     out <- list(model.type = object$model.type,
-                y.threshold = y.threshold,
-                regression.categories = reg.group,
                 svm.roc_object = roc_auc_list,
                 svm.roc_dataframe = roc_dfm,
                 input.newdata = newdata,
-                input.newdata.y = newdata.y,
                 input.newdata.label = newdata.label,
                 newdata.center.scaled = centered_newdata)
     class(out) <- "svm_roc_auc"
