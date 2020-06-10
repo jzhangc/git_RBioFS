@@ -61,6 +61,9 @@ Update log
           - Regression model support removed from rbioClass_svm_roc_auc()
           - Regression model support removed from rbioClass_svm_cv_roc_auc()
           - rbioClass_svm_perm updated to accommodate SVM models without center.scaledX
+        
+        - Other updates
+          - Small fixes
               
 
     0.7.2 (Mar.12.2020)
