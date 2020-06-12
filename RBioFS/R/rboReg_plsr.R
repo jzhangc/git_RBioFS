@@ -54,8 +54,8 @@ rbioReg_plsr <- function(x, y, method = "simpls",
                          jackknife = TRUE, ...,
                          verbose = TRUE){
   ## check arguments
-  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
-  if (class(x) == "data.frame" | is.vector(x)){
+  if (!any(class(x) %in% c("data.frame", "matrix")) & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
+  if (any(class(x) == "data.frame") | is.vector(x)){
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
@@ -701,6 +701,3 @@ rbioReg_plsr_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
     RBioFS::rbioReg_plsr_vip_plot(vip_obj = out, ...)
   }
 }
-
-
-

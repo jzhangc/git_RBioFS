@@ -70,8 +70,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   } else {
     model_type <- "regression"
   }
-  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
-  if (class(x) == "data.frame" | is.vector(x)){
+  if (!any(class(x) %in% c("data.frame", "matrix")) & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
+  if (any(class(x) == "data.frame") | is.vector(x)){
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
@@ -331,7 +331,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   }
 
   if (cross.k > nrow(x)) stop("Cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
-  if (class(x) == "data.frame"){
+  if (any(class(x) == "data.frame")){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
@@ -768,7 +768,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     cat("No newdata input, proceed with training data.\n\n")
     newdata <- object$inputX
     newdata.label <- object$inputY
-    if (class(newdata.label) != "factor"){
+    if (any(class(newdata.label) != "factor")){
       if (verbose) cat("newdata.label is converted to factor. \n")
       newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
@@ -778,8 +778,8 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
     #   newdata.y <- object$inputY
     # }
   }
-  if (!class(newdata) %in% c("data.frame", "matrix") & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
-  if (class(newdata) == "data.frame" | is.null(dim(newdata))){
+  if (!any(class(newdata) %in% c("data.frame", "matrix")) & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
+  if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }
@@ -1443,7 +1443,7 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
   ## argument check
   if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
   if (missing(newdata) || is.null(newdata)) stop("please provide newdata.")
-  if (!class(newdata) %in% c("matrix", "data.frame")) stop("newdata has to be either a matrix or data.frame object.")
+  if (!any(class(newdata) %in% c("matrix", "data.frame"))) stop("newdata has to be either a matrix or data.frame object.")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
@@ -1468,7 +1468,7 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
   }
 
   ## center data with the option of scaling
-  if (class(newdata) == "data.frame"){
+  if (any(class(newdata) == "data.frame")){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }

@@ -56,6 +56,9 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs    
 
     (ADDED)
+        - General updates
+          - All functions updated to be compatible with R version 4.0. 
+          
         - Update to SVM function(s)
           - Error handling added for rRF_FS to rbioClass_svm_ncv_fs()
           - Regression model support removed from rbioClass_svm_roc_auc()
