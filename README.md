@@ -56,11 +56,16 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs    
 
     (ADDED)
+        - New SVM function(s)
+          - rbioClass_svm_cv() added for non-nested cross-validation, without feature selection
+            - The function generates a "rbiosvm_cv" class object
+
         - General updates
           - All functions updated to be compatible with R version 4.0. 
           
         - Update to SVM function(s)
           - Error handling added for rRF_FS to rbioClass_svm_ncv_fs()
+          - "rbiosvm_cv" class support added for rbioClass_svm_cv_roc_auc()
           - Regression model support removed from rbioClass_svm_roc_auc()
           - Regression model support removed from rbioClass_svm_cv_roc_auc()
           - rbioClass_svm_perm updated to accommodate SVM models without center.scaledX

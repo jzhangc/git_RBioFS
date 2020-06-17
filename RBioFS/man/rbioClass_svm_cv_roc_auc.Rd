@@ -26,7 +26,7 @@ rbioClass_svm_cv_roc_auc(
 )
 }
 \arguments{
-\item{object}{A \code{rbiosvm_nestedcv} object.}
+\item{object}{A \code{rbiosvm_nestedcv} or \code{rbiosvm_dcv} object.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
