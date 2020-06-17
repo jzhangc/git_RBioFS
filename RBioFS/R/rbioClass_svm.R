@@ -330,7 +330,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     }
   }
 
-  if (cross.k > nrow(x)) stop("Cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
+  if (cross.k > nrow(x)) stop("Nested cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
   if (any(class(x) == "data.frame")){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
@@ -883,7 +883,7 @@ rbioClass_svm_cv <- function(x, y,
     cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
     cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
     cat("\n")
-    cat("Cross-validation with feature selection (speed depending on hardware configuration)...\n")
+    cat("Cross-validation (speed depending on hardware configuration)...\n")
   }
   cv.list <- vector(mode = "list", length = cross.k)
   cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %do% cv_func(i)
