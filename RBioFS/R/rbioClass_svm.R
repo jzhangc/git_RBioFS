@@ -850,7 +850,7 @@ rbioClass_svm_cv <- function(x, y,
       cv_training_x <- cv_training_x
     }
 
-    cv_m <- reffunc(x = cv_training_x, y = cv_training_y, center.scale = center.scale,
+    cv_m <- rbioClass_svm(x = cv_training_x, y = cv_training_y, center.scale = center.scale,
                     svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                     tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
