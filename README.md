@@ -3,7 +3,10 @@ A comprehensive yet straightforward machine learning package for biological and 
 
 To cite in publication
   
-    Zhang J, Hadj-Moussa H, Storey KB. 2016. Current progress of high-throughput microRNA differential expression analysis and random forest gene selection for model and non-model systems: an R implementation. J Integr Bioinform. 13: 306.
+    Zhang J, Hadj-Moussa H, Storey KB. 2016. Current progress of high-throughput microRNA differential expression analysis and random forest gene selection for model and non-model systems: an R implementation. J Integr Bioinform. 13: 306. doi: 10.1515/jib-2016-306.
+    Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor to reflect anoxia and freezing survival adaptations. GENOMICS. 020 Jul 27: S0888-7543(20)30169-5. doi: 10.1016/j.ygeno.2020.07.036.
+    Zhang J, Richardson DJ, Dunkley BT. 2020. Classifying post-traumatic stress disorder using the magnetoencephalographic connectome and machine learning. Scientific Reports. 10(1): 5937. doi: 10.1038/s41598-020-62713-5.
+    
 
 
 Installation
@@ -30,34 +33,6 @@ Installation
 
 Update log
 
-    0.7.4 (Feature preview)
-    (ICEBOX)
-        - New PLSR function(s)
-          - rbioReg_plsr() function added for PLS regression analysis
-            - "rbiomvr" object from this function has model.type = "regression"
-          - rbioReg_plsr_predict() function added for PLS regression analysis
-          - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
-          - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
-          
-        - Update to SVM function(s)
-          - rbioClass_svm_perm() plot output file name fixed
-
-        - Updates to PLS-DA function(s)
-          - Multivariate Y modelling now possible with rbioFS_plsda
-          - rbioFS_plsda_vip_plot() plot output file name fixed
-          - rbioClass_plsda_perm() plot output file name fixed
-          - rbioClass_plsda_roc_auc() plot.lineSize argument added
-          - Print function for relevant functions to accommodate the new plsr functions
-          - A bug fixed for rbioClass_plsda_perm() where the intercept term wasn't excluded
-
-        - Updates to the PCA function(s)
-          - rbioFS_PCA() now exports a "rbiofs_pca" class object
-          - rbioFS_PCA() updated with S3 print method
-          - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
-
-    (ADDED)  
-    
-
     0.7.3 (Aug.14.2020)
         - New SVM function(s)
           - rbioClass_svm_cv() added for non-nested cross-validation, without feature selection
@@ -75,7 +50,8 @@ Update log
         
         - Other updates
           - Small fixes
-              
+          - Additional citations added
+          
 
     0.7.2 (Mar.12.2020)
         - Update to SVM function(s)
