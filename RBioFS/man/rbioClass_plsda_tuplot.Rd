@@ -72,7 +72,7 @@ rbioClass_plsda_tuplot(
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
-Returns a pdf file for scoreplot.
+Returns a pdf file for tuplot.
 }
 \description{
 T-U plot function for PLS-DA models.

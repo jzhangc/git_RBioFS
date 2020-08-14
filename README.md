@@ -30,11 +30,30 @@ Installation
 
 Update log
 
+    0.7.3 (Aug.14.2020)
+        - New SVM function(s)
+          - rbioClass_svm_cv() added for non-nested cross-validation, without feature selection
+            - The function generates a "rbiosvm_cv" class object
+
+        - General updates
+          - All functions updated to be compatible with R version 4.0. 
+          
+        - Update to SVM function(s)
+          - Error handling added for rRF_FS to rbioClass_svm_ncv_fs()
+          - "rbiosvm_cv" class support added for rbioClass_svm_cv_roc_auc()
+          - Regression model support removed from rbioClass_svm_roc_auc()
+          - Regression model support removed from rbioClass_svm_cv_roc_auc()
+          - rbioClass_svm_perm updated to accommodate SVM models without center.scaledX
+        
+        - Other updates
+          - Small fixes
+              
+
     0.7.2 (Mar.12.2020)
         - Update to SVM function(s)
           - rbioClass_svm_ncv_fs() now conducts stratified k-fold CV for CV segmentation for classification modelling
-          - fixed a bug for rbioClass_svm_roc_auc() still displays redundant warning messages
-          - fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
+          - Fixed a bug for rbioClass_svm_roc_auc() still displays redundant warning messages
+          - Fixed a bug where rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() would fail with more than two groups
 
     
     0.7.1

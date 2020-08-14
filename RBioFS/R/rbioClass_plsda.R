@@ -85,12 +85,12 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
                             jackknife = TRUE, ...,
                             verbose = TRUE){
   ## check arguments
-  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
-  if (class(x) == "data.frame" | is.vector(x)){
+  if (!any(class(x) %in% c("data.frame", "matrix")) & !is.null(dim(x))) stop("x needs to be a matrix, data.frame or vector.")
+  if (any(class(x) == "data.frame") | is.vector(x)){
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
   }
-  if (class(y) != "factor"){
+  if (any(class(y) != "factor")){
     if (verbose) cat("y is converted to factor. \n")
     y <- factor(y, levels = unique(y))
   }
@@ -157,7 +157,7 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @param plot.Width tuplot width. Default is \code{170}.
 #' @param plot.Height tuplot height. Default is \code{150}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return Returns a pdf file for scoreplot.
+#' @return Returns a pdf file for tuplot.
 #' @details The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 #' @import ggplot2
 #' @import ggrepel
@@ -898,7 +898,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     y <- object$inputY
   } else if (!any(class(object) == "rbiomvr") & any(class(object) == "mvr")){
     if (is.null(y)) stop("for mvr class objects, please provide response factor vector y.")
-    if (class(y) != "factor"){
+    if (any(class(y) != "factor")){
       if (verbose) cat("y is converted to factor. \n")
       y <- factor(y, levels = unique(y))
     } else {
@@ -2045,8 +2045,8 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   ## argument check
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be a \"rbiomvr\" class.")
   if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
-  if (!class(x) %in% c("data.frame", "matrix") & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
-  if (class(newdata) == "data.frame" | is.null(dim(newdata))){
+  if (!any(class(x) %in% c("data.frame", "matrix")) & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
+  if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }
