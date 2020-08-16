@@ -9,7 +9,7 @@ rbioFS_PCA.file(file, ...)
 \arguments{
 \item{file}{Input file name. Format is \code{csv}.}
 
-\item{...}{Augument for \code{\link{rbioFS_PCA}}.}
+\item{...}{Argument for \code{\link{rbioFS_PCA}}.}
 }
 \value{
 Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
@@ -18,7 +18,7 @@ Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA a
 A simple to use wrapper for PCA (Principal Component Analysis) and visualization. This is the version that loads \code{csv} file directly.
 }
 \details{
-Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+Make sure to arrange input data with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
 }
 \examples{
 \dontrun{

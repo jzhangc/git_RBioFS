@@ -29,13 +29,13 @@
 #' @param biplot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
 #' @param biplot.Width The biplot width. Default is \code{170}.
 #' @param biplot.Height The biplot height. Default is \code{150}.
-#' @param rightsideY If to show the right side y-axis for both boxplot and biplot. For biplot, only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
+#' @param rightsideY If to show the right side y-axis for both boxplot and biplot. For biplot, only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param fontType Font for the figure texts. Default is \code{"sans"}.
 #' @param xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param yTickLblSize Y-axis tick label size. Default is \code{10}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
-#' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+#' @details Make sure to arrange input data with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2
 #' @import ggrepel
 #' @importFrom GGally ggpairs
@@ -306,9 +306,9 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 #'
 #' @description A simple to use wrapper for PCA (Principal Component Analysis) and visualization. This is the version that loads \code{csv} file directly.
 #' @param file Input file name. Format is \code{csv}.
-#' @param ... Augument for \code{\link{rbioFS_PCA}}.
+#' @param ... Argument for \code{\link{rbioFS_PCA}}.
 #' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
-#' @details Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+#' @details Make sure to arrange input data with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2
 #' @examples
 #' \dontrun{

@@ -11,7 +11,7 @@
 #' }
 #' @export
 dummy <- function (x, drop2nd = FALSE){  # integrate into the main function eventually
-  if (!is.factor(x)){  # use this one for the augments
+  if (!is.factor(x)){  # use this one for the arguments
     stop("'x' should be a factor")
   }
   y <- model.matrix(~x - 1)
