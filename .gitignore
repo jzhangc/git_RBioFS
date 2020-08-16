@@ -30,7 +30,6 @@ vignettes/*.pdf
 
 # test and data folders
 data/
-test/
 restuls/
 
 # Temporary files created by R markdown
