@@ -2,12 +2,12 @@
 #'
 #' @description PLS regression modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is a continuous vairable..
+#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is a continuous variable..
 #' @param method PLSR modelling method. Four PLSR algorithms are available: the kernel algorithm ("kernelpls"), the wide kernel algorithm ("widekernelpls"),
 #'               SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls"}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
-#' @param segments Set only when \code{validation = "CV"}, the number of segement to be set. Default is \code{10}.
+#' @param segments Set only when \code{validation = "CV"}, the number of segment to be set. Default is \code{10}.
 #' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{mvr} function from \code{pls} package.

@@ -97,7 +97,7 @@ rbioFS_PCA(
 
 \item{biplot.Height}{The biplot height. Default is \code{150}.}
 
-\item{rightsideY}{If to show the right side y-axis for both boxplot and biplot. For biplot, only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
+\item{rightsideY}{If to show the right side y-axis for both boxplot and biplot. For biplot, only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
 
 \item{fontType}{Font for the figure texts. Default is \code{"sans"}.}
 
@@ -105,7 +105,7 @@ rbioFS_PCA(
 
 \item{yTickLblSize}{Y-axis tick label size. Default is \code{10}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
@@ -114,7 +114,7 @@ Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA a
 A simple to use wrapper for PCA (Principal Component Analysis) and visualization
 }
 \details{
-Make sure to arrange input data with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+Make sure to arrange input data with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
 }
 \examples{
 \dontrun{
