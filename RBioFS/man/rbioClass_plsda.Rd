@@ -32,15 +32,15 @@ SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as N
 
 \item{validation}{Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.}
 
-\item{segments}{Set only when \code{validation = "CV"}, the number of segement to be set. Default is \code{10}.}
+\item{segments}{Set only when \code{validation = "CV"}, the number of segment to be set. Default is \code{10}.}
 
 \item{segments.type}{Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.}
 
 \item{jackknife}{If to use jack-knife procedure. Default is \code{TRUE}.}
 
-\item{...}{Additional arguments for \code{mvr} function from \code{pls} pacakge.}
+\item{...}{Additional arguments for \code{mvr} function from \code{pls} package.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a PLS-DA model object, with classes "mvr" and "rbiomvr".
@@ -75,7 +75,7 @@ The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus n
          For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
 
          For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
-         or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+         or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} package.
 }
 \examples{
 \dontrun{

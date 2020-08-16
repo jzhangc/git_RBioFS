@@ -46,7 +46,7 @@ rbioClass_plsda_roc_auc(
 
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
 
-\item{plot.smooth}{If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.}
+\item{plot.smooth}{If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.}
 
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{length(plot.comps)}.}
 
@@ -54,7 +54,7 @@ rbioClass_plsda_roc_auc(
 
 \item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
-\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
+\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
@@ -64,7 +64,7 @@ rbioClass_plsda_roc_auc(
 
 \item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.}
 
@@ -84,7 +84,7 @@ rbioClass_plsda_roc_auc(
 
 \item{plot.Height}{ROC height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Prints AUC values in the console. And a pdf file for ROC plot

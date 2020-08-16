@@ -10,8 +10,8 @@
 #' @param segments Set only when \code{validation = "CV"}, the number of segement to be set. Default is \code{10}.
 #' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
-#' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param ... Additional arguments for \code{mvr} function from \code{pls} package.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The center and scale processes are handled by \code{\link{center_scale}} function.
 #'          Therefore, the \code{center} and \code{scale} arguments \code{pls::mvr} are set to \code{FALSE}.
 #'
@@ -38,8 +38,8 @@
 #' @details The data is always centered prior to modelling, i.e. \code{x - col.mean}. Thus no "center = TRUE/FALSE" option is provided.
 #'
 #'
-#'          For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
-#'          or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#'          For sequencing data, the input x needs to be either transformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
+#'          or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} package.
 #'
 #' @importFrom pls plsr
 #' @examples
@@ -99,21 +99,21 @@ rbioReg_plsr <- function(x, y, method = "simpls",
 
 #' @title rbioReg_plsr_ncomp_select()
 #'
-#' @description Optimal number of components selection for PLSR model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
+#' @description Optimal number of components selection for PLSR model, with RMSEP plot functionality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} package.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ... Additional argument for \code{RMSEP} function from \code{pls} package.
 #' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1sd"}.
 #' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
 #' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
 #' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
-#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.
 #' @param plot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
@@ -123,13 +123,13 @@ rbioReg_plsr <- function(x, y, method = "simpls",
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Plot width. Default is \code{170}.
 #' @param plot.Height Plot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment as a \code{rbiomvr_ncomp_select} object,
 #'         as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
-#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
+#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimates corrected for bias.
 #'          Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
-#'          reach te minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
-#'          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+#'          reach the minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
+#'          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} package.
 #' @import ggplot2
 #' @import foreach
 #' @importFrom GGally ggpairs
@@ -285,13 +285,13 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
 #' @param ncomp Model complexity, i.e. number of components to model. Default is \code{object$ncomp}, i.e. maximum complexity.
 #' @param adjCV If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.
 #' @param nperm Number of permutations to run. Default is \code{999}.
-#' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
+#' @param perm.plot Whether to produce a plot or not. Default is \code{TRUE}.
 #' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value resutls.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value results.
 #'
 #' The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
 #'
@@ -305,9 +305,9 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
 #'
 #' \code{poerm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
 #'
-#' A scatter plot is also generaeted when \code{perm.plot = TRUE}.
+#' A scatter plot is also generated when \code{perm.plot = TRUE}.
 #'
-#' @details The function uses RMSEP as the stats for comparing original model with permutatsions.
+#' @details The function uses RMSEP as the stats for comparing original model with permutations.
 #'
 #'          Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
 #'
@@ -318,7 +318,7 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
 #'             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
 #'             J Mach Learn Res. 11: 1833 - 63.
 #'
-#'          For this function, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'          For this function, labels (i.e. y) are permutated. A non-significant model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
 #'
 #' @import ggplot2
@@ -455,18 +455,18 @@ rbioReg_plsr_perm <- function(object, ncomp = object$ncomp, adjCV = FALSE,
 
 #' @title rbioReg_plsr_vip
 #'
-#' @description VIP, or variable importance in projection, calcualtion and plotting for PLSR models. This is another FS method, and can be used independently.
-#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
+#' @description VIP, or variable importance in projection, calculation and plotting for PLSR models. This is another FS method, and can be used independently.
+#' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built using \code{"oscorespls"} method.
 #' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
-#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.
+#' @param comps Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.
 #' @param bootstrap If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{TRUE}.
-#' @param boot.n Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.
-#' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.
+#' @param boot.n Set only when \code{boostrap = TRUE}, numbers of iterations for boostrap. Default is \code{50}.
+#' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computing for bootstrap process. Default is \code{TRUE}.
 #' @param boot.n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param boot.clusterType Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to generate a plot. Default is \code{TRUE}.
 #' @param ... Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Outputs a \code{rbiomvr_vip} class object to the environment.
 #'
 #'         \code{rbiomvr_vip} items are:

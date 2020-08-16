@@ -71,7 +71,7 @@ rbioClass_plsda_predict(
 
 \item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
-\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
+\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
@@ -79,7 +79,7 @@ rbioClass_plsda_predict(
 
 \item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.unclassifiedColour}{Colour for the unclassified samples. Default is \code{"gray"}.}
 
@@ -109,7 +109,7 @@ rbioClass_plsda_predict(
 
 \item{plot.Height}{Predplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
@@ -146,7 +146,7 @@ This is only for information sake.
 
 The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
 Specifically, the equation models classification against predicted values from pls-da model and training data: \code{P(class|predicted values) = P(predicted values|)P(class)/P(predicted values)}.
-The resulted Bayesian classification model is then applied to newdata, thereby prosterior probabilites are calcuated.
+The resulted Bayesian classification model is then applied to newdata, thereby posterior probabilities are calcuated.
 
 The "softmax" method uses the equation: \code{probability = exp(predicted.value) / sum(exp(predicted.values))}. This method doesn't relay on training data.
 

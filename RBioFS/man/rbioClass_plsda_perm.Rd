@@ -25,7 +25,7 @@ rbioClass_plsda_perm(
 
 \item{adjCV}{If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.}
 
-\item{perm.plot}{Wether to produce a plot or not. Default is \code{TRUE}.}
+\item{perm.plot}{whether to produce a plot or not. Default is \code{TRUE}.}
 
 \item{...}{Additional argument for \code{\link{rbioUtil_perm_plot}}.}
 
@@ -33,16 +33,16 @@ rbioClass_plsda_perm(
 
 \item{nperm}{Number of permutations to run. Default is \code{999}.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value resutls.
+The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value results.
 
 The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
 
@@ -58,13 +58,13 @@ The results are also exported to the environment as a \code{rbiomvr_perm} object
 
 \code{poerm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
 
-A scatter plot is also generaeted when \code{perm.plot = TRUE}.
+A scatter plot is also generated when \code{perm.plot = TRUE}.
 }
 \description{
 Permutation test for PLS-DA models.
 }
 \details{
-The function uses RMSEP as the stats for comparing original model with permutatsions.
+The function uses RMSEP as the stats for comparing original model with permutations.
 
          Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
 
@@ -75,11 +75,11 @@ The function uses RMSEP as the stats for comparing original model with permutats
             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
             J Mach Learn Res. 11: 1833 - 63.
 
-         For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+         For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-significant model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 
          For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature.
          Since the permutation is done for the features WITHIN the group,
-         the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
+         the test actually evaluates if the model will produce significantly different performance from the permutation models with the original "between-features" relation (if any) disturbed.
          Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 }
 \examples{

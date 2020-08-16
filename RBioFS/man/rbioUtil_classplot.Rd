@@ -42,7 +42,7 @@ rbioUtil_classplot(
 
 \item{plot.probLabel.outside.nudge}{Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.legendSize}{Legend size. Default is \code{9}.}
 
@@ -50,20 +50,20 @@ rbioUtil_classplot(
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
-\item{pred.object}{A \code{prediction} object, which can be obtained from funciton \code{\link{rbioClass_plsda_predict}}.}
+\item{pred.object}{A \code{prediction} object, which can be obtained from function \code{\link{rbioClass_plsda_predict}}.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 }
 \value{
-A \code{classification} obejct with classification probability summary for each sample, as well as pdf figure file fif \code{classplot = TRUE}.
+A \code{classification} object with classification probability summary for each sample, as well as pdf figure file when \code{classplot = TRUE}.
 }
 \description{
-Classification plot function for classification predction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probablity pie charts.
+Classification plot function for classification prediction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probablity pie charts.
 }
 \details{
-The function operates in conjunction with the prediction function \code{\link{rbioClass_plsda_predict}}, to which the sample(s) of intestested is provided.
+The function operates in conjunction with the prediction function \code{\link{rbioClass_plsda_predict}}, to which the sample(s) of interested is provided.
 }
 \examples{
 \dontrun{

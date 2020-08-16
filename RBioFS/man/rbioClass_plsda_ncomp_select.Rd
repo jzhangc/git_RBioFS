@@ -44,7 +44,7 @@ rbioClass_plsda_ncomp_select(
 
 \item{rmsepplot}{If to generate a RMSEP plot. Default is \code{TRUE}.}
 
-\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
+\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.}
 
 \item{plot.optm.ncomp.line}{If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.}
 
@@ -58,7 +58,7 @@ rbioClass_plsda_ncomp_select(
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.}
 
@@ -78,20 +78,20 @@ rbioClass_plsda_ncomp_select(
 
 \item{plot.Height}{Plot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment as a \code{rbiomvr_ncomp_select} object,
         as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 }
 \description{
-Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
+Optimal number of components selection for PLS-DA model, with RMSEP plot functionality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} package.
 }
 \details{
-The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
+The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimates corrected for bias.
          Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
-         reach te minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
-         For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+         reach the minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
+         For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} package.
 }
 \examples{
 \dontrun{

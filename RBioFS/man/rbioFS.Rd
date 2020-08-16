@@ -71,7 +71,7 @@ rbioFS(
 
 \item{imputeNtree}{RF imputation ntree value. Default is \code{501}. See \code{\link{rbioIMP}} for details.}
 
-\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{FALSE}.}
 
 \item{quantileNorm}{Whether to use quantile normalization on the raw data. Default is \code{FALSE}.}
 
@@ -79,7 +79,7 @@ rbioFS(
 
 \item{nTree}{Number of trees generated for each random forest run for both initial FS and SFS-like FS. Default is \code{1001} trees.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 

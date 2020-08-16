@@ -1,6 +1,6 @@
 #' @title dummy
 #'
-#' @description dummification of catagorical variables
+#' @description dummification of categorical variables
 #' @param x Input vector. Make sure it is a factor.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @return Outputs a matrix with dummified variables.
@@ -11,7 +11,7 @@
 #' }
 #' @export
 dummy <- function (x, drop2nd = FALSE){  # integrate into the main function eventually
-  if (!is.factor(x)){  # use this one for the arugments
+  if (!is.factor(x)){  # use this one for the augments
     stop("'x' should be a factor")
   }
   y <- model.matrix(~x - 1)
@@ -37,11 +37,11 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'               SIMPLS ("simpls") and the classical orthogonal scores algorithm (also known as NIPALS) ("oscorespls"). Default is the popular \code{"simpls"}.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @param validation Cross validation methods. Options are "none", "CV" (fold), "LOO" (leave-one-out). Default is \code{"CV"}.
-#' @param segments Set only when \code{validation = "CV"}, the number of segement to be set. Default is \code{10}.
+#' @param segments Set only when \code{validation = "CV"}, the number of segment to be set. Default is \code{10}.
 #' @param segments.type Method to set up the segments. Options are \code{"random", "consecutive", "interleaved"}. Default is \code{"random"}.
 #' @param jackknife If to use jack-knife procedure. Default is \code{TRUE}.
-#' @param ... Additional arguments for \code{mvr} function from \code{pls} pacakge.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param ... Additional arguments for \code{mvr} function from \code{pls} package.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The center and scale processes are handled by \code{\link{center_scale}} function.
 #'          Therefore, the \code{center} and \code{scale} arguments \code{pls::mvr} are set to \code{FALSE}.
 #'
@@ -70,7 +70,7 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #'          For \code{ncomp} value, the default (full model) compares feature number with \code{class number - 1}, instead of observation number.
 #'
 #'          For sequencing data, the input x needs to be either tranformed with the function like \code{clr_ilr_transfo()} from \code{RBioArray} package,
-#'          or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} pacakge.
+#'          or normalized using methods like "TMM" or "RLE" implemented in \code{edgeR} package.
 #'
 #' @importFrom pls plsr
 #' @examples
@@ -137,18 +137,18 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #'
 #' @description T-U plot function for PLS-DA models.
 #' @param object A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
-#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
+#' @param comps Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param multi_plot.ncol Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.
 #' @param multi_plot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
-#' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
+#' @param plot.rightsideY If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.Title tuplot title. Default is \code{NULL}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
@@ -156,9 +156,9 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width tuplot width. Default is \code{170}.
 #' @param plot.Height tuplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a pdf file for tuplot.
-#' @details The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
+#' @details The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 #' @import ggplot2
 #' @import ggrepel
 #' @import foreach
@@ -276,16 +276,16 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
 
 #' @title rbioClass_plsda_q2r2()
 #'
-#' @description q2-r2 (i.e. Q^2 and R^2 scores) caluclation and plot for plsda models
+#' @description q2-r2 (i.e. Q^2 and R^2 scores) calculation and plot for plsda models
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
-#' @param intercept Wether to include intercept term, i.e. comps = 0. Default is \code{TRUE}.
+#' @param intercept whether to include intercept term, i.e. comps = 0. Default is \code{TRUE}.
 #' @param q2r2plot If to generate a q2r2 plot. Default is \code{TRUE}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. unique y classes.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
-#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
@@ -296,7 +296,7 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Plot width. Default is \code{170}.
 #' @param plot.Height Plot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 #' @details A vertical line indicating the number of component with minimum q2-r2 distance.
 #' @import ggplot2
@@ -322,7 +322,7 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
                               verbose = TRUE){
   ## check arguments
   if (!any(class(object) %in% c("rbiomvr", 'mvr'))) stop("object needs to be either a \"rbiomvr\" or \"mvr\" class.")
-  if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls pacakge
+  if (is.null(object$validation) || is.null(object$validation$coefficients)) stop("'object' was not fit with jackknifing enabled")  # from pls package
   if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
   multi_plot.legend.pos <- match.arg(tolower(multi_plot.legend.pos), c("bottom"))
 
@@ -406,7 +406,7 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
 
 #' @title randomiz.test
 #'
-#' @description Randomization function from \code{pls} pacakge. For \code{\link{rbioClass_plsda_ncomp_select}} function.
+#' @description Randomization function from \code{pls} package. For \code{\link{rbioClass_plsda_ncomp_select}} function.
 randomiz.test <- function(residualsNew, residualsReference, nperm){
   d <- residualsNew^2 - residualsReference^2
   md <- mean(d)
@@ -423,21 +423,21 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 
 #' @title rbioClass_plsda_ncomp_select()
 #'
-#' @description Optimal number of components selection for PLS-DA model, with RMSEP plot funcitonality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} pacakge.
+#' @description Optimal number of components selection for PLS-DA model, with RMSEP plot functionality. Selection methods are modified based on \code{selectNcomp()} from \code{pls} package.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ... Additional argument for \code{RMSEP} function from \code{pls} package.
 #' @param ncomp.selection.method Optimal numbers of components selection method. Options are \code{"min"}, \code{"1err"}, and \code{"randomization"}. Default is \code{"1err"}.
 #' @param randomization.nperm Set only when \code{ncomp.selection.method = "randomization"}, number of permutations. Default is \code{999}.
 #' @param randomization.alpha Set only when \code{ncomp.selection.method = "randomization"}, alpha for the p values used during "randomization" selection. Default is \code{0.05}.
 #' @param rmsepplot If to generate a RMSEP plot. Default is \code{TRUE}.
-#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.
 #' @param plot.optm.ncomp.line If to display the vertical line indicting the optimal number of components. Default is \code{TRUE}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is the number of responding classes, i.e. y.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Components"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
@@ -447,13 +447,13 @@ randomiz.test <- function(residualsNew, residualsReference, nperm){
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Plot width. Default is \code{170}.
 #' @param plot.Height Plot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment as a \code{rbiomvr_ncomp_select} object,
 #'         as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
-#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimiates corrected for bias.
+#' @details The RMSEP figure shows both CV estimates and adjusted CV estimates, which is CV estimates corrected for bias.
 #'          Three methods are used for components number selection: \code{"min"} simply chooses the number of components to
-#'          reach te minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
-#'          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} pacakge.
+#'          reach the minimum RMSEP; \code{"1err"} chooses the number of components when its RMSEP first reaches minimum as well as within one standard error;
+#'          For "randomization", see the help file for \code{selectNcomp()} function from  \code{pls} package.
 #' @import ggplot2
 #' @import foreach
 #' @importFrom GGally ggpairs
@@ -618,13 +618,13 @@ print.rbiomvr_ncomp_select <- function(x, ...){
 #' @param adjCV If to use adjusted CV, i.e. CV adjusted for unbalanced data. Default is \code{FALSE}.
 #' @param perm.method Permutation method. Options are \code{"by_y"} and \code{"by_feature_per_y"}. Default is \code{"by_y"}. See details below.
 #' @param nperm Number of permutations to run. Default is \code{999}.
-#' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
+#' @param perm.plot whether to produce a plot or not. Default is \code{TRUE}.
 #' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param parallelComputing whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value resutls.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return The function returns \code{CSV} files for all intermediate permutation RMSEP values as well as the p-value results.
 #'
 #' The results are also exported to the environment as a \code{rbiomvr_perm} object with the following items:
 #'
@@ -640,9 +640,9 @@ print.rbiomvr_ncomp_select <- function(x, ...){
 #'
 #' \code{poerm.results} The intermediate permutation results, i.e. stats for each permutation test run in a data.frame. \code{nperm = 0} is the original stats.
 #'
-#' A scatter plot is also generaeted when \code{perm.plot = TRUE}.
+#' A scatter plot is also generated when \code{perm.plot = TRUE}.
 #'
-#' @details The function uses RMSEP as the stats for comparing original model with permutatsions.
+#' @details The function uses RMSEP as the stats for comparing original model with permutations.
 #'
 #'          Usually, we use the optimized PLS-DA model for \code{object}, which can be obtained from functions \code{\link{rbioClass_plsda}} and \code{\link{rbioClass_plsda_ncomp_select}}.
 #'
@@ -653,11 +653,11 @@ print.rbiomvr_ncomp_select <- function(x, ...){
 #'             Ojala M, Garriga GC. 2010. Permutation test for studying classifier performance.
 #'             J Mach Learn Res. 11: 1833 - 63.
 #'
-#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-signifianct model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
+#'          For \code{perm.method = "by_y"}, labels (i.e. y) are permutated. A non-significant model (permutation p value > alpha, i.e. 0.05) in this case means the data is independent from the groups.
 #'
 #'          For \code{perm.method = "by_feature_per_by"}, X is first subset by label (i.e.y) before permutating data for each feature.
 #'          Since the permutation is done for the features WITHIN the group,
-#'          the test actually evaluates if the model will produce significantly different performannce from the permutation models with the original "betweeen-features" relation (if any) disturbed.
+#'          the test actually evaluates if the model will produce significantly different performance from the permutation models with the original "between-features" relation (if any) disturbed.
 #'          Therefore, A non-significant result (permutation p value > alpha, i.e. 0.05) means either the features are independent, or the model doesn't consider correlation between the features.
 #'
 #' @import ggplot2
@@ -842,8 +842,8 @@ print.rbiomvr_perm <- function(x, ...){
 #' @description scoreplot function for PLS-DA models.
 #' @param object A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param y Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class or a character vector.
-#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
-#' @param plot.rightsideY If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
+#' @param comps Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
+#' @param plot.rightsideY If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
 #' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
@@ -857,7 +857,7 @@ print.rbiomvr_perm <- function(x, ...){
 #' @param plot.xAngle The rotation angle (degrees) of the x-axis marks. Default is \code{0} - horizontal.
 #' @param plot.xhAlign The horizontal alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
 #' @param plot.xvAlign The vertical alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
@@ -865,7 +865,7 @@ print.rbiomvr_perm <- function(x, ...){
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a pdf file for scoreplot.
 #' @details When \code{length(comps) == 1}, the function generates a scatter plot plotting sample vs score for the comp of interest. When \code{length(comps) == 2}, the function generates a scatter plot plotting the two comps of interest against each other. When \code{length(comps) > 2}, the function generates a multi-panel correlation scoreplot matrix for the comps of interest - might be slow if the there are many comps.
 #' @import ggplot2
@@ -1106,14 +1106,14 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.
 #' @param ncomp Defaults is all the components the \code{mvr} object has.
 #' @param use.mean Defaults is \code{FALSE}.
-#' @param sig.p Alpha value for the jack-knife coffecient p values. Defaults is \code{0.05}.
+#' @param sig.p Alpha value for the jack-knife coefficient p values. Defaults is \code{0.05}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
 #' @param plot.errorbar Set the type of errorbar. Options are standard error of the mean (\code{"sem"}), or standard deviation (\code{"sd"}), case insensitive. Default is \code{"sem"}.
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize Font size of x-axis ticks. Default is \code{10}.
@@ -1130,7 +1130,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
 #' @param plot.yTickBold Set y-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.
 #' @details \code{use.mean = FALSE} is more main stream. Make sure to use cross validated and optimized component number for \code{ncomp}.
 #' @importFrom reshape2 melt
@@ -1174,7 +1174,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
   # compute sd, df, t-value, p-value for jackknife
   nresp <- dim(object$coefficients)[2]
   sdjack <- sqrt(pls::var.jack(object, ncomp = ncomp, covariance = FALSE,
-                          use.mean = use.mean))  # var.jack from pls pacakge
+                          use.mean = use.mean))  # var.jack from pls package
   sem <- sdjack / sqrt(length(object$validation$segments))
   B <- coef(object, ncomp = ncomp)
   df <- length(object$validation$segments) - 1
@@ -1297,18 +1297,18 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 
 #' @title rbioFS_plsda_vip
 #'
-#' @description VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
+#' @description VIP, or variable importance in projection, calculation and plotting for plsda models. This is another FS method, and can be used independently.
 #' @param object A \code{mvr} or \code{rbiomvr} object. Make sure the model is built uisng \code{"oscorespls"} method.
 #' @param vip.alpha Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.
-#' @param comps Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.
+#' @param comps Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.
 #' @param bootstrap If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{TRUE}.
-#' @param boot.n Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.
-#' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.
+#' @param boot.n Set only when \code{boostrap = TRUE}, numbers of iterations for boostrap. Default is \code{50}.
+#' @param boot.parallelComputing Set only when \code{boostrap = TRUE}, if to use parallel computing for bootstrap process. Default is \code{TRUE}.
 #' @param boot.n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param boot.clusterType Set only when \code{boostrap = TRUE} and \code{boot.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param plot If to generate a plot. Default is \code{TRUE}.
 #' @param ... Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Outputs a \code{rbiomvr_vip} class object to the environment.
 #'
 #' \code{rbiomvr_vip} items are:
@@ -1327,7 +1327,7 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
 #'
 #' \code{bootstrap.iteration.results}: raw VIP values for each bootstrap iteration
 #'
-#' @details Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
+#' @details Only works when the plsda model is fitted with the orthogonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
 #'
 #' The \code{vip.alpha} of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
 #' @import foreach
@@ -1587,12 +1587,12 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @param plot.preview If to preview plots. Default is \code{TRUE}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
-#' @param plot.sig.line Wether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.
+#' @param plot.sig.line whether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.
 #' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
 #' @param plot.errorbar Set the type of errorbar. Only applicable if the object model is built with bootstrapping. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
 #' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
 #' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
 #' @param plot.xLabelSize X-axis label size. Default is \code{10}.
 #' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
@@ -1609,7 +1609,7 @@ rbioFS_plsda_vip <- function(object, vip.alpha = 1, comps = c(1, 2),
 #' @param plot.yTickBold Set Y-axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
 #' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Outputs pdf figure files to the working directory.
 #' @details Only works with \code{rbiomvr_vip} objects. Set \code{plot.preview = FALSE} to speed up the process as preview rendering may be slow.
 #'          The function also applies to the regression model (model.type = "regression").
@@ -1761,15 +1761,15 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @param newdata.label Newdata label vector (i.e. test data y). If missing, the function will use the training data and its corresponding labels.
 #' @param center.newdata Only set when both \code{newdata} and \code{newdata.label} are set, if to center.scale newdata. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
-#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
+#' @param plot.smooth If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
-#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.lineSize Line size. Default is \code{1}.
 #' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
@@ -1781,7 +1781,7 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width ROC width. Default is \code{170}.
 #' @param plot.Height ROC height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Prints AUC values in the console. And a pdf file for ROC plot
 #' @details Uses pROC module to calculate ROC.
 #' @import ggplot2
@@ -1948,8 +1948,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
-#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.
-#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.unclassifiedColour Colour for the unclassified samples. Default is \code{"gray"}.
 #' @param plot.classifiedColour Colour for the classified samples. Default is \code{"red"}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
@@ -1965,7 +1965,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' @param plot.legendSize Legend size. Default is \code{9}.
 #' @param plot.Width Predplot width. Default is \code{170}.
 #' @param plot.Height Predplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 #'
 #' The items of the object are:
@@ -1996,7 +1996,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'
 #' The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
 #' Specifically, the equation models classification against predicted values from pls-da model and training data: \code{P(class|predicted values) = P(predicted values|)P(class)/P(predicted values)}.
-#' The resulted Bayesian classification model is then applied to newdata, thereby prosterior probabilites are calcuated.
+#' The resulted Bayesian classification model is then applied to newdata, thereby posterior probabilities are calcuated.
 #'
 #' The "softmax" method uses the equation: \code{probability = exp(predicted.value) / sum(exp(predicted.values))}. This method doesn't relay on training data.
 #'

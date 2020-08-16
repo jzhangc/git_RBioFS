@@ -15,7 +15,7 @@ center_scale(x, scale = TRUE)
 Outputs a list containing centered matrix.
 }
 \description{
-data centering function with scale opiton
+data centering function with scale option
 }
 \details{
 This function is needed to pre-process data when conducting plsda analysis.

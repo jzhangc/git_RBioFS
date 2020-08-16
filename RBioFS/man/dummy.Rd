@@ -15,7 +15,7 @@ dummy(x, drop2nd = FALSE)
 Outputs a matrix with dummified variables.
 }
 \description{
-dummification of catagorical variables
+dummification of categorical variables
 }
 \details{
 This function is needed to pre-process data when conducting plsda analysis. And the function can also be used for other purposes when needed.

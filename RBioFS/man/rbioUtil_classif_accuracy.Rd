@@ -19,7 +19,7 @@ rbioUtil_classif_accuracy(
 
 \item{newdata.label}{Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.}
 
-\item{center.scale.newdata}{Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
+\item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 }
 \value{
 Numerical model accuracy value.

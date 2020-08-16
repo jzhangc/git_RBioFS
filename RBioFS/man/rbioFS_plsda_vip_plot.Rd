@@ -46,7 +46,7 @@ rbioFS_plsda_vip_plot(
 
 \item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
 
-\item{plot.sig.line}{Wether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.}
+\item{plot.sig.line}{whether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.}
 
 \item{plot.outlineCol}{The outline colour for the bar gars. Default is \code{"black"}.}
 
@@ -56,7 +56,7 @@ rbioFS_plsda_vip_plot(
 
 \item{plot.errorbarLblSize}{Set the label size for the errorbar. Default is \code{6}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.}
 
@@ -90,7 +90,7 @@ rbioFS_plsda_vip_plot(
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Outputs pdf figure files to the working directory.

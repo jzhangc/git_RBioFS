@@ -29,7 +29,7 @@ rbioFS_rf_SFS(
 
 \item{nTree}{Number of trees generated for each random forest run. Default is \code{1001} trees.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
@@ -47,7 +47,7 @@ Outputs a \code{rf_sfs} object with  OOB error rate summary, and a joint-point c
         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 }
 \description{
-Recursive nested random froest variable importance (vi) and error computation in a sequential forward selection (SFS) manner.
+Recursive nested random forest variable importance (vi) and error computation in a sequential forward selection (SFS) manner.
 }
 \details{
 Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.

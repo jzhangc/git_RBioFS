@@ -50,7 +50,7 @@ Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rat
         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
 }
 \description{
-Recursive random froest variable importance (vi) and OOB error rate computation.
+Recursive random forest variable importance (vi) and OOB error rate computation.
 }
 \details{
 Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
