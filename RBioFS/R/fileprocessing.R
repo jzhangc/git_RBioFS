@@ -75,7 +75,7 @@ rbioIMP <- function(dfm, fct, annot, method = "mean", transpo = FALSE, ...){
 #' @title rbioNorm
 #'
 #' @description Data normalization. This is a shell function using limma package.
-#' @param RawData Inpule dataframe, which can be the the results from the function \code{\link{rbioIMP}} with transposition.
+#' @param RawData Input dataframe, which can be the the results from the function \code{\link{rbioIMP}} with transposition.
 #' @param NormMtd Normalization method. Options are \code{"none"}, \code{"scale"}, \code{"quantile"} and \code{"cyclicloess"}. Default is \code{"quantile"}. See \code{limma} package for details.
 #' @param correctBG If to correct background. Default is \code{TRUE}.
 #' @param BgMtd Background correction method if \code{correctBG} is TRUE. Options are \code{"auto"}, \code{"none"}, \code{"subtract"}, \code{"half"}, \code{"minimum"}, \code{"movingmin"}, \code{"edwards"} and \code{"normexp"}. Default is \code{"normexp"}. See \code{limma} package for details.
@@ -106,7 +106,7 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
 
 #' @title center_scale
 #'
-#' @description data centering function with scale opiton
+#' @description data centering function with scale option
 #' @param x Input matrix. Make sure it is a matrix. Typically, row is samples, and column the features.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @return Outputs a list containing centered matrix.
@@ -145,7 +145,7 @@ center_scale <- function(x, scale = TRUE){
 
 #' @title fs_csv_generator
 #'
-#' @description Creat CSV file from microarray or RNAseq experiments ready for RBioFS
+#' @description Create CSV file from microarray or RNAseq experiments ready for RBioFS
 #' @param objTitle Prefix for the output file name. Default is \code{"data"}.
 #' @param fltdata Filtered expression data from microarray or RNAseq experiments.
 #' @param rmControl Only functional for Agilent platform microarray datasets, to remove control probes. For other datasets, set to \code{FALSE}. Default is \code{FALSE}.
@@ -153,14 +153,14 @@ center_scale <- function(x, scale = TRUE){
 #' @param geneSymbol.var Name for the gene symbol variable from \code{anno}. Default is \code{"GeneSymbol"}.
 #' @param tgt Sample annotation data frame.
 #' @param group.var Name for the sample group variable from from \code{tgt}. Default is \code{"Group"}.
-#' @param de.dfm Differetinal expression resutls dataframe.
+#' @param de.dfm Differential expression resutls dataframe.
 #' @param probeID.var Name for the probe ID variable from \code{de.dfm}. Default is \code{"ProbeName"}.
 #' @param fc.var Name for the fold change variable from \code{de.dfm}. Default is \code{"logFC"}.
 #' @param p.var Name for the raw p value variable from \code{de.dfm}. Defaults is \code{"P.Value"}.
 #' @param adjP.var Name for the adjusted value variable from \code{de.dmf}. Default is \code{"adj.P.Val"}.
 #' @param q.value P value threshold for subsetting the filtered data. Default is \code{0.05}.
 #' @param fc.value Fold change threshold for subsetting filtered data. Default is \code{1.5}.
-#' @param fc.log.trans Wether the input fold change is log2 transformed. Default is \code{TRUE}.
+#' @param fc.log.trans Whether the input fold change is log2 transformed. Default is \code{TRUE}.
 #' @details The function works best with the results from RBioArray.
 #' @return Outputs a \code{csv} file to working directory for RBioFS. If not \code{Elist} class from limma, Make sure that \code{fltdata} is a list object with \code{genes} (name) dataframe for gene annotation and \code{E} (name) as expression matrix/dataframe. For \code{tgt}, make sure to have sample name as rownames.
 #' @examples

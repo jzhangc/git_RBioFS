@@ -33,6 +33,16 @@ Installation
 
 Update log
 
+    0.7.4 (Aug.16.2020)
+        - Updates to the RF-FS function(s):
+          - Error handling added for input data containing NA/missing data
+            - Stops the function and suggests imputation when NA/missing data detected
+          - Data center+scale functionality added for rbioFS() via the new "center.scale"" argument
+        
+        - Other updates
+          - Typos fixed for documentations
+    
+    
     0.7.3 (Aug.14.2020)
         - New SVM function(s)
           - rbioClass_svm_cv() added for non-nested cross-validation, without feature selection

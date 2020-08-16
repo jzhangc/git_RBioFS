@@ -31,7 +31,7 @@ rbioClass_plsda_tuplot(
 \arguments{
 \item{object}{A \code{rbiomvr} object. Make sure the object is generated with a \code{validation} section.}
 
-\item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
+\item{comps}{Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 
 \item{multi_plot.ncol}{Set only when \code{length(comps) > 1}, number of columns on one figure page. Default is \code{length(comps)}.}
 
@@ -39,7 +39,7 @@ rbioClass_plsda_tuplot(
 
 \item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
-\item{plot.rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}}
+\item{plot.rightsideY}{If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}}
 
 \item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
@@ -53,7 +53,7 @@ rbioClass_plsda_tuplot(
 
 \item{plot.Title}{tuplot title. Default is \code{NULL}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
 
@@ -69,7 +69,7 @@ rbioClass_plsda_tuplot(
 
 \item{plot.Height}{tuplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a pdf file for tuplot.
@@ -78,7 +78,7 @@ Returns a pdf file for tuplot.
 T-U plot function for PLS-DA models.
 }
 \details{
-The T-U plot shows the correlation betweem the decomposed x and y matrices for PLS-DA anlaysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
+The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 }
 \examples{
 \dontrun{

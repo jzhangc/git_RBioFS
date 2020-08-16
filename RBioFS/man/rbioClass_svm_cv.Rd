@@ -26,7 +26,7 @@ rbioClass_svm_cv(
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center.scale}{Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
@@ -42,13 +42,13 @@ rbioClass_svm_cv(
 
 \item{...}{Additional arguments for \code{rbioClass_svm}.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a CV SVM model object: \code{rbiosvm_cv}.

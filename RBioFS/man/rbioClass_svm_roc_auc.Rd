@@ -36,7 +36,7 @@ rbioClass_svm_roc_auc(
 
 \item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
 
-\item{center.scale.newdata}{Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
+\item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
@@ -72,7 +72,7 @@ rbioClass_svm_roc_auc(
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
 }

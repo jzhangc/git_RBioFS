@@ -23,13 +23,13 @@ rbioFS_plsda_vip(
 
 \item{vip.alpha}{Alpha value (threshold) for VIP values. Any VIP above this is considered important. Defaults is \code{1}.}
 
-\item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.}
+\item{comps}{Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Default is \code{c(1, 2)}.}
 
 \item{bootstrap}{If to use boostrap for VIP calculation, so that standard deviation on VIP can be estimated. Default is \code{TRUE}.}
 
-\item{boot.n}{Set only when \code{boostrap = TRUE}, nummbers of iterations for boostrap. Default is \code{50}.}
+\item{boot.n}{Set only when \code{boostrap = TRUE}, numbers of iterations for boostrap. Default is \code{50}.}
 
-\item{boot.parallelComputing}{Set only when \code{boostrap = TRUE}, if to use parallel computering for bootstrap process. Default is \code{TRUE}.}
+\item{boot.parallelComputing}{Set only when \code{boostrap = TRUE}, if to use parallel computing for bootstrap process. Default is \code{TRUE}.}
 
 \item{boot.n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
@@ -39,7 +39,7 @@ rbioFS_plsda_vip(
 
 \item{...}{Additional arguments to \code{\link{rbioFS_plsda_vip_plot}}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Outputs a \code{rbiomvr_vip} class object to the environment.
@@ -61,10 +61,10 @@ Outputs a \code{rbiomvr_vip} class object to the environment.
 \code{bootstrap.iteration.results}: raw VIP values for each bootstrap iteration
 }
 \description{
-VIP, or variable importance in projection, calcualtion and plotting for plsda models. This is another FS method, and can be used independently.
+VIP, or variable importance in projection, calculation and plotting for plsda models. This is another FS method, and can be used independently.
 }
 \details{
-Only works when the plsda model is fitted with the orthorgonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
+Only works when the plsda model is fitted with the orthogonal score algorithm, or NIPALS. Such model can be built using \code{\link{rbioClass_plsda}} with \code{method = "oscorespls"}.
 
 The \code{vip.alpha} of 1 is the most commonly accepted value. However it is also acceptable to set according to the data and objectives of the study.
 }

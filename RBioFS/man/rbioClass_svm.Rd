@@ -22,7 +22,7 @@ rbioClass_svm(
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center.scale}{Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
@@ -36,7 +36,7 @@ rbioClass_svm(
 
 \item{...}{Additional arguments for \code{svm} function from \code{e1071} pacakge.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a SVM model object, with classes "svm" and "rbiosvm".

@@ -13,7 +13,7 @@ rbioNorm(
 )
 }
 \arguments{
-\item{RawData}{Inpule dataframe, which can be the the results from the function \code{\link{rbioIMP}} with transposition.}
+\item{RawData}{Input dataframe, which can be the the results from the function \code{\link{rbioIMP}} with transposition.}
 
 \item{NormMtd}{Normalization method. Options are \code{"none"}, \code{"scale"}, \code{"quantile"} and \code{"cyclicloess"}. Default is \code{"quantile"}. See \code{limma} package for details.}
 

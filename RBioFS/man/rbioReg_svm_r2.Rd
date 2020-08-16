@@ -20,7 +20,7 @@ RMSE value with either new data or training data.
 Support Vector Regression (SVR) R2 calculation
 }
 \details{
-The R2 is calculated as follwoing: 1 - rss/tss.
+The R2 is calculated as following: 1 - rss/tss.
 rss: residual sum of squares: sum((yhat-y)^2)
 tss: total sum of squares: sum((y-mean(y))^2)
 }

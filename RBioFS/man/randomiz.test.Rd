@@ -7,5 +7,5 @@
 randomiz.test(residualsNew, residualsReference, nperm)
 }
 \description{
-Randomization function from \code{pls} pacakge. For \code{\link{rbioClass_plsda_ncomp_select}} function.
+Randomization function from \code{pls} package. For \code{\link{rbioClass_plsda_ncomp_select}} function.
 }

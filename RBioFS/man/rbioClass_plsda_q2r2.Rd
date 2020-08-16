@@ -30,7 +30,7 @@ rbioClass_plsda_q2r2(
 \arguments{
 \item{object}{A \code{rbiomvr} or \code{mvr} object. Make sure the object is generated with a \code{validation} section.}
 
-\item{intercept}{Wether to include intercept term, i.e. comps = 0. Default is \code{TRUE}.}
+\item{intercept}{whether to include intercept term, i.e. comps = 0. Default is \code{TRUE}.}
 
 \item{q2r2plot}{If to generate a q2r2 plot. Default is \code{TRUE}.}
 
@@ -42,9 +42,9 @@ rbioClass_plsda_q2r2(
 
 \item{multi_plot.legend.pos}{The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.}
 
-\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessasry as PLS-DA always has at least two y classes.}
+\item{plot.rightsideY}{If to show the right side y-axis. Default is \code{FALSE}. Note: doesn't seem to be necessary as PLS-DA always has at least two y classes.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
@@ -66,13 +66,13 @@ rbioClass_plsda_q2r2(
 
 \item{plot.Height}{Plot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Prints the selected number of components for each y class. Returns RMSEP values for each y class to the environment, as well as a pdf file for the RMSEP plot if \code{rmsepplot = TRUE}.
 }
 \description{
-q2-r2 (i.e. Q^2 and R^2 scores) caluclation and plot for plsda models
+q2-r2 (i.e. Q^2 and R^2 scores) calculation and plot for plsda models
 }
 \details{
 A vertical line indicating the number of component with minimum q2-r2 distance.

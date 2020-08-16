@@ -38,9 +38,9 @@ rbioClass_plsda_scoreplot(
 
 \item{y}{Set when object class is \code{mvr}. Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class or a character vector.}
 
-\item{comps}{Integer vector. Components to plot. The index of the components are intergers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
+\item{comps}{Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.}
 
-\item{plot.rightsideY}{If to show the right side y-axis. Only applicble when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
+\item{plot.rightsideY}{If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.}
 
 \item{plot.Title}{Scoreplot title. Default is \code{NULL}.}
 
@@ -68,7 +68,7 @@ rbioClass_plsda_scoreplot(
 
 \item{plot.xvAlign}{The vertical alignment type of the x-axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabelSize}{X-axis label size. Default is \code{10}.}
 
@@ -84,7 +84,7 @@ rbioClass_plsda_scoreplot(
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a pdf file for scoreplot.

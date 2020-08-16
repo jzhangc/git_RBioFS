@@ -53,13 +53,13 @@ rbioUtil_perm_plot(perm_res, ...)
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
 \item{plot.display.Title}{If to show the name of the y class. Default is \code{TRUE}.}
 
 \item{plot.titleSize}{The font size of the plot title. Default is \code{10}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Permutation"}.}
 

@@ -37,7 +37,7 @@ fs_csv_generator(
 
 \item{group.var}{Name for the sample group variable from from \code{tgt}. Default is \code{"Group"}.}
 
-\item{de.dfm}{Differetinal expression resutls dataframe.}
+\item{de.dfm}{Differential expression resutls dataframe.}
 
 \item{probeID.var}{Name for the probe ID variable from \code{de.dfm}. Default is \code{"ProbeName"}.}
 
@@ -51,13 +51,13 @@ fs_csv_generator(
 
 \item{fc.value}{Fold change threshold for subsetting filtered data. Default is \code{1.5}.}
 
-\item{fc.log.trans}{Wether the input fold change is log2 transformed. Default is \code{TRUE}.}
+\item{fc.log.trans}{Whether the input fold change is log2 transformed. Default is \code{TRUE}.}
 }
 \value{
 Outputs a \code{csv} file to working directory for RBioFS. If not \code{Elist} class from limma, Make sure that \code{fltdata} is a list object with \code{genes} (name) dataframe for gene annotation and \code{E} (name) as expression matrix/dataframe. For \code{tgt}, make sure to have sample name as rownames.
 }
 \description{
-Creat CSV file from microarray or RNAseq experiments ready for RBioFS
+Create CSV file from microarray or RNAseq experiments ready for RBioFS
 }
 \details{
 The function works best with the results from RBioArray.

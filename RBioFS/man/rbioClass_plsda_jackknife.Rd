@@ -43,7 +43,7 @@ rbioClass_plsda_jackknife(
 
 \item{use.mean}{Defaults is \code{FALSE}.}
 
-\item{sig.p}{Alpha value for the jack-knife coffecient p values. Defaults is \code{0.05}.}
+\item{sig.p}{Alpha value for the jack-knife coefficient p values. Defaults is \code{0.05}.}
 
 \item{plot.title}{Whether to display plot title on top of the plot. Default is \code{FALSE}.}
 
@@ -57,7 +57,7 @@ rbioClass_plsda_jackknife(
 
 \item{plot.errorbarLblSize}{Set the label size for the errorbar. Default is \code{6}.}
 
-\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
+\item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
 \item{plot.xLabel}{X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.}
 
@@ -91,7 +91,7 @@ rbioClass_plsda_jackknife(
 
 \item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Outputs a jacknife summary list object to the environment. The function also generates the pdf figure files to the working directory.

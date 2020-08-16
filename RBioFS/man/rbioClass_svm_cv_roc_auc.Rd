@@ -60,7 +60,7 @@ rbioClass_svm_cv_roc_auc(
 
 \item{plot.Height}{Scoreplot height. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
 

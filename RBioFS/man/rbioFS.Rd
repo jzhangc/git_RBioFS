@@ -16,6 +16,7 @@ rbioFS(
   imputeMethod = "rf",
   imputeIter = 10,
   imputeNtree = 501,
+  center.scale = FALSE,
   quantileNorm = FALSE,
   nTimes = 50,
   nTree = 1001,
@@ -52,7 +53,7 @@ rbioFS(
 
 \item{rf_type}{RF modelling type, either \code{"classification"} or \code{"regression"}. Default is \code{"classifiation"}.}
 
-\item{file}{Input file. Only takes \code{.csv} format, with the label column, i.e. the whole dataset. Set either this or \code{input}, but not both.}
+\item{file}{Input file. Only takes \code{.csv} format, with the label column, i.e. the whole data set. Set either this or \code{input}, but not both.}
 
 \item{input}{Input data frame. The type should be \code{data.frame} or \code{matrix}, with the label column, i.e. the whole dataset. Set either this or \code{file}, but not both.}
 
@@ -62,7 +63,7 @@ rbioFS(
 
 \item{annotVarNames}{String, identifying the annotation variable names to exclude from the FS analysis. Default is \code{c(sampleIDVar, groupIDVar)}.}
 
-\item{impute}{Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.}
+\item{impute}{Whether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.}
 
 \item{imputeMethod}{The method for data imputation, only set if \code{impute = TRUE}. Default is \code{"rf"}. See \code{\link{rbioIMP}} for details.}
 
@@ -70,13 +71,15 @@ rbioFS(
 
 \item{imputeNtree}{RF imputation ntree value. Default is \code{501}. See \code{\link{rbioIMP}} for details.}
 
-\item{quantileNorm}{Wehter ot use quantile nomalization on the raw data. Default is \code{FALSE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{FALSE}.}
+
+\item{quantileNorm}{Whether to use quantile normalization on the raw data. Default is \code{FALSE}.}
 
 \item{nTimes}{Number of random forest for both initial FS and SFS-like FS. Default is \code{50} times.}
 
 \item{nTree}{Number of trees generated for each random forest run for both initial FS and SFS-like FS. Default is \code{1001} trees.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
@@ -90,7 +93,7 @@ rbioFS(
 
 \item{initialFS_xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
-\item{initialFS_yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+\item{initialFS_yLabel}{Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
 
 \item{initialFS_errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
 
@@ -108,7 +111,7 @@ rbioFS(
 
 \item{SFS_xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
-\item{SFS_yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+\item{SFS_yLabel}{Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
 
 \item{SFS_errorbar}{The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.}
 
@@ -124,7 +127,7 @@ rbioFS(
 
 \item{SFS_plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
@@ -133,8 +136,10 @@ Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \c
 Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 }
 \details{
-Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+Make sure to arrange input \code{.csv} file with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
          \code{groupIDVar} also takes continuous variable for regression study.
+
+         When \code{center.scale=TRUE}, the function transforms the data using center (X-mean(X)) and scaling (z-score transformation/standardization) (X-mean(X))/SD
 }
 \examples{
 \dontrun{

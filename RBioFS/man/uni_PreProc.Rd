@@ -18,7 +18,7 @@ uni_PreProc(
 \arguments{
 \item{rawlist}{Input data, either a list, \code{EList} or \code{MAList} object.}
 
-\item{logTrans}{If to perfom a log transformation on the data or not. Default is \code{FALSE}.}
+\item{logTrans}{If to perform a log transformation on the data or not. Default is \code{FALSE}.}
 
 \item{logTransMethod}{If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.}
 
@@ -41,5 +41,5 @@ a legacy function borrowed from RBioArray. Data pre-processing function for the 
 }
 \details{
 The function does not use design matrix for array weight calculation.
-         Therefore, the DE analysis based on the output from this function will yeild slightly different resutls from the \code{\link{rbioarray_filter_combine}}.
+         Therefore, the DE analysis based on the output from this function will yield slightly different results from the \code{\link{rbioarray_filter_combine}}.
 }
