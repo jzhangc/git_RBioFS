@@ -59,6 +59,13 @@ Update log
           - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
 
     (ADDED)
+        - Updates to the RF-FS function(s):
+          - Error handling added for input data containing NA/missing data
+            - Stops the function and suggests imputation when NA/missing data detected
+          - Data center+scale functionality added for rbioFS() via the new "center.scale"" argument
+        
+        - Other updates
+          - Typos fixed for documentations
     
     
     0.7.3 (Aug.14.2020)

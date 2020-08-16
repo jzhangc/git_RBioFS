@@ -3,16 +3,17 @@
 #' @description Recursive nested random forest variable importance (vi) and OOB error rate computation in a sequential forward selection (SFS) manner.
 #' @param objTitle The title for the output data frame. Default is \code{"data"}
 #' @param rf_type RF modelling type, either \code{"classification"} or \code{"regression"}. Default is \code{"classifiation"}.
-#' @param file Input file. Only takes \code{.csv} format, with the label column, i.e. the whole dataset. Set either this or \code{input}, but not both.
+#' @param file Input file. Only takes \code{.csv} format, with the label column, i.e. the whole data set. Set either this or \code{input}, but not both.
 #' @param input Input data frame. The type should be \code{data.frame} or \code{matrix}, with the label column, i.e. the whole dataset. Set either this or \code{file}, but not both.
 #' @param sampleIDVar Sample variable name. It's a character string.
 #' @param groupIDVar Group variable name. It's a character string.
 #' @param annotVarNames String, identifying the annotation variable names to exclude from the FS analysis. Default is \code{c(sampleIDVar, groupIDVar)}.
-#' @param impute Wether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.
+#' @param impute Whether to use data imputation functionality to impute missing data points. Default is \code{FALSE}.
 #' @param imputeMethod The method for data imputation, only set if \code{impute = TRUE}. Default is \code{"rf"}. See \code{\link{rbioIMP}} for details.
 #' @param imputeIter RF imputation iteration value. Default is \code{10}. See \code{\link{rbioIMP}} for details.
 #' @param imputeNtree RF imputation ntree value. Default is \code{501}. See \code{\link{rbioIMP}} for details.
-#' @param quantileNorm Wehter ot use quantile nomalization on the raw data. Default is \code{FALSE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param quantileNorm Whether to use quantile normalization on the raw data. Default is \code{FALSE}.
 #' @param nTimes Number of random forest for both initial FS and SFS-like FS. Default is \code{50} times.
 #' @param nTree Number of trees generated for each random forest run for both initial FS and SFS-like FS. Default is \code{1001} trees.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
@@ -21,7 +22,7 @@
 #' @param plot If to plot results, bar graph for initial FS and joint-point curve for SFS-like FS. Default is \code{TRUE}
 #' @param initialFS_Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param initialFS_xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
-#' @param initialFS_yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param initialFS_yLabel Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
 #' @param initialFS_n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param initialFS_errorbar The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.
 #' @param initialFS_errorbarWidth The width of the errorbar. Default is \code{0.2}.
@@ -30,7 +31,7 @@
 #' @param initialFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param initialFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param SFS_xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
-#' @param SFS_yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param SFS_yLabel Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
 #' @param SFS_n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
 #' @param SFS_errorbar The type of errorbar in the graph. Options are \code{"SEM"} (standard error of the mean) or \code{"SD"} (standard deviation). Default is \code{"SEM"}.
 #' @param SFS_errorbarWidth The width of the errorbar. Default is \code{0.2}.
@@ -39,10 +40,12 @@
 #' @param SFS_yTickLblSize Font size for the y-axis text. Default is \code{10}.
 #' @param SFS_plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param SFS_plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Outputs two \code{list} objects and \code{.csv} for the two FS steps. And, if \code{plot = TRUE}, a bargraph for initial FS and joint-point curve for SFS-like FS step. A \code{.csv} file with imputed data is also generated if \code{impute = TRIE}.
-#' @details Make sure to arrange input \code{.csv} file with first two columns for smaple ID and conditions, and the rest for features (e.g., genes).
+#' @details Make sure to arrange input \code{.csv} file with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
 #'          \code{groupIDVar} also takes continuous variable for regression study.
+#'
+#'          When \code{center.scale=TRUE}, the function transforms the data using center (X-mean(X)) and scaling (z-score transformation/standardization) (X-mean(X))/SD
 #' @examples
 #' \dontrun{
 #' rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
@@ -52,7 +55,7 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
                    file = NULL, input = NULL,
                    sampleIDVar = NULL, groupIDVar = NULL, annotVarNames = c(sampleIDVar, groupIDVar),
                    impute = FALSE, imputeMethod = "rf", imputeIter = 10, imputeNtree = 501,
-                   quantileNorm = FALSE,
+                   center.scale = FALSE, quantileNorm = FALSE,
                    nTimes = 50, nTree = 1001,
                    parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "PSOCK",
                    plot = TRUE,
@@ -72,17 +75,24 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
   if (is.null(file) & is.null(input)) stop("set one of the \"file\" and \"input\"")
   if (is.null(sampleIDVar) | is.null(groupIDVar)) stop("set both sampleIDVar and groupIDVar")
   if (is.null(annotVarNames)) stop("set annotNarNames variable")
-  # if (!tolower(rf_type) %in% c("classification", "regression")) stop("set rf_type to either \"classification\" or \"regression\".")
   rf_type <- match.arg(tolower(rf_type), c("classification", "regression"))
   if (parallelComputing){
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
 
-  ## input constuction
+  ## input construction
+  # load file
   if (is.null(input)){
     raw <- read.csv(file = file, header = TRUE, na.strings = c("NA", ""), stringsAsFactors = FALSE, check.names = FALSE)
   } else {
     raw <- data.frame(input, check.names = FALSE, stringsAsFactors = FALSE)
+  }
+
+  # test NA/Inf
+  if (any(is.na(raw)) && !impute){
+    stop("NA/Missing data detected, check your data or use the imputation functionality by setting impute=TRUE.")
+  } else {
+    cat("Imputation is used for NA/Missing data points.\n")
   }
 
   # further input check
@@ -97,10 +107,10 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
 
   ## imputation
   if (impute){
-    if (verbose) cat(paste("Imputing missing data using ", imputeMethod, " method...", sep = ""))  # initial message
+    if (verbose) cat(paste("Imputing missing data using ", imputeMethod, " method...\n", sep = ""))  # initial message
     imp_data <- RBioFS::rbioIMP(dfm = raw[, !names(raw) %in% annotVarNames], method = imputeMethod,
-                             iter = imputeIter, ntree = imputeNtree,
-                             fct = tgt, annot = raw[, sampleIDVar], transpo = FALSE)
+                                iter = imputeIter, ntree = imputeNtree,
+                                fct = tgt, annot = raw[, sampleIDVar], transpo = FALSE)
     imp_data <- data.frame(imp_data, check.names = FALSE)
     fs_data <- imp_data
 
@@ -113,7 +123,16 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
     fs_data <- data.frame(raw[, !names(raw) %in% annotVarNames], check.names = FALSE)
   }
 
-  if (quantileNorm){ # normalization
+  ## data normalization
+  # normalization (center/scale)
+  if (center.scale){
+    if (verbose) cat(paste0("Data centered with scaling prior to RF-FS.\n"))
+    centered_X <- center_scale(fs_data, scale = TRUE)  # center data with the option of scaling
+    fs_data <- centered_X$centerX
+  }
+
+  # quantile
+  if (quantileNorm){
     if (verbose) cat(paste("Quantile normalization...", sep = ""))  # initial message
     fs_data <- t(fs_data)
     fs_data <- RBioFS::rbioNorm(fs_data, correctBG = FALSE)
@@ -139,33 +158,31 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
 
     if (verbose) cat(paste("Sequential forward selection with plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
-                       x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
-                       y = tgt, nTimes = nTimes,
-                       parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
-                       plot = TRUE,
-                       n = SFS_n,
-                       plot.title = SFS_Title, plot.xLabel = SFS_xLabel, plot.yLabel = SFS_yLabel,
-                       plot.errorbar = SFS_errorbar, plot.errorbarWidth = SFS_errorbarWidth,
-                       plot.symbolSize = SFS_symbolSize, plot.xTickLblSize = SFS_xTickLblSize, plot.yTickLblSize = SFS_yTickLblSize,
-                       plot.Width = SFS_plotWidth, plot.Height = SFS_plotHeight,
-                       verbose = FALSE) # SFS
+                          x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
+                          y = tgt, nTimes = nTimes,
+                          parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
+                          plot = TRUE,
+                          n = SFS_n,
+                          plot.title = SFS_Title, plot.xLabel = SFS_xLabel, plot.yLabel = SFS_yLabel,
+                          plot.errorbar = SFS_errorbar, plot.errorbarWidth = SFS_errorbarWidth,
+                          plot.symbolSize = SFS_symbolSize, plot.xTickLblSize = SFS_xTickLblSize, plot.yTickLblSize = SFS_yTickLblSize,
+                          plot.Width = SFS_plotWidth, plot.Height = SFS_plotHeight,
+                          verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
-
-
   } else {
     if (verbose) cat(paste("Initial selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_initialFS(objTitle = objTitle, x = fs_data, y = tgt,
-                             nTimes = nTimes, nTree = nTree,
-                             parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
-                             plot = FALSE, verbose = FALSE) # initial FS
+                                nTimes = nTimes, nTree = nTree,
+                                parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
+                                plot = FALSE, verbose = FALSE) # initial FS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
 
     if (verbose) cat(paste("Sequential forward selection without plotting...", sep = ""))  # initial message
     RBioFS::rbioFS_rf_SFS(objTitle = objTitle,
-                       x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
-                       y = tgt, nTimes = nTimes,
-                       parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
-                       plot = FALSE, verbose = FALSE) # SFS
+                          x = get(paste(objTitle, "_initial_FS", sep = ""))$training_initial_FS,
+                          y = tgt, nTimes = nTimes,
+                          parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
+                          plot = FALSE, verbose = FALSE) # SFS
     if (verbose) cat(paste("Done!\n", sep = ""))  # final message
   }
 }

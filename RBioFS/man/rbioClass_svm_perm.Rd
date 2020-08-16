@@ -23,17 +23,17 @@ rbioClass_svm_perm(
 
 \item{nperm}{Number of permutations to run. Default is \code{999}.}
 
-\item{perm.plot}{Wether to produce a plot or not. Default is \code{TRUE}.}
+\item{perm.plot}{whether to produce a plot or not. Default is \code{TRUE}.}
 
 \item{...}{Additional argument for \code{\link{rbioUtil_perm_plot}}.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 The function returns \code{CSV} files for all intermediate permutation accuracy values as well as the p-value resutls.

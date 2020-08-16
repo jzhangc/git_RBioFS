@@ -23,14 +23,14 @@ rbioClass_svm_predcit(
 
 \item{sampleLabel.vector}{A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{newdata.y}{Only requried for regression study. The default is \code{NULL}.}
+\item{newdata.y}{Only required for regression study. The default is \code{NULL}.}
 
 \item{prob.method}{Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-A \code{prediction} obejct. The items of the object are:
+A \code{prediction} object. The items of the object are:
 
 \code{model.type}
 
@@ -40,7 +40,7 @@ A \code{prediction} obejct. The items of the object are:
 
 \code{tot.predict.RMSE}
 
-\code{prob.method}: Method to caluculate posterier probability
+\code{prob.method}: Method to calculate posterior probability
 
 \code{probability.summary}
 

@@ -3,14 +3,14 @@
 #' @description Support Vector Machine (SVM) modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param svm.cross.k Fold of cross validation. Default is \code{10}.
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{svm} function from \code{e1071} pacakge.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
 #'
 #' Additional items for \code{rbiosvm} object to \code{svm} object from e1071 package:
@@ -181,25 +181,25 @@ print.rbiosvm <- function(x, ...){
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param univariate.fs If to use limma-based univariate reduction. Default is \code{FALSE}.
 #' @param uni.log2trans Only set if \code{univariate.fs = TRUE}, if to log2 transform data before univariate reduction.
-#' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classificaiton study, the contrast for the univariate analysis. Default is \code{NULL}.
+#' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.
 #' @param uni.alpha Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.
 #' @param uni.fdr Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.
-#' @param center.scale Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
-#' @param tune.method Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
+#' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
 #' @param fs.method Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.
 #' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.
 #' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.
-#' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a nested CV SVM model object: \code{rbiosvm_nestedcv}.
 #'
 #' Additional items for \code{rbiosvm_nestedcv}:
@@ -689,7 +689,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @description Cross-validation assessment for SVM modelling. It evaluates the overall performace of SVM modelling given the training data.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -697,10 +697,10 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param parallelComputing whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a CV SVM model object: \code{rbiosvm_cv}.
 #'
 #' Additional items for \code{rbiosvm_cv}:
@@ -1005,7 +1005,7 @@ rbioClass_svm_cv <- function(x, y,
 #' @param object A \code{rbiosvm} object.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
-#' @param center.scale.newdata Logical, wether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -1024,7 +1024,7 @@ rbioClass_svm_cv <- function(x, y,
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list as a \code{svm_roc_auc} class to the environment.
 #'
 #'         Items of the \code{svm_roc_auc} class:
@@ -1263,7 +1263,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
 #' @param plot.Width Scoreplot width. Default is \code{170}.
 #' @param plot.Height Scoreplot height. Default is \code{150}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Prints AUC values in the console. And a pdf file for ROC plot.
 #'         The function also exports a ROC results list with an ROC object for each CV fold.
 #'
@@ -1455,12 +1455,12 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
 #' @param object A \code{rbiosvm} object. Make sure the object is generated with a \code{tot.accuracy} section.
 #' @param perm.method Permutation method. Options are \code{"by_y"} and \code{"by_feature_per_y"}. Default is \code{"by_y"}. See details below.
 #' @param nperm Number of permutations to run. Default is \code{999}.
-#' @param perm.plot Wether to produce a plot or not. Default is \code{TRUE}.
+#' @param perm.plot whether to produce a plot or not. Default is \code{TRUE}.
 #' @param ... Additional argument for \code{\link{rbioUtil_perm_plot}}.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param parallelComputing whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return The function returns \code{CSV} files for all intermediate permutation accuracy values as well as the p-value resutls.
 #'
 #'
@@ -1700,10 +1700,10 @@ print.rbiosvm_perm <- function(x, ...){
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param sampleLabel.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
-#' @param newdata.y Only requried for regression study. The default is \code{NULL}.
+#' @param newdata.y Only required for regression study. The default is \code{NULL}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return  A \code{prediction} obejct. The items of the object are:
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return  A \code{prediction} object. The items of the object are:
 #'
 #' \code{model.type}
 #'
@@ -1713,7 +1713,7 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' \code{tot.predict.RMSE}
 #'
-#' \code{prob.method}: Method to caluculate posterier probability
+#' \code{prob.method}: Method to calculate posterior probability
 #'
 #' \code{probability.summary}
 #'
@@ -1934,7 +1934,7 @@ rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
 #'
 #' @details
 #'
-#' The R2 is calculated as follwoing: 1 - rss/tss.
+#' The R2 is calculated as following: 1 - rss/tss.
 #' rss: residual sum of squares: sum((yhat-y)^2)
 #' tss: total sum of squares: sum((y-mean(y))^2)
 #'

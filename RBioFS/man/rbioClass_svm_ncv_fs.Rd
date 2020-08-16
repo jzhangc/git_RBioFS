@@ -39,13 +39,13 @@ rbioClass_svm_ncv_fs(
 
 \item{uni.log2trans}{Only set if \code{univariate.fs = TRUE}, if to log2 transform data before univariate reduction.}
 
-\item{uni.contrast}{Only set if \code{univariate.fs = TRUE} and for a classificaiton study, the contrast for the univariate analysis. Default is \code{NULL}.}
+\item{uni.contrast}{Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.}
 
 \item{uni.alpha}{Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.}
 
 \item{uni.fdr}{Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.}
 
-\item{center.scale}{Logical, wether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
@@ -53,7 +53,7 @@ rbioClass_svm_ncv_fs(
 
 \item{cross.best.model.method}{The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.}
 
-\item{tune.method}{Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
+\item{tune.method}{Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
 
 \item{tune.cross.k}{Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.}
 
@@ -67,15 +67,15 @@ rbioClass_svm_ncv_fs(
 
 \item{rf.sfs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.}
 
-\item{fs.count.cutoff}{A integer for feature vote cutoff. Default is outer loop cross-valiation fold \code{cross.k}.}
+\item{fs.count.cutoff}{A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a nested CV SVM model object: \code{rbiosvm_nestedcv}.
