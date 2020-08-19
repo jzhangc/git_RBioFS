@@ -59,6 +59,8 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
 
     (ADDED)
+      - Updates to file processing function(s)
+        - center.scale documentation updated with explanations for Z-score standardization and Min-Max normalization
     
 
     0.7.4 (Aug.16.2020)
