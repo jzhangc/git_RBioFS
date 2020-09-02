@@ -61,6 +61,12 @@ Update log
     (ADDED)
       - Updates to file processing function(s)
         - center.scale documentation updated with explanations for Z-score standardization and Min-Max normalization
+      
+      - Updates to SVM function(s)
+        - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
+        
+      - Other upates
+        - Citatioin information updated
     
 
     0.7.4 (Aug.16.2020)
