@@ -6,6 +6,7 @@
 \usage{
 rbioClass_svm_cv_roc_auc(
   object,
+  fileprefix = NULL,
   rocplot = TRUE,
   plot.smooth = FALSE,
   plot.lineSize = 1,
@@ -27,6 +28,8 @@ rbioClass_svm_cv_roc_auc(
 }
 \arguments{
 \item{object}{A \code{rbiosvm_nestedcv} or \code{rbiosvm_dcv} object.}
+
+\item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 

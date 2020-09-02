@@ -6,6 +6,7 @@
 \usage{
 rbioClass_svm_roc_auc(
   object,
+  fileprefix = NULL,
   newdata = NULL,
   newdata.label = NULL,
   center.scale.newdata = TRUE,
@@ -31,6 +32,8 @@ rbioClass_svm_roc_auc(
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}
+
+\item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 

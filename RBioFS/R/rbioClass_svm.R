@@ -1003,6 +1003,7 @@ rbioClass_svm_cv <- function(x, y,
 #'
 #' @description ROC-AUC analysis and ploting for SVM model, for classification model only.
 #' @param object A \code{rbiosvm} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
@@ -1064,7 +1065,8 @@ rbioClass_svm_cv <- function(x, y,
 #'                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
 #' }
 #' @export
-rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
+rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
+                                  newdata = NULL, newdata.label = NULL,
                                   center.scale.newdata = TRUE,
                                   rocplot = TRUE,
                                   plot.smooth = FALSE,
@@ -1203,7 +1205,11 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
                 input.newdata.label = newdata.label,
                 newdata.center.scaled = centered_newdata)
     class(out) <- "svm_roc_auc"
-    assign(paste(deparse(substitute(object)), "_svm_roc_auc", sep = ""), out, envir = .GlobalEnv)
+    if (is.null(fileprefix)) {  # export
+      assign(paste0(deparse(substitute(object)), "_svm_roc_auc"), out, envir = .GlobalEnv)
+    } else {
+      assign(paste0(as.character(fileprefix), "_svm_roc_auc"), out, envir = .GlobalEnv)
+    }
 
     ## plotting
     if (rocplot){
@@ -1232,8 +1238,13 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 
       # save
       # grid.newpage()
-      ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
-             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      if (is.null(fileprefix)) {
+        ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      } else {
+        ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      }
       grid.draw(plt)
       if (verbose) cat("Done!\n")
     }
@@ -1245,6 +1256,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #'
 #' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models, for classification only.
 #' @param object A \code{rbiosvm_nestedcv} or \code{rbiosvm_dcv} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -1287,7 +1299,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #' rbioClass_svm_cv_roc_auc(object = svm_nested_cv)
 #' }
 #' @export
-rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
+rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
                                                                  rocplot = TRUE,
                                                                  plot.smooth = FALSE,
                                                                  plot.lineSize = 1,
@@ -1394,10 +1406,18 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
     auc_res_list <- auc_res_list[-which(sapply(auc_res_list, is.null))]
   }
 
-  if (class(object) == 'rbiosvm_nestedcv') {
-    assign(paste(deparse(substitute(object)), "_svm_nestedcv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+  if (class(object) == 'rbiosvm_nestedcv') {  # export
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_nestedcv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    } else {
+      assign(paste(as.character(fileprefix), "_svm_nestedcv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    }
   } else {
-    assign(paste(deparse(substitute(object)), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    } else {
+      assign(paste(as.character(fileprefix), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    }
   }
 
   # ---- plotting ----
@@ -1439,8 +1459,13 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
 
         # save
         # grid.newpage()
-        ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
-               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        if (is.null(fileprefix)){
+          ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+                 width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        } else {
+          ggsave(filename = paste0(as.character(fileprefix),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+                 width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
       }
