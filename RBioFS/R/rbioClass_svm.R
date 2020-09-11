@@ -1805,7 +1805,8 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
   ## center data with the option of scaling
   if (any(class(newdata) == "data.frame")){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-    newdata <- as.matrix(sapply(newdata, as.numeric))
+    # newdata <- as.matrix(sapply(newdata, as.numeric)) # testing
+    newdata <- as.matrix(newdata)  # testing
   }
   if (center.scale.newdata){
     if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")

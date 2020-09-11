@@ -64,6 +64,7 @@ Update log
       
       - Updates to SVM function(s)
         - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
+        - (testing, might revert back) rbioClass_svm_predcit() updated with new data matrix converting method
       
       - Updates to the Util function(s)
         - rbioUtil_classif_accuracy() now outputs confusion matrix and input data labels
