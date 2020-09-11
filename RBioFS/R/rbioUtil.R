@@ -1,12 +1,15 @@
 #' Title rbioUtil_classif_accuracy
 #'
-#' @description Plotting function for permutation test results.
+#' @description Classification accuracy calculation function
 #' @param object Classification model object. The object should be either \code{rbiosvm}, or \code{rbiomvr} classes.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.
 #' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @details accuracy = true predictions/total predictions
-#' @return Numerical model accuracy value.
+#' @return A list includes:
+#'         (1) Numerical model accuracy value based on the input test data.
+#'         (2) Confusion matrix
+#'         (3) Input data label
 #' @examples
 #'
 #' \dontrun{
@@ -41,7 +44,10 @@ rbioUtil_classif_accuracy <- function(object, newdata, newdata.label, center.sca
   confusion_mtx <- table(predict(object = object, newdata = test), newdata.label, dnn = c("Predicted", "Actual"))
   accu <- sum(diag(confusion_mtx))/sum(confusion_mtx)  # true prediction/total prediction
 
-  return(accu)
+  # output
+  out <- list(accuracy = accu, confusion = confusion_mtx, newdata.label = newdata.label)
+
+  return(out)
 }
 
 
@@ -237,7 +243,7 @@ rbioUtil_perm_plot.default <- function(baseplt,
 #' }
 #' @export
 rbioUtil_classplot <- function(pred.obj,
-                              multi_plot.ncol = nrow(pred.obj), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+                              multi_plot.ncol = nrow(pred.obj$raw.newdata), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               multi_plot.stripLblSize = 10,
                               plot.Title = NULL, plot.titleSize = 10,
                               plot.probLabelSize = 5, plot.probLabel.padding = 0,

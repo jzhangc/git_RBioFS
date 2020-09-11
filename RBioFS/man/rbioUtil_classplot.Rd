@@ -6,7 +6,7 @@
 \usage{
 rbioUtil_classplot(
   pred.obj,
-  multi_plot.ncol = nrow(pred.obj),
+  multi_plot.ncol = nrow(pred.obj$raw.newdata),
   multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom",
   multi_plot.stripLblSize = 10,
