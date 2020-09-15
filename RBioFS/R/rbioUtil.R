@@ -217,13 +217,14 @@ rbioUtil_perm_plot.default <- function(baseplt,
 #'
 #' @description Classification plot function for classification prediction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probablity pie charts.
 #' @param pred.object A \code{prediction} object, which can be obtained from function \code{\link{rbioClass_plsda_predict}}.
+#' @param export.name String. Optional user defined export name prefix. Default is \code{NULL}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.Title Plot title. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.probLabelSize The size of the sample label. Default is \code{2}.
-#' @param plot.probLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.probLabel.padding The padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.probLabel.outside If to put the probability label outside of the pies. Default is \code{"TRUE"}.
 #' @param plot.probLabel.outside.nudge Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
@@ -242,8 +243,9 @@ rbioUtil_perm_plot.default <- function(baseplt,
 #' rbioUtil_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
 #' }
 #' @export
-rbioUtil_classplot <- function(pred.obj,
-                              multi_plot.ncol = nrow(pred.obj$raw.newdata), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+rbioUtil_classplot <- function(pred.obj, export.name = NULL,
+                              multi_plot.ncol = nrow(pred.obj$raw.newdata),
+                              multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                               multi_plot.stripLblSize = 10,
                               plot.Title = NULL, plot.titleSize = 10,
                               plot.probLabelSize = 5, plot.probLabel.padding = 0,
@@ -255,12 +257,17 @@ rbioUtil_classplot <- function(pred.obj,
   ## check arguments
   if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioClass_plsda_predict() to generate one.")
   if (pred.obj$model.type != "classification") stop("the function only supports \"classification\".")
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(pred.obj))
+  } else {
+    export.name <- export.name
+  }
 
   ## plot
   if (multi_plot.ncol * multi_plot.nrow < nrow(pred.obj$raw.newdata)){
     stop("multi_plot.ncol and multi_plot.nrow settings are incorrect. Make sure they match the number of y groups.\n")
   }
-  if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(pred.obj)),".plsda.classification.pdf...", sep = ""))  # initial message
+  if (verbose) cat(paste0("Plot being saved to file: ", export.name, ".plsda.classification.pdf..."))  # initial message
   plt <- ggplot(pred.obj$probability.summary, aes(x = "", y = Probability, fill = Class)) +
     geom_col(width = 1, colour = "black", alpha = 0.8) +
     ggtitle(plot.Title) +
@@ -293,7 +300,7 @@ rbioUtil_classplot <- function(pred.obj,
 
   # save
   # grid.newpage()
-  ggsave(filename = paste(deparse(substitute(pred.obj)),".plsda.classification.pdf", sep = ""), plot = plt,
+  ggsave(filename = paste0(export.name, ".", pred.obj$classifier.class[2], ".classification.pdf"), plot = plt,
          width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
   grid.draw(plt)
   if (verbose) cat("Done!\n")

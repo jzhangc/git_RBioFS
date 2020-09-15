@@ -142,10 +142,10 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @param multi_plot.nrow Set only when \code{length(comps) > 1}, number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.rightsideY If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}
-#' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
-#' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
-#' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.sampleID.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleID.vector Set only when \code{plot.sampleID.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleIDSize Only set when \code{plot.sampleID.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
+#' @param plot.sampleID.padding Set only when \code{plot.sampleID.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.Title tuplot title. Default is \code{NULL}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
@@ -158,7 +158,10 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @param plot.Height tuplot height. Default is \code{150}.
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a pdf file for tuplot.
-#' @details The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
+#' @details The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection.
+#'          Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot.
+#'          The \code{sampleID} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components
+#'          at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 #' @import ggplot2
 #' @import ggrepel
 #' @import foreach
@@ -172,8 +175,8 @@ rbioClass_plsda <- function(x, y, ncomp = length(unique(y)) - 1, method = "simpl
 #' @export
 rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(comps), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                                 plot.rightsideY = TRUE,
-                                plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
-                                plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
+                                plot.sampleID.type = "none", plot.sampleID.vector = NULL,
+                                plot.sampleIDSize = 2, plot.sampleID.padding = 0.5,
                                 plot.SymbolSize = 5, plot.Title = NULL,
                                 plot.fontType = "sans",
                                 plot.xLabelSize = 10, plot.xTickLblSize = 10,
@@ -185,14 +188,14 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
   if (!any(class(object) %in% c("rbiomvr"))) stop("object needs to be either a \"rbiomvr\" class.")
   if (length(comps) > object$ncomp) stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp))) stop("comps contain non-existant comp.")
-  # if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  # if (!tolower(plot.sampleID.type) %in% c("none", "direct", "indirect")) stop("sampleID.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
   if (plot.rightsideY){
     if (length(comps) > 1){
       cat("right side y-axis ignored for multi-plot figure.\n")
     }
   }
   if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
-  plot.sampleLabel.type <- match.arg(tolower(plot.sampleLabel.type), c("none", "direct", "indirect"))
+  plot.sampleID.type <- match.arg(tolower(plot.sampleID.type), c("none", "direct", "indirect"))
 
 
   ## extract and construt t-u plot dataframe
@@ -211,21 +214,21 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
     lbl <- paste(c("t ", "u "), comp_axis_lbl, sep = "")
     plt <- ggplot(data = tu_dfm)  # base plot
 
-    if (plot.sampleLabel.type != "none"){
-      if (is.null(plot.sampleLabel.vector)){
-        cat("sampleLabel.vector not provided. proceed without sampole labels.\n")
+    if (plot.sampleID.type != "none"){
+      if (is.null(plot.sampleID.vector)){
+        cat("sampleID.vector not provided. proceed without sampole labels.\n")
         plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
-      } else if (length(plot.sampleLabel.vector) != nrow(tu_dfm)){
-        cat("sampleLabel.vector not the same length as the number of samples. proceed without sampole labels.\n")
+      } else if (length(plot.sampleID.vector) != nrow(tu_dfm)){
+        cat("sampleID.vector not the same length as the number of samples. proceed without sampole labels.\n")
         plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
       } else {
-        tu_dfm$samplelabel <- as.character(plot.sampleLabel.vector)
-        if (tolower(plot.sampleLabel.type) == "direct"){
-          plt <- plt + geom_text(data = tu_dfm, aes(x = t, y = u, colour = y, label = samplelabel), size = plot.SymbolSize)
-        } else if (tolower(plot.sampleLabel.type) == "indirect") {
+        tu_dfm$sampleID <- as.character(plot.sampleID.vector)
+        if (tolower(plot.sampleID.type) == "direct"){
+          plt <- plt + geom_text(data = tu_dfm, aes(x = t, y = u, colour = y, label = sampleID), size = plot.SymbolSize)
+        } else if (tolower(plot.sampleID.type) == "indirect") {
           plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y)) +
-            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = samplelabel),
-                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize,
+            geom_text_repel(data = tu_dfm, aes(x = t, y = u, label = sampleID),
+                            point.padding = unit(plot.sampleID.padding, "lines"), size = plot.sampleIDSize,
                             show.legend = FALSE)
         }
       }
@@ -845,10 +848,10 @@ print.rbiomvr_perm <- function(x, ...){
 #' @param comps Integer vector. Components to plot. The index of the components are integers. The vector length should be between 1 and the total number of components, inclusive. Can be Default is \code{c(1, 2)}.
 #' @param plot.rightsideY If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param plot.Title Scoreplot title. Default is \code{NULL}.
-#' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
-#' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
-#' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.sampleID.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleID.vector Set only when \code{plot.sampleID.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleIDSize Only set when \code{plot.sampleID.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
+#' @param plot.sampleID.padding Set only when \code{plot.sampleID.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.ellipse If to draw ellipses. Default is \code{FALSE}.
 #' @param plot.ellipse_conf The confidence value for the ellipses. Default is \code{0.95}.
@@ -881,8 +884,8 @@ print.rbiomvr_perm <- function(x, ...){
 rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
                                    plot.rightsideY = FALSE,
                                    plot.Title = NULL,
-                                   plot.sampleLabel.type = c("none", "direct", "indirect"), plot.sampleLabel.vector = NULL,
-                                   plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
+                                   plot.sampleID.type = c("none", "direct", "indirect"), plot.sampleID.vector = NULL,
+                                   plot.sampleIDSize = 2, plot.sampleID.padding = 0.5,
                                    plot.SymbolSize = 2,
                                    plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
                                    plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
@@ -907,21 +910,21 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
   } else stop("object needs to be \"rbiomvr\" or \"mvr\" class, e.g. created from rbioClass_plsda() function.")
   if (length(comps) > object$ncomp)stop("comps length exceeded the maximum comp length.")
   if (!all(comps %in% seq(object$ncomp)))stop("comps contain non-existant comp.")
-  # if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
-  plot.sampleLabel.type <- match.arg(tolower(plot.sampleLabel.type), c("none", "direct", "indirect"))
-  if (tolower(plot.sampleLabel.type != "none")){
-    if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(object$inputX)) {
-      stop("plot.sampleLabel.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX).")}
+  # if (!tolower(plot.sampleID.type) %in% c("none", "direct", "indirect")) stop("sampleID.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  plot.sampleID.type <- match.arg(tolower(plot.sampleID.type), c("none", "direct", "indirect"))
+  if (tolower(plot.sampleID.type != "none")){
+    if (!is.null(plot.sampleID.vector) & length(plot.sampleID.vector) != nrow(object$inputX)) {
+      stop("plot.sampleID.vector has to be the same length as number of samples in the training set from object, i.e. nrow(object$inputX).")}
   }
   if (object$model.type != "classification") stop("object needs to have model.type = \"classification\"")
 
   ## extract information
   score_x <- data.frame(object$scores[, comps, drop = FALSE], check.names = FALSE)
   score_x$group <- y
-  if (is.null(plot.sampleLabel.vector)){  # sample label
+  if (is.null(plot.sampleID.vector)){  # sample label
     score_x$sample.label <- 1:nrow(object$inputX)
   } else {
-    score_x$sample.label <- plot.sampleLabel.vector
+    score_x$sample.label <- plot.sampleID.vector
   }
   varpp_x <- 100 * object$Xvar / object$Xtotvar
   boxdfm_x <- data.frame(comp_x = as.numeric(gsub("Comp", "", names(varpp_x))), varpp_x = varpp_x)
@@ -929,8 +932,8 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
   comp_axis_lbl <- paste("comp ", comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
 
   ## scoreplot plotting
-  if (plot.sampleLabel.type != "none" & is.null(plot.sampleLabel.vector)){
-    cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
+  if (plot.sampleID.type != "none" & is.null(plot.sampleID.vector)){
+    cat("plot.sampleID.vector not provided. Proceed with row numbers as sampole labels.\n")
   }
   if (length(comps) == 1){  # one component plot
     score_x$sample <- as.numeric(rownames(score_x))
@@ -940,16 +943,16 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     scoreplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
       geom_line(aes(colour = group, linetype = group))
 
-    if (plot.sampleLabel.type != "none"){  # labels
-      if (tolower(plot.sampleLabel.type) == "direct"){
+    if (plot.sampleID.type != "none"){  # labels
+      if (tolower(plot.sampleID.type) == "direct"){
         scoreplt <- scoreplt +
           geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
-      } else if (tolower(plot.sampleLabel.type) == "indirect") {
+      } else if (tolower(plot.sampleID.type) == "indirect") {
         scoreplt <- scoreplt +
           geom_point(size = plot.SymbolSize, aes(colour = group, shape = group)) +
           scale_shape_manual(values=1:nlevels(score_x$group)) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                          size = plot.sampleLabelSize, show.legend = FALSE)
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleID.padding, "lines"),
+                          size = plot.sampleIDSize, show.legend = FALSE)
       }
     } else {
       scoreplt <- scoreplt +
@@ -984,16 +987,16 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.scoreplot.pdf...", sep = ""))  # initial message
     scoreplt <- ggplot(score_x, aes(x = axis1, y = axis2))
 
-    if (plot.sampleLabel.type != "none"){  # labels
-      if (tolower(plot.sampleLabel.type) == "direct"){
+    if (plot.sampleID.type != "none"){  # labels
+      if (tolower(plot.sampleID.type) == "direct"){
         scoreplt <- scoreplt +
           geom_text(aes(label = sample.label, colour = group), size = plot.SymbolSize)
-      } else if (tolower(plot.sampleLabel.type) == "indirect") {
+      } else if (tolower(plot.sampleID.type) == "indirect") {
         scoreplt <- scoreplt +
           geom_point(size = plot.SymbolSize, aes(colour = group, shape = group)) +
           scale_shape_manual(values=1:nlevels(score_x$group)) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                          size = plot.sampleLabelSize, show.legend = FALSE)
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleID.padding, "lines"),
+                          size = plot.sampleIDSize, show.legend = FALSE)
       }
     } else {
       scoreplt <- scoreplt +
@@ -1033,7 +1036,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
     }
 
     # custom functions for the paired scoreplot
-    ellipsefunc <- function(data = score_x, mapping, label.method = plot.sampleLabel.type,
+    ellipsefunc <- function(data = score_x, mapping, label.method = plot.sampleID.type,
                             ellipse = plot.ellipse, ellipse_conf = plot.ellipse_conf,
                             ...){
       g <- ggplot(data = data, mapping = mapping)
@@ -1043,8 +1046,8 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       } else if (label.method == "indirect"){
         g <- g +  geom_point(...) +
           scale_shape_manual(values=1:nlevels(data$group)) +
-          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                          size = plot.sampleLabelSize, show.legend = FALSE)
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleID.padding, "lines"),
+                          size = plot.sampleIDSize, show.legend = FALSE)
       } else {
         g <- g + geom_point(...) +
           scale_shape_manual(values=1:nlevels(data$group))
@@ -1935,14 +1938,15 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' @param object A \code{rbiomvr} object.
 #' @param comps  Number of PLS-DA components used in the model. Default is \code{object$ncomp}.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
+#' @param export.name String. Optional user defined export name prefix. Default is \code{NULL}.
 #' @param center.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"Bayes"}.
 #' @param threshold  Classification threshold. Should be a number between \code{0} and \code{1}. Default is \code{0.2}.
 #' @param predplot If to generate a prediction value plot. Default is \code{TRUE}.
-#' @param plot.sampleLabel.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
-#' @param plot.sampleLabel.vector Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param plot.sampleLabelSize Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
-#' @param plot.sampleLabel.padding Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.sampleID.type If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleID.vector Set only when \code{plot.sampleID.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param plot.sampleIDSize Only set when \code{plot.sampleID.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.
+#' @param plot.sampleID.padding Set only when \code{plot.sampleID.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param multi_plot.ncol Number of columns on one figure page. Default is \code{length(plot.comps)}.
@@ -1966,7 +1970,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' @param plot.Width Predplot width. Default is \code{170}.
 #' @param plot.Height Predplot height. Default is \code{150}.
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
-#' @return  A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
+#' @return  A \code{prediction} object, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 #'
 #' The items of the object are:
 #'
@@ -1976,7 +1980,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'
 #' \code{predited.value}
 #'
-#' \code{prob.method}  Method to caluculate posterier probability
+#' \code{prob.method}  Method to calculate posterior probability
 #'
 #' \code{probability.summary}
 #'
@@ -1996,7 +2000,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'
 #' The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
 #' Specifically, the equation models classification against predicted values from pls-da model and training data: \code{P(class|predicted values) = P(predicted values|)P(class)/P(predicted values)}.
-#' The resulted Bayesian classification model is then applied to newdata, thereby posterior probabilities are calcuated.
+#' The resulted Bayesian classification model is then applied to newdata, thereby posterior probabilities are calculated.
 #'
 #' The "softmax" method uses the equation: \code{probability = exp(predicted.value) / sum(exp(predicted.values))}. This method doesn't relay on training data.
 #'
@@ -2004,7 +2008,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'
 #' For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioClass_plsda_classplot()}}.
 #'
-#' If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#' If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.
 #'
 #' @import ggplot2
 #' @import pls
@@ -2015,7 +2019,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #' @examples
 #' \dontrun{
 #' rbioClass_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
-#'                      plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+#'                      plot.sampleID.type = "none", plot.sampleID.vector = NULL, plot.sampleID.padding = 0.5,
 #'                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
 #'                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
 #'                      plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
@@ -2026,12 +2030,13 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 #'                      plot.Width = 170, plot.Height = 150)
 #' }
 #' @export
-rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, center.newdata = TRUE,
+rbioClass_plsda_predict <- function(object, comps = object$ncomp,
+                                    newdata, center.newdata = TRUE, export.name = NULL,
                                     prob.method = "Bayes",
                                     threshold = 0.2,
                                     predplot = TRUE,
-                                    plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL,
-                                    plot.sampleLabelSize = 2, plot.sampleLabel.padding = 0.5,
+                                    plot.sampleID.type = "none", plot.sampleID.vector = NULL,
+                                    plot.sampleIDSize = 2, plot.sampleID.padding = 0.5,
                                     multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = c("bottom", "top", "left", "right"),
                                     plot.rightsideY = TRUE,
                                     plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
@@ -2048,15 +2053,21 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   if (!any(class(x) %in% c("data.frame", "matrix")) & !is.null(dim(x)))stop("x needs to be a matrix, data.frame or vector.")
   if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
     if (verbose) cat("newdata converted to a matrix object.\n")
-    newdata <- as.matrix(sapply(newdata, as.numeric))
+    # newdata <- as.matrix(sapply(newdata, as.numeric))
+    newdata <- as.matrix(newdata)  # testing
+  }
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(newdata))
+  } else {
+    export.name <- export.name
   }
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   if (!prob.method %in% c("softmax", "Bayes")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
-  # if (!tolower(plot.sampleLabel.type) %in% c("none", "direct", "indirect")) stop("sampleLabel.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
+  # if (!tolower(plot.sampleID.type) %in% c("none", "direct", "indirect")) stop("sampleID.type argument has to be one of \"none\", \"direct\" or \"indirect\".")
   multi_plot.legend.pos <- match.arg(multi_plot.legend.pos, c("bottom", "top", "left", "right"))
-  if (tolower(plot.sampleLabel.type != "none")){
-    if (!is.null(plot.sampleLabel.vector) & length(plot.sampleLabel.vector) != nrow(newdata)) {
-      stop("plot.sampleLabel.vector has to be the same length as nrow(newdata).")}
+  if (tolower(plot.sampleID.type != "none")){
+    if (!is.null(plot.sampleID.vector) & length(plot.sampleID.vector) != nrow(newdata)) {
+      stop("plot.sampleID.vector has to be the same length as nrow(newdata).")}
   }
 
   ## center data with the option of scaling
@@ -2072,10 +2083,10 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   ## prediction and class assign
   rownames(test) <- 1:nrow(test)
   pred <- predict(object = object, ncomp = comps, newdata = test, type = "response")
-  if (is.null(plot.sampleLabel.vector) | missing(plot.sampleLabel.vector)){
+  if (is.null(plot.sampleID.vector) | missing(plot.sampleID.vector)){
     sample.label <- seq(nrow(test))
   } else {
-    sample.label <- plot.sampleLabel.vector
+    sample.label <- plot.sampleID.vector
   }
 
   ## classification and probability calculation
@@ -2083,8 +2094,8 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
   if (is.null(dim(pred_mtx))) {  # if only one sample
     pred_mtx <- t(as.matrix(pred_mtx))
   }
-  if (!missing(plot.sampleLabel.vector) & !is.null(plot.sampleLabel.vector)){
-    rownames(pred_mtx) <- plot.sampleLabel.vector
+  if (!missing(plot.sampleID.vector) & !is.null(plot.sampleID.vector)){
+    rownames(pred_mtx) <- plot.sampleID.vector
   }
 
   if (verbose) cat(paste("Classification probability calculation using ", prob.method, " method...", sep = ""))  # initial message
@@ -2131,8 +2142,8 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
     names(predlist) <- levels(object$inputY)
 
     # plot
-    if (plot.sampleLabel.type != "none" & is.null(plot.sampleLabel.vector)){  # message when no label vector is provided.
-      cat("plot.sampleLabel.vector not provided. Proceed with row numbers as sampole labels.\n")
+    if (plot.sampleID.type != "none" & is.null(plot.sampleID.vector)){  # message when no label vector is provided.
+      cat("plot.sampleID.vector not provided. Proceed with row numbers as sampole labels.\n")
     }
     if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.predict.pdf...", sep = ""))  # initial message
     plt_list <- vector(mode = "list", length = length(levels(object$inputY)))
@@ -2140,13 +2151,13 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
       pltdfm <- predlist[[j]]
       plt <- ggplot(data = pltdfm)  # base plot
 
-      if (plot.sampleLabel.type != "none"){  # labels
-        if (tolower(plot.sampleLabel.type) == "direct"){
+      if (plot.sampleID.type != "none"){  # labels
+        if (tolower(plot.sampleID.type) == "direct"){
           plt <- plt + geom_text(aes(x = sample, y = predicted.value, label = sample.label, colour = `Within threshold`), size = plot.SymbolSize)
-        } else if (tolower(plot.sampleLabel.type) == "indirect") {
+        } else if (tolower(plot.sampleID.type) == "indirect") {
           plt <- plt + geom_point(alpha = 0.6, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = `Within threshold`)) +
             geom_text_repel(data = pltdfm[!pltdfm$classification %in% c("rest", "undetermined"), ], aes(x = sample, y = predicted.value, label = sample.label),
-                            point.padding = unit(plot.sampleLabel.padding, "lines"), size = plot.sampleLabelSize, show.legend = FALSE)
+                            point.padding = unit(plot.sampleID.padding, "lines"), size = plot.sampleIDSize, show.legend = FALSE)
         }
       } else {
         plt <- plt + geom_point(alpha = 0.4, size = plot.SymbolSize, aes(x = sample, y = predicted.value, colour = `Within threshold`))
@@ -2206,7 +2217,7 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
 
     # save
     # grid.newpage()
-    ggsave(filename = paste(deparse(substitute(object)),".plsda.predict.pdf", sep = ""), plot = plt,
+    ggsave(filename = paste0(export.name,".plsda.predict.pdf"), plot = plt,
            width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     grid.draw(plt)
     if (verbose) cat("Done!\n")
@@ -2220,9 +2231,10 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp, newdata, cente
               probability.method = prob.method,
               probability.summary = prob_dfm,
               raw.newdata = newdata,
+              newdata.id = plot.sampleID.vector,
               center.scale = center.newdata,
               center.scaled.newdata = centerdata,
               newdata.y <- NULL)
   class(out) <- "prediction"
-  assign(paste(deparse(substitute(object)), "_plsda_predict", sep = ""), out, envir = .GlobalEnv)
+  assign(paste0(export.name, "_plsda_predict"), out, envir = .GlobalEnv)
 }

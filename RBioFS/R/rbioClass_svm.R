@@ -1723,7 +1723,8 @@ print.rbiosvm_perm <- function(x, ...){
 #' @description Prediction function for SVM analysis. The function calculates the predicted value for unknown sample data using the input SVM model.
 #' @param object A \code{rbiosvm} object.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
-#' @param sampleLabel.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param export.name String. Optional user defined export name prefix. Default is \code{NULL}.
+#' @param sampleID.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
 #' @param newdata.y Only required for regression study. The default is \code{NULL}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
@@ -1744,6 +1745,8 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' \code{raw.newdata}
 #'
+#' \code{newdata.id}
+#'
 #' \code{center.scale}
 #'
 #' \code{center.scaled.newdata}
@@ -1754,12 +1757,12 @@ print.rbiosvm_perm <- function(x, ...){
 #'          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
 #'          column mean and column standard deviation.
 #'
-#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
+#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071} package's implementation of logistic regression model.
 #'          See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
 #'
-#'          If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#'          If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.
 #'
-#'          When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
+#'          When the model type is \code{"regression"}, the value of the irrelevant items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
 #'          \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 #'
 #' @import ggplot2
@@ -1771,23 +1774,29 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' }
 #' @export
-rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
-                                  sampleLabel.vector = NULL, newdata.y = NULL,
+rbioClass_svm_predcit <- function(object,
+                                  newdata, center.scale.newdata = TRUE, export.name = NULL,
+                                  sampleID.vector = NULL, newdata.y = NULL,
                                   prob.method = c("logistic",  "Bayes", "softmax"),
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
   if (missing(newdata) || is.null(newdata)) stop("please provide newdata.")
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(newdata))
+  } else {
+    export.name <- export.name
+  }
   if (!any(class(newdata) %in% c("matrix", "data.frame"))) stop("newdata has to be either a matrix or data.frame object.")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
-  if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
-    if (length(sampleLabel.vector) != nrow(newdata)){
-      cat("Sample label vector not the same length as newdata. Proceed without custom sample labels.\n")
-      sampleLabel.vector <- NULL
+  if (!missing(sampleID.vector) & !is.null(sampleID.vector)){
+    if (length(sampleID.vector) != nrow(newdata)){
+      cat("Sample ID vector not the same length as newdata. Proceed without custom sample labels.\n")
+      sampleID.vector <- NULL
     }
   }
   if (object$model.type == "classification"){
@@ -1827,8 +1836,8 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
     if (is.null(dim(pred_mtx))) {  # if only one sample
       pred_mtx <- t(as.matrix(pred_mtx))
     }
-    if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
-      rownames(pred_mtx) <- sampleLabel.vector
+    if (!missing(sampleID.vector) & !is.null(sampleID.vector)){
+      rownames(pred_mtx) <- sampleID.vector
     }
     ## posterior
     if (prob.method == "logistic"){
@@ -1842,14 +1851,14 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
       trainingpred <- predict(object = object, newdata = training_mtx, type = "response", probability = TRUE)
       trainingpred <- attributes(trainingpred)$probabilities
       bayes.prob <- klaR::NaiveBayes(x = trainingpred, grouping = object$inputY, usekernel = TRUE)
-      bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calcuate posterior probability for
+      bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calculate posterior probability for
       bayes.prob$x <- NULL
 
       bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
       prob <- bayespred$posterior
     } else {
       group <- colnames(pred_mtx)
-      # calcuate probability
+      # calculate probability
       prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
       rownames(prob_mtx) <- group
       prob <- t(prob_mtx)
@@ -1880,13 +1889,13 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
               prob.method = prob.method,
               probability.summary = prob_dfm,
               raw.newdata = newdata,
+              newdata.id = sampleID.vector,
               center.scale = center.scale.newdata,
               center.scaled.newdata = centerdata,
               newdata.y = y)
   class(out) <- "prediction"
-  assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
+  assign(paste0(export.name, "_svm_predict"), out, envir = .GlobalEnv)
 }
-
 
 
 #' @export

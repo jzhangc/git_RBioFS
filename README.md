@@ -64,14 +64,23 @@ Update log
       
       - Updates to SVM function(s)
         - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
+        - rbioClass_svm_predcit() updated with user customizable export name prefix
+          - Also, the default name chagned from "object" string to the "new data string"
         - (testing, might revert back) rbioClass_svm_predcit() updated with new data matrix converting method
+
+      - Updates to the PLS function(s)
+        - rbioClass_plsda_predcit() updated with user customizable export name prefix
+          - Also, the default name chagned from "object" string to the "new data string"
+        - (testing, might revert back) rbioClass_plsda_predcit() updated with new data matrix converting method
       
       - Updates to the Util function(s)
         - rbioUtil_classif_accuracy() now outputs confusion matrix and input data labels
         - Manual page updated for rbioUtil_classif_accuracy()
         - Default argument value fixed for rbioUtil_classplot()
+        - rbioUtil_classplot() now supports optional customized export file name prefix via export.name argument
               
       - Other upates
+        - The "prediction" object now contains a newdata.id item
         - Citatioin information updated
     
 

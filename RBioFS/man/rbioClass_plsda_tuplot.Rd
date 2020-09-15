@@ -11,10 +11,10 @@ rbioClass_plsda_tuplot(
   multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom",
   plot.rightsideY = TRUE,
-  plot.sampleLabel.type = "none",
-  plot.sampleLabel.vector = NULL,
-  plot.sampleLabelSize = 2,
-  plot.sampleLabel.padding = 0.5,
+  plot.sampleID.type = "none",
+  plot.sampleID.vector = NULL,
+  plot.sampleIDSize = 2,
+  plot.sampleID.padding = 0.5,
   plot.SymbolSize = 5,
   plot.Title = NULL,
   plot.fontType = "sans",
@@ -41,13 +41,13 @@ rbioClass_plsda_tuplot(
 
 \item{plot.rightsideY}{If to show the right side y-axis. Only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}. Note: the right side Y is ignored when \code{length(comps) > 1}}
 
-\item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
+\item{plot.sampleID.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
-\item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
+\item{plot.sampleID.vector}{Set only when \code{plot.sampleID.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{plot.sampleLabelSize}{Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
+\item{plot.sampleIDSize}{Only set when \code{plot.sampleID.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
 
-\item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
+\item{plot.sampleID.padding}{Set only when \code{plot.sampleID.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
@@ -78,7 +78,10 @@ Returns a pdf file for tuplot.
 T-U plot function for PLS-DA models.
 }
 \details{
-The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
+The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection.
+         Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot.
+         The \code{sampleID} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components
+         at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 }
 \examples{
 \dontrun{

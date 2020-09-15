@@ -10,10 +10,10 @@ rbioClass_plsda_scoreplot(
   comps = c(1, 2),
   plot.rightsideY = FALSE,
   plot.Title = NULL,
-  plot.sampleLabel.type = c("none", "direct", "indirect"),
-  plot.sampleLabel.vector = NULL,
-  plot.sampleLabelSize = 2,
-  plot.sampleLabel.padding = 0.5,
+  plot.sampleID.type = c("none", "direct", "indirect"),
+  plot.sampleID.vector = NULL,
+  plot.sampleIDSize = 2,
+  plot.sampleID.padding = 0.5,
   plot.SymbolSize = 2,
   plot.ellipse = FALSE,
   plot.ellipse_conf = 0.95,
@@ -44,13 +44,13 @@ rbioClass_plsda_scoreplot(
 
 \item{plot.Title}{Scoreplot title. Default is \code{NULL}.}
 
-\item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
+\item{plot.sampleID.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
-\item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
+\item{plot.sampleID.vector}{Set only when \code{plot.sampleID.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{plot.sampleLabelSize}{Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
+\item{plot.sampleIDSize}{Only set when \code{plot.sampleID.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
 
-\item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
+\item{plot.sampleID.padding}{Set only when \code{plot.sampleID.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 
