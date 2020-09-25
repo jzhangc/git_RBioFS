@@ -13,10 +13,10 @@ rbioClass_plsda_predict(
   prob.method = "Bayes",
   threshold = 0.2,
   predplot = TRUE,
-  plot.sampleID.type = "none",
-  plot.sampleID.vector = NULL,
-  plot.sampleIDSize = 2,
-  plot.sampleID.padding = 0.5,
+  plot.sampleLabel.type = "none",
+  plot.sampleLabel.vector = NULL,
+  plot.sampleLabelSize = 2,
+  plot.sampleLabel.padding = 0.5,
   multi_plot.ncol = length(levels(object$inputY)),
   multi_plot.nrow = 1,
   multi_plot.legend.pos = c("bottom", "top", "left", "right"),
@@ -60,13 +60,13 @@ rbioClass_plsda_predict(
 
 \item{predplot}{If to generate a prediction value plot. Default is \code{TRUE}.}
 
-\item{plot.sampleID.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
+\item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
-\item{plot.sampleID.vector}{Set only when \code{plot.sampleID.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
+\item{plot.sampleLabel.vector}{Set only when \code{plot.sampleLabel.type} is not set to \code{"none"}, a character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
-\item{plot.sampleIDSize}{Only set when \code{plot.sampleID.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
+\item{plot.sampleLabelSize}{Only set when \code{plot.sampleLabel.type} is not \code{"none"}. The size of the sample label. Default is \code{2}.}
 
-\item{plot.sampleID.padding}{Set only when \code{plot.sampleID.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
+\item{plot.sampleLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{length(plot.comps)}.}
 
@@ -162,7 +162,7 @@ If \code{sampleID.vector = NULL} or missing, the function uses row numbers as la
 \examples{
 \dontrun{
 rbioClass_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
-                     plot.sampleID.type = "none", plot.sampleID.vector = NULL, plot.sampleID.padding = 0.5,
+                     plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
                      plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
