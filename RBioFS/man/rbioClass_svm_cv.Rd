@@ -26,7 +26,7 @@ rbioClass_svm_cv(
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
@@ -34,7 +34,7 @@ rbioClass_svm_cv(
 
 \item{cross.best.model.method}{The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.}
 
-\item{tune.method}{Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
+\item{tune.method}{Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.}
 
 \item{tune.cross.k}{Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.}
 
@@ -102,7 +102,7 @@ Additional items for \code{rbiosvm_cv}:
 \code{run.time}: total run time
 }
 \description{
-Cross-validation assessment for SVM modelling. It evaluates the overall performace of SVM modelling given the training data.
+Cross-validation assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 }
 \details{
 This function is very simular to \code{\link{rbioClass_svm_ncv_fs}}.

@@ -425,9 +425,18 @@ rbioClass_svm_ncv_fs <- function(x, y,
       uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
 
       # update the cv training data
-      cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
-      cv_training_x <- cv_training[, -1, drop = FALSE]
-      cv_training_y <- cv_training[, 1]
+      # cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
+      # cv_training_x <- cv_training[, -1, drop = FALSE]
+      # cv_training_y <- cv_training[, 1]
+      if (length(uni_sig_fs) == 0) {
+        stop("No statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
+        # cv_training_x <- cv_training[, -1]
+        # cv_training_y <- cv_training[, 1]
+      } else {
+        cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
+        cv_training_x <- cv_training[, -1, drop = FALSE]
+        cv_training_y <- cv_training[, 1]
+      }
     } else {
       uni_sig_fs <- NULL
     }
@@ -483,7 +492,6 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
-
     # processing test data
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
     if (center.scale){ # using training data mean and sd
@@ -518,8 +526,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...\n")
   }
   nested.cv.list <- vector(mode = "list", length = cross.k)
-  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %do% nestedcv_func(i)
-  names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
+  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nestedcv_func(i)
 
   # below: cv.model.idx: best models index
   if (model_type == "classification"){
