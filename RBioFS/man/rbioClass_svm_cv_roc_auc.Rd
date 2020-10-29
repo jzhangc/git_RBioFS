@@ -27,13 +27,13 @@ rbioClass_svm_cv_roc_auc(
 )
 }
 \arguments{
-\item{object}{A \code{rbiosvm_nestedcv} or \code{rbiosvm_dcv} object.}
+\item{object}{A \code{rbiosvm_nestedcv} or \code{rbiosvm_cv} object.}
 
-\item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
+\item{fileprefix}{String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
-\item{plot.smooth}{If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.}
+\item{plot.smooth}{If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.}
 
 \item{plot.lineSize}{Line size. Default is \code{1}.}
 
@@ -74,7 +74,7 @@ Prints AUC values in the console. And a pdf file for ROC plot.
         The function also exports a ROC results list with an ROC object for each CV fold.
 }
 \description{
-ROC-AUC analysis and ploting for SVM cross-valildation (CV) models, for classification only.
+ROC-AUC analysis and ploting for SVM cross-validation (CV) models, for classification only.
 }
 \details{
 Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold

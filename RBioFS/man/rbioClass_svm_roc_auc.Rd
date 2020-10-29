@@ -99,7 +99,7 @@ ROC-AUC analysis and ploting for SVM model, for classification model only.
 \details{
 Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
 
-         When \code{newdata} is not provided, the function uses the training data from the input SVM object.
+         When \code{newdata} is not provided, the function uses the training data from the input SVM object, and the training data is automatically cneter.scaled.
 
          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.

@@ -66,6 +66,7 @@ Update log
         - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
         - rbioClass_svm_predcit() updated with user customizable export name prefix
           - Also, the default name chagned from "object" string to the "new data string"
+        - rbioClass_svm_roc_auc() now automatically center.scale the training data when no new data is provided
         - (testing, might revert back) rbioClass_svm_predcit() updated with new data matrix converting method
 
       - Updates to the PLS function(s)

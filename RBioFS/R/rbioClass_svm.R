@@ -425,8 +425,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
       uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
 
       # update the cv training data
-      cv_training <- cv_training[, c("y", uni_sig_fs)]
-      cv_training_x <- cv_training[, -1]
+      cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
+      cv_training_x <- cv_training[, -1, drop = FALSE]
       cv_training_y <- cv_training[, 1]
     } else {
       uni_sig_fs <- NULL
@@ -477,6 +477,9 @@ rbioClass_svm_ncv_fs <- function(x, y,
     })
 
     # cv svm
+    # cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
+    #                       svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
+    #                       tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
@@ -686,14 +689,14 @@ print.rbiosvm_nestedcv <- function(x, ...){
 
 #' @title rbioClass_svm_cv
 #'
-#' @description Cross-validation assessment for SVM modelling. It evaluates the overall performace of SVM modelling given the training data.
+#' @description Cross-validation assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
-#' @param tune.method Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
+#' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
@@ -1041,7 +1044,7 @@ rbioClass_svm_cv <- function(x, y,
 #'
 #' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
 #'
-#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object.
+#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object, and the training data is automatically cneter.scaled.
 #'
 #'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
 #'          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
@@ -1089,6 +1092,7 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
       if (verbose) cat("newdata.label is converted to factor. \n")
       newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
+    center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
     # if (object$model.type == "classification") {
     #   newdata.label <- object$inputY
     # } else {
@@ -1254,11 +1258,11 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
 
 #' @title rbioClass_svm_cv_roc_auc
 #'
-#' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models, for classification only.
-#' @param object A \code{rbiosvm_nestedcv} or \code{rbiosvm_dcv} object.
-#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
+#' @description ROC-AUC analysis and ploting for SVM cross-validation (CV) models, for classification only.
+#' @param object A \code{rbiosvm_nestedcv} or \code{rbiosvm_cv} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
-#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
+#' @param plot.smooth If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
