@@ -527,6 +527,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   }
   nested.cv.list <- vector(mode = "list", length = cross.k)
   nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nestedcv_func(i)
+  names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
   # below: cv.model.idx: best models index
   if (model_type == "classification"){
