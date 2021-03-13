@@ -462,11 +462,15 @@ rbioClass_svm_ncv_fs <- function(x, y,
     # }
     fs <- tryCatch({  # rRF-FS with error handling
       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
-                          nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+                          nTree = rf.ifs.ntree,
+                          parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
+                          plot = FALSE)
       # fs <- svm_nested_initial_FS$feature_initial_FS
       rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
                     x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
-                    nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+                    nTree = rf.sfs.ntree,
+                    parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
+                    plot = FALSE)
 
       if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
