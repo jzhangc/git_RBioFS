@@ -6,6 +6,7 @@
 \usage{
 rbioFS_PCA(
   input = NULL,
+  export.name = NULL,
   sampleIDVar = NULL,
   groupIDVar = NULL,
   scaleData = TRUE,
@@ -42,6 +43,8 @@ rbioFS_PCA(
 }
 \arguments{
 \item{input}{Input data, data frame.}
+
+\item{export.name}{String. Prefix for results exports. When \code{NULL}, the function uses the input object name. Default is \code{NULL}.}
 
 \item{sampleIDVar}{Sample variable name. It's a character string.}
 

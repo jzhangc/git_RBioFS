@@ -77,6 +77,9 @@ Update log
         - rbioClass_plsda_predcit() updated with user customizable export name prefix
           - Also, the default name chagned from "object" string to the "new data string"
         - (testing, might revert back) rbioClass_plsda_predcit() updated with new data matrix converting method
+        
+      - Updates to the PCA function(s)
+        - rbioFS_PCA() now supports custom export name, via "export.name" argument
       
       - Updates to the Util function(s)
         - rbioUtil_classif_accuracy() now outputs confusion matrix and input data labels
