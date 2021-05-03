@@ -8,7 +8,8 @@ rbioClass_svm_predcit(
   object,
   newdata,
   center.scale.newdata = TRUE,
-  sampleLabel.vector = NULL,
+  export.name = NULL,
+  sampleID.vector = NULL,
   newdata.y = NULL,
   prob.method = c("logistic", "Bayes", "softmax"),
   verbose = TRUE
@@ -21,7 +22,9 @@ rbioClass_svm_predcit(
 
 \item{center.scale.newdata}{If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.}
 
-\item{sampleLabel.vector}{A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
+\item{export.name}{String. Optional user defined export name prefix. Default is \code{NULL}.}
+
+\item{sampleID.vector}{A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.}
 
 \item{newdata.y}{Only required for regression study. The default is \code{NULL}.}
 
@@ -46,6 +49,8 @@ A \code{prediction} object. The items of the object are:
 
 \code{raw.newdata}
 
+\code{newdata.id}
+
 \code{center.scale}
 
 \code{center.scaled.newdata}
@@ -60,12 +65,12 @@ Although optional, the \code{newdata} matrix should be centered prior to testing
          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
          column mean and column standard deviation.
 
-         The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
+         The default posterior probability calculation method \code{"logistic"} is the \code{e1071} package's implementation of logistic regression model.
          See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
 
-         If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+         If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.
 
-         When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
+         When the model type is \code{"regression"}, the value of the irrelevant items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
          \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 }
 \examples{

@@ -22,10 +22,13 @@ rbioUtil_classif_accuracy(
 \item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 }
 \value{
-Numerical model accuracy value.
+A list includes:
+        (1) Numerical model accuracy value based on the input test data.
+        (2) Confusion matrix
+        (3) Input data label
 }
 \description{
-Plotting function for permutation test results.
+Classification accuracy calculation function
 }
 \details{
 accuracy = true predictions/total predictions

@@ -78,7 +78,10 @@ Returns a pdf file for tuplot.
 T-U plot function for PLS-DA models.
 }
 \details{
-The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection. Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot. The \code{sampleLabel} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
+The T-U plot shows the correlation between the decomposed x and y matrices for PLS-DA analysis. Such plot is useful to inspecting X-Y decomposition and outlier detection.
+         Since PLS-DA is a classification modelling method, the well-correlated T-U plot will likely show a logistic regression-like plot, as opposed to a linear regressoin plot.
+         The \code{sampleID} series arguments make it possible to show exact sample, something useful for outlier detection. The function supports plotting multiple components
+         at the same time, i.e. multiple plots on one page. The right side y-axis is not applicable when plotting multiple components.
 }
 \examples{
 \dontrun{

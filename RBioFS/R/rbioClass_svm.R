@@ -425,9 +425,18 @@ rbioClass_svm_ncv_fs <- function(x, y,
       uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
 
       # update the cv training data
-      cv_training <- cv_training[, c("y", uni_sig_fs)]
-      cv_training_x <- cv_training[, -1]
-      cv_training_y <- cv_training[, 1]
+      # cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
+      # cv_training_x <- cv_training[, -1, drop = FALSE]
+      # cv_training_y <- cv_training[, 1]
+      if (length(uni_sig_fs) == 0) {
+        stop("No statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
+        # cv_training_x <- cv_training[, -1]
+        # cv_training_y <- cv_training[, 1]
+      } else {
+        cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
+        cv_training_x <- cv_training[, -1, drop = FALSE]
+        cv_training_y <- cv_training[, 1]
+      }
     } else {
       uni_sig_fs <- NULL
     }
@@ -453,11 +462,15 @@ rbioClass_svm_ncv_fs <- function(x, y,
     # }
     fs <- tryCatch({  # rRF-FS with error handling
       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
-                          nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+                          nTree = rf.ifs.ntree,
+                          parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
+                          plot = FALSE)
       # fs <- svm_nested_initial_FS$feature_initial_FS
       rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
                     x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
-                    nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
+                    nTree = rf.sfs.ntree,
+                    parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
+                    plot = FALSE)
 
       if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
@@ -477,10 +490,12 @@ rbioClass_svm_ncv_fs <- function(x, y,
     })
 
     # cv svm
+    # cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
+    #                       svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
+    #                       tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
-
     # processing test data
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
     if (center.scale){ # using training data mean and sd
@@ -515,7 +530,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...\n")
   }
   nested.cv.list <- vector(mode = "list", length = cross.k)
-  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %do% nestedcv_func(i)
+  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nestedcv_func(i)
   names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
   # below: cv.model.idx: best models index
@@ -686,14 +701,14 @@ print.rbiosvm_nestedcv <- function(x, ...){
 
 #' @title rbioClass_svm_cv
 #'
-#' @description Cross-validation assessment for SVM modelling. It evaluates the overall performace of SVM modelling given the training data.
+#' @description Cross-validation assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
-#' @param tune.method Parameter tuning method, i.e. innter loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
+#' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
@@ -1003,6 +1018,7 @@ rbioClass_svm_cv <- function(x, y,
 #'
 #' @description ROC-AUC analysis and ploting for SVM model, for classification model only.
 #' @param object A \code{rbiosvm} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
@@ -1040,7 +1056,7 @@ rbioClass_svm_cv <- function(x, y,
 #'
 #' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
 #'
-#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object.
+#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object, and the training data is automatically cneter.scaled.
 #'
 #'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
 #'          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
@@ -1064,7 +1080,8 @@ rbioClass_svm_cv <- function(x, y,
 #'                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
 #' }
 #' @export
-rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
+rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
+                                  newdata = NULL, newdata.label = NULL,
                                   center.scale.newdata = TRUE,
                                   rocplot = TRUE,
                                   plot.smooth = FALSE,
@@ -1087,6 +1104,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
       if (verbose) cat("newdata.label is converted to factor. \n")
       newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
+    center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
     # if (object$model.type == "classification") {
     #   newdata.label <- object$inputY
     # } else {
@@ -1203,7 +1221,11 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
                 input.newdata.label = newdata.label,
                 newdata.center.scaled = centered_newdata)
     class(out) <- "svm_roc_auc"
-    assign(paste(deparse(substitute(object)), "_svm_roc_auc", sep = ""), out, envir = .GlobalEnv)
+    if (is.null(fileprefix)) {  # export
+      assign(paste0(deparse(substitute(object)), "_svm_roc_auc"), out, envir = .GlobalEnv)
+    } else {
+      assign(paste0(as.character(fileprefix), "_svm_roc_auc"), out, envir = .GlobalEnv)
+    }
 
     ## plotting
     if (rocplot){
@@ -1232,8 +1254,13 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 
       # save
       # grid.newpage()
-      ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
-             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      if (is.null(fileprefix)) {
+        ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      } else {
+        ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      }
       grid.draw(plt)
       if (verbose) cat("Done!\n")
     }
@@ -1243,10 +1270,11 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 
 #' @title rbioClass_svm_cv_roc_auc
 #'
-#' @description ROC-AUC analysis and ploting for SVM cross-valildation (CV) models, for classification only.
-#' @param object A \code{rbiosvm_nestedcv} or \code{rbiosvm_dcv} object.
+#' @description ROC-AUC analysis and ploting for SVM cross-validation (CV) models, for classification only.
+#' @param object A \code{rbiosvm_nestedcv} or \code{rbiosvm_cv} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
-#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
+#' @param plot.smooth If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
@@ -1287,7 +1315,7 @@ rbioClass_svm_roc_auc <- function(object, newdata = NULL, newdata.label = NULL,
 #' rbioClass_svm_cv_roc_auc(object = svm_nested_cv)
 #' }
 #' @export
-rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
+rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
                                                                  rocplot = TRUE,
                                                                  plot.smooth = FALSE,
                                                                  plot.lineSize = 1,
@@ -1394,10 +1422,18 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
     auc_res_list <- auc_res_list[-which(sapply(auc_res_list, is.null))]
   }
 
-  if (class(object) == 'rbiosvm_nestedcv') {
-    assign(paste(deparse(substitute(object)), "_svm_nestedcv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+  if (class(object) == 'rbiosvm_nestedcv') {  # export
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_nestedcv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    } else {
+      assign(paste(as.character(fileprefix), "_svm_nestedcv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    }
   } else {
-    assign(paste(deparse(substitute(object)), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    } else {
+      assign(paste(as.character(fileprefix), "_svm_cv_roc_auc", sep = ""), auc_res_list, envir = .GlobalEnv)
+    }
   }
 
   # ---- plotting ----
@@ -1439,8 +1475,13 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object,
 
         # save
         # grid.newpage()
-        ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
-               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        if (is.null(fileprefix)){
+          ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+                 width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        } else {
+          ggsave(filename = paste0(as.character(fileprefix),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+                 width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
       }
@@ -1698,7 +1739,8 @@ print.rbiosvm_perm <- function(x, ...){
 #' @description Prediction function for SVM analysis. The function calculates the predicted value for unknown sample data using the input SVM model.
 #' @param object A \code{rbiosvm} object.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
-#' @param sampleLabel.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
+#' @param export.name String. Optional user defined export name prefix. Default is \code{NULL}.
+#' @param sampleID.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
 #' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
 #' @param newdata.y Only required for regression study. The default is \code{NULL}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
@@ -1719,6 +1761,8 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' \code{raw.newdata}
 #'
+#' \code{newdata.id}
+#'
 #' \code{center.scale}
 #'
 #' \code{center.scaled.newdata}
@@ -1729,12 +1773,12 @@ print.rbiosvm_perm <- function(x, ...){
 #'          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
 #'          column mean and column standard deviation.
 #'
-#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071} pacakge's implementation of logistic regression model.
+#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071} package's implementation of logistic regression model.
 #'          See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
 #'
-#'          If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+#'          If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.
 #'
-#'          When the model type is \code{"regression"}, the value of the irrelavent items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
+#'          When the model type is \code{"regression"}, the value of the irrelevant items is set to \code{NULL}. Likewise, when the model type is \code{"classification"},
 #'          \code{newdata.y} and \code{tot.predict.RMSE} are set to \code{NULL}
 #'
 #' @import ggplot2
@@ -1746,23 +1790,29 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' }
 #' @export
-rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
-                                  sampleLabel.vector = NULL, newdata.y = NULL,
+rbioClass_svm_predcit <- function(object,
+                                  newdata, center.scale.newdata = TRUE, export.name = NULL,
+                                  sampleID.vector = NULL, newdata.y = NULL,
                                   prob.method = c("logistic",  "Bayes", "softmax"),
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
   if (missing(newdata) || is.null(newdata)) stop("please provide newdata.")
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(newdata))
+  } else {
+    export.name <- export.name
+  }
   if (!any(class(newdata) %in% c("matrix", "data.frame"))) stop("newdata has to be either a matrix or data.frame object.")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
-  if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
-    if (length(sampleLabel.vector) != nrow(newdata)){
-      cat("Sample label vector not the same length as newdata. Proceed without custom sample labels.\n")
-      sampleLabel.vector <- NULL
+  if (!missing(sampleID.vector) & !is.null(sampleID.vector)){
+    if (length(sampleID.vector) != nrow(newdata)){
+      cat("Sample ID vector not the same length as newdata. Proceed without custom sample labels.\n")
+      sampleID.vector <- NULL
     }
   }
   if (object$model.type == "classification"){
@@ -1780,7 +1830,8 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
   ## center data with the option of scaling
   if (any(class(newdata) == "data.frame")){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-    newdata <- as.matrix(sapply(newdata, as.numeric))
+    # newdata <- as.matrix(sapply(newdata, as.numeric)) # testing
+    newdata <- as.matrix(newdata)  # testing
   }
   if (center.scale.newdata){
     if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")
@@ -1801,8 +1852,8 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
     if (is.null(dim(pred_mtx))) {  # if only one sample
       pred_mtx <- t(as.matrix(pred_mtx))
     }
-    if (!missing(sampleLabel.vector) & !is.null(sampleLabel.vector)){
-      rownames(pred_mtx) <- sampleLabel.vector
+    if (!missing(sampleID.vector) & !is.null(sampleID.vector)){
+      rownames(pred_mtx) <- sampleID.vector
     }
     ## posterior
     if (prob.method == "logistic"){
@@ -1816,14 +1867,14 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
       trainingpred <- predict(object = object, newdata = training_mtx, type = "response", probability = TRUE)
       trainingpred <- attributes(trainingpred)$probabilities
       bayes.prob <- klaR::NaiveBayes(x = trainingpred, grouping = object$inputY, usekernel = TRUE)
-      bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calcuate posterior probability for
+      bayes.prob$train.posterior <- predict(bayes.prob)$posterior  # calculate posterior probability for
       bayes.prob$x <- NULL
 
       bayespred <- predict(object = bayes.prob, newdata = pred_mtx)
       prob <- bayespred$posterior
     } else {
       group <- colnames(pred_mtx)
-      # calcuate probability
+      # calculate probability
       prob_mtx <- apply(pred_mtx, 1, FUN = function(x) exp(x) / sum(exp(x)))
       rownames(prob_mtx) <- group
       prob <- t(prob_mtx)
@@ -1854,13 +1905,13 @@ rbioClass_svm_predcit <- function(object, newdata, center.scale.newdata = TRUE,
               prob.method = prob.method,
               probability.summary = prob_dfm,
               raw.newdata = newdata,
+              newdata.id = sampleID.vector,
               center.scale = center.scale.newdata,
               center.scaled.newdata = centerdata,
               newdata.y = y)
   class(out) <- "prediction"
-  assign(paste(deparse(substitute(object)), "_svm_predict", sep = ""), out, envir = .GlobalEnv)
+  assign(paste0(export.name, "_svm_predict"), out, envir = .GlobalEnv)
 }
-
 
 
 #' @export

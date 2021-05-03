@@ -9,6 +9,7 @@ rbioClass_plsda_predict(
   comps = object$ncomp,
   newdata,
   center.newdata = TRUE,
+  export.name = NULL,
   prob.method = "Bayes",
   threshold = 0.2,
   predplot = TRUE,
@@ -50,6 +51,8 @@ rbioClass_plsda_predict(
 \item{newdata}{Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.}
 
 \item{center.newdata}{If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.}
+
+\item{export.name}{String. Optional user defined export name prefix. Default is \code{NULL}.}
 
 \item{prob.method}{Method to calculate classification probability. Options are \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"Bayes"}.}
 
@@ -112,7 +115,7 @@ rbioClass_plsda_predict(
 \item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-A \code{prediction} obejct, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
+A \code{prediction} object, as well as pdf figure file for predicted values if \code{predplot = TRUE}.
 
 The items of the object are:
 
@@ -122,7 +125,7 @@ The items of the object are:
 
 \code{predited.value}
 
-\code{prob.method}  Method to caluculate posterier probability
+\code{prob.method}  Method to calculate posterior probability
 
 \code{probability.summary}
 
@@ -146,7 +149,7 @@ This is only for information sake.
 
 The "Bayes" method uses the klaR package implementation of naive Bayes algorithm, based on the Bayes theorem: \code{P(A|B) = P(B|A)P(A)/P(B)}.
 Specifically, the equation models classification against predicted values from pls-da model and training data: \code{P(class|predicted values) = P(predicted values|)P(class)/P(predicted values)}.
-The resulted Bayesian classification model is then applied to newdata, thereby posterior probabilities are calcuated.
+The resulted Bayesian classification model is then applied to newdata, thereby posterior probabilities are calculated.
 
 The "softmax" method uses the equation: \code{probability = exp(predicted.value) / sum(exp(predicted.values))}. This method doesn't relay on training data.
 
@@ -154,7 +157,7 @@ The conventional wisdom is to use "Bayes" method for unbalanced classification, 
 
 For classification plot, the output \code{prediction} object should be used with function \code{\link{rbioClass_plsda_classplot()}}.
 
-If \code{sampleLabel.vector = NULL} or missing, the function uses row numbers as label.
+If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.
 }
 \examples{
 \dontrun{

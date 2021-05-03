@@ -6,6 +6,7 @@
 \usage{
 rbioClass_svm_roc_auc(
   object,
+  fileprefix = NULL,
   newdata = NULL,
   newdata.label = NULL,
   center.scale.newdata = TRUE,
@@ -31,6 +32,8 @@ rbioClass_svm_roc_auc(
 }
 \arguments{
 \item{object}{A \code{rbiosvm} object.}
+
+\item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 
@@ -96,7 +99,7 @@ ROC-AUC analysis and ploting for SVM model, for classification model only.
 \details{
 Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
 
-         When \code{newdata} is not provided, the function uses the training data from the input SVM object.
+         When \code{newdata} is not provided, the function uses the training data from the input SVM object, and the training data is automatically cneter.scaled.
 
          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.

@@ -33,6 +33,40 @@ Installation
 
 Update log
 
+    0.7.5 (May.3.2021)
+      - Updates to file processing function(s)
+        - center.scale documentation updated with explanations for Z-score standardization and Min-Max normalization
+ 
+      - Updates to RF-FS function(s)
+        - A bug fixed for rbioFS(), rbioFS_rf_initialFS() and rbioFS_rf_SFS() where number of cores cannot set for parallel computing
+      
+      - Updates to SVM function(s)
+        - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
+        - rbioClass_svm_ncv_fs() updated with error handling where no significant features are found when univariate.fs = TRUE: The current impolementation stops the function.
+        - rbioClass_svm_predcit() updated with user customizable export name prefix
+          - Also, the default name chagned from "object" string to the "new data string"
+        - rbioClass_svm_roc_auc() now automatically center.scale the training data when no new data is provided
+        - (testing, might revert back) rbioClass_svm_predcit() updated with new data matrix converting method
+
+      - Updates to the PLS function(s)
+        - rbioClass_plsda_predcit() updated with user customizable export name prefix
+          - Also, the default name chagned from "object" string to the "new data string"
+        - (testing, might revert back) rbioClass_plsda_predcit() updated with new data matrix converting method
+        
+      - Updates to the PCA function(s)
+        - rbioFS_PCA() now supports custom export name, via "export.name" argument
+      
+      - Updates to the Util function(s)
+        - rbioUtil_classif_accuracy() now outputs confusion matrix and input data labels
+        - Manual page updated for rbioUtil_classif_accuracy()
+        - Default argument value fixed for rbioUtil_classplot()
+        - rbioUtil_classplot() now supports optional customized export file name prefix via export.name argument
+              
+      - Other upates
+        - The "prediction" object now contains a newdata.id item
+        - Citatioin information updated
+    
+
     0.7.4 (Aug.16.2020)
         - Updates to the RF-FS function(s):
           - Error handling added for input data containing NA/missing data

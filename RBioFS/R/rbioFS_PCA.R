@@ -2,6 +2,7 @@
 #'
 #' @description A simple to use wrapper for PCA (Principal Component Analysis) and visualization
 #' @param input Input data, data frame.
+#' @param export.name String. Prefix for results exports. When \code{NULL}, the function uses the input object name. Default is \code{NULL}.
 #' @param sampleIDVar Sample variable name. It's a character string.
 #' @param groupIDVar Group variable name. It's a character string.
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
@@ -47,7 +48,8 @@
 #' biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
 #' }
 #' @export
-rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE, centerData = TRUE, ...,
+rbioFS_PCA <- function(input = NULL, export.name = NULL,
+                       sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE, centerData = TRUE, ...,
                        boxplot = TRUE,
                        boxplot.Title = NULL,
                        boxplot.Width = 170, boxplot.Height = 150,
@@ -75,6 +77,13 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
   if (biplot & length(biplot.comps) > ncol(x))stop("biplot.comps length exceeded the maximum PC length.")
   if (biplot & !all(biplot.comps %in% seq(ncol(x))))stop("biplot.comps contain non-existant PC.")
 
+  ## set up export name
+  if (is.null(export.name)) {
+    export_name <- deparse(substitute(input))
+  } else {
+    export_name <- export.name
+  }
+
   ## PCA
   PCA <- prcomp(x, scale. = scaleData, center = centerData, ...)
   varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calcualte the proportion of variance
@@ -82,7 +91,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
   ## Boxplot
   if (boxplot){
-    if (verbose) cat(paste("Boxplot being saved to file: ", deparse(substitute(input)), ".pca.boxplot.pdf...", sep = ""))  # initial message
+    if (verbose) cat(paste("Boxplot being saved to file: ", export_name, ".pca.boxplot.pdf...", sep = ""))  # initial message
     # grid.newpage()
     boxplt <- ggplot(data = boxdfm_x, aes(x = PC, y = varpp_x, group = 1)) +
       geom_bar(position = "dodge", stat = "identity", color = "black", fill = "gray66") +
@@ -104,7 +113,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       boxplt <- rightside_y(boxplt)  # port back to boxplt object
     }
 
-    ggsave(filename = paste(deparse(substitute(input)),".pca.boxplot.pdf", sep = ""), plot = boxplt,
+    ggsave(filename = paste(export_name,".pca.boxplot.pdf", sep = ""), plot = boxplt,
            width = boxplot.Width, height = boxplot.Height, units = "mm",dpi = 600)
     if (verbose) cat("Done!\n")
     grid.draw(boxplt) # preview
@@ -131,7 +140,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       score_x$sample <- as.numeric(rownames(score_x))
       names(score_x)[1] <- "axis1"
 
-      if (verbose) cat(paste("Single PC biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
+      if (verbose) cat(paste("Single PC biplot being saved to file: ", export_name, ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
         geom_line(aes(colour = group, linetype = group))
 
@@ -170,7 +179,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
     } else if (length(biplot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
 
-      if (verbose) cat(paste("Biplot being saved to file: ", deparse(substitute(input)), ".pca.biplot.pdf...", sep = ""))  # initial message
+      if (verbose) cat(paste("Biplot being saved to file: ", export_name, ".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggplot(score_x, aes(x = axis1, y = axis2))
 
       # sample labels
@@ -270,7 +279,7 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
       }
 
       # matrix scoreplot
-      if (verbose) cat(paste("Biplot matrix being saved to file: ", deparse(substitute(input)),".pca.biplot.pdf...", sep = ""))  # initial message
+      if (verbose) cat(paste("Biplot matrix being saved to file: ", export_name,".pca.biplot.pdf...", sep = ""))  # initial message
       biplt <- ggpairs(score_x, columns = biplot.comps, aes(colour = group, shape = group),
                        axisLabels = "show", columnLabels = pc_axis_lbl,
                        showStrips = NULL,
@@ -292,13 +301,13 @@ rbioFS_PCA <- function(input = NULL, sampleIDVar = NULL, groupIDVar = NULL, scal
 
       # grid.newpage()
     }
-    ggsave(filename = paste(deparse(substitute(input)),".pca.biplot.pdf", sep = ""), plot = biplt,
+    ggsave(filename = paste(export_name,".pca.biplot.pdf", sep = ""), plot = biplt,
            width = biplot.Width, height = biplot.Height, units = "mm",dpi = 600)
     if (verbose) cat("Done!\n") # final message
     grid.draw(biplt)
   }
 
-  assign(paste(deparse(substitute(input)), "_pca", sep = ""), PCA, envir = .GlobalEnv)
+  assign(paste(export_name, "_pca", sep = ""), PCA, envir = .GlobalEnv)
 }
 
 

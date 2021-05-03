@@ -6,7 +6,8 @@
 \usage{
 rbioUtil_classplot(
   pred.obj,
-  multi_plot.ncol = nrow(pred.obj),
+  export.name = NULL,
+  multi_plot.ncol = nrow(pred.obj$raw.newdata),
   multi_plot.nrow = 1,
   multi_plot.legend.pos = "bottom",
   multi_plot.stripLblSize = 10,
@@ -24,6 +25,8 @@ rbioUtil_classplot(
 )
 }
 \arguments{
+\item{export.name}{String. Optional user defined export name prefix. Default is \code{NULL}.}
+
 \item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{nrow(pred.obj)}.}
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
@@ -36,7 +39,7 @@ rbioUtil_classplot(
 
 \item{plot.probLabelSize}{The size of the sample label. Default is \code{2}.}
 
-\item{plot.probLabel.padding}{Set only when \code{plot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.}
+\item{plot.probLabel.padding}{The padding between sample symbol and the label. Default is \code{0.5}.}
 
 \item{plot.probLabel.outside}{If to put the probability label outside of the pies. Default is \code{"TRUE"}.}
 
