@@ -56,8 +56,8 @@ Update log
       - Updates to the PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object
         - rbioFS_PCA() updated with S3 print method
-        - rbioFS_PCA() updated with plotly powered 3D score plots
-        - rbioFS_PCA_app() updated with plotly powered 3D score plots
+        - rbioFS_PCA() updated with 3D score plots
+        - rbioFS_PCA_app() updated with 3D score plots
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
     
 
