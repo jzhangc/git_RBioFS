@@ -448,18 +448,6 @@ rbioClass_svm_ncv_fs <- function(x, y,
       fs_training_x <- cv_training_x
     }
 
-    # rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
-    #                     nTree = rf.ifs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
-    # # fs <- svm_nested_initial_FS$feature_initial_FS
-    # rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
-    #               x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
-    #               nTree = rf.sfs.ntree, parallelComputing = parallelComputing, clusterType = clusterType, plot = FALSE)
-    #
-    # if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
-    #   fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
-    # } else {
-    #   fs <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
-    # }
     fs <- tryCatch({  # rRF-FS with error handling
       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
                           nTree = rf.ifs.ntree,
@@ -489,15 +477,11 @@ rbioClass_svm_ncv_fs <- function(x, y,
       return(out)
     })
 
-    # cv svm
-    # cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
-    #                       svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-    #                       tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
     # processing test data
-    fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preseve y and selected fetures
+    fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
     if (center.scale){ # using training data mean and sd
       centered_newdata <- t((t(fs_test[, -1]) - cv_m$center.scaledX$meanX) / cv_m$center.scaledX$columnSD)
       fs_test[, -1] <- centered_newdata
@@ -885,7 +869,7 @@ rbioClass_svm_cv <- function(x, y,
     } else {
       error <- pred - cv_test$y
       rmse <- sqrt(mean(error^2))
-      rsq <- cor(pred, fs_test$y)
+      rsq <- cor(pred, cv_test$y)
       tmp_out <- list(cv_svm_model = cv_m, cv.rmse = rmse, cv.rsq = rsq, cv_test_data = cv_test)
     }
     if (verbose) cat("Done!\n")

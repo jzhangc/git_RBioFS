@@ -33,33 +33,8 @@ Installation
 
 Update log
 
-    0.7.6 (Feature roadmap)
-    (ICEBOX)
-      - New PLSR function(s)
-        - rbioReg_plsr() function added for PLS regression analysis
-          - "rbiomvr" object from this function has model.type = "regression"
-        - rbioReg_plsr_predict() function added for PLS regression analysis
-        - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
-        - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
-        
-      - Update to SVM function(s)
-        - rbioClass_svm_perm() plot output file name fixed
-
-      - Updates to PLS-DA function(s)
-        - Multivariate Y modelling now possible with rbioFS_plsda
-        - rbioFS_plsda_vip_plot() plot output file name fixed
-        - rbioClass_plsda_perm() plot output file name fixed
-        - rbioClass_plsda_roc_auc() plot.lineSize argument added
-        - Print function for relevant functions to accommodate the new plsr functions
-        - A bug fixed for rbioClass_plsda_perm() where the intercept term wasn't excluded
-
-      - Updates to the PCA function(s)
-        - rbioFS_PCA() now exports a "rbiofs_pca" class object
-        - rbioFS_PCA() updated with S3 print method
-        - rbioFS_PCA() updated with 3D score plots
-        - rbioFS_PCA_app() updated with 3D score plots
-        - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
-    
+    0.7.5-1 (March.24.2022)
+      - A bug fixed where rbioClass_svm_cv() fails for regresssion study
 
     0.7.5 (May.3.2021)
       - Updates to file processing function(s)
