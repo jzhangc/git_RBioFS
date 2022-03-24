@@ -836,7 +836,7 @@ rbioClass_svm_cv <- function(x, y,
   }
 
   # nested CV function
-  cv_func <- function(i) {
+  cv_func <- function(i, ...) {
     if (verbose) cat(paste0("CV iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
