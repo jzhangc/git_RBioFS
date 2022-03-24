@@ -33,6 +33,9 @@ Installation
 
 Update log
 
+    0.7.5-1 (March.24.2022)
+      - A bug fixed where rbioClass_svm_cv() fails for regresssion study
+
     0.7.5 (May.3.2021)
       - Updates to file processing function(s)
         - center.scale documentation updated with explanations for Z-score standardization and Min-Max normalization
