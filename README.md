@@ -59,7 +59,10 @@ Update log
         - rbioFS_PCA() updated with 3D score plots
         - rbioFS_PCA_app() updated with 3D score plots
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
-        
+    (ADDED)
+      - Updates to the SVM function(s):
+        - rbioClass_svm_cv() now supports parallel computing
+      
 
     0.7.5-1 (March.24.2022)
       - A bug fixed where rbioClass_svm_cv() fails for regresssion study

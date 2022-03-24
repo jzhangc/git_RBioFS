@@ -885,7 +885,18 @@ rbioClass_svm_cv <- function(x, y,
     cat("Cross-validation (speed depending on hardware configuration)...\n")
   }
   cv.list <- vector(mode = "list", length = cross.k)
-  cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %do% cv_func(i)
+  if (parallelComputing) {
+    # set up cpu cluster
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # run function
+    cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %dopar% cv_func(i)
+  } else {
+    cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "pass") %do% cv_func(i)
+  }
   names(cv.list) <- paste0("cv_fold_", c(1:cross.k))
 
   # below: cv.model.idx: best models index
