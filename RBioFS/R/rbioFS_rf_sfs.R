@@ -227,8 +227,8 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
 
   if (!parallelComputing){
     l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %do% {
-      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
-      errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+      tmp <- foreach(m = 1:nTimes) %do% rf_modelling_func(m)
+      errmtx <- foreach(n = 1:nTimes, .combine = cbind) %do% tmp[[n]]$tmperrmtx
       lst <- list(errmtx = errmtx)
     }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %do% l[[j]]$errmtx
@@ -241,8 +241,8 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
-      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
-      errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+      tmp <- foreach(m = 1:nTimes) %do% rf_modelling_func(m)
+      errmtx <- foreach(n = 1:nTimes, .combine = cbind) %do% tmp[[n]]$tmperrmtx
       lst <- list(errmtx = errmtx)
     }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx

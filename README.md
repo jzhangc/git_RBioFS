@@ -62,6 +62,9 @@ Update log
     (ADDED)
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
+        
+      - Updates to the FS function(s):
+        - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
       
 
     0.7.5-1 (March.24.2022)
