@@ -76,7 +76,7 @@ Update log
         - center.scale documentation updated with explanations for Z-score standardization and Min-Max normalization
  
       - Updates to RF-FS function(s)
-        - A bug fixed for rbioFS(), rbioFS_rf_initialFS() and rbioFS_rf_SFS() where number of cores cannot set for parallel computing
+        - A bug fixed for rbioFS(), rbioFS_rf_initialFS() and rbioFS_rf_SFS() where number of cores cannot set be for parallel computing
       
       - Updates to SVM function(s)
         - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
