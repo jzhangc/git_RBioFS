@@ -89,10 +89,12 @@ rbioFS <- function(objTitle = "data", rf_type = c("classification", "regression"
   }
 
   # test NA/Inf
-  if (any(is.na(raw)) && !impute){
-    stop("NA/Missing data detected, check your data or use the imputation functionality by setting impute=TRUE.")
-  } else {
-    cat("Imputation is used for NA/Missing data points.\n")
+  if (any(is.na(raw))) {
+    if (!imput) {
+      stop("NA/Missing data detected, check your data or use the imputation functionality by setting impute=TRUE.")
+    } else {
+      cat("Imputation is used for NA/Missing data points.\n")
+    }
   }
 
   # further input check

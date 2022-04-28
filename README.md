@@ -65,6 +65,7 @@ Update log
         
       - Updates to the FS function(s):
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
+        - A bug fixed for rbioFS() where imputation messaging was incorrect
       
 
     0.7.5-1 (March.24.2022)
