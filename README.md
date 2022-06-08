@@ -62,6 +62,7 @@ Update log
     (ADDED)
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
+        - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
         
       - Updates to the FS function(s):
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing

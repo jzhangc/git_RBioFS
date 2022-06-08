@@ -466,11 +466,11 @@ rbioClass_svm_ncv_fs <- function(x, y,
         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
       }
     },
-    warning = function(w){
-      cat(paste0("Warnings occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
-      out <- colnames(fs_training_x)
-      return(out)
-    },
+    # warning = function(w){
+    #   cat(paste0("Warnings occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
+    #   out <- colnames(fs_training_x)
+    #   return(out)
+    # },
     error = function(e){
       cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
       out <- colnames(fs_training_x)
