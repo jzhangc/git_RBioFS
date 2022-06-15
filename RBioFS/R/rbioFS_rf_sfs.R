@@ -315,6 +315,170 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   return(assign(paste(objTitle, "_SFS", sep = ""), outlst, envir = .GlobalEnv))
 }
 
+
+#' @title rbioFS_rf_SFS_v2
+#'
+#' @description Recursive nested random forest variable importance (vi) and error computation in a sequential forward selection (SFS) manner. The v2 version returns the output, as opposed to assigning.
+#' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
+#' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.
+#' @param y The target (outcome) variable for random forest feature selection.
+#' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
+#' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
+#' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
+#' @param ... Additional arguments passed to the plot function \code{\link{rbioFS_rf_SFS_plot}}.
+#' @return Outputs a \code{rf_sfs} object with  OOB error rate summary, and a joint-point curve in \code{csv} format.
+#'         When \code{plot = TRUE}, a error curve is also generated and exported as a \code{pdf} file.
+#'         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
+#' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
+#'          The v2 version returns the output, as opposed to assigning.
+#' @import ggplot2
+#' @import foreach
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @importFrom randomForest randomForest importance
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom RBioplot rightside_y
+#' @examples
+#' \dontrun{
+#' rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, parallelComputing = TRUE)
+#' }
+#' @export
+rbioFS_rf_SFS_v2 <- function(objTitle = "x_vs_tgt",
+                          x, y, nTimes = 50, nTree = 1001,
+                          parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                          plot = TRUE, n = "all", ...){
+  #### run time initiation
+  start_time <- Sys.time()
+
+  #### check arguments
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
+
+  #### prepare the dataframe
+  training <- data.frame(x, check.names = FALSE)
+  tgt <- y
+
+  # ### pepare the target variable
+  # tgt <- factor(as.character(y), levels = unique(y))
+  #
+  # ### prepare draw size. this uses down-sampling if the samples are unbalanced
+  # nlvl <- length(levels(tgt))
+  # size <- min(as.vector(table(tgt))) # down-sampling
+  # drawSize <- rep(size, nlvl)
+
+  ## prepare blank tree OOB error matrics
+  singleerrmtx <- matrix(nrow = 1, ncol = nTimes) # for the recursive OOB error rates from a single tree
+  ooberrmtx <- matrix(nrow = ncol(training), ncol = nTimes) # for the recursive OOB error rates from all trees.
+
+  # recursive RF using par-apply functions
+  rf_modelling_func <- function(j){
+    rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree,
+                                     importance = TRUE, proximity = TRUE)
+    if (is.factor(tgt)) {
+      tmperrmtx <- tail(rf$err.rate[, 1], n = 1) # compute the OOB error rate
+    } else {
+      tmperrmtx <- tail(rf$mse, n = 1) # compute the MSE
+    }
+    lst <- list(tmperrmtx = tmperrmtx)
+  }
+
+  if (!parallelComputing){
+    l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %do% {
+      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
+      # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
+      lst <- list(errmtx = errmtx)
+    }
+    ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %do% l[[j]]$errmtx
+
+  } else { ## parallel computing
+    # set up cpu cluster
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
+      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
+      # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
+      lst <- list(errmtx = errmtx)
+    }
+    ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
+
+  }
+  rownames(ooberrmtx) <- seq(ncol(training))
+  colnames(ooberrmtx) <- c(paste("OOB_error_tree_rep", seq(nTimes), sep = "_"))
+
+  ## perpare the summary dataframe for OOB error rates
+  ooberrnames <- rownames(ooberrmtx)
+  ooberrmean <- rowMeans(ooberrmtx)
+  ooberrSD <- apply(ooberrmtx, 1, sd)
+  ooberrSEM <- sapply(ooberrSD, function(x)x / sqrt(ncol(ooberrmtx)))
+  ooberrsummary <- data.frame(Features = ooberrnames, Mean = ooberrmean, SD = ooberrSD,
+                              SEM = ooberrSEM, stringsAsFactors = FALSE)
+  ooberrsummary$Features <- factor(ooberrsummary$Features, levels = unique(ooberrsummary$Features))
+
+  ## output
+  mean_min_idx <- which.min(ooberrsummary$Mean)  # index for the minimum mean oob feature group
+  sd_min <- ooberrsummary$SD[mean_min_idx]  # oob SD for the feature group above
+  minerrsd <- with(ooberrsummary, which(Mean <= (Mean[mean_min_idx] + sd_min)))  # 1sd minimum selection
+
+  minfeatures <- colnames(training)[1:min(minerrsd)]
+  sfsmatrix <- training[, 1:min(minerrsd), drop = FALSE]
+
+  #### export results
+  ## run time
+  runtime <- Sys.time() - start_time
+
+  if (is.factor(y)){
+    err_type <- "OOB"
+  } else {
+    err_type <- "MSE"
+  }
+
+  ## object
+  outlst <- list(selected_features = minfeatures,
+                 feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
+                 error_evaluation_type = err_type,
+                 ntree = nTree,
+                 rf_iteration = nTimes,
+                 error_summary = ooberrsummary,
+                 SFS_training_data_matrix = sfsmatrix,
+                 SFS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+  class(outlst) <- "rf_sfs"
+
+  ## export to files
+  write.csv(file = paste0(objTitle, ".SFS.error_table.csv"), outlst$error_summary , row.names = FALSE)
+
+  sink(file = paste(objTitle,".SFS.txt",sep = ""), append = FALSE) # dump the results to a file
+  print(outlst[!names(outlst) %in% c("error_summary", "SFS_training_data_matrix")])
+  sink() # end dump
+
+  ## plot
+  if (plot){
+    # check the feature number
+    if (nrow(ooberrsummary) == 1){
+      ## print msg
+      print("Only single feature subset detected. No need to plot.")
+      ## output to env
+      return(outlst)
+    } else {
+      rbioFS_rf_SFS_plot(object = outlst, n = n, plot.file.title = objTitle, ...)
+    }
+  }
+
+  ## output to env
+  return(outlst)
+}
+
+
 #' @export
 print.rf_sfs <- function(x, ...){
   cat("Feature selected from sequential forward selection:\n")

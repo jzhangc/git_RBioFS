@@ -355,6 +355,192 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
 }
 
 
+#' @title rbioFS_rf_initialFS_v2
+#'
+#' @description Recursive random forest variable importance (vi) and OOB error rate computation. The v2 version returns the output, as opposed to assigning.
+#' @param objTitle The title for the output data frame. Default is \code{"x_vs_tgt"}
+#' @param x Input dataframe or matrix. Make sure to arrange the data with features as column names. Note this excludes the label column.
+#' @param y The target (outcome) variable for random forest feature selection.
+#' @param nTimes Number of random forest vi computation runs. Default is \code{50} times.
+#' @param nTree Number of trees generated for each random forest run. Default is \code{1001} trees.
+#' @param mTry Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)} for classification, and \code{floor(sqrt(ncol(x)))}.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param plot If to plot a bargraph to visualize vi and the ranking. Default is \code{TRUE}
+#' @param n Number of features to show. Takes integer numbers. Default is \code{"all"} (make sure to include quotation marks).
+#' @param ... Additional arguments passed to the plot function \code{\link{rbioFS_rf_initialFS_plot}}.
+#' @return Outputs a \code{rf_ifs} object with vi values for each feature and OOB error rate.
+#'         When \code{plot = TRUE}, bargraph for the vi is also generated and exported as a \code{.pdf} file.
+#'         Detailed results are also exported into a \code{csv} file and a \code{txt} file to the working directory.
+#' @details Make sure to arrange data (dfm) with feature (e.g., gene) as variables (i.e., columns), and rownames as sample names.
+#'          The v2 version returns the output, as opposed to assigning.
+#' @import ggplot2
+#' @import foreach
+#' @importFrom randomForest randomForest importance
+#' @importFrom rpart rpart prune
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @examples
+#' \dontrun{
+#' rbioFS_rf_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
+#' }
+#' @export
+rbioFS_rf_initialFS_v2 <- function(objTitle = "x_vs_tgt",
+                                x, y, nTimes = 50, nTree = 1001,
+                                mTry = if (!is.factor(y))
+                                  max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))),
+                                parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                plot = TRUE,
+                                n = "all", ...){
+  #### run time initiation
+  start_time <- Sys.time()
+
+  #### check arguments
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
+
+  #### check the variables
+  if (ncol(x) == 1){
+    stop("only one feature detected. No need to select.")
+  }
+  if (any(class(x) == "data.frame")){
+    x <- as.matrix(sapply(x, as.numeric))
+  }
+  ### pepare the target variable
+  tgt <- y
+
+  #### recursive RF
+  ### load the dataframe/matrix
+  training <- x
+
+  ### prepare draw size. this uses down-sampling if the samples are unbalanced
+  # nlvl <- length(levels(tgt))
+  # size <- min(as.vector(table(tgt))) # down-sampling
+  # drawSize <- rep(size, nlvl)
+
+  ### repeating random forest - recursive approach
+  # pre-set an empty matrix with the number of columns same as the number of RF runs
+  # note that nrow is the number of features, hence the ncol of the training set
+  vimtx <- matrix(nrow = ncol(training), ncol = nTimes)
+  errmtx <- matrix(nrow = 1, ncol = nTimes)
+
+  ## RF modelling
+  rf_modelling_func <- function(i){
+    rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
+                                     proximity = TRUE)
+
+    impt <- randomForest::importance(rf, type = 1)
+    tmpvimtx <- impt[, 1] # fill the vi matrix
+    if (is.factor(tgt)){
+      tmperrmtx <- rf$err.rate[nTree, 1] # fill the OOB error rate
+    } else {
+      tmperrmtx <- rf$mse[nTree]
+    }
+    lst <- list(tmpvimtx = tmpvimtx, tmperrmtx = tmperrmtx)
+  }
+  if (!parallelComputing){
+    # non-parallel
+    tmp <- foreach(i = 1:nTimes) %do% rf_modelling_func(i)
+    vimtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmpvimtx
+    errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+  } else { ## parallel computing
+    # set up cpu cluster
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # foreach parallel
+    tmp <- foreach(i = 1:nTimes) %dopar% rf_modelling_func(i)
+    vimtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmpvimtx
+    errmtx <- foreach(i = 1:nTimes, .combine = cbind) %dopar% tmp[[i]]$tmperrmtx
+  }
+  rownames(vimtx) <- colnames(training)
+  colnames(vimtx) <- c(paste("vi", seq(nTimes), sep = "_"))
+
+  rownames(errmtx) <- "OOB_error_rate"
+  colnames(errmtx) <- c(paste("OOB_error_tree", seq(nTimes), sep = "_"))
+
+  phase0mtx_vi <- vimtx
+  phase0mtx_OOB_err <- errmtx
+
+  ####prepare output vi and OOB error dataframes
+  ## prepare the vi dataframe
+  fName_vi <- rownames(phase0mtx_vi)
+  fMean_vi <- rowMeans(phase0mtx_vi)
+  fSD_vi <- apply(phase0mtx_vi, 1, sd)
+  fSEM_vi <- sapply(fSD_vi, function(x)x/sqrt(ncol(phase0mtx_vi)))
+  tmpdfm_vi <- data.frame(Target = fName_vi, Mean = fMean_vi, SD = fSD_vi, SEM = fSEM_vi, stringsAsFactors = FALSE)
+  tmpdfm_vi <- tmpdfm_vi[order(tmpdfm_vi$Mean), ]
+  tmpdfm_vi$Target <- factor(tmpdfm_vi$Target, levels = unique(tmpdfm_vi$Target))
+
+  fMean_OOB_err <- rowMeans(phase0mtx_OOB_err)
+  fSD_OOB_err <- apply(phase0mtx_OOB_err, 1, sd)
+  fSEM_OOB_err <- fSD_OOB_err/sqrt(ncol(phase0mtx_OOB_err))
+
+  # ranked vi dataframe
+  outdfm_vi <- data.frame(tmpdfm_vi[order(tmpdfm_vi$Mean, decreasing = TRUE), ],
+                          Rank = c(1:nrow(tmpdfm_vi))) # make sure to resort the dataframe in descenting order.
+
+  # OOB dtaframe
+  outdfm_OOB_err <- data.frame(Mean = fMean_OOB_err, SD = fSD_OOB_err, SEM = fSEM_OOB_err, stringsAsFactors = FALSE)
+  rownames(outdfm_OOB_err) <- paste(nTimes, "trees_OOB_err", sep = "_")
+
+  ## initial feature elimination
+  cartTree <- rpart(SD ~ Rank, data = outdfm_vi, cp = 0, minsplit = 2) # CART modelling: classify Rank by SD. Using ANOVA (regression) method.
+  mincp <- cartTree$cptable[which(cartTree$cptable[, 4] == min(cartTree$cptable[, 4])) ,1] # extract the minimum cp value
+  cartprune <- prune(cartTree, cp = mincp) # prune the tree so that SD values that won't impact Rank classfication are discarded
+  minpredv <- min(predict(cartprune)) # obatain the minimum prediciton value (predicted SD) as the SD threshold for Mean
+
+  if (length(which(outdfm_vi$Mean < minpredv)) == 0){ # in the case of VI values don't meet the cut.
+    thsd <- ncol(training)
+  } else {
+    thsd <- min(which(outdfm_vi$Mean < minpredv)) - 1 # compare Mean and SD. Discard all the features with a mean < minimum predicted SD.
+  }
+
+  feature_initFS <- as.character(outdfm_vi$Target[1:thsd]) # extract selected features
+  training_initFS <- training[, feature_initFS, drop = FALSE] # subsetting the input matrix
+
+  #### export results
+  ## run time
+  runtime <- Sys.time() - start_time
+  if (is.factor(y)){
+    err_type <- "OOB"
+  } else {
+    err_type <- "MSE"
+  }
+
+  ## return the vi ranking and OOB err dataframes for the initial feature elimination
+  outlst <- list(feature_initial_FS = feature_initFS,
+                 vi_at_threshold = outdfm_vi[thsd, "Mean"],
+                 error_evaluation_type = err_type,
+                 ntree = nTree,
+                 rf_iteration = nTimes,
+                 initial_FS_err_summary = outdfm_OOB_err,
+                 vi_summary = outdfm_vi,
+                 training_initial_FS = training_initFS,
+                 initial_FS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+  class(outlst) <- "rf_ifs"
+
+  ## export to files
+  write.csv(file = paste0(objTitle, ".initialFS.vi.csv"), outlst$vi_summary, row.names = FALSE)
+
+  sink(file = paste(objTitle,".initialFS.txt",sep = ""), append=FALSE) # dump the results to a file
+  print(outlst[!names(outlst) %in% c("training_initial_FS", "vi_summary")])
+  sink() # end dump
+
+  ## plot
+  if (plot){
+    rbioFS_rf_initialFS_plot(object = outlst, n = n, plot.file.title = objTitle,...)
+  }
+
+  ## return a dataframe with the vi ranking dataframe
+  return(outlst)
+}
+
+
 #' @export
 print.rf_ifs <- function(x, ...){
   cat("Feature selected from initial selection:\n")

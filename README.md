@@ -62,6 +62,7 @@ Update log
     (ADDED)
       - New FS function(s):
         - rbioClass_svm_ncv_fs_v2() added with a different paralelle computing implementation
+        - rbioFS_rf_initialFS_v2() and rbioFS_rf_sfs_v2() added with returning output, instead of assigning
     
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
