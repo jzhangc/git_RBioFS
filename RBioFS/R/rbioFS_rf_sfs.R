@@ -241,21 +241,24 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    l <- vector(mode = "list", length = ncol(training))
-    for (i in 1:ncol(training)) {
-      tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
-      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %dopar% tmp[[m]]$tmperrmtx
-      l[[i]] <- list(errmtx = errmtx)
+    # two parelell computing solutions to ensure maximum cores are used
+    if (ncol(training) >= nTimes) {
+      l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
+        tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
+        # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+        errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
+        lst <- list(errmtx = errmtx)
+      }
+    } else {
+      l <- vector(mode = "list", length = ncol(training))
+      for (i in 1:ncol(training)) {
+        tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
+        errmtx <- foreach(m = 1:nTimes, .combine = cbind) %dopar% tmp[[m]]$tmperrmtx
+        l[[i]] <- list(errmtx = errmtx)
+      }
     }
 
-    # l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
-    #   tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
-    #   # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
-    #   errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
-    #   lst <- list(errmtx = errmtx)
-    # }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
-
   }
   rownames(ooberrmtx) <- seq(ncol(training))
   colnames(ooberrmtx) <- c(paste("OOB_error_tree_rep", seq(nTimes), sep = "_"))
@@ -411,21 +414,24 @@ rbioFS_rf_SFS_v2 <- function(objTitle = "x_vs_tgt",
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    l <- vector(mode = "list", length = ncol(training))
-    for (i in 1:ncol(training)) {
-      tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
-      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %dopar% tmp[[m]]$tmperrmtx
-      l[[i]] <- list(errmtx = errmtx)
+    # two parelell computing solutions to ensure maximum cores are used
+    if (ncol(training) >= nTimes) {
+      l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
+        tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
+        # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+        errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
+        lst <- list(errmtx = errmtx)
+      }
+    } else {
+      l <- vector(mode = "list", length = ncol(training))
+      for (i in 1:ncol(training)) {
+        tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
+        errmtx <- foreach(m = 1:nTimes, .combine = cbind) %dopar% tmp[[m]]$tmperrmtx
+        l[[i]] <- list(errmtx = errmtx)
+      }
     }
 
-    # l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
-    #   tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
-    #   # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
-    #   errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
-    #   lst <- list(errmtx = errmtx)
-    # }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
-
   }
   rownames(ooberrmtx) <- seq(ncol(training))
   colnames(ooberrmtx) <- c(paste("OOB_error_tree_rep", seq(nTimes), sep = "_"))
