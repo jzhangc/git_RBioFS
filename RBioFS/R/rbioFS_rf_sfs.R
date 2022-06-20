@@ -241,12 +241,19 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
-      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
-      # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
-      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
-      lst <- list(errmtx = errmtx)
+    l <- vector(mode = "list", length = ncol(training))
+    for (i in 1:ncol(training)) {
+      tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
+      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %dopar% tmp[[m]]$tmperrmtx
+      l[[i]] <- list(errmtx = errmtx)
     }
+
+    # l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
+    #   tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
+    #   # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+    #   errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
+    #   lst <- list(errmtx = errmtx)
+    # }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
 
   }
@@ -404,12 +411,19 @@ rbioFS_rf_SFS_v2 <- function(objTitle = "x_vs_tgt",
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
-      tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
-      # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
-      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
-      lst <- list(errmtx = errmtx)
+    l <- vector(mode = "list", length = ncol(training))
+    for (i in 1:ncol(training)) {
+      tmp <- foreach(j = 1:nTimes) %dopar% rf_modelling_func(i)
+      errmtx <- foreach(m = 1:nTimes, .combine = cbind) %dopar% tmp[[m]]$tmperrmtx
+      l[[i]] <- list(errmtx = errmtx)
     }
+
+    # l <- foreach(i = 1:ncol(training), .packages = c("foreach")) %dopar% {
+    #   tmp <- foreach(j = 1:nTimes) %do% rf_modelling_func(i)
+    #   # errmtx <- foreach(i = 1:nTimes, .combine = cbind) %do% tmp[[i]]$tmperrmtx
+    #   errmtx <- foreach(m = 1:nTimes, .combine = cbind) %do% tmp[[m]]$tmperrmtx
+    #   lst <- list(errmtx = errmtx)
+    # }
     ooberrmtx <- foreach(j = 1:ncol(training), .combine = rbind) %dopar% l[[j]]$errmtx
 
   }

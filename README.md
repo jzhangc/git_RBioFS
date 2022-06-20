@@ -69,6 +69,7 @@ Update log
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
         
       - Updates to the FS function(s):
+        - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
         - A bug fixed for rbioFS() where imputation messaging was incorrect
       
