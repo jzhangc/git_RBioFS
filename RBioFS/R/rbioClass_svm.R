@@ -1917,7 +1917,7 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
   # ---- plotting ----
   if (rocplot){
     if (length(auc_res_list) < 1){
-      cat("ROC data empty. No plots can be genereated. \n")
+      cat("ROC data empty. No plots can be generated. \n")
     } else {
       plot_dfm <- foreach(i = 1:length(auc_res_list), .combine = "rbind") %do% {
         dfm <- auc_res_list[[i]]$svm.roc_dataframe

@@ -59,6 +59,7 @@ Update log
         - rbioFS_PCA() updated with 3D score plots
         - rbioFS_PCA_app() updated with 3D score plots
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
+        
     (ADDED)
       - New FS function(s):
         - rbioClass_svm_ncv_fs_v2() added with a different paralelle computing implementation
@@ -67,6 +68,7 @@ Update log
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
+        - rbioClass_svm_cv_roc_auc() updated with typo fixes
         
       - Updates to the FS function(s):
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation
