@@ -1823,7 +1823,8 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
     # data
     cv_test <- x$cv_test_data
     cv_test_x <- cv_test[, !names(cv_test) %in% "y"]
-    cv_test_y <- cv_test$y
+    # cv_test_y <- cv_test$y
+    cv_test_y <- droplevels(cv_test$y) # to deal with fragments without all the classes
 
     # model
     cv_m <- x$cv_svm_model
