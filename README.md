@@ -6,7 +6,7 @@ To cite in publication
     Zhang J, Hadj-Moussa H, Storey KB. 2016. Current progress of high-throughput microRNA differential expression analysis and random forest gene selection for model and non-model systems: an R implementation. J Integr Bioinform. 13: 306. doi: 10.1515/jib-2016-306.
     Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor to reflect anoxia and freezing survival adaptations. GENOMICS. 020 Jul 27: S0888-7543(20)30169-5. doi: 10.1016/j.ygeno.2020.07.036.
     Zhang J, Richardson DJ, Dunkley BT. 2020. Classifying post-traumatic stress disorder using the magnetoencephalographic connectome and machine learning. Scientific Reports. 10(1): 5937. doi: 10.1038/s41598-020-62713-5.
-    
+      Genuer R, Poggi JM, Tuleau-Malot C. 2010. Variable selection using random forests. Pattern Recognition Letters. 31(14): 2225-2236.
 
 
 Installation
