@@ -11,7 +11,7 @@
   magnetoencephalographic connectome and machine learning. Scientific Reports. 10(1): 5937.
   doi: 10.1038/s41598-020-62713-5.
     Genuer R, Poggi JM, Tuleau-Malot C. 2010. Variable selection using random forests. Pattern Recognition Letters.
-  31(14): 2225-2236
+  31(14): 2225-2236.
 
   For more details, please visit: http://kenstoreylab.com/?page_id=2542")
 
