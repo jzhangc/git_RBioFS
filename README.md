@@ -70,6 +70,7 @@ Update log
         - rbioClass_svm_cv() now supports parallel computing
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
         - rbioClass_svm_cv_roc_auc() updated with typo fixes
+        - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with features with no variance (i.e. constant value) will be removed from the nested cv training data
         
       - Updates to the FS function(s):
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation

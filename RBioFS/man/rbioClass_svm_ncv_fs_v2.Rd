@@ -138,7 +138,7 @@ Additional items for \code{rbiosvm_nestedcv}:
 \code{run.time}: total run time
 }
 \description{
-Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM. This is V2 with slightly different parallel computing implmentation
+Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM. This is V2 with slightly different parallel computing implementation
 }
 \details{
 This "v2" implements parallel computing when running nested_cv sub-function, as opposed to the RF-FS function inside the nested_cv like the original

@@ -374,6 +374,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
     if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
+    # below: remove columns with constant value
+    cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
 
     # optional uni
@@ -657,7 +659,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 
 #' @title rbioClass_svm_ncv_fs_v2
 #'
-#' @description Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM. This is V2 with slightly different parallel computing implmentation
+#' @description Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM. This is V2 with slightly different parallel computing implementation
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param univariate.fs If to use limma-based univariate reduction. Default is \code{FALSE}.
@@ -855,6 +857,8 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     # if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
+    # below: remove columns with constant value
+    cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
 
     # optional uni
