@@ -236,23 +236,43 @@ rbioClass_plsda_tuplot <- function(object, comps = 1, multi_plot.ncol = length(c
       plt <- plt + geom_point(size = plot.SymbolSize, aes(x = t, y = u, colour = y, shape = y))
     }
 
+
     plt <- plt +
       ggtitle(plot.Title) +
       xlab(lbl[1]) +
-      ylab(lbl[2]) +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
-            legend.key = element_blank(),
-            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
-
+      ylab(lbl[2])
     if (plot.rightsideY & length(comps) == 1){
-      plt <- rightside_y(plt)
+      plt <- plt +
+        # below: TO BE TESTED: if scale_y_continuous is correct.
+        scale_y_continuous(sec.axis = dup_axis()) +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              axis.title.y.right = element_blank(),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+    } else {
+      plt <- plt +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
     }
+
+    # # below: not needed for ggplot2 3.5.0 due to its native support for axis duplication
+    # if (plot.rightsideY & length(comps) == 1){
+    #   plt <- rightside_y(plt)
+    # }
+
     plt
   }
   names(plt_list) <- paste0("g", comps)
@@ -361,30 +381,55 @@ rbioClass_plsda_q2r2 <- function(object, intercept = TRUE, q2r2plot = TRUE,
     plt_list <- vector(mode = "list", length = length(q2r2_dfm_list))  # list
     plt_list[] <- foreach(i = 1:length(q2r2_dfm_list)) %do% {
       q2r2_plot_dfm <- reshape2::melt(q2r2_dfm_list[[i]], id = "components")
+
+
       plt <- ggplot(data = q2r2_plot_dfm, aes(x = components, y = value, color = variable)) +
         geom_line(aes(linetype = variable)) +
         geom_point(size = plot.SymbolSize) +
         scale_x_continuous(breaks = c(ifelse(intercept, 0, 1), q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1],
                                       floor(median(seq(ifelse(intercept, 0, 1), nrow(q2r2_dfm_list[[i]])))),
-                                      q2r2_dfm_list[[i]][nrow(q2r2_dfm_list[[i]]), 1])) +
-        scale_y_continuous() +
-        ggtitle(ifelse(plot.display.Title, names(q2r2_dfm_list)[i], NULL)) +
-        geom_vline(xintercept = q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1], linetype = "dashed", colour = "red") +
-        xlab(plot.xLabel) +
-        ylab(plot.yLabel) +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
-              legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+                                      q2r2_dfm_list[[i]][nrow(q2r2_dfm_list[[i]]), 1]))
 
       if (plot.rightsideY & length(names(q2r2_dfm_list)) == 1){
-        plt <- RBioplot::rightside_y(plt)
+        plt <- plt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          ggtitle(ifelse(plot.display.Title, names(q2r2_dfm_list)[i], NULL)) +
+          geom_vline(xintercept = q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1], linetype = "dashed", colour = "red") +
+          xlab(plot.xLabel) +
+          ylab(plot.yLabel) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          scale_y_continuous() +
+          ggtitle(ifelse(plot.display.Title, names(q2r2_dfm_list)[i], NULL)) +
+          geom_vline(xintercept = q2r2_dfm_list[[i]][which.min(abs(q2r2_dfm_list[[i]][, 2] - q2r2_dfm_list[[i]][, 3])), 1], linetype = "dashed", colour = "red") +
+          xlab(plot.xLabel) +
+          ylab(plot.yLabel) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
       }
+
+      # # below: not needed for ggplot2 3.5.0 due to its native support for axis duplication
+      # if (plot.rightsideY & length(names(q2r2_dfm_list)) == 1){
+      #   plt <- RBioplot::rightside_y(plt)
+      # }
+
       plt
     }
     names(plt_list) <- names(q2r2_dfm_list)
@@ -553,30 +598,51 @@ rbioClass_plsda_ncomp_select <- function(object, ...,
   if (rmsepplot){
     if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".plsda.rmsepplot.pdf...", sep = ""))  # initial message
     plt_list[] <- foreach(i = 1:length(rmsep_dfm_list)) %do% {
+
       plt <- ggplot(data = rmsep_dfm_list[[i]], aes(x = comps, y = value, colour = variable)) +
         geom_line(aes(linetype = variable)) +
         geom_point(aes(shape = variable), size = plot.SymbolSize) +
         ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.yLabel) +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom", legend.key = element_blank(),
-              legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+        ylab(plot.yLabel)
+
+      if (plot.rightsideY & length(rmsep_dfm_list) == 1){
+        plt <- plt +
+          # below: NEEDS TO BE TESTED if y continuous is correct
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.key = element_blank(),
+                legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.key = element_blank(),
+                legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      }
 
       if (plot.optm.ncomp.line){
         plt <- plt +
           geom_vline(xintercept = ncompsel_mtx[i, ], linetype = "dashed", colour = "red")
       }
 
-      if (plot.rightsideY & length(rmsep_dfm_list) == 1){
-        plt <- rightside_y(plt)
-      }
+      # # below: not needed due to ggplot2 3.5.0 native support for axis duplication
+      # if (plot.rightsideY & length(rmsep_dfm_list) == 1){
+      #   plt <- rightside_y(plt)
+      # }
+
       plt
     }
     names(plt_list) <- paste0("g_", names(rmsep_dfm_list))
@@ -960,26 +1026,46 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
         scale_shape_manual(values=1:nlevels(score_x$group))
     }
 
+
     scoreplt <- scoreplt +
       ggtitle(plot.Title) +
       ylab(comp_axis_lbl[1]) +
-      theme_bw() +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
-            legend.key = element_blank(),
-            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
-            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      theme_bw()
 
-    # grid.newpage()
-    if (plot.rightsideY){ # add the right-side y axis
-      # extract gtable
-      pltgtb <- rightside_y(scoreplt)
-    } else { # no right side y-axis
-      pltgtb <- scoreplt
+    if (plot.rightsideY) {
+      scoreplt <- scoreplt +
+        scale_y_continuous(sec.axis = dup_axis()) +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              axis.title.y.right = element_blank(),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+    } else {
+      scoreplt <- scoreplt +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
     }
+
+    # # below: not needed for ggplot2 3.5.0 for its native support for axis duplication
+    # # grid.newpage()
+    # if (plot.rightsideY){ # add the right-side y axis
+    #   # extract gtable
+    #   pltgtb <- rightside_y(scoreplt)
+    # } else { # no right side y-axis
+    #   pltgtb <- scoreplt
+    # }
+
+    pltgtb <- scoreplt
 
   } else if (length(comps) == 2){  # two components plot
     names(score_x)[1:2] <- c("axis1", "axis2")
@@ -1008,27 +1094,45 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
       ggtitle(plot.Title) +
       xlab(comp_axis_lbl[1]) +
       ylab(comp_axis_lbl[2]) +
-      theme_bw() +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-            axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-            axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-            legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
-            legend.key = element_blank(),
-            axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
-            axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      theme_bw()
+    if (plot.rightsideY) {
+      scoreplt <- scoreplt +
+        scale_y_continuous(sec.axis = dup_axis()) +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              axis.title.y.right = element_blank(),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+    } else {
+      scoreplt <- scoreplt +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+    }
+
     if (plot.ellipse){ # circles
       scoreplt <- scoreplt +
         stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
     }
-
-    # grid.newpage()
-    if (plot.rightsideY){ # add the right-side y axis
-      pltgtb <- rightside_y(scoreplt)
-    } else { # no right side y-axis
-      pltgtb <- scoreplt
-    }
+    # # below: not needed for ggplot2 3.5.0 for its native support for axis duplication
+    # # grid.newpage()
+    # if (plot.rightsideY){ # add the right-side y axis
+    #   pltgtb <- rightside_y(scoreplt)
+    # } else { # no right side y-axis
+    #   pltgtb <- scoreplt
+    # }
+    pltgtb <- scoreplt
 
   } else if (length(comps) > 2){  # over two components plot matrix
     if (plot.rightsideY){
@@ -1084,7 +1188,7 @@ rbioClass_plsda_scoreplot <- function(object, y = NULL, comps = c(1, 2),
             strip.background = element_blank(),  # no strip background colour
             strip.text = element_text(face = "bold", size = plot.mtx.stripLblSize),
             panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
             legend.position = "bottom", legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
             legend.key = element_blank(),
             axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
@@ -1221,8 +1325,8 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
                        warning = function(err) return(0))
       ymin <- tryCatch((min(DfPlt$coefficients[DfPlt$coefficients < 0] - err[DfPlt$coefficients < 0]) * 1.15),
                        warning = function(err) return(0))
-#      y_axis_Mx <- ifelse(ymax == 0, 0, max(abs(ymax), abs(ymin)))
-#      y_axis_Mn <- ifelse(ymin == 0, 0, max(abs(ymax), abs(ymin)) * sign(ymin)) # make sure the y-axes have the same abs value
+      # y_axis_Mx <- ifelse(ymax == 0, 0, max(abs(ymax), abs(ymin)))
+      # y_axis_Mn <- ifelse(ymin == 0, 0, max(abs(ymax), abs(ymin)) * sign(ymin)) # make sure the y-axes have the same abs value
       y_axis_Mx <- ifelse(ymax == 0, 0, abs(ymax))
       y_axis_Mn <- ifelse(ymin == 0, 0, abs(ymin) * sign(ymin))
 
@@ -1234,20 +1338,39 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
         geom_text(aes(y = ifelse(sign(coefficients) > 0, (coefficients + err) * 1.05, (coefficients - err) * 1.15), label = sig),
                   position = position_dodge(width = 0.9), color = "black", size = plot.errorbarLblSize) +
         scale_x_discrete(expand = c(0.05, 0.05)) +
-        scale_y_continuous(expand = c(0.01, 0.01), limits = c(y_axis_Mn, y_axis_Mx),
-                           oob = rescale_none) +
+
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
-        geom_hline(yintercept = 0) +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
-                                         hjust = plot.xhAlign, vjust = plot.xvAlign),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
-              axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
+        geom_hline(yintercept = 0)
+
+      if (plot.rightsideY) {
+        baseplt <- baseplt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(y_axis_Mn, y_axis_Mx),
+                             oob = rescale_none, sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                           hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
+      } else {
+        baseplt <- baseplt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(y_axis_Mn, y_axis_Mx),
+                             oob = rescale_none) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                           hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
+      }
 
       if (plot.title){
         baseplt <- baseplt + ggtitle(names(plot_list)[i])
@@ -1278,13 +1401,17 @@ rbioClass_plsda_jackknife <- function(object, ncomp = object$ncomp, use.mean = F
       }
 
       plt <- baseplt
+
+      # # below: not needed for ggplot2 3.5.0 for its native support for axis duplication
+      # # grid.newpage()
+      # if (plot.rightsideY){ # add the right-side y axis
+      #   pltgtb <- rightside_y(plt)
+      # } else { # no right side y-axis
+      #   pltgtb <- plt
+      # }
+
       ## finalize the plot
-      # grid.newpage()
-      if (plot.rightsideY){ # add the right-side y axis
-        pltgtb <- rightside_y(plt)
-      } else { # no right side y-axis
-        pltgtb <- plt
-      }
+      pltgtb <- plt
 
       ## export the file and draw a preview
       ggsave(filename = paste(deparse(substitute(object)), ".", names(plot_list)[i], ".jackknife.pdf", sep = ""), plot = pltgtb,
@@ -1681,15 +1808,16 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
         geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol) +
         # scale_x_discrete(expand = c(0.05, 0.05)) +
         scale_y_continuous(expand = c(0, 0), limits = c(y_axis_Mn, y_axis_Mx),
-                           oob = rescale_none) +
+                           oob = rescale_none, sec.axis = dup_axis()) +
         xlab(plot.xLabel) +
         ylab(paste0(plot.yLabel, " (", names(vip_list[[i]])[j], ")")) +
         geom_hline(yintercept = 0) +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
               axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
               axis.title.y = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y.right = element_blank(),
               legend.position = "bottom",
               legend.text = element_text(size = plot.legendSize),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
@@ -1738,7 +1866,8 @@ rbioFS_plsda_vip_plot <- function(vip_obj, plot.preview = TRUE,
           theme(axis.text.y = element_text(face = "bold"))
       }
 
-      plt <- RBioplot::rightside_y(plt)
+      # # below: not needed for the ggplot2 3.5.0 native support for axis duplication
+      # plt <- RBioplot::rightside_y(plt)
 
       ## export the file and draw a preview
       if (verbose) cat(paste0("Plot saved to file: ", deparse(substitute(vip_obj)), ".", names(vip_list)[i], ".", names(vip_list[[i]])[j], ".vip.pdf..."))
@@ -1890,26 +2019,45 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
 
     plt_list <- vector(mode = "list", length = length(plot.comps))
     plt_list[] <- foreach(k = 1:length(plot.comps)) %do% {
+
       plt <- ggplot(data = roc_dfm_list[[k]], aes(x = fpr, y = tpr, group = group, colour = group)) +
         geom_line(aes(linetype = group), size = plot.lineSize) +
         geom_point(aes(shape = group), size = plot.SymbolSize) +
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.yLabel) +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
-              legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+        ylab(plot.yLabel)
 
       if (plot.rightsideY & length(plot.comps) == 1){
-        plt <- RBioplot::rightside_y(plt)
+        plt <- plt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
       }
+
+      # # below: not needed for ggplot2 3.5.0 native support for axis duplication
+      # if (plot.rightsideY & length(plot.comps) == 1){
+      #   plt <- RBioplot::rightside_y(plt)
+      # }
       plt
     }
     names(plt_list) <- names(roc_dfm_list)[plot.comps]
@@ -2178,31 +2326,50 @@ rbioClass_plsda_predict <- function(object, comps = object$ncomp,
 
       plt <- plt +
         ggtitle(ifelse(plot.display.Title, levels(object$inputY)[j], NULL)) +
-        #       scale_x_continuous(expand = c(0, 0)) +
-        scale_y_continuous(breaks = c(-threshold, 0, threshold, 1 - threshold, 1, 1 + threshold)) +
+        # scale_x_continuous(expand = c(0, 0)) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
         geom_hline(yintercept = c(0, 1)) +
         geom_hline(yintercept = c(-threshold, threshold, 1 - threshold, 1 + threshold), linetype = "dashed") +
-        #       geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
-        #       geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4) +  # colour between lines: higher
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom",
-              #              legend.title = element_blank(),
-              legend.text = element_text(size = plot.legendSize),
-              legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
-                                         hjust = plot.xhAlign, vjust = plot.xvAlign),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
-
+        # geom_ribbon(aes(x = sample, ymax = threshold, ymin = -threshold), fill = "pink", alpha = 0.4) +  # colour between lines: lower
+        # geom_ribbon(aes(x = sample, ymax = 1 + threshold, ymin = 1 - threshold), fill = "pink", alpha = 0.4)  # colour between lines: higher
       if (plot.rightsideY & length(plt_list) == 1){
-        plt <- RBioplot::rightside_y(plt)
+        plt <- plt +
+          scale_y_continuous(breaks = c(-threshold, 0, threshold, 1 - threshold, 1, 1 + threshold), sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom",
+                # legend.title = element_blank(),
+                legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                           hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          scale_y_continuous(breaks = c(-threshold, 0, threshold, 1 - threshold, 1, 1 + threshold)) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom",
+                # legend.title = element_blank(),
+                legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                           hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
       }
 
+      # # blow not needed for ggplot2 3.5.0 native support for axis duplication
+      # if (plot.rightsideY & length(plt_list) == 1){
+      #   plt <- RBioplot::rightside_y(plt)
+      # }
       return(plt)
     }
     names(plt_list) <- levels(object$inputY)

@@ -62,6 +62,10 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
         
     (ADDED)
+      - General update
+        - Package updated to require ggplot 2 >= 3.5.0
+        - All the  plotting functions updated to the new features with ggplot 2, such as the ggplot 2 native support for axis duplication
+      
       - New FS function(s):
         - rbioClass_svm_ncv_fs_v2() added with a different paralelle computing implementation
         - rbioFS_rf_initialFS_v2() and rbioFS_rf_sfs_v2() added with returning output, instead of assigning
@@ -70,6 +74,7 @@ Update log
         - rbioClass_svm_cv() now supports parallel computing
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
         - rbioClass_svm_cv_roc_auc() updated with typo fixes
+        - rbioClass_svm_cv_roc_auc() updated with CV model validity check
         - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with features with no variance (i.e. constant value) will be removed from the nested cv training data
         
       - Updates to the FS function(s):

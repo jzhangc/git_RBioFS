@@ -115,16 +115,17 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
                   position = position_dodge(0.9), color = "black", width = plot.errorbarWidth) +
     scale_x_discrete(expand = c(0.05, 0.05)) +
     scale_y_continuous(expand = c(0, 0), limits = c(ymin, ymax),
-                       oob = rescale_none) +
+                       oob = rescale_none, sec.axis = dup_axis()) +
     ggtitle(plot.title) +
     xlab(plot.xLabel) +
     ylab(plot.yLabel) +
     geom_hline(yintercept = 0) +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
           plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
           axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
           axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+          axis.title.y.right = element_blank(),
           axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
                                      hjust = plot.xhAlign, vjust = plot.xvAlign),
           axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
@@ -160,7 +161,8 @@ rbioFS_rf_initialFS_plot <- function(object, n = "all",
 
   ## add the right-side y axis
   # grid.newpage()
-  pltgtb <- RBioplot::rightside_y(baseplt)
+  # pltgtb <- RBioplot::rightside_y(baseplt)  # not needed anymore
+  pltgtb <- (baseplt)
 
   # export the file and draw a preview
   ggsave(filename = paste(plot.file.title,".rffs.ifs.plot.pdf", sep = ""), plot = pltgtb,

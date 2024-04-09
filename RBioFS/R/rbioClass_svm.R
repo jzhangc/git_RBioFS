@@ -83,7 +83,6 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
   tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
 
-
   ## data processing
   if (center.scale){
     if (verbose) cat(paste0("Data centered with the scaling prior to modelling.\n"))
@@ -1719,20 +1718,38 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.yLabel) +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
-              legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+        ylab(plot.yLabel)
 
-      if (plot.rightsideY){
-        plt <- RBioplot::rightside_y(plt)
+      if (plot.rightsideY) {
+        plt <- plt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
       }
+
+      # # below: not needed for ggplot2 3.5.0
+      # if (plot.rightsideY){
+      #   plt <- RBioplot::rightside_y(plt)
+      # }
 
       # save
       # grid.newpage()
@@ -1821,6 +1838,17 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
   if (object$model.type == "regression"){
     stop('ROC-AUC only applies to classfication models.')
   }
+
+  # --- check the validity of and, if needed, process the model list ---
+  for (m in names(cv_model_list)) {
+    cat(paste0("processing model: ", m))
+    if ("simpleError" %in% class(cv_model_list[[m]])) {
+      cv_model_list[[m]] <- NULL
+    }
+    cat("\n")
+  }
+
+  if (length(cv_model_list) < 1) stop("No valid model found in the object.")
 
   # ---- intermediate function ----
   cv_auc_func <- function(x){
@@ -1941,20 +1969,37 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
           geom_abline(intercept = 0) +
           ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
           xlab(plot.xLabel) +
-          ylab(plot.yLabel) +
-          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
-                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
-                legend.key = element_blank(),
-                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
-
-        if (plot.rightsideY){
-          plt <- RBioplot::rightside_y(plt)
+          ylab(plot.yLabel)
+        if (plot.rightsideY) {
+          plt <- plt +
+            scale_y_continuous(sec.axis = dup_axis()) +
+            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                  panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                  plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                  axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                  axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                  axis.title.y.right = element_blank(),
+                  legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                  legend.key = element_blank(),
+                  axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                  axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+        } else {
+          plt <- plt +
+            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                  panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                  plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                  axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                  axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                  legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                  legend.key = element_blank(),
+                  axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                  axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
         }
+
+        # # below not needed for ggplot 2 3.5.0
+        # if (plot.rightsideY){
+        #   plt <- RBioplot::rightside_y(plt)
+        # }
 
         # save
         # grid.newpage()
