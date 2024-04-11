@@ -33,7 +33,7 @@ Installation
 
 Update log
 
-    0.7.6 and beyond (Feature roadmap)
+    0.8.0 and beyond (Feature roadmap)
     (ICEBOX)
       - New PLSR function(s)
         - rbioReg_plsr() function added for PLS regression analysis
