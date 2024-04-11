@@ -66,6 +66,7 @@ Update log
         - Package updated to require ggplot 2 >= 3.5.0
         - All the  plotting functions updated to the new features with ggplot 2, such as the ggplot 2 native support for axis duplication
         - data.table package becomes a dependency
+        - Version bumped to 0.8.0
       
       - New FS function(s):
         - rbioClass_svm_ncv_fs_v2() added with a different paralelle computing implementation
