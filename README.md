@@ -65,10 +65,17 @@ Update log
       - General update
         - Package updated to require ggplot 2 >= 3.5.0
         - All the  plotting functions updated to the new features with ggplot 2, such as the ggplot 2 native support for axis duplication
+        - data.table package becomes a dependency
       
       - New FS function(s):
         - rbioClass_svm_ncv_fs_v2() added with a different paralelle computing implementation
         - rbioFS_rf_initialFS_v2() and rbioFS_rf_sfs_v2() added with returning output, instead of assigning
+        
+      - New utility functions(s):
+        - rbioUtil_onehotEncoding(): one hot encoding function
+          - helper: convertToFactor()
+        - substr_right(): extract nth character from string from right
+        - na_summary(): NA ratio calculation
     
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing

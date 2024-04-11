@@ -325,3 +325,155 @@ rbioUtil_classplot <- function(pred.obj, export.name = NULL,
 
   invisible(plt)
 }
+
+
+#' @title convertToFactor
+#'
+#' @description Convert data.frame features into factors.
+#' @param dfm data.frame. Input data.frame.
+#' @param cols str or vector of strings. Column names to convert.
+#' @return data.frame with columns converted into factors.
+#' @details
+#'  The output data.frame has the same dim() as the input data.frame.
+#' @examples
+#' \dontrun{
+#'   convertToFactor(dfm = dfm, cols = c("gender", "regions"))
+#' }
+#' @export
+convertToFactor <- function(dfm, cols) {
+  if (!"data.frame" %in% class(dfm)) stop("input dt needs to be a data.frame.")
+  if (all(!cols %in% names(dfm))) stop("one or more cols not found in the input dataframe.")
+
+  out <- dfm
+  for (col in cols) {
+    out[, col] <- factor(dfm[, col], levels = unique(dfm[, col]))
+  }
+  return(out)
+}
+
+
+#' @title dummy
+#'
+#' @description dummification of categorical variables
+#' @param x Input vector. Make sure it is a factor.
+#' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
+#' @return Outputs a matrix with dummified variables.
+#' @details This function is needed to pre-process data when conducting plsda analysis. And the function can also be used for other purposes when needed.
+#' @examples
+#' \dontrun{
+#' y <- dummy(y)
+#' }
+#' @export
+dummy <- function (x, drop2nd = FALSE){  # integrate into the main function eventually
+  if (!is.factor(x)){  # use this one for the arguments
+    stop("'x' should be a factor")
+  }
+  y <- model.matrix(~x - 1)
+  # below: remove unecessary array attributes
+  colnames(y) <- gsub("^x", "", colnames(y))
+  attributes(y)$assign <- NULL
+  attributes(y)$contrasts <- NULL
+
+  if (length(levels(x)) == 2 & drop2nd) { # if to only keep the factor binary
+    y <- y[, 1]
+  }
+  return(y)
+}
+
+
+#' @title rbioUtil_onehotEncoding
+#'
+#' @description Convert data.frame features into factors.
+#' @param data data.frame. Input data.frame.
+#' @param cols str or vector of strings. Column names to encode.
+#' @param export_mode str. Export as data.table or data.frame. Default is \code{"dfm"}.
+#' @return data.frame with columns one hot encoded.
+#' @details
+#'  The output data.frame has all the data of the inoput data, as opposed to just encoded columns.
+#' @examples
+#' \dontrun{
+#'   rbioUtil_onehotEncoding(dfm = data, cols = c("gender"), export_mode = "dfm")
+#' }
+#' @export
+rbioUtil_onehotEncoding <- function(data, cols, export_mode = c("dfm", "dt")) {
+  if (length(export_mode) > 1) stop("only set one value for \"export_mode\"")
+  export_mode <- match.arg(export_mode)
+
+  dt <- convertToFactor(data, cols)
+  dt <- data.table(dt)
+  out <- one_hot(dt, cols = cols)
+
+  switch(export_mode,
+         dfm = {
+           return(as.data.frame(out))
+         },
+         dt = {
+           return(out)
+         })
+}
+
+
+#' @title substr_right
+#'
+#' @description Extract n'th character from string from right.
+#' @param x str. Input string.
+#' @param n int. Optional user defined export name prefix. Default is \code{NULL}.
+#' @return character extracted from string.
+#' @examples
+#' \dontrun{
+#'   substr_right("abc", 2)
+#' }
+#' @export
+substr_right <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+
+#' @title na_summary
+#'
+#' @description NA ration summary.
+#' @param data data.frame, matrix list of data.frames or matrices. Input data.
+#' @param by str. Summarize by row or column. Default is \code{"row"}.
+#' @return Vector or list of vector of NA ratios.
+#' @examples
+#' \dontrun{
+#'   na_summary(data = data, by = "row")
+#' }
+#' @export
+na_summary <- function(data, by = c("row", "col")) {
+  if (length(by) >1) stop("only set one value for \"by\". ")
+  by <- match.arg(by)
+
+  if ("list" %in% class(data)) {
+    out <- vector(mode = "list", length = length(data))
+    names(out) <- names(data)
+
+    switch(by,
+           row = {
+             for (i in 1:length(out)) {
+               out[[i]] <- rowSums(is.na(data[[i]]))/ncol(data[[i]])
+             }
+           },
+           col = {
+             for (i in 1:length(out)) {
+               out[[i]] <- colSums(is.na(data[[i]]))/nrow(data[[i]])
+             }
+           }
+    )
+
+  } else if (any(c("data.frame", "matrix") %in% class(data))) {
+    out <- vector()
+    switch(by,
+           row = {
+             for (i in 1:length(out)) {
+               out <- rowSums(is.na(data))/ncol(data)
+             }
+           },
+           col = {
+             out <- colSums(is.na(data))/nrow(data)
+           }
+    )
+  }
+  return(out)
+}
+
