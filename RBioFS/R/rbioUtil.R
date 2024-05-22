@@ -390,6 +390,8 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @return data.frame with columns one hot encoded.
 #' @details
 #'  The output data.frame has all the data of the inoput data, as opposed to just encoded columns.
+#' @importFrom mltools one_hot
+#' @importFrom data.table data.table
 #' @examples
 #' \dontrun{
 #'   rbioUtil_onehotEncoding(dfm = data, cols = c("gender"), export_mode = "dfm")
