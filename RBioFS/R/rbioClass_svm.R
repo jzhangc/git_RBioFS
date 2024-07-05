@@ -655,7 +655,6 @@ rbioClass_svm_ncv_fs <- function(x, y,
 }
 
 
-
 #' @title rbioClass_svm_ncv_fs_v2
 #'
 #' @description Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM. This is V2 with slightly different parallel computing implementation

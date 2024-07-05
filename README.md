@@ -75,6 +75,8 @@ Update log
       - New utility functions(s):
         - rbioUtil_onehotEncoding(): one hot encoding function
           - helper: convertToFactor()
+        - rbioUtil_fscount_plot(): bar graph for nested FS counts
+          - function supports S3 class rbiosvm_nestedcv and data.frame
         - substr_right(): extract nth character from string from right
         - na_summary(): NA ratio calculation
     

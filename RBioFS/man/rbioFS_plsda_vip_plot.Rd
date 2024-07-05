@@ -48,7 +48,7 @@ rbioFS_plsda_vip_plot(
 
 \item{plot.sig.line}{whether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.}
 
-\item{plot.outlineCol}{The outline colour for the bar gars. Default is \code{"black"}.}
+\item{plot.outlineCol}{The outline colour for the bar graph. Default is \code{"black"}.}
 
 \item{plot.errorbar}{Set the type of errorbar. Only applicable if the object model is built with bootstrapping. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.}
 

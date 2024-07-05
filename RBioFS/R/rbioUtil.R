@@ -1,3 +1,127 @@
+#' Title rbioUtil_fscount_plot
+#'
+#' @description Bar graph for the FS count numbers
+#' @param object Object or data frame containing FS count information. This currently supports S3 classes \code{table}, \code{data.frame} and \code{rbiosvm_nestedcv}.
+#' @param ... Arguments for S3 class methods.
+#' @return ggplot 2 bar graph exported as PDF file
+#' @export
+rbioUtil_fscount_plot <- function(object, ...){
+  # -- class check --
+  if (!class(object) %in% c("rbiosvm_nestedcv", "data.frame")) stop("object needs to be either a \"rbiosvm_nestedcv\" or \"data.frame\" object")
+
+  # -- use method --
+  UseMethod("rbioUtil_fscount_plot", object)
+}
+
+
+#' Title rbioUtil_fscount_plot.rbiosvm_nestedcv
+#' @rdname rbioUtil_fscount_plot
+#' @method rbioUtil_fscount_plot rbiosvm_nestedcv
+#' @param object A \code{rbiosvm_nestedcv} object.
+#' @param export.name Name used to output the plot.
+#' @param ... Additional arguments for the default method.
+#'
+#' @export
+rbioUtil_fscount_plot.rbiosvm_nestedcv <- function(object, export.name, ...) {
+  x <- data.frame(object$best.nested.fs.count)
+  threshold <- object$fs.count.threshold
+  fvar <- "nested.fs"
+  cvar <- "Freq"
+  rbioUtil_fscount_plot.default(dfm = x, threshold = threshold, feature_var = fvar, count_var = cvar, ...)
+}
+
+
+#' Title rbioUtil_fscount_plot.default
+#' @rdname rbioUtil_fscount_plot
+#' @method rbioUtil_fscount_plot default
+#' @param dfm Input data.frame.
+#' @param feature_var Variable name for feature names.
+#' @param count_var Variable name for FS count.
+#' @param threshold An integer indicating the FS count threshold for consensus feature selection.
+#' @param export.name Name used to output the plot.
+#' @param plot.preview If to preview plots. Default is \code{TRUE}.
+#' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.outlineCol The outline colour for the bar graph. Default is \code{"gray4"}.
+#' @param plot.fillCol The fill colour for the bar. Default is \code{"lightcyan"}
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
+#' @param plot.xTickItalic Set X-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set X-axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
+#' @param plot.yTickItalic Set Y-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set Y-axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
+#' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
+#' @details
+#'    The input data.frame should at least have variables for feature name and FS count.
+#'
+#' @import ggplot2
+#' @importFrom scales rescale_none
+#' @export
+rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
+                            threshold = 2, export.name = "plot",
+                            plot.preview = TRUE,
+                            plot.title = TRUE, plot.titleSize = 10,
+                            plot.sig.line = TRUE,
+                            plot.outlineCol = "gray4", plot.fillCol = "lightcyan",
+                            plot.errorbarLblSize = 6, plot.fontType = "sans",
+                            plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                            plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAlign = 0.5,
+                            plot.rightsideY = TRUE,
+                            plot.yLabel = "FS counts", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                            plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+                            plot.legendTtl = FALSE, plot.legendTtlSize = 9,
+                            plot.Width = 170, plot.Height = 150) {
+  # -- data prep --
+  d <- dfm[dfm$Freq >= threshold, ]
+  if (!feature_var %in% names(dfm)) stop("feature variable not found.")
+  if (!count_var %in% names(dfm) ) stop("count variable not found.")
+
+  # plot
+  baseplt <- ggplot(data = d, aes(x = .data[[feature_var]], y = .data[[count_var]])) +
+    geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol, fill = plot.fillCol) +
+    scale_x_discrete(expand = c(0.05, 0.05)) +
+    scale_y_continuous(limits = c(0, x$Freq), expand = expansion(add = c(0, 1)), oob = scales::rescale_none, sec.axis = dup_axis(),
+                       breaks = scales::breaks_pretty()) +
+    xlab(plot.xLabel) +
+    ylab(plot.yLabel) +
+    theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+          plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
+          axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+          axis.title.y = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+          axis.title.y.right = element_blank(),
+          legend.position = "bottom",
+          legend.text = element_text(size = plot.legendSize),
+          axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                     hjust = plot.xhAlign, vjust = plot.xvAlign),
+          axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
+          axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
+
+  p <- baseplt +
+    annotate(geom = "text", label = paste0("FS count threshold = ", threshold), colour = "red", y = max(d$Freq), x = nrow(d), hjust = 0.9) +
+    annotate(geom = "segment", x = nrow(d), y = threshold+0.5, xend = nrow(d), yend = max(d$Freq)-0.5,
+             arrow = arrow(type = "closed", length = unit(0.02, "npc")))
+
+  # -- export --
+  if (plot.preview) show(p)
+  ggsave(filename = paste0(export.name, ".fscount.pdf"), plot = p,
+         width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+
+  # return(p)
+}
+
+
+
 #' Title rbioUtil_classif_accuracy
 #'
 #' @description Classification accuracy calculation function
@@ -478,4 +602,62 @@ na_summary <- function(data, by = c("row", "col")) {
   }
   return(out)
 }
+
+
+#' @title fscount_plot
+#'
+#' @description Plotting function for \code{\link{rbioFS_plsda_VIP}}.
+#' @param vip_obj A \code{rbiomvr_vip}, generated by \code{\link{rbioFS_plsda_VIP}}.
+#' @param plot.preview If to preview plots. Default is \code{TRUE}.
+#' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.sig.line whether to display a horizontal line indicating the VIP threshold. Default is \code{TRUE}.
+#' @param plot.outlineCol The outline colour for the bar gars. Default is \code{"black"}.
+#' @param plot.errorbar Set the type of errorbar. Only applicable if the object model is built with bootstrapping. Options are standard error of the mean (\code{"SEM"}, \code{"standard error"}, \code{"standard error of the mean"}), or standard deviation (\code{"SD"}, \code{"standard deviation"}), case insensitive. Default is \code{"SEM"}.
+#' @param plot.errorbarWidth Set the width for errorbar. Default is \code{0.2}.
+#' @param plot.errorbarLblSize Set the label size for the errorbar. Default is \code{6}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
+#' @param plot.xTickItalic Set X-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set X-axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"VIP"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
+#' @param plot.yTickItalic Set Y-axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set Y-axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
+#' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return Outputs pdf figure files to the working directory.
+#' @details Only works with \code{rbiomvr_vip} objects. Set \code{plot.preview = FALSE} to speed up the process as preview rendering may be slow.
+#'          The function also applies to the regression model (model.type = "regression").
+#' @import ggplot2
+#' @importFrom reshape2 melt
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y
+#' @importFrom scales rescale_none
+#' @examples
+#' \dontrun{
+#' rbioFS_plsda_vip_plot(vip_obj = plsda_m_vip,
+#'                       plot.title = TRUE, plot.titleSize = 10,
+#'                       plot.sig.line = TRUE,
+#'                       plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+#'                       plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+#'                       plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+#'                       plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+#'                       plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+#'                       plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+#'                       plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+#'                       plot.Height = 150)
+#' }
+#' @export
+
+
+
 
