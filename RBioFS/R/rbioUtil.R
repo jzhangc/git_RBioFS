@@ -27,7 +27,9 @@ rbioUtil_fscount_plot.rbiosvm_nestedcv <- function(object, export.name, ...) {
   threshold <- object$fs.count.threshold
   fvar <- "best.nested.fs"
   cvar <- "Freq"
-  rbioUtil_fscount_plot.default(dfm = x, threshold = threshold, feature_var = fvar, count_var = cvar, ...)
+  rbioUtil_fscount_plot.default(dfm = x, threshold = threshold,
+                                export.name = export.name,
+                                feature_var = fvar, count_var = cvar, ...)
 }
 
 
@@ -37,8 +39,8 @@ rbioUtil_fscount_plot.rbiosvm_nestedcv <- function(object, export.name, ...) {
 #' @param dfm Input data.frame.
 #' @param feature_var Variable name for feature names.
 #' @param count_var Variable name for FS count.
-#' @param threshold An integer indicating the FS count threshold for consensus feature selection.
 #' @param export.name Name used to output the plot.
+#' @param threshold An integer indicating the FS count threshold for consensus feature selection.
 #' @param plot.preview If to preview plots. Default is \code{TRUE}.
 #' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
@@ -68,19 +70,20 @@ rbioUtil_fscount_plot.rbiosvm_nestedcv <- function(object, export.name, ...) {
 #' @importFrom scales rescale_none
 #' @export
 rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
-                            threshold = 2, export.name = "plot",
-                            plot.preview = TRUE,
-                            plot.title = TRUE, plot.titleSize = 10,
-                            plot.sig.line = TRUE,
-                            plot.outlineCol = "gray4", plot.fillCol = "lightcyan",
-                            plot.errorbarLblSize = 6, plot.fontType = "sans",
-                            plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
-                            plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAlign = 0.5,
-                            plot.rightsideY = TRUE,
-                            plot.yLabel = "FS counts", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                            plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
-                            plot.legendTtl = FALSE, plot.legendTtlSize = 9,
-                            plot.Width = 170, plot.Height = 150) {
+                                          export.name = "plot",
+                                          threshold = 2,
+                                          plot.preview = TRUE,
+                                          plot.title = TRUE, plot.titleSize = 10,
+                                          plot.sig.line = TRUE,
+                                          plot.outlineCol = "gray4", plot.fillCol = "lightcyan",
+                                          plot.errorbarLblSize = 6, plot.fontType = "sans",
+                                          plot.xLabel = "Features", plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+                                          plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAlign = 0.5,
+                                          plot.rightsideY = TRUE,
+                                          plot.yLabel = "FS counts", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                          plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+                                          plot.legendTtl = FALSE, plot.legendTtlSize = 9,
+                                          plot.Width = 170, plot.Height = 150) {
   # -- data prep --
   d <- dfm[dfm$Freq >= threshold, ]
   if (!feature_var %in% names(dfm)) stop("feature variable not found.")
