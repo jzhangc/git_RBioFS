@@ -25,7 +25,7 @@ rbioUtil_fscount_plot <- function(object, ...){
 rbioUtil_fscount_plot.rbiosvm_nestedcv <- function(object, export.name, ...) {
   x <- data.frame(object$best.nested.fs.count)
   threshold <- object$fs.count.threshold
-  fvar <- "nested.fs"
+  fvar <- "best.nested.fs"
   cvar <- "Freq"
   rbioUtil_fscount_plot.default(dfm = x, threshold = threshold, feature_var = fvar, count_var = cvar, ...)
 }

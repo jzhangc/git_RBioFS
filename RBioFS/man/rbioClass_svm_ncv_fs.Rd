@@ -148,8 +148,8 @@ Resulted features from each nested cross-validation round are voted. Features wi
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
 
-When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median value
+for feature count threholding. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
 
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
