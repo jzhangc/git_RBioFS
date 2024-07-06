@@ -90,7 +90,7 @@ rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
   baseplt <- ggplot(data = d, aes(x = .data[[feature_var]], y = .data[[count_var]])) +
     geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol, fill = plot.fillCol) +
     scale_x_discrete(expand = c(0.05, 0.05)) +
-    scale_y_continuous(limits = c(0, x$Freq), expand = expansion(add = c(0, 1)), oob = scales::rescale_none, sec.axis = dup_axis(),
+    scale_y_continuous(limits = c(0, d$Freq), expand = expansion(add = c(0, 1)), oob = scales::rescale_none, sec.axis = dup_axis(),
                        breaks = scales::breaks_pretty()) +
     xlab(plot.xLabel) +
     ylab(plot.yLabel) +
