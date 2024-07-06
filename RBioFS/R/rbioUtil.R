@@ -97,6 +97,7 @@ rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
                        breaks = scales::breaks_pretty()) +
     xlab(plot.xLabel) +
     ylab(plot.yLabel) +
+    geom_hline(yintercept = threshold, col = "red", linetype = "dashed") +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
           plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
