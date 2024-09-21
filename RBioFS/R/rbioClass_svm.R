@@ -2017,6 +2017,336 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
 }
 
 
+#' @title rbioClass_svm_cv_roc_auc_mean
+#'
+#' @description CV ROC-AUC mean analysis and ploting for SVM model, for classification model only.
+#' @param object A \code{rbiosvm} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
+#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
+#' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
+#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
+#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
+#' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @returns
+#'        1. PDF of the mean ROC-AUC plot
+#'        2. A \code{v_rocauc_mean} to the environment
+#'
+#' @details
+#'        The function construct a  list containing data.frames of AUC results over folds per group
+#'        for every fold: list = roc dfm w cols: tpr, fpr, folds, auc dfm w cols: auc, folds
+#'
+#'        The function also uses interpolation for CV ROC: set fpr seq(0, 1, length.out = 100), and interpolated tpr,
+#'        to make sure all ROCs from different CV classifiers to have the same length
+#'        interpolation for ROC thus is also used to plot ROCs for different types classifiers for comparison
+#'
+#'        The ROC-AUC calcualte details follows the same as \code{\link{rbioClass_svm_roc_auc}}
+#'
+#'        \code{v_rocauc_mean} items:
+#'          1. \code{cv_auc_mean_res}: AUC calculation results
+#'          2. \code{roc_plot}: mean ROC-AUC plot
+#'
+#' @import ggplot2
+#' @import foreach
+#' @importFrom pROC roc
+#' @importFrom matrixStats colSds
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#'
+#' @export
+rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
+                                          rocplot = TRUE,
+                                          plot.smooth = FALSE,
+                                          plot.lineSize = 1,
+                                          plot.display.Title = TRUE, plot.titleSize = 10,
+                                          plot.fontType = "sans",
+                                          plot.xLabel = "1 - specificity", plot.xLabelSize = 15, plot.xTickLblSize = 10,
+                                          plot.yLabel = "sensitivity", plot.yLabelSize = 15, plot.yTickLblSize = 10,
+                                          plot.legendSize = 9, plot.rightsideY = TRUE,
+                                          plot.Width = 170, plot.Height = 150,
+                                          verbose = TRUE){
+  # ---- arguments check ----
+  if (!any(class(object) %in% c('rbiosvm_nestedcv', 'rbiosvm_cv'))) stop("object needs to be \"rbiosvm_nestedcv\" or \"rbiosvm_cv\" classes.")
+
+  # ---- read in data ----
+  if (class(object) == 'rbiosvm_nestedcv') {
+    cv_model_list <- object$nested.cv.models
+  } else {
+    cv_model_list <- object$cv.models
+  }
+
+  if (object$model.type == "regression"){
+    stop('ROC-AUC only applies to classfication models.')
+  }
+
+  # --- check the validity of and, if needed, process the model list ---
+  for (m in names(cv_model_list)) {
+    cat(paste0("processing model: ", m))
+    if ("simpleError" %in% class(cv_model_list[[m]])) {
+      cv_model_list[[m]] <- NULL
+    }
+    cat("\n")
+  }
+
+  if (length(cv_model_list) < 1) stop("No valid model found in the object.")
+
+  # ---- intermediate function ----
+  # x = cv_model_list[[1]]
+  cv_auc_func <- function(x){
+    # data
+    cv_test <- x$cv_test_data
+    cv_test_x <- cv_test[, !names(cv_test) %in% "y"]
+    # cv_test_y <- cv_test$y
+    cv_test_y <- droplevels(cv_test$y) # to deal with fragments without all the classes
+
+    # model
+    cv_m <- x$cv_svm_model
+
+    # pred
+    pred <- predict(cv_m, newdata = cv_test_x, decision.values = TRUE, probability = TRUE)  # prediction
+    pred_prob <- attr(pred, "probabilities")
+
+    # ROC-AUC
+    roc_auc_list <- vector(mode = "list", length = length(levels(cv_test_y)))
+    roc_auc_list[] <- foreach(i = 1:length(levels(cv_test_y))) %do% {
+      response <- cv_test_y
+      predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
+      levels(response)[-i] <- "others"
+      splt <- split(predictor, response)  # split function splist array according to a factor
+      controls <- splt$others
+      cases <- splt[[levels(cv_test_y)[i]]]
+      if (length(cases) && length(controls)) {
+        perf <- tryCatch(suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE))),
+                         error = function(err){
+                           cat("Curve not smoothable. Proceed without smooth.\n")
+                           suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)))
+                         })
+        if (verbose){
+          if (length(levels(cv_test_y)) == 2){
+            cat(paste0("AUC - ", levels(cv_test_y)[i], ": ", perf$auc, "\n"))
+          } else {
+            cat(paste0(" AUC - ", levels(cv_test_y)[i], " (vs Others): ", perf$auc, "\n"))
+          }
+        }
+
+        perf
+      } else {
+        return(NULL)
+      }
+    }
+    names(roc_auc_list) <- unique(cv_test_y)
+
+    roc_dfm <- foreach(i = 1:length(levels(cv_test_y)), .combine = "rbind") %do% {
+      perf <- roc_auc_list[[i]]
+      fpr <- 1 - perf$specificities
+      tpr <- perf$sensitivities
+      thresholds <- perf$thresholds
+      mtx <- cbind(fpr, tpr, thresholds)
+      if (length(levels(cv_test_y)) == 2){
+        df <- data.frame(mtx, group = rep(levels(cv_test_y)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      } else {
+        df <- data.frame(mtx, group = rep(paste0(levels(cv_test_y)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+      }
+      df <- df[order(df$tpr), ]
+      return(df)
+    }
+
+    # return
+    if (any(sapply(roc_auc_list, is.null))) {
+      out <- NULL
+    } else {
+      out <- list(svm.roc_object = roc_auc_list,
+                  svm.roc_dataframe = roc_dfm)
+    }
+    return(out)
+  }
+
+  # ---- compute and return ----
+  auc_res_list <- vector(mode = "list", length = length(cv_model_list))
+  auc_res_list[] <- foreach(i = 1:length(cv_model_list)) %do% {
+    out <- cv_auc_func(cv_model_list[[i]])
+    out
+  }
+  names(auc_res_list) <- names(cv_model_list)
+
+  if (any(sapply(auc_res_list, is.null))){
+    cat("NULL element removed from the CV ROC-AUC list.\n")
+    auc_res_list <- auc_res_list[-which(sapply(auc_res_list, is.null))]
+  }
+
+  # ---- CV ROC-AUC curve ----
+  auc_res_group <- unique(auc_res_list$cv_fold_1$svm.roc_dataframe$group)
+
+  # construct a  list containing data.frames of AUC results over folds per group
+  # for every fold: list = roc dfm w cols: tpr, fpr, folds, auc dfm w cols: auc, folds
+  # use interpolation for CV ROC: set fpr seq(0, 1, length.out = 100), and interpolated tpr
+  # to make sure all ROCs from different CV classifiers to
+  # have the same length
+  # interpolation for ROC thus is also used to plot ROCs for different types classifiers
+  # for comparison
+  fpr_mean <- seq(0, 1, length.out = 100)
+  auc_group_list <- vector(mode = "list", length = length(auc_res_group))
+  for (i in 1:length(auc_res_group)){
+    group_label <- auc_res_group[[i]]
+    group <- gsub(" (vs Others)", "", auc_res_group[[i]], fixed = TRUE)
+    cat(paste0("processing group: ", group, ", group label: ",  group_label, "\n"))
+    cv_tpr_list <- vector(mode = "list",  length = length(auc_res_list))
+    for (j in 1:length(cv_tpr_list)) {
+      roc <- auc_res_list[[j]]$svm.roc_dataframe[auc_res_list[[j]]$svm.roc_dataframe$group %in% group_label, ]
+      cv_tpr_list[[paste0("cv_fold_", j)]] <- approx(roc$fpr, roc$tpr, xout = fpr_mean, ties = "mean")$y
+    }
+    cv_tpr <- do.call(cbind, cv_tpr_list)
+    cv_auc <- foreach(j = 1:length(auc_res_list), .combine = "rbind") %do% {
+      dfm <- data.frame(auc = as.numeric(auc_res_list[[j]]$svm.roc_object[[group]]$auc), cv_fold = names(auc_res_list)[j])
+    }
+    auc_group_list[[i]] <- list(cv_tpr = cv_tpr, cv_auc = cv_auc)
+    # break
+  }
+  names(auc_group_list) <- auc_res_group
+
+  # calculate mean tpr and mean auc
+  cv_roc_mean_list <- vector(mode = "list", length = length(auc_group_list))
+  for (i in 1:length(cv_roc_mean_list)) {
+    group_label <- auc_res_group[[i]]
+    group <- gsub(" (vs Others)", "", auc_res_group[[i]], fixed = TRUE)
+    cat(paste0("processing group: ", group, ", group label: ",  group_label, "\n"))
+
+    mean_tpr <- rowMeans2(auc_group_list[[group_label]]$cv_tpr)
+    mean_tpr[length(mean_tpr)] <- 1.0
+    sd_tpr <- rowSds(auc_group_list[[group_label]]$cv_tpr)
+    tprs_upper <- min(mean_tpr + sd_tpr, 1)
+    tprs_lower <- max(mean_tpr - sd_tpr, 0)
+
+    mean_auc <- mean(auc_group_list[[group_label]]$cv_auc$auc)
+    sd_auc <- sd(auc_group_list[[group_label]]$cv_auc$auc)
+
+    cv_roc_mean_list[[i]] <- list(
+      mean_fpr = fpr_mean,
+      mean_tpr = rowMeans2(auc_group_list[[group_label]]$cv_tpr),
+      sd_tpr = rowSds(auc_group_list[[group_label]]$cv_tpr),
+      tprs_upper = pmin(rowMeans2(auc_group_list[[group_label]]$cv_tpr) + rowSds(auc_group_list[[group_label]]$cv_tpr), 1),
+      tprs_lower = pmax(rowMeans2(auc_group_list[[group_label]]$cv_tpr) - rowSds(auc_group_list[[group_label]]$cv_tpr), 0),
+      mean_auc = mean(auc_group_list[[group_label]]$cv_auc$auc),
+      sd_auc = sd(auc_group_list[[group_label]]$cv_auc$auc)
+    )
+  }
+  names(cv_roc_mean_list) <- names(auc_group_list)
+
+
+  # ------ plotting ------
+  if (rocplot) {
+    plot_dfm <- foreach(i = 1:length(cv_roc_mean_list), .combine = "rbind") %do% {
+      d <- data.frame(mean_fpr = cv_roc_mean_list[[i]]$mean_fpr, mean_tpr = cv_roc_mean_list[[i]]$mean_tpr,
+                      tprs_upper = cv_roc_mean_list[[i]]$tprs_upper, tprs_lower = cv_roc_mean_list[[i]]$tprs_lower)
+      d$group <- as.factor(rep(names(cv_roc_mean_list)[i], times = nrow(d)))
+      d
+    }
+
+    if (length(unique(plot_dfm$group)) < 2) {
+      p <- ggplot(data = plot_dfm, aes(x = .data[["mean_fpr"]], y = .data[["mean_tpr"]], colour = group, group = group, shape = group)) +
+        geom_point(size = 2) +
+        geom_line() +
+        geom_ribbon(aes(ymin = .data[["tprs_lower"]], ymax = .data[["tprs_upper"]],
+                        fill = group), alpha = 0.15, colour = NA) +
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+        scale_x_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+        scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
+        ggtitle("CV ROC-AUC") +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
+        theme_bw() +
+        theme(legend.key = element_blank(),
+              plot.margin=unit(c(1,0.5,1,0.5),"cm"),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              axis.title.y.right = element_blank(),
+              axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+              legend.position = "none",
+              legend.title = element_blank(),
+              plot.title = element_text(hjust = 0.5))
+    } else {
+      p <- ggplot(data = plot_dfm, aes(x = .data[["mean_fpr"]], y = .data[["mean_tpr"]], colour = group, group = group, shape = group)) +
+        geom_point(size = 2) +
+        geom_line() +
+        geom_ribbon(aes(ymin = .data[["tprs_lower"]], ymax = .data[["tprs_upper"]],
+                        fill = group), alpha = 0.15, colour = NA) +
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+        scale_x_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+        scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
+        ggtitle("CV ROC-AUC") +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
+        theme_bw() +
+        theme(legend.key = element_blank(),
+              plot.margin=unit(c(1,0.5,1,0.5),"cm"),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+              axis.title.y.right = element_blank(),
+              axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+              legend.position = "bottom",
+              legend.direction = "horizontal",
+              legend.title = element_blank(),
+              plot.title = element_text(hjust = 0.5))
+    }
+
+    # -- export plot --
+    if (is.null(fileprefix)){
+      ggsave(filename = paste0(deparse(substitute(object)),".cv_roc_mean.pdf"), plot = p,
+             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    } else {
+      ggsave(filename = paste0(as.character(fileprefix),".cv_roc_mean.pdf"), plot = p,
+             width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    }
+  } else {
+    p <- NULL
+  }
+
+  # ----- export results to the environment ----
+  out_list <- vector(mode = "list", length = 2)
+  names(out_list) <- c("cv_auc_mean_res", "roc_plot")
+
+  out_list$cv_auc_mean_res <- auc_group_list
+  for (i in 1:length(out_list$cv_auc_mean_res)) {
+    cat(paste0("processing...", i))
+    out_list$cv_auc_mean_res[[names(out_list$cv_auc_mean_res)[i]]]$mean_auc <- cv_roc_mean_list[[names(cv_roc_mean_list)[i]]]$mean_auc
+    out_list$cv_auc_mean_res[[names(out_list$cv_auc_mean_res)[i]]]$sd_auc <- cv_roc_mean_list[[names(cv_roc_mean_list)[i]]]$sd_auc
+  }
+  out_list$roc_plot <- p
+
+  class(out_list) <- "cv_rocauc_mean"
+
+  if (class(object) == 'rbiosvm_nestedcv') {  # export
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_nestedcv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
+    } else {
+      assign(paste(as.character(fileprefix), "_svm_nestedcv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
+    }
+  } else {
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
+    } else {
+      assign(paste(as.character(fileprefix), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
+    }
+  }
+}
+
+
 #' @title rbioClass_svm_perm()
 #'
 #' @description Permutation test for SVM models.
