@@ -2014,8 +2014,6 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
 }
 
 
-
-
 #' @title svm_cv_rocauc_helper
 #'
 #' @description ROC-AUC helper function for cross-validated SVM models
