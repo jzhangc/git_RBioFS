@@ -2157,7 +2157,6 @@ svm_cv_rocauc_helper <- function(object, roc.smooth = FALSE, verbose = TRUE) {
     auc_res_list <- auc_res_list[-which(sapply(auc_res_list, is.null))]
   }
 
-
   # output results
   out_list <- vector(mode = "list", length = 3)
   names(out_list) <- c("cv_res_list", "smooth_roc", "input_model_class")
