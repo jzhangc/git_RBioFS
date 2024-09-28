@@ -79,6 +79,7 @@ Update log
           - function supports S3 class rbiosvm_nestedcv and data.frame
         - substr_right(): extract nth character from string from right
         - na_summary(): NA ratio calculation
+        - svm_cv_rocauc_helper(): ROC-AUC helper function for cross-validated SVM models
       
       - New SVM function(s):
         - rbioClass_svm_cv_roc_auc_mean() added to calculate CV ROC-AUC mean and mean ROC-AUC plot with SD ribbons
@@ -94,6 +95,9 @@ Update log
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
         - A bug fixed for rbioFS() where imputation messaging was incorrect
+        
+      - Other updates:
+        - Outdated dependencies removed
       
 
     0.7.5-1 (March.24.2022)

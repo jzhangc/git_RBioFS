@@ -8,7 +8,6 @@ rbioClass_svm_cv_roc_auc_mean(
   object,
   fileprefix = NULL,
   rocplot = TRUE,
-  plot.smooth = FALSE,
   plot.lineSize = 1,
   plot.display.Title = TRUE,
   plot.titleSize = 10,
@@ -27,13 +26,11 @@ rbioClass_svm_cv_roc_auc_mean(
 )
 }
 \arguments{
-\item{object}{A \code{rbiosvm} object.}
+\item{object}{A \code{cv_auc_res} object.}
 
 \item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
-
-\item{plot.smooth}{If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.}
 
 \item{plot.lineSize}{Line size. Default is \code{1}.}
 
@@ -65,19 +62,13 @@ rbioClass_svm_cv_roc_auc_mean(
 
 \item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
-\item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
-
-\item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
-
-\item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
-
 \item{plot.comps}{Number of comps to plot. Default is \code{1:object$ncomp}}
 
 \item{plot.SymbolSize}{Symbol size. Default is \code{2}.}
 }
 \value{
 1. PDF of the mean ROC-AUC plot
-       2. A \code{v_rocauc_mean} to the environment
+       2. A \code{CV_rocauc_mean} object to the environment
 }
 \description{
 CV ROC-AUC mean analysis and ploting for SVM model, for classification model only.
@@ -93,6 +84,6 @@ The function construct a  list containing data.frames of AUC results over folds 
        The ROC-AUC calcualte details follows the same as \code{\link{rbioClass_svm_roc_auc}}
 
        \code{v_rocauc_mean} items:
-         1. \code{cv_auc_mean_res}: AUC calculation results
+         1. \code{cv_auc_mean_res}: mean CV ROC-AUC calculation results organized by outcome (or \code{y}) groups
          2. \code{roc_plot}: mean ROC-AUC plot
 }
