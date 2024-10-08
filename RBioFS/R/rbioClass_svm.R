@@ -2177,6 +2177,7 @@ svm_cv_rocauc_helper <- function(object, roc.smooth = FALSE, verbose = TRUE) {
 #' @description CV ROC-AUC mean analysis and ploting for SVM model, for classification model only.
 #' @param object A \code{cv_auc_res} object.
 #' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
+#' @param roc.smooth If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
 #' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
@@ -2221,6 +2222,7 @@ svm_cv_rocauc_helper <- function(object, roc.smooth = FALSE, verbose = TRUE) {
 #'
 #' @export
 rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
+                                          roc.smooth = FALSE,
                                           rocplot = TRUE,
                                           plot.lineSize = 1,
                                           plot.display.Title = TRUE, plot.titleSize = 10,
@@ -2231,8 +2233,10 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
                                           plot.Width = 170, plot.Height = 150,
                                           verbose = TRUE) {
   # ---- check the class ----
-  if (!'cv_auc_res' %in% class(object)) stop("object needs to be \"cv_auc_res\" classes.")
-  auc_res_list <- object$cv_res_list
+  # if (!'cv_auc_res' %in% class(object)) stop("object needs to be \"cv_auc_res\" classes.")
+  if (!any(class(object) %in% c('rbiosvm_nestedcv', 'rbiosvm_cv'))) stop("object needs to be \"rbiosvm_nestedcv\" or \"rbiosvm_cv\" classes.")
+  auc_res <- svm_cv_rocauc_helper(object = object, roc.smooth = roc.smooth, verbose = verbose)
+  auc_res_list <- auc_res$cv_res_list
 
   # ---- CV ROC-AUC curve ----
   auc_res_group <- unique(auc_res_list$cv_fold_1$svm.roc_dataframe$group)
@@ -2256,10 +2260,11 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
       cv_tpr_list[[paste0("cv_fold_", j)]] <- approx(roc$fpr, roc$tpr, xout = fpr_mean, ties = "mean")$y
     }
     cv_tpr <- do.call(cbind, cv_tpr_list)
+    cv_fpr <- fpr_mean
     cv_auc <- foreach(j = 1:length(auc_res_list), .combine = "rbind") %do% {
       dfm <- data.frame(auc = as.numeric(auc_res_list[[j]]$svm.roc_object[[group]]$auc), cv_fold = names(auc_res_list)[j])
     }
-    auc_group_list[[i]] <- list(cv_tpr = cv_tpr, cv_auc = cv_auc)
+    auc_group_list[[i]] <- list(cv_tpr = cv_tpr, cv_fpr = cv_fpr, cv_auc = cv_auc)
     # break
   }
   names(auc_group_list) <- auc_res_group
@@ -2375,7 +2380,7 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
 
   class(out_list) <- "cv_rocauc_mean"
 
-  if (object$input_model_class == 'rbiosvm_nestedcv') {  # export
+  if (auc_res$input_model_class == 'rbiosvm_nestedcv') {  # export
     if (is.null(fileprefix)) {
       assign(paste(deparse(substitute(object)), "_svm_nestedcv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
     } else {

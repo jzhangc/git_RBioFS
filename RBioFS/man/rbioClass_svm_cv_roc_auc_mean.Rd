@@ -7,6 +7,7 @@
 rbioClass_svm_cv_roc_auc_mean(
   object,
   fileprefix = NULL,
+  roc.smooth = FALSE,
   rocplot = TRUE,
   plot.lineSize = 1,
   plot.display.Title = TRUE,
@@ -29,6 +30,8 @@ rbioClass_svm_cv_roc_auc_mean(
 \item{object}{A \code{cv_auc_res} object.}
 
 \item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
+
+\item{roc.smooth}{If to smooth the curves. Uses binomial method to smooth the curves. Default is \code{FALSE}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 
