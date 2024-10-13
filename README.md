@@ -45,6 +45,7 @@ Update log
       - Update to SVM function(s)
         - rbioClass_svm_perm() plot output file name fixed
         - rbioClass_svm_cv_roc_auc() updated with compatibility for CV segments without all group levels
+          - rbioClass_svm_cv_roc_auc_v2() added with substantially reduced code redundency
 
       - Updates to PLS-DA function(s)
         - Multivariate Y modelling now possible with rbioFS_plsda
