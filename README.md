@@ -44,7 +44,6 @@ Update log
         
       - Update to SVM function(s)
         - rbioClass_svm_perm() plot output file name fixed
-        - rbioClass_svm_cv_roc_auc() updated with compatibility for CV segments without all group levels
 
       - Updates to PLS-DA function(s)
         - Multivariate Y modelling now possible with rbioFS_plsda
@@ -88,8 +87,9 @@ Update log
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
-        - rbioClass_svm_cv_roc_auc() updated with typo fixes
         - rbioClass_svm_cv_roc_auc() updated with CV model validity check
+        - rbioClass_svm_cv_roc_auc() updated with compatibility for CV segments without all group levels
+        - rbioClass_svm_cv_roc_auc() updated with typo fixes
         - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with features with no variance (i.e. constant value) will be removed from the nested cv training data
         
       - Updates to the FS function(s):
