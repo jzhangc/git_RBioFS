@@ -2365,7 +2365,7 @@ rbioClass_svm_cv_roc_auc_v2 <- function(object, fileprefix = NULL,
 #' @importFrom pROC roc
 #' @importFrom GGally ggpairs
 #' @importFrom grid grid.newpage grid.draw
-#' @importFrom matrixStats rowMeans2
+#' @importFrom matrixStats rowMeans2 rowSds
 #'
 #' @export
 rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
