@@ -2509,6 +2509,7 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
       ggsave(filename = paste0(as.character(fileprefix),".cv_roc_mean.pdf"), plot = p,
              width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
     }
+    grid.draw(p)
   } else {
     p <- NULL
   }
