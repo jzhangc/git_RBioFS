@@ -472,7 +472,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     #   return(out)
     # },
     error = function(e){
-      cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n"))
+      cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n", "\tError message: ", e))
       out <- colnames(fs_training_x)
       return(out)
     })
@@ -942,7 +942,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
       }
     },
     error = function(e){
-      cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n"))
+      cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n", "\tError message: ", e))
       out <- colnames(fs_training_x)
       return(out)
     })

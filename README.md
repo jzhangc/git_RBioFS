@@ -94,6 +94,7 @@ Update log
         
       - Updates to the FS function(s):
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation
+        - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with better error messages
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
         - A bug fixed for rbioFS() where imputation messaging was incorrect
         
