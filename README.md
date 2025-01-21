@@ -83,6 +83,7 @@ Update log
       - New SVM function(s):
         - rbioClass_svm_cv_roc_auc_mean() added to calculate CV ROC-AUC mean and mean ROC-AUC plot with SD ribbons
         - rbioClass_svm_cv_roc_auc_v2() added with substantially reduced code redundency
+        - rbioClass_svm_ncv_fs() updated with parallel computing for SVM modelling during nested CV
     
       - Updates to the SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing

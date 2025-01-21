@@ -260,7 +260,7 @@ print.rbiosvm <- function(x, ...){
 #'
 #' @details
 #'
-#' For now, RBioFS implementation of two-step random forest feature selection is used to select features based on nested cross-validation.
+#' For now, RBioFS implementation of two-step random forest feature selection (rRF-FS) is used to select features, and based on nested cross-validation with SVM.
 #' Resulted features from each nested cross-validation round are voted. Features with votes equal or greater than the cutoff are reported as selected features.
 #'
 #' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
@@ -269,6 +269,11 @@ print.rbiosvm <- function(x, ...){
 #' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median value
 #' for feature count threholding. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
 #'
+#' For parallel computing, the nested CV rRF-FS part uses parallel for the rRF-FS functions \code{rbioFS_rf_initialFS} and \code{rbioFS_rf_SFS},
+#' i.e. the \code{parallelComputing} argument in these two functions. This would lead to as many CPU threads as set likely being used due to the number of trees
+#' often exceeding the number of threads. However, the SVM process is paralleled per CV iteration, e.g. 10-fold CV would use 10 CPU threads, which may lead to
+#' insufficient CPU thread utilization. This problem would not likely be solved unless the SVM dependency \code{e1071} is updated with parallel computing,
+#' or a different SVM dependency that has parallel computing is used.
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
@@ -343,7 +348,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
 
-  ## nested cv
+  ## nested cv-fs
   # processing training data
   dfm <- data.frame(y, x, check.names = FALSE)
   if (model_type == "regression"){
@@ -367,9 +372,9 @@ rbioClass_svm_ncv_fs <- function(x, y,
     random_sample_idx <- NULL
   }
 
-  # nested CV function
-  nestedcv_func <- function(i) {
-    if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
+  # nested CV-FS function
+  nested_cvfs_func <- function(i) {
+    if (verbose) cat(paste0("Iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
     # below: remove columns with constant value
@@ -424,14 +429,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
       # output
       uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
 
-      # update the cv training data
-      # cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
-      # cv_training_x <- cv_training[, -1, drop = FALSE]
-      # cv_training_y <- cv_training[, 1]
       if (length(uni_sig_fs) == 0) {
-        stop("No statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
-        # cv_training_x <- cv_training[, -1]
-        # cv_training_y <- cv_training[, 1]
+        stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
       } else {
         cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
         cv_training_x <- cv_training[, -1, drop = FALSE]
@@ -459,29 +458,45 @@ rbioClass_svm_ncv_fs <- function(x, y,
                     nTree = rf.sfs.ntree,
                     parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
                     plot = FALSE)
-
+      if (verbose) cat("Done!\n")
       if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
       } else {
         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
       }
     },
-    # warning = function(w){
-    #   cat(paste0("Warnings occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "..."))
-    #   out <- colnames(fs_training_x)
-    #   return(out)
-    # },
     error = function(e){
-      cat(paste0("Errors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n", "\tError message: ", e))
+      cat(paste0("\nErrors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n", "\tError message: ", e, "\n"))
       out <- colnames(fs_training_x)
       return(out)
     })
 
+    # processing test data
+    fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
+
+    cv_fs_out <- list(
+      fs = fs,
+      fs_training_x = fs_training_x,
+      cv_training_y = cv_training_y,
+      uni_sig_fs = uni_sig_fs,
+      fs_test = fs_test
+    )
+    return(cv_fs_out)
+  }
+
+  # nested CV-M function: SVM modelling for nested CV iterations
+  nested_cvm_func <- function(i, ...){
+    fs <- nested_cvfs.list[[i]]$fs
+    fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
+    cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
+    uni_sig_fs <- nested_cvfs.list$uni_sig_fs
+
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+
     # processing test data
-    fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
+    fs_test <- nested_cvfs.list[[i]]$fs_test
     if (center.scale){ # using training data mean and sd
       centered_newdata <- t((t(fs_test[, -1]) - cv_m$center.scaledX$meanX) / cv_m$center.scaledX$columnSD)
       fs_test[, -1] <- centered_newdata
@@ -500,10 +515,11 @@ rbioClass_svm_ncv_fs <- function(x, y,
       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
                       cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq, cv_test_data = fs_test)
     }
-    if (verbose) cat("Done!\n")
-    # foreach output
+
+    cat(paste0("cvm iteration ", i, "...Done!\n"))
     return(tmp_out)
   }
+
 
   # computing
   if (verbose){
@@ -511,13 +527,32 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
     cat(paste0("Univariate reduction: ", ifelse(univariate.fs, " ON\n", " OFF\n")))
     cat("\n")
-    cat("Nested cross-validation with feature selection (speed depending on hardware configuration)...\n")
+    cat("Nested cross-validation with feature selection (speed depending on hardware configuration): \n")
+    cat("Nested CV rRF-FS: \n")
   }
-  nested.cv.list <- vector(mode = "list", length = cross.k)
-  nested.cv.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nestedcv_func(i)
-  names(nested.cv.list) <- paste0("cv_fold_", c(1:cross.k))
+  nested_cvfs.list <- vector(mode = "list", length = cross.k)
+  nested_cvfs.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nested_cvfs_func(i)
+  names(nested_cvfs.list) <- paste0("cv_fold_", c(1:cross.k))
+
+  if (verbose) cat(paste0("SVM for nested CV rRF-FS assessment (", cross.k, " iterations)..."))
+  if (parallelComputing) {
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = "FORK")
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    nested_cvm.list <- vector(mode = "list", length = cross.k)
+    nested_cvm.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %dopar% nested_cvm_func(i, ...)
+    names(nested_cvm.list) <- paste0("cv_fold_", c(1:cross.k))
+  } else {
+    nested_cvm.list <- vector(mode = "list", length = cross.k)
+    nested_cvm.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nested_cvm_func(i, ...)
+    names(nested_cvm.list) <- paste0("cv_fold_", c(1:cross.k))
+  }
+  if (verbose) cat("Done!\n")
 
   # below: cv.model.idx: best models index
+  nested.cv.list <- nested_cvm.list  # set up nested.cv.list instead of using new nested_cvm.list for compatibility
   if (model_type == "classification"){
     nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
       nested.cv.list[[i]]$nested.cv.accuracy
@@ -615,6 +650,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cat("\n")
     cat("Final (best) cross-validation selected features: \n")
     cat(selected.features)
+    cat("\n\n")
   }
 
   # run time
