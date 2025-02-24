@@ -78,8 +78,9 @@ Update log
           - function supports S3 class rbiosvm_nestedcv and data.frame
         - substr_right(): extract nth character from string from right
         - na_summary(): NA ratio calculation
+        - rbioClass_svm_cv_roc_auc(): updated verbose behaviour
         - svm_cv_rocauc_helper(): ROC-AUC helper function for cross-validated SVM models
-      
+
       - New SVM function(s):
         - rbioClass_svm_cv_roc_auc_mean() added to calculate CV ROC-AUC mean and mean ROC-AUC plot with SD ribbons
         - rbioClass_svm_cv_roc_auc_v2() added with substantially reduced code redundency

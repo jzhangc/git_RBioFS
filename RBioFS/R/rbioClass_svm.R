@@ -2031,11 +2031,11 @@ rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, filepre
 
   # --- check the validity of and, if needed, process the model list ---
   for (m in names(cv_model_list)) {
-    cat(paste0("processing model: ", m))
+    if (verbose) cat(paste0("processing model: ", m))
     if ("simpleError" %in% class(cv_model_list[[m]])) {
       cv_model_list[[m]] <- NULL
     }
-    cat("\n")
+    if (verbose) cat("\n")
   }
 
   if (length(cv_model_list) < 1) stop("No valid model found in the object.")
