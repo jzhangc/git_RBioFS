@@ -2004,17 +2004,17 @@ svm_cv_rocauc_helper <- function(object, roc.smooth = FALSE, verbose = TRUE) {
 #' rbioClass_svm_cv_roc_auc(object = svm_nested_cv)
 #' }
 #' @export
-rbioClass_svm_cv_roc_auc <- rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
-                                                                 rocplot = TRUE,
-                                                                 plot.smooth = FALSE,
-                                                                 plot.lineSize = 1,
-                                                                 plot.display.Title = TRUE, plot.titleSize = 10,
-                                                                 plot.fontType = "sans",
-                                                                 plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
-                                                                 plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
-                                                                 plot.legendSize = 9, plot.rightsideY = TRUE,
-                                                                 plot.Width = 170, plot.Height = 150,
-                                                                 verbose = TRUE){
+rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
+                                     rocplot = TRUE,
+                                     plot.smooth = FALSE,
+                                     plot.lineSize = 1,
+                                     plot.display.Title = TRUE, plot.titleSize = 10,
+                                     plot.fontType = "sans",
+                                     plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                     plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                     plot.legendSize = 9, plot.rightsideY = TRUE,
+                                     plot.Width = 170, plot.Height = 150,
+                                     verbose = TRUE){
   # ---- argements check ----
   if (!any(class(object) %in% c('rbiosvm_nestedcv', 'rbiosvm_cv'))) stop("object needs to be \"rbiosvm_nestedcv\" or \"rbiosvm_cv\" classes.")
 
