@@ -75,6 +75,8 @@ class weight the inverse of the draw probability: \code{sample size / class size
 When \code{tune.method = "cross"} and the sample size set for \code{tune.cross.k}, the method is effectively "leave-one-out (LOO)" cross-validation.
 Same goes for \code{svm.cross.k} argument.
 
+If \code{svm.cross.k} is set to 0, no cross validation is used for the final modelling.
+
 The center.scale is \code{(x -  col.mean)/col.sd}. Raw data for SVM should be center.scaled. The training data column mean and column sd are used by the
 center.scale process for the test data for ROC-AUC analysis. Usually, we center.scale the training data and use the col.mean and col.sd for center.scaling the test data.
 
