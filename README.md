@@ -41,6 +41,9 @@ Update log
         - rbioReg_plsr_predict() function added for PLS regression analysis
         - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
         - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
+      
+      - New SVM function(s)
+        - rbioClass_roc_auc_interpolation() for ROC-AUC with interpolation 
         
       - Update to SVM function(s)
         - rbioClass_svm_perm() plot output file name fixed
