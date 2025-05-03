@@ -1621,11 +1621,6 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
       newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
     center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
-    # if (object$model.type == "classification") {
-    #   newdata.label <- object$inputY
-    # } else {
-    #   newdata.y <- object$inputY
-    # }
   }
   if (!any(class(newdata) %in% c("data.frame", "matrix")) & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
   if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
@@ -1636,32 +1631,6 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
   }
-  # y <- newdata.y
-  # if (object$model.type == "classification"){
-  #   if (verbose && !is.null(newdata.y)) {
-  #     cat("newdata.y set to NULL for classification model. \n")
-  #     newdata.y <- NULL
-  #   }
-  #   y <- NULL
-  #   if (class(newdata.label) != "factor"){
-  #     if (verbose) cat("newdata.label is converted to factor. \n")
-  #     newdata.label <- factor(newdata.label, levels = unique(newdata.label))
-  #   }
-  #   # reg.group <- NULL
-  # } else {  # for regression
-  #   if (is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression model.")
-  #   if (is.null(y.threshold)) stop("Please set an appropriate value for y.threhold for regression model.")
-  #   if (!is.numeric(y.threshold)) stop("y.threshold only takes a numeric vector.")
-  #   y.threshold <- sort(unique(y.threshold))
-  #   threshold.length <- length(y.threshold)
-  #   reg.group.names <- paste0("case", seq(threshold.length + 1))
-  #   rg <- c(0, y.threshold, ceiling(max(newdata.y)*1.1))
-  #   newdata.label <- cut(y, rg)
-  #   reg.group <- levels(newdata.label)
-  #   names(reg.group) <- reg.group.names
-  #   levels(newdata.label) <- reg.group.names
-  #   stop("ROC-AUC only applies to classification studies.")
-  # }
 
   ## process data
   if (center.scale.newdata){ # using training data mean and sd
@@ -1748,16 +1717,16 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
       if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".svm.roc.pdf...", sep = ""))  # initial message
 
       plt <- ggplot(data = roc_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
-        geom_line(aes(linetype = group), size = plot.lineSize) +
+        geom_line(aes(linetype = group), linewidth = plot.lineSize) +
         geom_point(aes(shape = group), size = plot.SymbolSize) +
-        geom_abline(intercept = 0) +
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
         ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel)
 
       if (plot.rightsideY) {
         plt <- plt +
-          scale_y_continuous(sec.axis = dup_axis()) +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
                 panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
@@ -1770,6 +1739,7 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
                 axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
       } else {
         plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
                 panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
@@ -1793,6 +1763,293 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       } else {
         ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      }
+      grid.draw(plt)
+      if (verbose) cat("Done!\n")
+    }
+  }
+}
+
+
+#' @title rbioClass_svm_roc_auc_inter
+#'
+#' @description Interporlated ROC-AUC analysis and ploting for SVM model, for classification model only.
+#' @param object A \code{rbiosvm} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
+#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
+#' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
+#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
+#' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
+#' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"1 - specificity"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"sensitivity"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return Prints AUC values in the console. And a pdf file for ROC plot. The function also exports a ROC results list as a \code{svm_roc_auc_inter} class to the environment.
+#'         The \code{svm_roc_auc_inter} class is a subclass to \code{svm_roc_auc}, meaning it contains all the items from the latter:
+#'
+#'         \code{model.type}
+#'         \code{y.threshold}
+#'         \code{regression.categories}
+#'         \code{svm.roc_object}
+#'         \code{svm.roc_dataframe}
+#'         \code{input.newdata}
+#'         \code{input.newdata.y}
+#'         \code{input.newdata.label}
+#'         \code{newdata.center.scaled}
+#'
+#'         with the additional interporlation item:
+#'         \code{svm.interporlated_roc_object}
+#'
+#' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
+#'
+#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object, and the training data is automatically cneter.scaled.
+#'
+#'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to ROC-AUC analysis.
+#'          The option \code{center.scaled.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+#'
+#'          For regression models, it is ok to provide multiple thresholds for \code{y.threshold}.
+#'
+#'          Along with the data frame, the \code{svm_roc_auc} output includes the \code{roc} object from the \code{pROC} package, with which the stats can be done to compare ROCs.
+#'
+#'          Also: a ROC curve with AUC == 1 is always 1-1 for 95% CI and can be misleading.
+#'
+#'          Interporlation is computed with the \code{approx} function, with FPR set at 0-1, with 100 intervals.
+#'
+#' @import ggplot2
+#' @import foreach
+#' @importFrom pROC roc
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @examples
+#' \dontrun{
+#' rbioClass_svm_roc_auc_itner(object = svm_m, newdata = svm_test[, -1],
+#'                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
+#' }
+#' @export
+rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
+                                        newdata = NULL, newdata.label = NULL,
+                                        center.scale.newdata = TRUE,
+                                        rocplot = TRUE,
+                                        plot.smooth = FALSE,
+                                        plot.SymbolSize = 2, plot.lineSize = 1,
+                                        plot.display.Title = TRUE, plot.titleSize = 10,
+                                        plot.fontType = "sans",
+                                        plot.xLabel = "1 - specificity", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                        plot.yLabel = "sensitivity", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                        plot.legendSize = 9, plot.rightsideY = TRUE,
+                                        plot.Width = 170, plot.Height = 150,
+                                        verbose = TRUE){
+  ## argument check
+  if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
+  if (object$model.type != "classification") stop("object needs to be a \"classification\" model")
+  if (is.null(newdata)) {
+    cat("No newdata input, proceed with training data.\n\n")
+    newdata <- object$inputX
+    newdata.label <- object$inputY
+    if (any(class(newdata.label) != "factor")){
+      if (verbose) cat("newdata.label is converted to factor. \n")
+      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+    }
+    center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
+  }
+  if (!any(class(newdata) %in% c("data.frame", "matrix")) & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
+  if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
+    if (verbose) cat("newdata converted to a matrix object.\n")
+    newdata <- as.matrix(sapply(newdata, as.numeric))
+  }
+  if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same number of variables as the training data.")
+  if (center.scale.newdata){
+    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
+  }
+
+  ## process data
+  if (center.scale.newdata){ # using training data mean and sd
+    if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
+    centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    test <- centered_newdata
+  } else {
+    centered_newdata <- NULL
+    test <- newdata
+  }
+
+  ## ROC-AUC calculation
+  pred <- predict(object, newdata = test, decision.values = TRUE, probability = TRUE)  # prediction
+  pred_prob <- attr(pred, "probabilities")
+  outcome <- newdata.label  # origial label
+
+  # auc
+  roc_auc_list <- vector(mode = "list", length = length(levels(outcome)))
+  roc_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
+    response <- outcome
+    predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
+    levels(response)[-i] <- "others"
+    # predictor <- dummy(pred)
+    # predictor <- as.matrix(predictor[, i], ncol = 1)
+    splt <- split(predictor, response)  # split function splist array according to a factor
+    controls <- splt$others
+    cases <- splt[[levels(outcome)[i]]]
+    if (length(cases) && length(controls)) {  # check if there are any zero controls or zero cases
+      perf <- tryCatch(suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = plot.smooth, ci= TRUE))),
+                       error = function(err){
+                         cat("Curve not smoothable. Proceed without smooth.\n")
+                         suppressWarnings(suppressMessages(pROC::roc(controls = controls, cases = cases, smooth = FALSE, ci= TRUE)))
+                       })
+      if (length(levels(outcome)) == 2){
+        cat(paste0("AUC - ", levels(outcome)[i], ": ", perf$auc, "\n"))
+      } else {
+        cat(paste0(" AUC - ", levels(outcome)[i], " (vs Others): ", perf$auc, "\n"))
+      }
+      perf
+    } else {
+      return(NULL)
+    }
+  }
+  names(roc_auc_list) <- unique(outcome)
+
+  roc_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
+    perf <- roc_auc_list[[i]]
+    fpr <- 1 - perf$specificities
+    tpr <- perf$sensitivities
+    thresholds <- perf$thresholds
+    mtx <- cbind(fpr, tpr, thresholds)
+    if (length(levels(outcome)) == 2){
+      df <- data.frame(mtx, group = rep(levels(outcome)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+    } else {
+      df <- data.frame(mtx, group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+    }
+    df <- df[order(df$tpr), ]
+    return(df)
+  }
+
+  ## return
+  if (any(sapply(roc_auc_list, is.null))) {
+    cat("Either no control or no case obesevated. ROC-AUC fails. \n")
+    out <- NULL
+  } else {
+    # construct a  list containing data.frames of AUC results over folds per group
+    # for every fold: list = roc dfm w cols: tpr, fpr, folds, auc dfm w cols: auc, folds
+    # use interpolation for CV ROC: set fpr seq(0, 1, length.out = 100), and interpolated tpr
+    # to make sure all ROCs from different CV classifiers to
+    # have the same length
+    # interpolation for ROC thus is also used to plot ROCs for different types classifiers
+    # for comparison
+    auc_res_group <- names(roc_auc_list)
+    fpr_init <- seq(0, 1, length.out = 100)
+    auc_inter_list <- vector(mode = "list", length = length(auc_res_group))
+    for (i in 1:length(auc_res_group)){
+      group_label <- auc_res_group[[i]]
+      if (verbose) cat(paste0("processing group label: ",  group_label, "\n"))
+
+      # original roc-auc
+      tpr <- roc_auc_list[[i]]$sensitivities
+      fpr <- 1 - roc_auc_list[[i]]$specificities
+      auc <- roc_auc_list[[i]]$auc
+      thresholds <- roc_auc_list[[i]]$thresholds
+
+      tpr_inter <- approx(fpr, tpr, xout = fpr_init, ties = "mean")$y
+      fpr_inter <- fpr_init
+
+      # interporlated roc-auc
+      auc_inter_list[[i]] <- list(og_roc_auc = list(tpr = tpr, fpr = fpr, thresholds = thresholds),
+                                  tpr_inter = tpr_inter,
+                                  fpr_inter = fpr_inter)
+      # break
+    }
+    names(auc_inter_list) <- auc_res_group
+
+    # export
+    out <- list(model.type = object$model.type,
+                svm.roc_object = roc_auc_list,
+                svm.interporlated_roc_object = auc_inter_list,
+                svm.roc_dataframe = roc_dfm,
+                input.newdata = newdata,
+                input.newdata.label = newdata.label,
+                newdata.center.scaled = centered_newdata)
+    class(out) <- c("svm_roc_auc", "svm_roc_auc_inter")
+
+
+    if (is.null(fileprefix)) {  # export
+      assign(paste0(deparse(substitute(object)), "_svm_roc_auc_inter"), out, envir = .GlobalEnv)
+    } else {
+      assign(paste0(as.character(fileprefix), "_svm_roc_auc_inter"), out, envir = .GlobalEnv)
+    }
+
+    ## plotting
+    if (rocplot){
+      if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)),".svm.roc.pdf...", sep = ""))  # initial message
+
+      auc_inter_list$high$tpr_inter
+      roc_inter_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
+        roc_inter <- auc_inter_list[[i]]
+        fpr <- roc_inter$fpr_inter
+        tpr <- roc_inter$tpr_inter
+        mtx <- cbind(fpr, tpr)
+        if (length(levels(outcome)) == 2){
+          df <- data.frame(mtx, group = rep(levels(outcome)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+        } else {
+          df <- data.frame(mtx, group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+        }
+        df <- df[order(df$tpr), ]
+        return(df)
+      }
+
+      plt <- ggplot(data = roc_inter_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
+        scale_x_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+        geom_line(aes(linetype = group), linewidth = plot.lineSize) +
+        geom_point(aes(shape = group), size = plot.SymbolSize) +
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+        ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel)
+
+      if (plot.rightsideY) {
+        plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      }
+
+      if (is.null(fileprefix)) {
+        ggsave(filename = paste(deparse(substitute(object)),".svm.roc_inter.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      } else {
+        ggsave(filename = paste(as.character(fileprefix),".svm.roc_inter.pdf", sep = ""), plot = plt,
                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       }
       grid.draw(plt)
@@ -2157,7 +2414,7 @@ rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
         plot_dfm_g <- plot_dfm[plot_dfm$group %in% unique(plot_dfm$group)[i], ]
 
         plt <- ggplot(data = plot_dfm_g, aes(x = fpr, y = tpr, group = cv_fold, colour = cv_fold)) +
-          geom_line(aes(linetype = cv_fold), size = plot.lineSize) +
+          geom_line(aes(linetype = cv_fold), linewidth = plot.lineSize) +
           geom_abline(intercept = 0) +
           ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
           xlab(plot.xLabel) +
