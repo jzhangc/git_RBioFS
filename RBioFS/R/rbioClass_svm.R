@@ -2017,7 +2017,6 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
         return(df)
       }
 
-      dev.off()
       plt <- ggplot(data = roc_inter_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
         scale_x_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
         geom_line(aes(linetype = group), linewidth = plot.lineSize) +
