@@ -2001,14 +2001,23 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
         tpr <- roc_inter$tpr_inter
         mtx <- cbind(fpr, tpr)
         if (length(levels(outcome)) == 2){
+          init_df <- data.frame(fpr = 0, tpr = 0,  group = levels(outcome)[i])
+          end_df <- data.frame(fpr = 1, tpr = 1,  group = levels(outcome)[i])
           df <- data.frame(mtx, group = rep(levels(outcome)[i], times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+          df <- rbind(init_df, df)
+          df <- rbind(df, end_df)
         } else {
+          init_df <- data.frame(fpr = 0, tpr = 0,  group = paste0(levels(outcome)[i], " (vs Others)"))
+          end_df <- data.frame(fpr = 1, tpr = 1,  group = paste0(levels(outcome)[i], " (vs Others)"))
           df <- data.frame(mtx, group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = nrow(mtx)), row.names = NULL, check.names = FALSE)
+          df <- rbind(init_df, df)
+          df <- rbind(df, end_df)
         }
         df <- df[order(df$tpr), ]
         return(df)
       }
 
+      dev.off()
       plt <- ggplot(data = roc_inter_dfm, aes(x = fpr, y = tpr, group = group, colour = group)) +
         scale_x_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
         geom_line(aes(linetype = group), linewidth = plot.lineSize) +
@@ -2739,12 +2748,17 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
   }
   names(cv_roc_mean_list) <- names(auc_group_list)
 
-
   # ------ plotting ------
   if (rocplot) {
     plot_dfm <- foreach(i = 1:length(cv_roc_mean_list), .combine = "rbind") %do% {
+      init_d <- data.frame(mean_fpr = 0, mean_tpr = 0,
+                           tprs_upper = 0, tprs_lower = 0)
+      end_d <- data.frame(mean_fpr = 1, mean_tpr = 1,
+                          tprs_upper = 1, tprs_lower = 1)
       d <- data.frame(mean_fpr = cv_roc_mean_list[[i]]$mean_fpr, mean_tpr = cv_roc_mean_list[[i]]$mean_tpr,
                       tprs_upper = cv_roc_mean_list[[i]]$tprs_upper, tprs_lower = cv_roc_mean_list[[i]]$tprs_lower)
+      d <- rbind(init_d, d)
+      d <- rbind(d, end_d)
       d$group <- as.factor(rep(names(cv_roc_mean_list)[i], times = nrow(d)))
       d
     }
