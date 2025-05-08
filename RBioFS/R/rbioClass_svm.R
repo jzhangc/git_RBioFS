@@ -1207,7 +1207,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 
 #' @title rbioClass_svm_cv
 #'
-#' @description Cross-validation assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
+#' @description Cross-validation modelling and assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
@@ -1224,61 +1224,66 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a CV SVM model object: \code{rbiosvm_cv}.
 #'
-#' Additional items for \code{rbiosvm_cv}:
+#' Items for \code{rbiosvm_cv}:
 #'
-#' \code{univariate.fs}
+#'      \code{univariate.fs}
 #'
-#' \code{cv.fold}: number of (outer) cross-validation fold
+#'      \code{cv.fold}: number of (outer) cross-validation fold
 #'
-#' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
+#'      \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
 #'
-#' \code{model.type}: the SVM model type, "classification" or "regression".
+#'      \code{model.type}: the SVM model type, "classification" or "regression".
 #'
-#' \code{tot.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
+#'      \code{tot.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
 #'
-#' \code{tot.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
+#'      \code{tot.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
 #'
-#' \code{tot.rsq.summary}: total (i.e. mean) nested cross-validation R2, if \code{model_type = "regression"}
+#'      \code{tot.rsq.summary}: total (i.e. mean) nested cross-validation R2, if \code{model_type = "regression"}
 #'
-#' \code{accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
+#'      \code{accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
 #'
-#' \code{RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
+#'      \code{RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
 #'
-#' \code{rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
+#'      \code{rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
 #'
-#' \code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
+#'      \code{cv.models}: all the CV SVM models
 #'
-#' \code{best.method}: method to determine the best model.
+#'      \code{final.cv.models}: the CV SVM models selected by the \code{cross.best.model.method}.
+#'                              when \code{cross.best.model.method = NULL}, \code{final.cv.models} is the same as \code{cv.models}.
 #'
-#' \code{best.index}: index of the best models in the total model list
+#'      \code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
 #'
-#' \code{best.acc.summary}
+#'      \code{best.method}: method to determine the best model.
 #'
-#' \code{best.rmse.summary}
+#'      \code{best.index}: index of the best models in the total model list
 #'
-#' \code{best.rsq.summary}
+#'      \code{best.acc.summary}
 #'
-#' \code{best.accu}
+#'      \code{best.rmse.summary}
 #'
-#' \code{best.rmse}
+#'      \code{best.rsq.summary}
 #'
-#' \code{best.rsq}
+#'      \code{best.accu}
 #'
-#' \code{tune.method}: (inner) loop method for SVM grid search
+#'      \code{best.rmse}
 #'
-#' \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
+#'      \code{best.rsq}
 #'
-#' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+#'      \code{tune.method}: (inner) loop method for SVM grid search
 #'
-#' \code{run.time}: total run time
+#'      \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
+#'
+#'      \code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
+#'
+#'      \code{run.time}: total run time
 #'
 #' @details
 #'
-#' This function is very simular to \code{\link{rbioClass_svm_ncv_fs}}.
+#' This function is very similar to \code{\link{rbioClass_svm_ncv_fs}}.
 #' However, this function is intended for evaluating the final model, whereas the latter is for feature selection.
 #'
 #' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-#' for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+#' for feature count threshold. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
@@ -1386,6 +1391,7 @@ rbioClass_svm_cv <- function(x, y,
     }
     pred <- predict(cv_m, newdata = cv_test[, -1])
     if (model_type == "classification"){
+      cv_test$y <- droplevels(cv_test$y)
       accu <- sum(diag(table(pred, cv_test$y))) / length(cv_test$y)  # accuracy = total TP / total (TP: true positive)
       tmp_out <- list(cv_svm_model = cv_m, cv.accuracy = accu, cv_test_data = cv_test)
     } else {
@@ -1514,6 +1520,7 @@ rbioClass_svm_cv <- function(x, y,
               RMSE = rmse,
               rsq = rsq,
               cv.models = cv.list,
+              final.cv.models = final.cv.list,
               best.method = cross.best.model.method,
               best.index = cv.model.idx,
               best.accuracy.summary = best.acc.summary,
@@ -2700,19 +2707,32 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
   # for comparison
   fpr_mean <- seq(0, 1, length.out = 100)
   auc_group_list <- vector(mode = "list", length = length(auc_res_group))
+
   for (i in 1:length(auc_res_group)){
     group_label <- auc_res_group[[i]]
     group <- gsub(" (vs Others)", "", auc_res_group[[i]], fixed = TRUE)
     if (verbose) cat(paste0("processing group: ", group, ", group label: ",  group_label, "\n"))
     cv_tpr_list <- vector(mode = "list",  length = length(auc_res_list))
+    names(cv_tpr_list) <- paste0("cv_fold_", 1:length(cv_tpr_list))
     for (j in 1:length(cv_tpr_list)) {
       roc <- auc_res_list[[j]]$svm.roc_dataframe[auc_res_list[[j]]$svm.roc_dataframe$group %in% group_label, ]
-      cv_tpr_list[[paste0("cv_fold_", j)]] <- approx(roc$fpr, roc$tpr, xout = fpr_mean, ties = "mean")$y
+      # cv_tpr_list[[paste0("cv_fold_", j)]] <- approx(roc$fpr, roc$tpr, xout = fpr_mean, ties = "mean")$y
+      if (nrow(roc) == 0) {
+        cv_tpr_list[[paste0("cv_fold_", j)]] <- NULL
+      } else {
+        cv_tpr_list[[paste0("cv_fold_", j)]] <- approx(roc$fpr, roc$tpr, xout = fpr_mean, ties = "mean")$y
+      }
     }
     cv_tpr <- do.call(cbind, cv_tpr_list)
     cv_fpr <- fpr_mean
-    cv_auc <- foreach(j = 1:length(auc_res_list), .combine = "rbind") %do% {
-      dfm <- data.frame(auc = as.numeric(auc_res_list[[j]]$svm.roc_object[[group]]$auc), cv_fold = names(auc_res_list)[j])
+
+    cv_auc <- foreach(m = 1:length(auc_res_list), .combine = "rbind") %do% {
+      tryCatch(
+        dfm <- data.frame(auc = as.numeric(auc_res_list[[m]]$svm.roc_object[[group]]$auc), cv_fold = names(auc_res_list)[m]),
+        error = function(e) {
+          dfm <- NULL
+        }
+      )
     }
     auc_group_list[[i]] <- list(cv_tpr = cv_tpr, cv_fpr = cv_fpr, cv_auc = cv_auc)
     # break

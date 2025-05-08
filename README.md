@@ -98,6 +98,8 @@ Update log
         - rbioClass_svm_cv_roc_auc() updated with typo fixes
         - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with features with no variance (i.e. constant value) will be removed from the nested cv training data
         - rbioClass_svm_ncv_fs() updated with parallel computing for SVM modelling during nested CV
+        - "rbiosvm_cv" class now includes "final.cv.models" filtered by a "best model method" parameter
+        - "rbiosvm_cv" class updated with correct cv test data "y" levels
         
       - Updates to the FS function(s):
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation

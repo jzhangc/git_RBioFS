@@ -53,63 +53,68 @@ rbioClass_svm_cv(
 \value{
 Returns a CV SVM model object: \code{rbiosvm_cv}.
 
-Additional items for \code{rbiosvm_cv}:
+Items for \code{rbiosvm_cv}:
 
-\code{univariate.fs}
+     \code{univariate.fs}
 
-\code{cv.fold}: number of (outer) cross-validation fold
+     \code{cv.fold}: number of (outer) cross-validation fold
 
-\code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
+     \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
 
-\code{model.type}: the SVM model type, "classification" or "regression".
+     \code{model.type}: the SVM model type, "classification" or "regression".
 
-\code{tot.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
+     \code{tot.accuracy.summary}: total (i.e. mean) nested cross-validation accuracy, if \code{model_type = "classification"}
 
-\code{tot.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
+     \code{tot.RMSE.summary}: total (i.e. mean) nested cross-validation RMSE, if \code{model_type = "regression"}
 
-\code{tot.rsq.summary}: total (i.e. mean) nested cross-validation R2, if \code{model_type = "regression"}
+     \code{tot.rsq.summary}: total (i.e. mean) nested cross-validation R2, if \code{model_type = "regression"}
 
-\code{accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
+     \code{accuracy}: accuracy for each cross-validation iteration, if \code{model_type = "classification"}
 
-\code{RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
+     \code{RMSE}: RMSE for each cross-validation iteration, if \code{model_type = "regression"}
 
-\code{rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
+     \code{rsq}: R2 for each cross-validation iteration, if \code{model_type = "regression"}
 
-\code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
+     \code{cv.models}: all the CV SVM models
 
-\code{best.method}: method to determine the best model.
+     \code{final.cv.models}: the CV SVM models selected by the \code{cross.best.model.method}.
+                             when \code{cross.best.model.method = NULL}, \code{final.cv.models} is the same as \code{cv.models}.
 
-\code{best.index}: index of the best models in the total model list
+     \code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
 
-\code{best.acc.summary}
+     \code{best.method}: method to determine the best model.
 
-\code{best.rmse.summary}
+     \code{best.index}: index of the best models in the total model list
 
-\code{best.rsq.summary}
+     \code{best.acc.summary}
 
-\code{best.accu}
+     \code{best.rmse.summary}
 
-\code{best.rmse}
+     \code{best.rsq.summary}
 
-\code{best.rsq}
+     \code{best.accu}
 
-\code{tune.method}: (inner) loop method for SVM grid search
+     \code{best.rmse}
 
-\code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
+     \code{best.rsq}
 
-\code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+     \code{tune.method}: (inner) loop method for SVM grid search
 
-\code{run.time}: total run time
+     \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
+
+     \code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
+
+     \code{run.time}: total run time
 }
 \description{
-Cross-validation assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
+Cross-validation modelling and assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 }
 \details{
-This function is very simular to \code{\link{rbioClass_svm_ncv_fs}}.
+This function is very similar to \code{\link{rbioClass_svm_ncv_fs}}.
 However, this function is intended for evaluating the final model, whereas the latter is for feature selection.
 
 When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+for feature count threshold. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 
