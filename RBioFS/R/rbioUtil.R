@@ -606,3 +606,153 @@ na_summary <- function(data, by = c("row", "col")) {
   }
   return(out)
 }
+
+
+#' @title rbio_shap_svm_label_prob
+#' @description
+#' Helper function to extract probability vectors from svm model predictions.
+#' @param object A SVM model object, in \code{svm} or \code{rbiosvm} classes.
+#' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
+#' @param col_idx Probability column (i.e. label or outcome) index or name for which the probability vector is extracted.
+#' @param ... Additional parameters for the \code{e1071:::predict.svm} method.
+#' @details
+#'    \code{newdata} should not include outcome column
+#' @return Vector or data frame of prediction probabilities.
+#' @import e1071
+rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
+  # --- arg check ---
+  if (!any(class(object) %in% c("rbiosvm", "svm"))) stop("object has to be a \"svm\" or \"rbiosvm\" class.\n")
+
+  # --- prediction ---
+  pred <- e1071:::predict.svm(object, newdata, probability = TRUE, ...)
+  prob_dfm <- attr(pred, "probabilities")
+
+  # --- prob extraction ---
+  if (is.null(col_idx)) {
+    o <- prob_dfm
+  } else {
+    o <- prob_dfm[, col_idx]
+  }
+  return(o)
+}
+
+
+#' @title shap_g_theme_helper
+#' @description
+#'    A helper function to set the plot themes for the \link\code{rbioClass_svm_shap_aggreated}} function.
+#' @import ggplot2
+#' @return \code{ggplot2} graph object.
+shap_g_theme_helper <- function(g,
+                                plot.SymbolSize = 2, plot.lineSize = 1,
+                                plot.display.Title = TRUE, plot.title = "SHAP", plot.titleSize = 10,
+                                plot.fontType = "sans",
+                                plot.xLabel = "SHAP value", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                plot.yLabel = "Features", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                plot.legendPosition = "right", plot.legendSize = 9,
+                                plot.Width = 170, plot.Height = 150) {
+  g <- g + ggtitle(ifelse(plot.display.Title, plot.title, NULL)) +
+    xlab(plot.xLabel) +
+    ylab(plot.yLabel) +
+    theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+          plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+          axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+          axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+          legend.position = plot.legendPosition, legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+          legend.key = element_blank(),
+          axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+          axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 1))
+
+  g
+}
+
+
+#' @title sv_importance_shapviz
+#' @description
+#' A alternative version of \code{sv_importance} function from \code{shapviz} package
+#'
+#' @details
+#'    Mainly to add custom graphic settings to the original function
+#' @import shapviz
+#' @return \code{ggplot2} graph object.
+sv_importance_shapviz <- function(object, kind = c("bar", "beeswarm", "both", "no"),
+                                  max_display = 15L, fill = "#fca50a", bar_width = 2/3,
+                                  bee_width = 0.4, bee_adjust = 0.5,
+                                  viridis_args = getOption("shapviz.viridis_args"),
+                                  color_bar_title = "Feature value",
+                                  show_numbers = FALSE, format_fun = format_max,
+                                  number_size = 3.2, sort_features = TRUE, ...) {
+  stopifnot("format_fun must be a function" = is.function(format_fun))
+  kind <- match.arg(kind)
+  imp <- shapviz:::.get_imp(get_shap_values(object), sort_features = sort_features)
+
+  if (kind == "no") {
+    return(imp)
+  }
+
+  # Deal with too many features
+  if (ncol(object) > max_display) {
+    imp <- imp[seq_len(max_display)]
+  }
+  ord <- names(imp)
+  object <- object[, ord]  # not required for kind = "bar"
+
+  # ggplot will need to work with data.frame
+  imp_df <- data.frame(feature = factor(ord, rev(ord)), value = imp)
+  is_bar <- kind == "bar"
+  if (is_bar) {
+    p <- ggplot2::ggplot(imp_df, ggplot2::aes(x = value, y = feature)) +
+      ggplot2::geom_bar(fill = fill, width = bar_width, stat = "identity", colour = "black", alpha = 0.1, ...) +
+      ggplot2::labs(x = "mean(|SHAP value|)", y = ggplot2::element_blank())
+  } else {
+    # Prepare data.frame for beeswarm plot
+    S <- get_shap_values(object)
+    X <- shapviz:::.scale_X(get_feature_values(object))
+    df <- transform(
+      as.data.frame.table(S, responseName = "value"),
+      feature = factor(Var2, levels = rev(ord)),
+      color = as.data.frame.table(X)$Freq
+    )
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = value, y = feature))
+    if (kind == "both") {
+      p <- p +
+        ggplot2::geom_bar(
+          data = imp_df, fill = fill, width = bar_width, stat = "identity",  colour = "black", alpha = 0.1,
+        )
+    }
+    p <- p +
+      ggplot2::geom_vline(xintercept = 0, color = "darkgray") +
+      ggplot2::geom_point(
+        ggplot2::aes(color = color),
+        position = shapviz:::position_bee(width = bee_width, adjust = bee_adjust),
+        ...
+      ) +
+      shapviz:::.get_color_scale(
+        viridis_args = viridis_args,
+        bar = !is.null(color_bar_title),
+        ncol = length(unique(df$color))   # Special case of constant feature values
+      ) +
+      ggplot2::labs(
+        x = "SHAP value", y = ggplot2::element_blank(), color = color_bar_title
+      ) +
+      ggplot2::theme(legend.box.spacing = grid::unit(0, "pt"))
+  }
+  if (show_numbers) {
+    p <- p +
+      ggplot2::geom_text(
+        data = imp_df,
+        ggplot2::aes(
+          x = if (is_bar) value + max(value) / 60 else
+            min(df$value) - diff(range(df$value)) / 20,
+          label = format_fun(value)
+        ),
+        hjust = !is_bar,
+        size = number_size
+      ) +
+      ggplot2::scale_x_continuous(
+        expand = ggplot2::expansion(mult = 0.05 + c(0.12 *!is_bar, 0.09 * is_bar))
+      )
+  }
+  p
+}

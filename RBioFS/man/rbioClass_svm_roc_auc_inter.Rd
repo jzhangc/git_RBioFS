@@ -37,7 +37,7 @@ rbioClass_svm_roc_auc_inter(
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 
-\item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
+\item{newdata.label}{The corresponding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
 
 \item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
 
@@ -93,11 +93,11 @@ Prints AUC values in the console. And a pdf file for ROC plot. The function also
         \code{input.newdata.label}
         \code{newdata.center.scaled}
 
-        with the additional interporlation item:
+        with the additional interpolation item:
         \code{svm.interporlated_roc_object}
 }
 \description{
-Interporlated ROC-AUC analysis and ploting for SVM model, for classification model only.
+Interpolated ROC-AUC analysis and ploting for SVM model, for classification model only.
 }
 \details{
 Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.

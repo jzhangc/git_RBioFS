@@ -1781,11 +1781,11 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
 
 #' @title rbioClass_svm_roc_auc_inter
 #'
-#' @description Interporlated ROC-AUC analysis and ploting for SVM model, for classification model only.
+#' @description Interpolated ROC-AUC analysis and ploting for SVM model, for classification model only.
 #' @param object A \code{rbiosvm} object.
 #' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
-#' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
+#' @param newdata.label The corresponding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
@@ -1819,7 +1819,7 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
 #'         \code{input.newdata.label}
 #'         \code{newdata.center.scaled}
 #'
-#'         with the additional interporlation item:
+#'         with the additional interpolation item:
 #'         \code{svm.interporlated_roc_object}
 #'
 #' @details Uses pROC module to calculate ROC. The function supports more than two groups or more than one threshold for classification and regression model.
@@ -3397,4 +3397,108 @@ rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
 
   # output
   return(out_r2)
+}
+
+
+#' @title rbioClass_svm_shap_aggregated
+#' @description Aggregated SHAP analysis for SVM model.
+#'
+#' @details
+#'    1. This fucntion relies on \code{kernelshap} and \code{shapviz} logics.
+#'    2. (To be tested) The function should work with regression SVM models as well.
+#' @import shapviz
+#' @importFrom kernelshap kernelshap
+#' @importFrom ggpubr ggarrange
+#' @export
+rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
+                                          parallelComputing = FALSE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                          plot = TRUE,
+                                          plot.filename.prefix = NULL,
+                                          plot.SymbolSize = 2, plot.lineSize = 1,
+                                          plot.display.Title = TRUE, plot.titleSize = 10,
+                                          plot.fontType = "sans",
+                                          plot.bee.colorscale = "A", plot.bar.color = "blue",
+                                          plot.xLabel = "SHAP value", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                          plot.yLabel = "Features", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                          plot.legendPosition = "right", plot.legendSize = 9,
+                                          plot.Width = 15, plot.Height = 10,
+                                          verbose = TRUE) {
+  # --- arg check ---
+  if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
+
+  # --- shap calculation ---
+  if (parallelComputing) {
+    pc <- TRUE
+    # set up cpu cluster
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+  } else {
+    pc <- FALSE
+  }
+
+  if (model$model.type == "classification") {
+    y_labels <- as.character(unique(svm_m$inputY))
+    ks_list <- vector(mode = "list", length = length(y_labels))
+
+    for (i in 1:length(y_labels)) {
+      l <- y_labels[i]
+      ks_list[[i]] <- kernelshap(svm_m, X = X,
+                                 bg_X = bg_X,
+                                 pred_fun = function(model, X) rbio_shap_svm_label_prob(svm_m, X, col_idx = l),
+                                 parallel = pc,
+                                 verbose = verbose)
+      names(ks_list)[i] <- l
+      # break
+    }
+  } else {
+    y_labels <- svm_m$inputY
+    ks_list <- vector(mode = "list", length = 1)
+    ks_list[[1]] <- kernelshap(svm_m, X = X,
+                               bg_X = bg_X,
+                               pred_fun = as.numeric(e1071:::predict.svm(model, X)),
+                               parallel = pc,
+                               verbose = verbose)
+    names(ks_list) <- "y"
+  }
+
+  # --- plotting ---
+  if (plot) {
+    g_list <- vector(mode = "list", length = length(ks_list))
+    opt <- list(begin = 0.05, end = 0.85, option = plot.bee.colorscale)
+    for (i in 1:length(ks_list)) {
+      ks <- ks_list[[i]]
+      s <- shapviz(ks)
+      g <- sv_importance_shapviz(s, kind = "both", show_numbers = TRUE, viridis_args = opt, fill = "green")
+      g <- shap_g_theme_helper(g,
+                               plot.SymbolSize = plot.SymbolSize, plot.lineSize = plot.lineSize,
+                               plot.display.Title = plot.display.Title, plot.titleSize = plot.titleSize,
+                               plot.title = paste0("Class: ", names(ks_list[i])),
+                               plot.fontType = plot.fontType,
+                               plot.xLabel = plot.xLabel, plot.xLabelSize = plot.xLabelSize, plot.xTickLblSize = plot.xTickLblSize,
+                               plot.yLabel = plot.yLabel, plot.yLabelSize = plot.yLabelSize, plot.yTickLblSize = plot.yTickLblSize,
+                               plot.legendPosition = plot.legendPosition, plot.legendSize = plot.legendSize,
+                               plot.Width = plot.Width, plot.Height = plot.Height)
+      g_list[[i]] <- g
+      names(g_list)[i] <- names(ks_list)[i]
+    }
+    g_aggreg <- ggarrange(plotlist = g_list,
+                          common.legend = TRUE, legend = "right")
+    plot_filename <- paste0(plot.filename.prefix, "_shap_aggregated_plot.pdf")
+    ggsave(plot = g_aggreg, filename = plot_filename,
+           device = "pdf", units = "in",
+           width = plot.Width, height = plot.Height, dpi= 600)
+    if (verbose) cat(paste0("\nplot saved to file: ", plot_filename))
+  } else {
+    g_list <- NULL
+  }
+
+  # --- output ---
+  o <- list(
+    shap_ks = ks_list,
+    shap_plot = g_list
+  )
+  class(o) <- "rbio_shap"
+  return(o)
 }

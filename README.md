@@ -42,9 +42,6 @@ Update log
         - All relevant classification only functions now only accepts "rbiomvr" object with model.type = "classification"
         - A bug fixed for rbioReg_plsr_perm() where the intercept term wasn't excluded
       
-      - New SVM function(s)
-        - rbioClass_roc_auc_interpolation() for ROC-AUC with interpolation 
-        
       - Update to SVM function(s)
         - rbioClass_svm_perm() plot output file name fixed
 
@@ -62,7 +59,14 @@ Update log
         - rbioFS_PCA() updated with 3D score plots
         - rbioFS_PCA_app() updated with 3D score plots
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
-        
+    
+    (ADDED)
+      - New SVM function(s)
+        - rbioClass_svm_roc_auc_inter() for ROC-AUC with interpolation
+        - rbioClass_svm_shap_aggregated() for SHAP aggregated analysis for the SVM/R models
+          - Shap plotting functions added
+          - rbio_shap_svm_label_prob() added
+
         
     0.8.0 (May.8.2025)
       - General update
