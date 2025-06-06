@@ -12,6 +12,7 @@ rbioClass_svm_shap_aggregated(
   n_cores = parallel::detectCores() - 1,
   clusterType = c("PSOCK", "FORK"),
   plot = TRUE,
+  plot.type = c("both", "bee", "bar"),
   plot.filename.prefix = NULL,
   plot.SymbolSize = 2,
   plot.lineSize = 1,
