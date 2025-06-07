@@ -639,7 +639,7 @@ rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
 
 #' @title shap_g_theme_helper
 #' @description
-#'    A helper function to set the plot themes for the \link\code{rbioClass_svm_shap_aggreated}} function.
+#'    A helper function to set the plot themes for the \code{\link{rbioClass_svm_shap_aggreated}} function.
 #' @import ggplot2
 #' @return \code{ggplot2} graph object.
 shap_g_theme_helper <- function(g,

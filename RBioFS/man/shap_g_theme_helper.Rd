@@ -28,5 +28,5 @@ shap_g_theme_helper(
 \code{ggplot2} graph object.
 }
 \description{
-
+A helper function to set the plot themes for the \code{\link{rbioClass_svm_shap_aggreated}} function.
 }
