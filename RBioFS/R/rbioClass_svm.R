@@ -3412,9 +3412,8 @@ rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
 #' @export
 rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
                                           parallelComputing = FALSE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                          plot = TRUE,
-                                          plot.type = c("both", "bee", "bar"),
-                                          plot.filename.prefix = NULL,
+                                          plot = TRUE, plot.filename.prefix = NULL,
+                                          plot.type = c("both", "bee", "bar"), plot.n = 15L,
                                           plot.SymbolSize = 2, plot.lineSize = 1,
                                           plot.display.Title = TRUE, plot.titleSize = 10,
                                           plot.fontType = "sans",
@@ -3471,7 +3470,8 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
     for (i in 1:length(ks_list)) {
       ks <- ks_list[[i]]
       s <- shapviz(ks)
-      g <- sv_importance_shapviz(s, kind = plot.type, show_numbers = TRUE, viridis_args = opt, fill = "green")
+      g <- sv_importance_shapviz(s, kind = plot.type, max_display = plot.n,
+                                 show_numbers = TRUE, viridis_args = opt, fill = "green")
       g <- shap_g_theme_helper(g,
                                plot.SymbolSize = plot.SymbolSize, plot.lineSize = plot.lineSize,
                                plot.display.Title = plot.display.Title, plot.titleSize = plot.titleSize,
@@ -3503,3 +3503,4 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
   class(o) <- "rbio_shap"
   return(o)
 }
+
