@@ -3444,9 +3444,9 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
 
     for (i in 1:length(y_labels)) {
       l <- y_labels[i]
-      ks_list[[i]] <- kernelshap(svm_m, X = X,
+      ks_list[[i]] <- kernelshap(model, X = X,
                                  bg_X = bg_X,
-                                 pred_fun = function(model, X) rbio_shap_svm_label_prob(svm_m, X, col_idx = l),
+                                 pred_fun = function(model, X) rbio_shap_svm_label_prob(model, X, col_idx = l),
                                  parallel = pc,
                                  verbose = verbose)
       names(ks_list)[i] <- l
@@ -3455,7 +3455,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
   } else {
     y_labels <- svm_m$inputY
     ks_list <- vector(mode = "list", length = 1)
-    ks_list[[1]] <- kernelshap(svm_m, X = X,
+    ks_list[[1]] <- kernelshap(model, X = X,
                                bg_X = bg_X,
                                pred_fun = as.numeric(e1071:::predict.svm(model, X)),
                                parallel = pc,
