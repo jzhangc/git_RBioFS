@@ -2971,7 +2971,7 @@ rbioClass_svm_perm <- function(object,
     set.seed(i)
     perm_y <- object$inputY[sample(1:length(object$inputY))]  # sample label permutation
     if (is.null(object$center.scaledX$centerX)) {
-      perm_model <- rbioClass_svm(x = svm_m$inputX, y = perm_y,
+      perm_model <- rbioClass_svm(x = object$inputX, y = perm_y,
                                   center.scale = FALSE, svm.cross.k = object$svm.cross.k, tune.method = object$tune.method,
                                   tune.cross.k = object$tune.cross.k, tune.boot.n = object$tune.boot.n,
                                   verbose = FALSE)  # permutated data modelling. NOTE: the x data is already scaled and centred
@@ -3439,7 +3439,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
   }
 
   if (model$model.type == "classification") {
-    y_labels <- as.character(unique(svm_m$inputY))
+    y_labels <- as.character(unique(model$inputY))
     ks_list <- vector(mode = "list", length = length(y_labels))
 
     for (i in 1:length(y_labels)) {
@@ -3453,7 +3453,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
       # break
     }
   } else {
-    y_labels <- svm_m$inputY
+    y_labels <- model$inputY
     ks_list <- vector(mode = "list", length = 1)
     ks_list[[1]] <- kernelshap(model, X = X,
                                bg_X = bg_X,
