@@ -3406,6 +3406,8 @@ rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
 #' @details
 #'    1. This fucntion relies on \code{kernelshap} and \code{shapviz} logics.
 #'    2. (To be tested) The function should work with regression SVM models as well.
+#' @return
+#'    The function outputs a \code{rbio_shap_aggregated} class object.
 #' @import shapviz
 #' @importFrom kernelshap kernelshap
 #' @importFrom ggpubr ggarrange
@@ -3500,7 +3502,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
     shap_ks = ks_list,
     shap_plot = g_list
   )
-  class(o) <- "rbio_shap"
+  class(o) <- "rbio_shap_aggregated"
   return(o)
 }
 

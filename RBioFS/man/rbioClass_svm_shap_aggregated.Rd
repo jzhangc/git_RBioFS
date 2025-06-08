@@ -35,6 +35,9 @@ rbioClass_svm_shap_aggregated(
   verbose = TRUE
 )
 }
+\value{
+The function outputs a \code{rbio_shap_aggregated} class object.
+}
 \description{
 Aggregated SHAP analysis for SVM model.
 }

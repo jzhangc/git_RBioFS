@@ -66,6 +66,7 @@ Update log
         - rbioClass_svm_shap_aggregated() for SHAP aggregated analysis for the SVM/R models
           - Shap plotting functions added
           - rbio_shap_svm_label_prob() added
+          - The function outputs a "rbio_shap_aggregated" class object
 
         
     0.8.0 (May.8.2025)
