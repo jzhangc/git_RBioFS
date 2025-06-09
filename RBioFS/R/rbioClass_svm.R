@@ -3172,7 +3172,7 @@ print.rbiosvm_perm <- function(x, ...){
 #'
 #' }
 #' @export
-rbioClass_svm_predcit <- function(object,
+rbioClass_svm_predict <- function(object,
                                   newdata, center.scale.newdata = TRUE, export.name = NULL,
                                   sampleID.vector = NULL, newdata.y = NULL,
                                   prob.method = c("logistic",  "Bayes", "softmax"),
