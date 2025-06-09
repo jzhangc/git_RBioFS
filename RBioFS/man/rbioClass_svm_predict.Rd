@@ -62,6 +62,7 @@ Prediction function for SVM analysis. The function calculates the predicted valu
 }
 \details{
 Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object.
+
          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
          column mean and column standard deviation.
 

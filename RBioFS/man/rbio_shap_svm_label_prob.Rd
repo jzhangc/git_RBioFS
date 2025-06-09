@@ -7,7 +7,7 @@
 rbio_shap_svm_label_prob(object, newdata, col_idx = NULL, ...)
 }
 \arguments{
-\item{object}{A SVM model object, in \code{svm} or \code{rbiosvm} classes.}
+\item{object}{A SVM model object, in \code{rbiosvm} class.}
 
 \item{newdata}{Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.}
 
@@ -22,5 +22,8 @@ Vector or data frame of prediction probabilities.
 Helper function to extract probability vectors from svm model predictions.
 }
 \details{
-\code{newdata} should not include outcome column
+1. \code{newdata} should not include outcome column.
+   2. \code{newdata} should be 0-1 scaled.
+   3. \code{newdata} will be standardized using training data's col mean and sd, if the input \code{rbiosvm} model \code{object} contains standardization information:
+      \code{object$center.scaledX}.This means the model was trainined using standardization.
 }

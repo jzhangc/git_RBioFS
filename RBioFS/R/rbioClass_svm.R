@@ -3152,6 +3152,7 @@ print.rbiosvm_perm <- function(x, ...){
 #' \code{newdata.y}
 #'
 #' @details Although optional, the \code{newdata} matrix should be centered prior to testing, with the same scaling setting as the input \code{rbiosvm} object.
+#'
 #'          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
 #'          column mean and column standard deviation.
 #'
@@ -3216,7 +3217,7 @@ rbioClass_svm_predict <- function(object,
     newdata <- as.matrix(newdata)  # testing
   }
   if (center.scale.newdata){
-    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to modelling.")
+    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to predicting.")
     centerdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
     test <- centerdata
   } else {
@@ -3407,12 +3408,12 @@ rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
 #'    1. This fucntion relies on \code{kernelshap} and \code{shapviz} logics.
 #'    2. (To be tested) The function should work with regression SVM models as well.
 #' @return
-#'    The function outputs a \code{rbio_shap_aggregated} class object.
+#'    The function outputs a \code{rbio_shap} class object.
 #' @import shapviz
 #' @importFrom kernelshap kernelshap
 #' @importFrom ggpubr ggarrange
 #' @export
-rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
+rbioClass_svm_shap_aggregated <- function(model, X, bg_X, bg_n = 200L,
                                           parallelComputing = FALSE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                           plot = TRUE, plot.filename.prefix = NULL,
                                           plot.type = c("both", "bee", "bar"), plot.n = 15L,
@@ -3427,7 +3428,6 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
                                           verbose = TRUE) {
   # --- arg check ---
   if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
-  plot.type <- match.arg(plot.type)
 
   # --- shap calculation ---
   if (parallelComputing) {
@@ -3449,6 +3449,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
       l <- y_labels[i]
       ks_list[[i]] <- kernelshap(model, X = X,
                                  bg_X = bg_X,
+                                 bg_n = bg_n,
                                  pred_fun = function(model, X) rbio_shap_svm_label_prob(model, X, col_idx = l),
                                  parallel = pc,
                                  verbose = verbose)
@@ -3462,7 +3463,8 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
                                bg_X = bg_X,
                                pred_fun = as.numeric(e1071:::predict.svm(model, X)),
                                parallel = pc,
-                               verbose = verbose)
+                               verbose = verbose) # needed to be updated with prediction scaling
+
     names(ks_list) <- "y"
   }
 
@@ -3502,9 +3504,120 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
   o <- list(
     shap_ks = ks_list,
     shap_plot = g_list,
-    type = "aggregated"
+    shap_type = "aggregated",
+    plot_type = plot.type
   )
   class(o) <- "rbio_shap"
   return(o)
 }
 
+
+#' @title rbioClass_svm_shap_individual
+#' @description Individualized SHAP analysis for SVM model.
+#'
+#' @details
+#'    1. This fucntion relies on \code{kernelshap} and \code{shapviz} logics.
+#'    2. (To be tested) The function should work with regression SVM models as well.
+#' @return
+#'    The function outputs a \code{rbio_shap} class object.
+#' @import shapviz
+#' @importFrom kernelshap kernelshap
+#' @importFrom ggpubr ggarrange
+#' @export
+rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
+                                          y = NULL,
+                                          parallelComputing = FALSE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                          plot.filename.prefix = NULL,
+                                          plot.type = c("waterfall", "force"), plot.n = 15L, ...,
+                                          plot.SymbolSize = 2, plot.lineSize = 1,
+                                          plot.display.Title = TRUE, plot.titleSize = 10,
+                                          plot.fontType = "sans",
+                                          plot.bee.colorscale = "A", plot.bar.color = "blue",
+                                          plot.xLabel = "SHAP value", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                          plot.yLabel = "Features", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                          plot.legendPosition = "right", plot.legendSize = 9,
+                                          plot.Width = 15, plot.Height = 10,
+                                          verbose = TRUE) {
+  # --- arg check ---
+  if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
+  plot.type <- match.arg(plot.type)
+
+  # --- shap calculateion ---
+  if (parallelComputing) {
+    pc <- TRUE
+    # set up cpu cluster
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+  } else {
+    pc <- FALSE
+  }
+
+  if (model$model.type == "classification") {
+    p <- rbioClass_svm_predict(model, newdata = X, verbose = verbose)
+    l <- as.character(p$probability.summary$Class[which.max(p$probability.summary$Probability)])
+    ks <- kernelshap(model, X = X,
+                     bg_X = bg_X,
+                     bg_n = bg_n,
+                     pred_fun = function(model, X) RBioFS:::rbio_shap_svm_label_prob(model, X, col_idx = l),
+                     parallel = pc,
+                     verbose = verbose)
+  } else {
+    l <- as.numeric(e1071:::predict.svm(model, X))  # needed to be updated with scaling
+    ks <- kernelshap(model, X = X,
+                     bg_X = bg_X,
+                     bg_n = bg_n,
+                     pred_fun = as.numeric(e1071:::predict.svm(model, X)),
+                     parallel = pc,
+                     verbose = verbose)
+  }
+
+  if (!is.null(y)) {
+    y <- as.character(y)
+    if (l != y) {
+      warning(paste0("prediction: ", l, " failed to match the input y: ", y, "\n"))
+    }
+    plot_title <- paste0("Sample prediction: ", l, " (input y: ", y, ")")
+  } else {
+    plot_title <- paste0("Sample prediction: ", l)
+  }
+
+  # --- plotting ---
+  s <- shapviz(ks)
+  if (plot.type == "waterfall") {
+    g <- sv_waterfall(s, max_display = plot.n, ...)
+  } else {
+    g <- sv_force(s, max_display = plot.n, ...)
+  }
+
+  switch(plot.type,
+         waterfall = {g <- sv_waterfall(s, max_display = plot.n, ...)},
+         force = {g <- sv_force(s, max_display = plot.n, ...)}
+  )
+
+  g <- RBioFS:::shap_g_theme_helper(g,
+                                    plot.SymbolSize = plot.SymbolSize, plot.lineSize = plot.lineSize,
+                                    plot.display.Title = plot.display.Title, plot.titleSize = plot.titleSize,
+                                    plot.title = plot_title,
+                                    plot.fontType = plot.fontType,
+                                    plot.xLabel = plot.xLabel, plot.xLabelSize = plot.xLabelSize, plot.xTickLblSize = plot.xTickLblSize,
+                                    plot.yLabel = plot.yLabel, plot.yLabelSize = plot.yLabelSize, plot.yTickLblSize = plot.yTickLblSize,
+                                    plot.legendPosition = plot.legendPosition, plot.legendSize = plot.legendSize,
+                                    plot.Width = plot.Width, plot.Height = plot.Height)
+  plot_filename <- paste0(plot.filename.prefix, "_shap_individual_waterfall.pdf")
+  ggsave(plot = g, filename = plot_filename,
+         device = "pdf", units = "in",
+         width = plot.Width, height = plot.Height, dpi= 600)
+  if (verbose) cat(paste0("\nplot saved to file: ", plot_filename))
+
+  # --- output ---
+  o <- list(
+    shap_ks = ks,
+    shap_plot = g,
+    type = "individual",
+    plot_type = plot.type
+  )
+  class(o) <- "rbio_shap"
+  return(o)
+}

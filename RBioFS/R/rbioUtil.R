@@ -611,20 +611,26 @@ na_summary <- function(data, by = c("row", "col")) {
 #' @title rbio_shap_svm_label_prob
 #' @description
 #' Helper function to extract probability vectors from svm model predictions.
-#' @param object A SVM model object, in \code{svm} or \code{rbiosvm} classes.
+#' @param object A SVM model object, in \code{rbiosvm} class.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param col_idx Probability column (i.e. label or outcome) index or name for which the probability vector is extracted.
 #' @param ... Additional parameters for the \code{e1071:::predict.svm} method.
 #' @details
-#'    \code{newdata} should not include outcome column
+#'    1. \code{newdata} should not include outcome column.
+#'    2. \code{newdata} should be 0-1 scaled.
+#'    3. \code{newdata} will be standardized using training data's col mean and sd, if the input \code{rbiosvm} model \code{object} contains standardization information:
+#'       \code{object$center.scaledX}.This means the model was trainined using standardization.
 #' @return Vector or data frame of prediction probabilities.
 #' @import e1071
 rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
   # --- arg check ---
-  if (!any(class(object) %in% c("rbiosvm", "svm"))) stop("object has to be a \"svm\" or \"rbiosvm\" class.\n")
+  if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
 
   # --- prediction ---
-  pred <- e1071:::predict.svm(object, newdata, probability = TRUE, ...)
+  if (!is.null(object$center.scaledX)) {
+    x <-  t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+  }
+  pred <- e1071:::predict.svm(object, x, probability = TRUE, ...)
   prob_dfm <- attr(pred, "probabilities")
 
   # --- prob extraction ---
