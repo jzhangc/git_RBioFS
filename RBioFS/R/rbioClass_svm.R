@@ -3427,6 +3427,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
                                           verbose = TRUE) {
   # --- arg check ---
   if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
+  plot.type <- match.arg(plot.type)
 
   # --- shap calculation ---
   if (parallelComputing) {
@@ -3500,9 +3501,10 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X,
   # --- output ---
   o <- list(
     shap_ks = ks_list,
-    shap_plot = g_list
+    shap_plot = g_list,
+    type = "aggregated"
   )
-  class(o) <- "rbio_shap_aggregated"
+  class(o) <- "rbio_shap"
   return(o)
 }
 

@@ -62,11 +62,12 @@ Update log
     
     (ADDED)
       - New SVM function(s)
-        - rbioClass_svm_roc_auc_inter() for ROC-AUC with interpolation
-        - rbioClass_svm_shap_aggregated() for SHAP aggregated analysis for the SVM/R models
-          - Shap plotting functions added
+        - rbioClass_svm_roc_auc_inter() added for ROC-AUC with interpolation
+        - rbioClass_svm_shap_aggregated() added for SHAP aggregated analysis for the SVM/R models
           - rbio_shap_svm_label_prob() added
-          - The function outputs a "rbio_shap_aggregated" class object
+        - rbioClass_svm_shap_individual() added for SHAP individual analysis for the SVM/R models
+        - SHAP plotting helper functions added
+        - "rbio_shap" class object added for both the "rbioClass_svm_shap_aggregated()" and "rbioClass_svm_shap_individual()" functions
 
         
     0.8.0 (May.8.2025)
