@@ -24,7 +24,7 @@ rbioClass_svm_shap_individual(
   plot.fontType = "sans",
   plot.bee.colorscale = "A",
   plot.bar.color = "blue",
-  plot.xLabel = "SHAP value",
+  plot.xLabel = "Prediction value",
   plot.xLabelSize = 10,
   plot.xTickLblSize = 10,
   plot.yLabel = "Features",
