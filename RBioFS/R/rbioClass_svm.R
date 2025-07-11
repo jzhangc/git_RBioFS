@@ -539,7 +539,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   if (verbose) cat(paste0("SVM for nested CV rRF-FS assessment (", cross.k, " iterations)..."))
   if (parallelComputing) {
     n_cores <- n_cores
-    cl <- makeCluster(n_cores, type = "FORK")
+    cl <- makeCluster(n_cores, type = clusterType)
     registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
@@ -1736,48 +1736,4 @@ print.prediction <- function(x, ...){
   print(x$classifier.class)
   cat("\n")
 }
-
-
-#' @title rbioReg_svm_r2
-#'
-#' @description Support Vector Regression (SVR) R2 calculation
-#' @param object A \code{rbiosvm} object.
-#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
-#' @param newdata.y For regression model only, the vector for the new data's continuous outcome variable. Default is \code{NULL}
-#' @return RMSE value with either new data or training data.
-#'
-#' @details
-#'
-#' The R2 is calculated as following: 1 - rss/tss.
-#' rss: residual sum of squares: sum((yhat-y)^2)
-#' tss: total sum of squares: sum((y-mean(y))^2)
-#'
-#' @examples
-#' \dontrun{
-#'  test_r2 <- rbioReg_svm_r2(object = svm_m, newdata = svm_test[,-1], newdata.y = svm_test$y)
-#' }
-#' @export
-rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
-  # argument check
-  if (!any(class(object) %in% "rbiosvm")) stop("The input object needs to be a \"rbiosvm\" class.")
-  if (object$model.type != "regression") stop("The input model type needs to be \"regression\".")
-  if (is.null(newdata)) {
-    stop("newdata cannot be NULL.")
-  } else {
-    if (is.null(newdata.y)) stop("newdata.y needs to be specified if newdata is available.")
-    if (nrow(newdata) != length(newdata.y)) stop("sample size needs to match the length of newdata.y.")
-  }
-
-  # computation
-  center_scale_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
-  pred <- predict(object, center_scale_newdata)
-  err <- newdata.y - pred
-  ss_res <- sum(err^2)  # sum of residual squares
-  ss_tot <- sum((newdata.y - mean(newdata.y))^2)  # sum of squares
-  out_r2 <- 1 - ss_res/ss_tot
-
-  # output
-  return(out_r2)
-}
-
 
