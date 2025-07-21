@@ -33,7 +33,7 @@ Installation
 
 Update log
 
-    0.8.1 and beyond (Feature roadmap)
+    0.8.2 and beyond (Feature roadmap)
     (ICEBOX)
       - New PLSR function(s)
         - rbioReg_plsr() function added for PLS regression analysis
@@ -61,6 +61,11 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
     
     (ADDED)
+      - Updates to the RF function(s)
+        - Run time updated with HMS formating for both initialFS and SFS functions
+        
+    
+    0.8.1 (June.8.2025)
       - New SVM function(s)
         - rbioClass_svm_roc_auc_inter() added for ROC-AUC with interpolation
         - rbioClass_svm_shap_aggregated() added for SHAP aggregated analysis for the SVM/R models
@@ -69,10 +74,7 @@ Update log
         - SHAP plotting helper functions added
         - "rbio_shap" class object added for both the "rbioClass_svm_shap_aggregated()" and "rbioClass_svm_shap_individual()" functions
       
-      - Updates to the RF function(s)
-        - Run time updated with HMS formating for both initialFS and SFS functions
-
-        
+      
     0.8.0 (May.8.2025)
       - General update
         - Package updated to require ggplot 2 >= 3.5.0
