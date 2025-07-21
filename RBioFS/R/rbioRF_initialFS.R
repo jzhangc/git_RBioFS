@@ -329,6 +329,9 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   }
 
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
+  display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
+                             runtime, format="%H:%M:%S")
+  attributes(display_time, "format") <-"hms"
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
                  error_evaluation_type = err_type,
@@ -337,7 +340,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
                  initial_FS_err_summary = outdfm_OOB_err,
                  vi_summary = outdfm_vi,
                  training_initial_FS = training_initFS,
-                 initial_FS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+                 initial_FS_run_time = display_time)
   class(outlst) <- "rf_ifs"
 
   ## export to files
@@ -515,6 +518,9 @@ rbioFS_rf_initialFS_v2 <- function(objTitle = "x_vs_tgt",
   }
 
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
+  display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
+                             runtime, format="%H:%M:%S")
+  attributes(display_time, "format") <-"hms"
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
                  error_evaluation_type = err_type,
@@ -523,7 +529,7 @@ rbioFS_rf_initialFS_v2 <- function(objTitle = "x_vs_tgt",
                  initial_FS_err_summary = outdfm_OOB_err,
                  vi_summary = outdfm_vi,
                  training_initial_FS = training_initFS,
-                 initial_FS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+                 initial_FS_run_time = display_time)
   class(outlst) <- "rf_ifs"
 
   ## export to files

@@ -68,6 +68,9 @@ Update log
         - rbioClass_svm_shap_individual() added for SHAP individual analysis for the SVM/R models
         - SHAP plotting helper functions added
         - "rbio_shap" class object added for both the "rbioClass_svm_shap_aggregated()" and "rbioClass_svm_shap_individual()" functions
+      
+      - Updates to the RF function(s)
+        - Run time updated with HMS formating for both initialFS and SFS functions
 
         
     0.8.0 (May.8.2025)
@@ -96,7 +99,7 @@ Update log
         - rbioClass_svm_cv_roc_auc_mean() added to calculate CV ROC-AUC mean and mean ROC-AUC plot with SD ribbons
         - rbioClass_svm_cv_roc_auc_v2() added with substantially reduced code redundency
     
-      - Updates to the SVM function(s):
+      - Updates to SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
         - rbioClass_svm_roc_auc() updated with enhanced compatibility with ggplot 3.5.x
@@ -108,7 +111,7 @@ Update log
         - "rbiosvm_cv" class now includes "final.cv.models" filtered by a "best model method" parameter
         - "rbiosvm_cv" class updated with correct cv test data "y" levels
         
-      - Updates to the FS function(s):
+      - Updates to FS function(s):
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation
         - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with better error messages
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
@@ -142,10 +145,10 @@ Update log
           - Also, the default name chagned from "object" string to the "new data string"
         - (testing, might revert back) rbioClass_plsda_predcit() updated with new data matrix converting method
         
-      - Updates to the PCA function(s)
+      - Updates to PCA function(s)
         - rbioFS_PCA() now supports custom export name, via "export.name" argument
       
-      - Updates to the Util function(s)
+      - Updates to Util function(s)
         - rbioUtil_classif_accuracy() now outputs confusion matrix and input data labels
         - Manual page updated for rbioUtil_classif_accuracy()
         - Default argument value fixed for rbioUtil_classplot()

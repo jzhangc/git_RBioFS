@@ -294,6 +294,9 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   }
 
   ## object
+  display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
+                             runtime, format="%H:%M:%S")
+  attributes(display_time, "format") <-"hms"
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
                  error_evaluation_type = err_type,
@@ -301,7 +304,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
                  rf_iteration = nTimes,
                  error_summary = ooberrsummary,
                  SFS_training_data_matrix = sfsmatrix,
-                 SFS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+                 SFS_run_time = display_time)
   class(outlst) <- "rf_sfs"
 
   ## export to files
@@ -467,6 +470,9 @@ rbioFS_rf_SFS_v2 <- function(objTitle = "x_vs_tgt",
   }
 
   ## object
+  display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
+                             runtime, format="%H:%M:%S")
+  attributes(display_time, "format") <-"hms"
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
                  error_evaluation_type = err_type,
@@ -474,7 +480,7 @@ rbioFS_rf_SFS_v2 <- function(objTitle = "x_vs_tgt",
                  rf_iteration = nTimes,
                  error_summary = ooberrsummary,
                  SFS_training_data_matrix = sfsmatrix,
-                 SFS_run_time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+                 SFS_run_time = display_time)
   class(outlst) <- "rf_sfs"
 
   ## export to files

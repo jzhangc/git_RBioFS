@@ -1643,8 +1643,8 @@ rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Plot width, in \code{mm} unit. Default is \code{15}
-#' @param plot.Height Plot height, in \code{mm} unit.. Default is \code{10}.
+#' @param plot.Width Plot width, in \code{mm} unit. Default is \code{500}
+#' @param plot.Height Plot height, in \code{mm} unit.. Default is \code{450}.
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details
 #'    1. This function relies on \code{kernelshap} and \code{shapviz} logics.
@@ -1668,12 +1668,13 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
                                           plot.xLabel = "SHAP value", plot.xLabelSize = 10, plot.xTickLblSize = 10,
                                           plot.yLabel = "Features", plot.yLabelSize = 10, plot.yTickLblSize = 10,
                                           plot.legendPosition = "right", plot.legendSize = 9,
-                                          plot.Width = 170, plot.Height = 150,
+                                          plot.Width = 500, plot.Height = 450,
                                           verbose = TRUE) {
   # --- arg check ---
   if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
 
   # --- shap calculation ---
+  start_time <- Sys.time()
   if (parallelComputing) {
     pc <- TRUE
     # set up cpu cluster
@@ -1745,11 +1746,16 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
   }
 
   # --- output ---
+  runtime <- Sys.time() - start_time
+  display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
+                             runtime, format="%H:%M:%S")
+  attributes(display_time, "format") <-"hms"
   o <- list(
     shap_ks = ks_list,
     shap_plot = g_list,
     shap_type = "aggregated",
-    plot_type = plot.type
+    plot_type = plot.type,
+    run_time = display_time,
   )
   class(o) <- "rbio_shap"
   return(o)
@@ -1782,8 +1788,8 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
 #' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
-#' @param plot.Width Plot width, in \code{mm} unit. Default is \code{15}
-#' @param plot.Height Plot height, in \code{mm} unit.. Default is \code{10}.
+#' @param plot.Width Plot width, in \code{mm} unit. Default is \code{500}
+#' @param plot.Height Plot height, in \code{mm} unit.. Default is \code{450}.
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details
 #'    1. This fucntion relies on \code{kernelshap} and \code{shapviz} logic.
@@ -1806,13 +1812,14 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
                                           plot.xLabel = "Prediction value", plot.xLabelSize = 10, plot.xTickLblSize = 10,
                                           plot.yLabel = "Features", plot.yLabelSize = 10, plot.yTickLblSize = 10,
                                           plot.legendPosition = "right", plot.legendSize = 9,
-                                          plot.Width = 170, plot.Height = 150,
+                                          plot.Width = 500, plot.Height = 450,
                                           verbose = TRUE) {
   # --- arg check ---
   if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
   plot.type <- match.arg(plot.type)
 
-  # --- shap calculateion ---
+  # --- shap calculation ---
+  start_time <- Sys.time()
   if (parallelComputing) {
     pc <- TRUE
     # set up cpu cluster
@@ -1882,11 +1889,16 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
   if (verbose) cat(paste0("\nplot saved to file: ", plot_filename))
 
   # --- output ---
+  runtime <- Sys.time() - start_time
+  display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
+                             runtime, format="%H:%M:%S")
+  attributes(display_time, "format") <-"hms"
   o <- list(
     shap_ks = ks,
     shap_plot = g,
     type = "individual",
-    plot_type = plot.type
+    plot_type = plot.type,
+    run_time = display_time
   )
   class(o) <- "rbio_shap"
   return(o)

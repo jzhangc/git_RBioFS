@@ -32,8 +32,8 @@ rbioClass_svm_shap_individual(
   plot.yTickLblSize = 10,
   plot.legendPosition = "right",
   plot.legendSize = 9,
-  plot.Width = 170,
-  plot.Height = 150,
+  plot.Width = 500,
+  plot.Height = 450,
   verbose = TRUE
 )
 }
@@ -84,9 +84,9 @@ rbioClass_svm_shap_individual(
 
 \item{plot.legendSize}{Legend size. Default is \code{9}.}
 
-\item{plot.Width}{Plot width, in \code{mm} unit. Default is \code{15}}
+\item{plot.Width}{Plot width, in \code{mm} unit. Default is \code{500}}
 
-\item{plot.Height}{Plot height, in \code{mm} unit.. Default is \code{10}.}
+\item{plot.Height}{Plot height, in \code{mm} unit.. Default is \code{450}.}
 
 \item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
