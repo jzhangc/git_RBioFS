@@ -1798,7 +1798,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
     shap_plot = g_list,
     shap_type = "aggregated",
     plot_type = plot.type,
-    run_time = display_time,
+    run_time = display_time
   )
   class(o) <- "rbio_shap"
   return(o)
