@@ -37,7 +37,7 @@ rbioFS_rf_initialFS_plot(
 \arguments{
 \item{object}{A \code{rf_ifs} object. Make sure the object is generated with a \code{validation} section.}
 
-\item{n}{Number of features to plot. Options are \code{"all"} or an integer. Defatult is \code{"all"}.}
+\item{n}{Number of features to plot. Options are \code{"all"} or an integer. Default is \code{"all"}.}
 
 \item{plot.file.title}{Plot file title prefix. Defaults is \code{deparse(substitute(object))}.}
 

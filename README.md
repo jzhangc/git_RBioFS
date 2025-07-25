@@ -63,6 +63,7 @@ Update log
     (ADDED)
       - Updates to the RF function(s)
         - Run time updated with HMS formating for both initialFS and SFS functions
+        - Fixed typos in the manual page
         
     
     0.8.1 (June.8.2025)

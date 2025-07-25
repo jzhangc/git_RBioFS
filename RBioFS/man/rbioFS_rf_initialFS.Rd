@@ -32,7 +32,7 @@ rbioFS_rf_initialFS(
 
 \item{mTry}{Number of random feature pick when building the tree. Default is \code{max(floor(ncol(dfm) / 3), 2)} for classification, and \code{floor(sqrt(ncol(x)))}.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
