@@ -1792,7 +1792,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
   runtime <- Sys.time() - start_time
   display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
                              runtime, format="%H:%M:%S")
-  attributes(display_time, "format") <-"hms"
+  attr(display_time, "format") <-"hms"
   o <- list(
     shap_ks = ks_list,
     shap_plot = g_list,
@@ -1935,7 +1935,7 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
   runtime <- Sys.time() - start_time
   display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
                              runtime, format="%H:%M:%S")
-  attributes(display_time, "format") <-"hms"
+  attr(display_time, "format") <-"hms"
   o <- list(
     shap_ks = ks,
     shap_plot = g,

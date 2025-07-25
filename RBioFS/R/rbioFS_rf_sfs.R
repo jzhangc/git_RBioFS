@@ -296,7 +296,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   ## object
   display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
                              runtime, format="%H:%M:%S")
-  attributes(display_time, "format") <-"hms"
+  attr(display_time, "format") <-"hms"
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
                  error_evaluation_type = err_type,
@@ -472,7 +472,7 @@ rbioFS_rf_SFS_v2 <- function(objTitle = "x_vs_tgt",
   ## object
   display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
                              runtime, format="%H:%M:%S")
-  attributes(display_time, "format") <-"hms"
+  attr(display_time, "format") <-"hms"
   outlst <- list(selected_features = minfeatures,
                  feature_subsets_with_min_OOBerror_plus_1SD = minerrsd,
                  error_evaluation_type = err_type,

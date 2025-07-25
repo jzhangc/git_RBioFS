@@ -331,7 +331,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
                              runtime, format="%H:%M:%S")
-  attributes(display_time, "format") <-"hms"
+  attr(display_time, "format") <-"hms"
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
                  error_evaluation_type = err_type,
@@ -520,7 +520,7 @@ rbioFS_rf_initialFS_v2 <- function(objTitle = "x_vs_tgt",
   ## return the vi ranking and OOB err dataframes for the initial feature elimination
   display_time <- strftime(as.POSIXct("00:00:00", format="%H:%M:%S") +
                              runtime, format="%H:%M:%S")
-  attributes(display_time, "format") <-"hms"
+  attr(display_time, "format") <-"hms"
   outlst <- list(feature_initial_FS = feature_initFS,
                  vi_at_threshold = outdfm_vi[thsd, "Mean"],
                  error_evaluation_type = err_type,
