@@ -45,7 +45,7 @@ Update log
       - Update to SVM function(s)
         - rbioClass_svm_perm() plot output file name fixed
 
-      - Updates to PLS-DA function(s)
+      - Update to PLS-DA function(s)
         - Multivariate Y modelling now possible with rbioFS_plsda
         - rbioFS_plsda_vip_plot() plot output file name fixed
         - rbioClass_plsda_perm() plot output file name fixed
@@ -53,7 +53,7 @@ Update log
         - Print function for relevant functions to accommodate the new plsr functions
         - A bug fixed for rbioClass_plsda_perm() where the intercept term wasn't excluded
 
-      - Updates to the PCA function(s)
+      - Update to the PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object
         - rbioFS_PCA() updated with S3 print method
         - rbioFS_PCA() updated with 3D score plots
@@ -61,8 +61,14 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
     
     (ADDED)
-      - Updates to the RF function(s)
-        - Run time updated with HMS formating for both initialFS and SFS functions
+      - New SVM function(s)
+        - print method for "rbio_shap" object
+
+      - Update to the SVM function(s)
+        - Run time added to "rbio_shap" object
+        
+      - Update to the RF function(s)
+        - Run time calculation and display methods updated with HMS formating for both initialFS and SFS functions
         - Fixed typos in the manual page
         
     
@@ -102,7 +108,7 @@ Update log
         - rbioClass_svm_cv_roc_auc_mean() added to calculate CV ROC-AUC mean and mean ROC-AUC plot with SD ribbons
         - rbioClass_svm_cv_roc_auc_v2() added with substantially reduced code redundency
     
-      - Updates to SVM function(s):
+      - Update to SVM function(s):
         - rbioClass_svm_cv() now supports parallel computing
         - rbioClass_svm_roc_auc() updated with suppressing rbioFS_rf_initialFS() and rbioFS_rf_SFS() warning messages
         - rbioClass_svm_roc_auc() updated with enhanced compatibility with ggplot 3.5.x
@@ -114,13 +120,13 @@ Update log
         - "rbiosvm_cv" class now includes "final.cv.models" filtered by a "best model method" parameter
         - "rbiosvm_cv" class updated with correct cv test data "y" levels
         
-      - Updates to FS function(s):
+      - Update to FS function(s):
         - rbioFS_rf_SFS() parallel computing updated with a new and faster implmentation
         - rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() updated with better error messages
         - A bug fixed for rbioFS_rf_initialFS() and rbioFS_rf_SFS() parallel computing
         - A bug fixed for rbioFS() where imputation messaging was incorrect
         
-      - Other updates:
+      - Other Updates:
         - Outdated dependencies removed
       
 
@@ -129,13 +135,13 @@ Update log
       
 
     0.7.5 (May.3.2021)
-      - Updates to file processing function(s)
+      - Update to file processing function(s)
         - center.scale documentation updated with explanations for Z-score standardization and Min-Max normalization
  
-      - Updates to RF-FS function(s)
+      - Update to RF-FS function(s)
         - A bug fixed for rbioFS(), rbioFS_rf_initialFS() and rbioFS_rf_SFS() where number of cores cannot set be for parallel computing
       
-      - Updates to SVM function(s)
+      - Update to SVM function(s)
         - Functions rbioClass_svm_roc_auc() and rbioClass_svm_cv_roc_auc() now allow custom file names for export files
         - rbioClass_svm_ncv_fs() updated with error handling where no significant features are found when univariate.fs = TRUE: The current impolementation stops the function.
         - rbioClass_svm_predcit() updated with user customizable export name prefix
@@ -143,15 +149,15 @@ Update log
         - rbioClass_svm_roc_auc() now automatically center.scale the training data when no new data is provided
         - (testing, might revert back) rbioClass_svm_predcit() updated with new data matrix converting method
 
-      - Updates to the PLS function(s)
+      - Update to the PLS function(s)
         - rbioClass_plsda_predcit() updated with user customizable export name prefix
           - Also, the default name chagned from "object" string to the "new data string"
         - (testing, might revert back) rbioClass_plsda_predcit() updated with new data matrix converting method
         
-      - Updates to PCA function(s)
+      - Update to PCA function(s)
         - rbioFS_PCA() now supports custom export name, via "export.name" argument
       
-      - Updates to Util function(s)
+      - Update to Util function(s)
         - rbioUtil_classif_accuracy() now outputs confusion matrix and input data labels
         - Manual page updated for rbioUtil_classif_accuracy()
         - Default argument value fixed for rbioUtil_classplot()
@@ -163,7 +169,7 @@ Update log
     
 
     0.7.4 (Aug.16.2020)
-        - Updates to the RF-FS function(s):
+        - Update to the RF-FS function(s):
           - Error handling added for input data containing NA/missing data
             - Stops the function and suggests imputation when NA/missing data detected
           - Data center+scale functionality added for rbioFS() via the new "center.scale"" argument
@@ -244,7 +250,7 @@ Update log
           - rbioReg_plsr_vip() added
             - NOTE: the plot function is the same as the classification model: rbioFS_plsda_vip_plot()
 
-        - Updates to PLS-DA function(s)
+        - Update to PLS-DA function(s)
           - Print function for relevant functions to accommodate the new plsr functions
           - rbiomvr_vip object now also has a model.type variable
           - rbioFS_plsda_vip_plot() fixed for small aesthetic settings
@@ -263,7 +269,7 @@ Update log
           - rbioUtil_classplot() updated accordingly to accommodate the regression study
           - Manual pages cominbed for S3 methods
 
-        - Updates to the PCA function(s)
+        - Update to the PCA function(s)
           - rbioFS_PCA now can display more than six groups
           - (not final) rbioFS_PCA now can handle single variable data matrix
         
@@ -293,7 +299,7 @@ Update log
             - Accordingly, and due to the required by ROC-AUC analysis, new argument "y.threshold" and "newdata.y" arguments added to convert continuous variable into categorical
             - The output is now a S3 class "svm_roc_auc", with all the appropriate items
 
-        - Updates to PLS-DA function(s)
+        - Update to PLS-DA function(s)
           - "rbiomvr" class updated with new item "model.type" for compatibility with the regression study
           - The output from rbioClass_plsda_predict() now includes the updated "prediction" class
           - rbioClass_plsda_scoreplot() now supports more than six groups
@@ -301,7 +307,7 @@ Update log
           - A bug fixed for rbioClass_plsda_perm() where "by_feature_per_y" method fails to permutate columns
           - A bug fixed for rbioFS_plsda_vip() where the function will crash if the input object only have one comp
           
-        - Updates to RF-FS function(s)
+        - Update to RF-FS function(s)
           - RF-FS now accepts regression analysis
           - The code base significantly improved for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
           - Function run time added to the output classes for rbioFS_rf_initialFS() and rbioFS_rf_sfs()
@@ -314,14 +320,14 @@ Update log
           
            
     0.6.2
-        - Updates to RF-FS functions:
+        - Update to RF-FS functions:
           - When imputation option enabled, rbioFS() function now also ouputs impuated data.frame into the enviroment
           - Argument "annotVarNames" added so that rbioFS() is able to exclude all the annotation columns from the input data
           
-        - Updates to SVM functions
+        - Update to SVM functions
           - Additional argument check added to rbioClass_svm_roc_auc(), rbioClass_plsda() and rbioClass_plsda_scoreplot()
         
-        - Updates to PLS-DA functions
+        - Update to PLS-DA functions
           - The output object from rbioClass_plsda_ncomp_select() now a "rbiomvr_ncomp_select" class
           - The "rbiomvr_ncomp_select" class now includes the "ncomp_selected" matrix
           - Print function added for the "rbiomvr_ncomp_select" class
@@ -342,12 +348,12 @@ Update log
         - New PLS-DA functions:
           - rbioFS_plsda_vip_plot(): the function only accepts "rbiomvr_vip" class object
           
-        - Updates to SVM functions (non-Shiny):
+        - Update to SVM functions (non-Shiny):
           - Fixed a bug where rbioClass_svm cannot handle group weight in the scenario of not all groups represent in the training data
           - S3 print method for relevant functions
           - Additional argument checks added for all functions
           
-        - Updates to PLS-DA functions (non-Shiny):
+        - Update to PLS-DA functions (non-Shiny):
           - Changes made to rbioClass_plsda() and rbioClass_plsda_perm() to acconmmodate validation = "LOO"
           - rbioFS_plsda_VIP() changed to rbioFS_plsda_vip()
           - Bootstraping option added for rbioFS_plsda_vip() so that VIP can use bootstrap data for SD/SEM errorbars
@@ -358,13 +364,13 @@ Update log
           - S3 print method for relevant functions
           - Additional argument checks
           
-        - Updates to RF-FS functions:
+        - Update to RF-FS functions:
           - Boxplot for the rf_ifs object now has a horizontal line indicating the selection result
           - rf_ifs object now contains: feature_initial_FS, vi_at_threshold, vi_summary, initial_FS_OOB_err_summary, training_initial_FS
           - S3 print method for relevant functions
           - Updated method for export a list for rf_ifs and rf_sfs classes
 
-        - Updates to the PCA functions
+        - Update to the PCA functions
           - Loadingplot disabled message when more than 2 PCs are used
           
         - Other updates
@@ -390,11 +396,11 @@ Update log
         - New PLS-DA functions added (non-Shiny):
           - rbioClass_plsda_perm(): permutation test for plsda models, with two permutation methods
         
-        - Updates to SVM functions:
+        - Update to SVM functions:
           - Class weight determination functionality added to rbioClass_svm()
           - Additional items added for the modelling settings to the SVM model object (i.e. rbiosvm object)
         
-        - Updates to PLS-DA functions (non-Shiny):
+        - Update to PLS-DA functions (non-Shiny):
           - All PLS-DA function names updated with new prefix: rbioClass_, except for the VIP function, which is a FS function
           - Data centering and scaling argument "center.newdata"" added to rbioClass_plsda_predict()
             - When "center.newdata = TRUE", the function applies training data's col.mean and col.sd to the test data 
@@ -406,7 +412,7 @@ Update log
           - rbioClass_plsda_perm() updated with plotting capability, using rbioUtil_perm_plot method for class "rbiomvr_perm"
           - rbioClass_plsda_classplot() now changed to a generic function rbioUtil_classplot() applicable to other classifier predictions
         
-        - Updates to RF-FS functions:
+        - Update to RF-FS functions:
           - All RF-FS function names updated with new prefix: rbioFS_rf_
           
         - verbose argument added for all the relavent functions so that user can silence the messages
@@ -417,13 +423,13 @@ Update log
           
 
     0.5.3
-        - Updates to rbioFS_PCA():
+        - Update to rbioFS_PCA():
           - Legend style adjusted for the sample labels
         
-        - Updates to RF-FS functions:
+        - Update to RF-FS functions:
           - For consistency, the dashed line indicators now in red in all the relevant functions
 
-        - Updates to PLS-DA functions (non-Shiny):
+        - Update to PLS-DA functions (non-Shiny):
           - Bayesian probability option added to rbioFS_plsda_predict()
           - The entire probability calculation and classification module of rbioFS_plsda_classification() merged to rbioFS_plsda_predict()
           - The prediction object will now contain the following sections: predicted.value, probability.summary, probability.method
@@ -440,7 +446,7 @@ Update log
           - rbioFS_plsda_predict(): use the plsda model to calcualte predicted values for unknown data.
           - rbioFS_plsda_classification(): use the predicted values (produced by rbioFS_plsda_predict) to classify. Note: current probability method is "softmax". A "Bayesian" method will be added later. 
           
-        - Updates to RF-FS functions:
+        - Update to RF-FS functions:
           - Plotting module separated from the functions
           - Boxplot for the rf_ifs object now horizontal
           - Plot file suffix for both VI boxplot and OOB plot now ".rffs.ifs.plot.pdf" and ".rffs.sfs.plot.pdf", respectively
@@ -452,7 +458,7 @@ Update log
           - rbioRF_initialFS_plot() 
           - rbioRF_SFS_plot()
           
-        - Updates to PLS-DA functions (non-Shiny):
+        - Update to PLS-DA functions (non-Shiny):
           - Smooth functionality added for rbioFS_plsda_roc_auc()
           - Legend position now customizable for multi-plot for the relevant functions
           - rbioFS_plsda_jackknife(): options added for hiding the x-axis tick labels (useful in the case of many variables)
@@ -477,14 +483,14 @@ Update log
           - rbioFS_plsda_q2r2(): Q2-R2 calculation and plotting
           - rbioFS_plsda_aoc_auc(): ROC and AUC analysis and plotting
           
-        - Updates to PLS-DA functions (non-Shiny):
+        - Update to PLS-DA functions (non-Shiny):
           - More information added to the manual page for rbioFS_plsda_ncomp_select()
           - Additional arugment checks added to rbioFS_plsda_ncomp_select()
           - A bug fixed where rbioFS_plsda_jackknife() fails if no coefs are > (or <) 0
           - Small changes made to message display pattern in rbioFS_plsda_jackknife()
           - Plot property auguments names unified for function only produce one type of plot
         
-        - Updates to RF-FS functions:
+        - Update to RF-FS functions:
           - rbioFS() now accepts R objects, in addition to csv files
           - Group variable now customizable for rbioFS()
           - Arugment check added for rbioFS()

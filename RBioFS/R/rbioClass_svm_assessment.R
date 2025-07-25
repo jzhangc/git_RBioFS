@@ -1939,10 +1939,37 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
   o <- list(
     shap_ks = ks,
     shap_plot = g,
-    shape_type = "individual",
+    shap_type = "individual",
     plot_type = plot.type,
     run_time = display_time
   )
   class(o) <- "rbio_shap"
   return(o)
+}
+
+
+#' @export
+print.rbio_shap <- function(x, ...) {
+  cat("SHAP summary\n")
+  cat(paste0("   SHAP type: ", x$shap_type, " \n"))
+
+  if (x$shap_type == "aggregated") {
+    al <- foreach(i = 1:length(x$shap_ks), .combine = "rbind") %do% {
+      c(names(x$shap_ks)[i], x$shap_ks[[i]]$algorithm)
+    }
+    colnames(al) <- c("label", "algorithm")
+    rownames(al) <- NULL
+    cat(paste0("   SHAP algorithm(s): \n"))
+    cat("    ", "label  algrithm\n")
+    for (i in 1:nrow(al)) {
+      cat("    ", al[i, ], "\n")
+    }
+    cat("\n")
+  } else {
+    cat(paste0("   SHAP algorithm: ", x$shap_ks$algorithm, " \n"))
+  }
+
+  cat(paste0("   SHAP plot type: ", x$plot_type, " \n"))
+  cat(paste0("   SHAP run time: ", x$run_time, " \n"))
+  cat("\n")
 }
