@@ -1939,7 +1939,7 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
   o <- list(
     shap_ks = ks,
     shap_plot = g,
-    type = "individual",
+    shape_type = "individual",
     plot_type = plot.type,
     run_time = display_time
   )
