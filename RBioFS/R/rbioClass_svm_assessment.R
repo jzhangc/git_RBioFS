@@ -1670,6 +1670,7 @@ rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
 #' @param parallelComputing whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param randomState Set seed for kernelshap. Default is \code{NULL}.
 #' @param plot If to generate aggregated SHAP plot.
 #' @param plot.filename.prefix Prefix string to add to the output plot file.
 #' @param plot.type The type of the SHAP plot, options are \code{"both", "bee", "bar"}.
@@ -1697,11 +1698,14 @@ rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
 #' @return
 #'    The function outputs a \code{rbio_shap} class object.
 #' @import shapviz
+#' @import doFuture
 #' @importFrom kernelshap kernelshap
 #' @importFrom ggpubr ggarrange
+#' @importFrom future plan multicore multisession
 #' @export
 rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
                                           parallelComputing = FALSE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                          randomState = NULL,
                                           plot = TRUE, plot.filename.prefix = NULL,
                                           plot.type = c("both", "bee", "bar"), plot.n = 15L,
                                           plot.SymbolSize = 2, plot.lineSize = 1,
@@ -1720,11 +1724,17 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
   start_time <- Sys.time()
   if (parallelComputing) {
     pc <- TRUE
+    clusterType <- match.arg(toupper(clusterType), choices = c("PSOCK", "FORK"))
     # set up cpu cluster
-    n_cores <- n_cores
-    cl <- makeCluster(n_cores, type = clusterType)
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl)) # close connect when exiting the function
+    # n_cores <- n_cores
+    # cl <- makeCluster(n_cores, type = clusterType)
+    # registerDoParallel(cl)
+    # on.exit(stopCluster(cl)) # close connect when exiting the function
+    if (clusterType == "FORK") {
+      plan("future::multicore", workers = n_cores)
+    } else {
+      plan("future::multisession", workers = n_cores)
+    }
   } else {
     pc <- FALSE
   }
@@ -1740,6 +1750,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
                                  bg_n = bg_n,
                                  pred_fun = function(model, X) rbio_shap_svm_label_prob(model, X, col_idx = l),
                                  parallel = pc,
+                                 seed = randomState,
                                  verbose = verbose)
       names(ks_list)[i] <- l
       # break
@@ -1751,6 +1762,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
                                bg_X = bg_X,
                                pred_fun = as.numeric(e1071:::predict.svm(model, X)),
                                parallel = pc,
+                               seed = randomState,
                                verbose = verbose) # needed to be updated with prediction scaling
 
     names(ks_list) <- "y"
@@ -1814,6 +1826,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
 #' @param parallelComputing whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param randomState Set seed for kernelshap. Default is \code{NULL}.
 #' @param plot If to generate aggregated SHAP plot.
 #' @param plot.filename.prefix Prefix string to add to the output plot file.
 #' @param plot.type The type of the individual SHAP plot, options are \code{"waterfall", "force"}.
@@ -1840,12 +1853,15 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
 #' @return
 #'    The function outputs a \code{rbio_shap} class object.
 #' @import shapviz
+#' @import doFuture
 #' @importFrom kernelshap kernelshap
 #' @importFrom ggpubr ggarrange
+#' @importFrom future plan multicore multisession
 #' @export
 rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
                                           y = NULL,
                                           parallelComputing = FALSE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                          randomState = NULL,
                                           plot.filename.prefix = NULL,
                                           plot.type = c("waterfall", "force"), plot.n = 15L, ...,
                                           plot.SymbolSize = 2, plot.lineSize = 1,
@@ -1865,11 +1881,17 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
   start_time <- Sys.time()
   if (parallelComputing) {
     pc <- TRUE
+    clusterType <- match.arg(toupper(clusterType), choices = c("PSOCK", "FORK"))
     # set up cpu cluster
-    n_cores <- n_cores
-    cl <- makeCluster(n_cores, type = clusterType)
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl)) # close connect when exiting the function
+    # n_cores <- n_cores
+    # cl <- makeCluster(n_cores, type = clusterType)
+    # registerDoParallel(cl)
+    # on.exit(stopCluster(cl)) # close connect when exiting the function
+    if (clusterType == "FORK") {
+      plan("future::multicore", workers = n_cores)
+    } else {
+      plan("future::multisession", workers = n_cores)
+    }
   } else {
     pc <- FALSE
   }
@@ -1882,6 +1904,7 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
                      bg_n = bg_n,
                      pred_fun = function(model, X) RBioFS:::rbio_shap_svm_label_prob(model, X, col_idx = l),
                      parallel = pc,
+                     seed = randomState,
                      verbose = verbose)
   } else {
     l <- as.numeric(e1071:::predict.svm(model, X))  # needed to be updated with scaling
@@ -1890,6 +1913,7 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
                      bg_n = bg_n,
                      pred_fun = as.numeric(e1071:::predict.svm(model, X)),
                      parallel = pc,
+                     seed = randomState,
                      verbose = verbose)
   }
 

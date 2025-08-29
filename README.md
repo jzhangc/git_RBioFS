@@ -66,6 +66,7 @@ Update log
 
       - Update to the SVM function(s)
         - Run time added to "rbio_shap" object
+        - Updated parallel computing logic for rbioClass_svm_shap_aggregated() and rbioClass_svm_shap_individual()
         
       - Update to the RF function(s)
         - Run time calculation and display methods updated with HMS formating for both initialFS and SFS functions

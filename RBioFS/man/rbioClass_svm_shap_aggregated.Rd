@@ -12,6 +12,7 @@ rbioClass_svm_shap_aggregated(
   parallelComputing = FALSE,
   n_cores = parallel::detectCores() - 1,
   clusterType = c("PSOCK", "FORK"),
+  randomState = NULL,
   plot = TRUE,
   plot.filename.prefix = NULL,
   plot.type = c("both", "bee", "bar"),
@@ -50,6 +51,8 @@ rbioClass_svm_shap_aggregated(
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+
+\item{randomState}{Set seed for kernelshap. Default is \code{NULL}.}
 
 \item{plot}{If to generate aggregated SHAP plot.}
 
