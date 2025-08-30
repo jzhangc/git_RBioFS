@@ -66,7 +66,8 @@ Update log
 
       - Update to the SVM function(s)
         - Run time added to "rbio_shap" object
-        - Updated parallel computing logic for rbioClass_svm_shap_aggregated() and rbioClass_svm_shap_individual()
+        - SHAP analysis functions updated to be compatible with kernelshap 0.9.x
+          - Updated parallel computing logic for rbioClass_svm_shap_aggregated() and rbioClass_svm_shap_individual()
         - Random state settings added for rbioClass_svm_shap_aggregated() and rbioClass_svm_shap_individual()
         
       - Update to the RF function(s)
