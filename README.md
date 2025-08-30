@@ -107,7 +107,7 @@ Update log
         - svm_cv_rocauc_helper(): ROC-AUC helper function for cross-validated SVM models
 
       - New SVM function(s):
-        - rbioClass_svm_cv_roc_auc__mean_iter() added to compute ROC curve with interporlation (0-1, 100 intervals)
+        - rbioClass_svm_cv_roc_auc_iter() added to compute ROC curve with interporlation (0-1, 100 intervals)
         - rbioClass_svm_cv_roc_auc_mean() added to calculate CV ROC-AUC mean and mean ROC-AUC plot with SD ribbons
         - rbioClass_svm_cv_roc_auc_v2() added with substantially reduced code redundency
     
