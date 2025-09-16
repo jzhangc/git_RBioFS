@@ -59,6 +59,10 @@ Update log
         - rbioFS_PCA() updated with 3D score plots
         - rbioFS_PCA_app() updated with 3D score plots
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
+    
+    (ADDED)
+      - Update to Util function(s)
+        - A bug fixed for rbioUtil_fscount_plot() where function crashes when plotting
 
 
     0.8.2 (August.30.2025)
