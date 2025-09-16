@@ -149,7 +149,9 @@ It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Nota
 meaning maximum number of features selected from the nested cross-validation are reported.
 
 When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median value
-for feature count threholding. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+for feature count threholding. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}.
+
+We only use \code{best.fs.count} for thresholding because it is going to be the same as \code{nest.fs} when \code{cross.best.model.method = "none"}.
 
 For parallel computing, the nested CV rRF-FS part uses parallel for the rRF-FS functions \code{rbioFS_rf_initialFS} and \code{rbioFS_rf_SFS},
 i.e. the \code{parallelComputing} argument in these two functions. This would lead to as many CPU threads as set likely being used due to the number of trees
