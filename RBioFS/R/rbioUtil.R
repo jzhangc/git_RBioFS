@@ -93,7 +93,7 @@ rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
   baseplt <- ggplot(data = d, aes(x = .data[[feature_var]], y = .data[[count_var]])) +
     geom_bar(position = "dodge", stat = "identity", color = plot.outlineCol, fill = plot.fillCol) +
     scale_x_discrete(expand = c(0.05, 0.05)) +
-    scale_y_continuous(limits = c(0, d$Freq), expand = expansion(add = c(0, 1)), oob = scales::rescale_none, sec.axis = dup_axis(),
+    scale_y_continuous(limits = c(0, max(d$Freq)), expand = expansion(add = c(0, 1)), oob = scales::rescale_none, sec.axis = dup_axis(),
                        breaks = scales::breaks_pretty()) +
     xlab(plot.xLabel) +
     ylab(plot.yLabel) +
@@ -329,7 +329,7 @@ rbioUtil_perm_plot.default <- function(baseplt,
     plt <- baseplt +
       scale_y_continuous(sec.axis = dup_axis()) +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
             plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
             axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
             axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
@@ -341,7 +341,7 @@ rbioUtil_perm_plot.default <- function(baseplt,
   } else {
     plt <- baseplt +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
             plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
             axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
             axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),

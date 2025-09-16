@@ -19,4 +19,4 @@ Imports:
     RBioplot (>= 0.5.2), pROC (>= 1.12.1), klaR (>= 0.6-14), e1071 (>= 1.6-8),
     matrixStats (>= 1.4.1), shapviz (>= 0.9.7), kernelshap (>= 0.9.0), future (>= 1.67.0), doFuture(>= 1.1.2)
 Remotes: jzhangc/git_R_STATS_KBS/package/rbioplot
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
