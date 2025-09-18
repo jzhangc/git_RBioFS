@@ -61,6 +61,9 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
     
     (ADDED)
+      - Update to PCA function(s)
+        - Updated with ggplot2 >= 3.5.0 compatibility
+        
       - Update to Util function(s)
         - A bug fixed for rbioUtil_fscount_plot() where function crashes when plotting
 

@@ -294,7 +294,7 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
               strip.background = element_blank(),  # no strip background colour
               strip.text = element_text(face = "bold", size = biplot.mtx.stripLblSize),
               panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
               axis.text.x = element_text(size = xTickLblSize, family = fontType, angle = biplot.xAngle, hjust = biplot.xhAlign, vjust = biplot.xvAlign),
               axis.text.y = element_text(size = yTickLblSize, family = fontType))
