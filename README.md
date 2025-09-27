@@ -63,6 +63,11 @@ Update log
     (ADDED)
       - Update to PCA function(s)
         - Updated with ggplot2 >= 3.5.0 compatibility
+        - Y-axis duplication logic updated
+      
+      - Update to SVM and PLS assessment function(s)
+        - All SVM ROC-AUC functions updated with consistent plot themes
+        - All PLS ROC-AUC functions updated with consistent plot themes
         
       - Update to Util function(s)
         - A bug fixed for rbioUtil_fscount_plot() where function crashes when plotting

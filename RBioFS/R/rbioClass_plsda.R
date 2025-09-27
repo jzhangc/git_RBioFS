@@ -1997,7 +1997,8 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.yLabel)
+        ylab(plot.yLabel) +
+        theme_bw()
 
       if (plot.rightsideY & length(plot.comps) == 1){
         plt <- plt +

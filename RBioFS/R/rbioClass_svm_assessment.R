@@ -232,7 +232,8 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
         geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
         ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.yLabel)
+        ylab(plot.yLabel) +
+        theme_bw()
 
       if (plot.rightsideY) {
         plt <- plt +
@@ -534,7 +535,8 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
         geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
         ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
         xlab(plot.xLabel) +
-        ylab(plot.yLabel)
+        ylab(plot.yLabel) +
+        theme_bw()
 
       if (plot.rightsideY) {
         plt <- plt +
@@ -936,7 +938,9 @@ rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
           geom_abline(intercept = 0) +
           ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
           xlab(plot.xLabel) +
-          ylab(plot.yLabel)
+          ylab(plot.yLabel) +
+          theme_bw()
+
         if (plot.rightsideY) {
           plt <- plt +
             scale_y_continuous(sec.axis = dup_axis()) +
@@ -1089,7 +1093,9 @@ rbioClass_svm_cv_roc_auc_v2 <- function(object, fileprefix = NULL,
           geom_abline(intercept = 0) +
           ggtitle(ifelse(plot.display.Title, "ROC", NULL)) +
           xlab(plot.xLabel) +
-          ylab(plot.yLabel)
+          ylab(plot.yLabel) +
+          theme_bw()
+
         if (plot.rightsideY) {
           plt <- plt +
             scale_y_continuous(sec.axis = dup_axis()) +

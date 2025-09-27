@@ -85,6 +85,7 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
   }
 
   ## PCA
+  # PCA <- prcomp(x, scale. = scaleData, center = centerData)
   PCA <- prcomp(x, scale. = scaleData, center = centerData, ...)
   varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calcualte the proportion of variance
   boxdfm_x <- data.frame(PC = as.numeric(gsub("PC", "", names(varpp_x))), varpp = varpp_x)
@@ -96,13 +97,11 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
     boxplt <- ggplot(data = boxdfm_x, aes(x = PC, y = varpp_x, group = 1)) +
       geom_bar(position = "dodge", stat = "identity", color = "black", fill = "gray66") +
       scale_x_continuous() +
-      scale_y_continuous(expand = c(0, 0),
-                         limits = c(0, with(boxdfm_x, ceiling(max(varpp_x))) * 1.1)) +
       ggtitle(boxplot.Title) +
       xlab("PC") +
       ylab("Proportion of variance (%)") +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
             plot.title = element_text(face = "bold", family = fontType, hjust = 0.5),
             axis.title = element_text(face = "bold", family = fontType),
             legend.position = "bottom",legend.title = element_blank(),legend.key = element_blank(),
@@ -110,7 +109,14 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
             axis.text.y = element_text(size = yTickLblSize, family = fontType, hjust = 0.5))
 
     if (rightsideY){ # add the right-side y axis
-      boxplt <- rightside_y(boxplt)  # port back to boxplt object
+      boxplt <- boxplt +
+        scale_y_continuous(expand = c(0, 0),
+                           limits = c(0, with(boxdfm_x, ceiling(max(varpp_x))) * 1.1),
+                           sec.axis = dup_axis())
+    } else {
+      boxplt <- boxplt +
+        scale_y_continuous(expand = c(0, 0),
+                           limits = c(0, with(boxdfm_x, ceiling(max(varpp_x))) * 1.1))
     }
 
     ggsave(filename = paste(export_name,".pca.boxplot.pdf", sep = ""), plot = boxplt,
@@ -165,16 +171,16 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
         ylab(pc_axis_lbl[1]) +
         theme_bw() +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               plot.title = element_text(face = "bold", family = fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = fontType),
               legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
               axis.text.x = element_text(size = xTickLblSize, family = fontType, angle = biplot.xAngle, hjust = biplot.xhAlign, vjust = biplot.xhAlign),
               axis.text.y = element_text(size = yTickLblSize, family = fontType, hjust = 0.5))
 
-      # grid.newpage()
       if (rightsideY){ # add the right-side y axis
-        biplt <- RBioplot::rightside_y(biplt)
+        biplt <- biplt +
+          scale_y_continuous(sec.axis = dup_axis())
       }
     } else if (length(biplot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
@@ -189,9 +195,9 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
       } else if (biplot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
-          scale_shape_manual(values=1:nlevels(score_x$group))
-        geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
-                        show.legend = FALSE, size = biplot.sampleLabelSize)
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(biplot.sampleLabel.padding, "lines"),
+                          show.legend = FALSE, size = biplot.sampleLabelSize)
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = biplot.SymbolSize) +
@@ -204,7 +210,7 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
         ylab(pc_axis_lbl[2]) +
         theme_bw() +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               plot.title = element_text(face = "bold", family = fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = fontType),
               legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -214,6 +220,11 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
       if (biplot.ellipse){ # circles
         biplt <- biplt +
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = biplot.ellipse_conf)
+      }
+
+      if (rightsideY){ # add the right-side y axis
+        biplt <- biplt +
+          scale_y_continuous(sec.axis = dup_axis())
       }
 
       if (biplot.loadingplot){ # superimpose loading plot
@@ -230,11 +241,6 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
           geom_vline(xintercept = 0, linetype = "dashed") +
           geom_hline(yintercept = 0, linetype = "dashed") +
           geom_text(data = loadingValuePlot, aes(x = axis1, y = axis2), label = loadingValuePlot$lbl, colour = "gray30", size = biplot.loadingplot.textsize)
-      }
-
-      # grid.newpage()
-      if (rightsideY){ # add the right-side y axis
-        biplt <- RBioplot::rightside_y(biplt)
       }
 
     } else if (length(biplot.comps) > 2) {
@@ -289,6 +295,7 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
                        legend = 2)
       biplt <- biplt +
         ggtitle(biplot.Title) +
+        theme_bw() +
         theme(plot.title = element_text(face = "bold", family = fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = fontType),
               strip.background = element_blank(),  # no strip background colour
