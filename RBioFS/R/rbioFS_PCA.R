@@ -80,8 +80,8 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
                        verbose = TRUE){
   # ------ check arguments ------
   if (!all(c(sampleIDVar, groupIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
-  biplot.sampleLabel.type <- match.arg(tolower(biplot.sampleLabel.type))
-  export.mode <- match.arg(tolower(export.mode))
+  biplot.sampleLabel.type <- match.arg(biplot.sampleLabel.type)
+  export.mode <- match.arg(export.mode)
   x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar), drop = FALSE]  # set up input
 
   if (biplot & length(biplot.comps) > ncol(x))stop("biplot.comps length exceeded the maximum PC length.")
@@ -146,9 +146,9 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
   # plotting
   if (biplot){
     if (length(biplot.comps) == 1){
-      if (biplot.loadingplot){
-        cat("loading plot is not applicable when length(biplot.comps) == 1. Proceed without one.\n")
-      }
+      # if (biplot.loadingplot){
+      #   cat("loading plot is not applicable when length(biplot.comps) == 1. Proceed without one.\n")
+      # }
       if (biplot.ellipse){
         cat("ellipse is not applicable when length(biplot.comps) == 1. Proceed without one.\n")
       }
@@ -191,6 +191,23 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
       if (rightsideY){ # add the right-side y axis
         biplt <- biplt +
           scale_y_continuous(sec.axis = dup_axis())
+      }
+
+      if (biplot.loadingplot){ # superimpose loading plot
+        # prepare for loading plot values (i.e. loading value for variables)
+        loadingValue <- data.frame(PCA$rotation[, biplot.comps], check.names = FALSE) # extract loading/rotation/eigenvectors for variables
+        names(loadingValue) <- c("axis1") # give a generic variable name for the ratation dataframe
+        loadingScale <- max(max(abs(score_x$axis1)) / max(abs(loadingValue$axis1))) * 0.85 # determine scaling for loading values
+        loadingValuePlot <- loadingValue * loadingScale
+        loadingValuePlot$lbl <- rownames(loadingValuePlot)
+
+        # plot
+        biplt <- biplt +
+          geom_vline(xintercept = 0, linetype = "dashed") +
+          geom_hline(yintercept = 0, linetype = "dashed") +
+          geom_text(data = loadingValuePlot, aes(x = 0, y = axis1), label = loadingValuePlot$lbl, colour = "gray30", size = biplot.loadingplot.textsize)
+      } else {
+        loadingValuePlot <- NULL
       }
     } else if (length(biplot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
@@ -251,6 +268,8 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
           geom_vline(xintercept = 0, linetype = "dashed") +
           geom_hline(yintercept = 0, linetype = "dashed") +
           geom_text(data = loadingValuePlot, aes(x = axis1, y = axis2), label = loadingValuePlot$lbl, colour = "gray30", size = biplot.loadingplot.textsize)
+      } else {
+        loadingValuePlot <- NULL
       }
 
     } else if (length(biplot.comps) > 2) {
@@ -260,6 +279,8 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
 
       if (biplot.loadingplot) {
         cat("For now, loadingplot is unavailable when using more then two PCs. \n")
+        biplot.loadingplot <- FALSE
+        loadingValuePlot <- NULL
       }
 
       # custom functions for the paired scoreplot
@@ -327,7 +348,7 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
   # ------ export ------
   if (export.mode == "full") {
     out <- list(input_dfm = input,
-                data_processing_settins = list(center = centerData, scale = scaleData),
+                data_processing_settins = list(center = centerData, scale = scaleData, biplot_loadingplot = biplot.loadingplot),
                 scoreplot_dfm = score_x,
                 loadingvalueplot_dfm = loadingValuePlot,
                 boxplot_dfm = boxdfm_x,
