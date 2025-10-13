@@ -7,6 +7,7 @@
 rbioFS_PCA(
   input = NULL,
   export.name = NULL,
+  export.mode = c("full", "compatibility"),
   sampleIDVar = NULL,
   groupIDVar = NULL,
   scaleData = TRUE,
@@ -19,7 +20,7 @@ rbioFS_PCA(
   biplot = TRUE,
   biplot.comps = c(1:2),
   biplot.Title = NULL,
-  biplot.sampleLabel.type = "none",
+  biplot.sampleLabel.type = c("none", "direct", "indirect"),
   biplot.sampleLabelSize = 2,
   biplot.sampleLabel.padding = 0.5,
   biplot.SymbolSize = 2,
@@ -45,6 +46,8 @@ rbioFS_PCA(
 \item{input}{Input data, data frame.}
 
 \item{export.name}{String. Prefix for results exports. When \code{NULL}, the function uses the input object name. Default is \code{NULL}.}
+
+\item{export.mode}{String. Export mode. Options are \code{full} and \code{compatibility}. Default is \code{full}.}
 
 \item{sampleIDVar}{Sample variable name. It's a character string.}
 
@@ -111,7 +114,16 @@ rbioFS_PCA(
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+If \code{export.mode = "compatibility"}, then the function outputs a PCA object with suffix "_pca", a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+       If \code{export.mode = "full"}, in addition to the PCA object exported by the "compatibility" mode, the function also exports a \code{"rbiofs_pca"} object, with suffix "pca_obj"
+
+       Items of the \code{"rbio_pca"} object:
+         input_dfm: input data.frame
+         data_processing_settins: centre and scale settings
+         scoreplot_dfm: score plot data.frame
+         loadingvalueplot_dfm: loading plot data.frame, regardless of the \code{biplot.loadingplot} setting.
+         boxplot_dfm: boxplot data.frame, regardless of the \code{boxplot} setting.
+         pca: the PCA object
 }
 \description{
 A simple to use wrapper for PCA (Principal Component Analysis) and visualization

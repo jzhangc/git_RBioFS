@@ -54,7 +54,6 @@ Update log
         - A bug fixed for rbioClass_plsda_perm() where the intercept term wasn't excluded
 
       - Update to the PCA function(s)
-        - rbioFS_PCA() now exports a "rbiofs_pca" class object
         - rbioFS_PCA() updated with S3 print method
         - rbioFS_PCA() updated with 3D score plots
         - rbioFS_PCA_app() updated with 3D score plots
@@ -62,6 +61,7 @@ Update log
     
     (ADDED)
       - Update to PCA function(s)
+        - rbioFS_PCA() now exports a "rbiofs_pca" class object
         - Updated with ggplot2 >= 3.5.0 compatibility
         - Y-axis duplication logic updated
       

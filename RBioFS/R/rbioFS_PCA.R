@@ -3,6 +3,7 @@
 #' @description A simple to use wrapper for PCA (Principal Component Analysis) and visualization
 #' @param input Input data, data frame.
 #' @param export.name String. Prefix for results exports. When \code{NULL}, the function uses the input object name. Default is \code{NULL}.
+#' @param export.mode String. Export mode. Options are \code{full} and \code{compatibility}. Default is \code{full}.
 #' @param sampleIDVar Sample variable name. It's a character string.
 #' @param groupIDVar Group variable name. It's a character string.
 #' @param scaleData If to scale the data when performing PCA. Default is \code{TRUE}.
@@ -35,7 +36,18 @@
 #' @param xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
-#' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+#' @return
+#'        If \code{export.mode = "compatibility"}, then the function outputs a PCA object with suffix "_pca", a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+#'        If \code{export.mode = "full"}, in addition to the PCA object exported by the "compatibility" mode, the function also exports a \code{"rbiofs_pca"} object, with suffix "pca_obj"
+#'
+#'        Items of the \code{"rbio_pca"} object:
+#'          input_dfm: input data.frame
+#'          data_processing_settins: centre and scale settings
+#'          scoreplot_dfm: score plot data.frame
+#'          loadingvalueplot_dfm: loading plot data.frame, regardless of the \code{biplot.loadingplot} setting.
+#'          boxplot_dfm: boxplot data.frame, regardless of the \code{boxplot} setting.
+#'          pca: the PCA object
+#'
 #' @details Make sure to arrange input data with first two columns for sample ID and conditions, and the rest for features (e.g., genes).
 #' @import ggplot2
 #' @import ggrepel
@@ -48,14 +60,14 @@
 #' biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
 #' }
 #' @export
-rbioFS_PCA <- function(input = NULL, export.name = NULL,
+rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full", "compatibility"),
                        sampleIDVar = NULL, groupIDVar = NULL, scaleData = TRUE, centerData = TRUE, ...,
                        boxplot = TRUE,
                        boxplot.Title = NULL,
                        boxplot.Width = 170, boxplot.Height = 150,
                        biplot = TRUE, biplot.comps = c(1:2),
                        biplot.Title = NULL,
-                       biplot.sampleLabel.type = "none", biplot.sampleLabelSize = 2,
+                       biplot.sampleLabel.type = c("none", "direct", "indirect"), biplot.sampleLabelSize = 2,
                        biplot.sampleLabel.padding = 0.5,
                        biplot.SymbolSize = 2,
                        biplot.ellipse = FALSE, biplot.ellipse_conf = 0.95,
@@ -66,14 +78,12 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
                        rightsideY = FALSE,
                        fontType = "sans", xTickLblSize = 10, yTickLblSize = 10,
                        verbose = TRUE){
-  ## check the argument
+  # ------ check arguments ------
   if (!all(c(sampleIDVar, groupIDVar) %in% names(input))) stop("sampleIDvar and/or groupIDvar not found in the input dataframe.")
-  biplot.sampleLabel.type <- match.arg(tolower(biplot.sampleLabel.type), c("none", "direct", "indirect"))
+  biplot.sampleLabel.type <- match.arg(tolower(biplot.sampleLabel.type))
+  export.mode <- match.arg(tolower(export.mode))
+  x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar), drop = FALSE]  # set up input
 
-  ## set up input
-  x <- input[, !names(input) %in% c(sampleIDVar, groupIDVar), drop = FALSE]
-
-  ## argument check
   if (biplot & length(biplot.comps) > ncol(x))stop("biplot.comps length exceeded the maximum PC length.")
   if (biplot & !all(biplot.comps %in% seq(ncol(x))))stop("biplot.comps contain non-existant PC.")
 
@@ -87,7 +97,7 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
   ## PCA
   # PCA <- prcomp(x, scale. = scaleData, center = centerData)
   PCA <- prcomp(x, scale. = scaleData, center = centerData, ...)
-  varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calcualte the proportion of variance
+  varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calculate the proportion of variance
   boxdfm_x <- data.frame(PC = as.numeric(gsub("PC", "", names(varpp_x))), varpp = varpp_x)
 
   ## Boxplot
@@ -314,7 +324,19 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL,
     grid.draw(biplt)
   }
 
-  assign(paste(export_name, "_pca", sep = ""), PCA, envir = .GlobalEnv)
+  # ------ export ------
+  if (export.mode == "full") {
+    out <- list(input_dfm = input,
+                data_processing_settins = list(center = centerData, scale = scaleData),
+                scoreplot_dfm = score_x,
+                loadingvalueplot_dfm = loadingValuePlot,
+                boxplot_dfm = boxdfm_x,
+                pca = PCA)
+    class(out) <- c("rbiofs_pca", "list")
+    assign(paste0(export_name, "_pca_obj"), out, envir = .GlobalEnv)
+  }
+
+  assign(paste0(export_name, "_pca"), PCA, envir = .GlobalEnv)
 }
 
 
