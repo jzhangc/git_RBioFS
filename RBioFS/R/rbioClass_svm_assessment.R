@@ -1854,7 +1854,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
 #' @param plot.Height Plot height, in \code{mm} unit.. Default is \code{450}.
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details
-#'    1. This fucntion relies on \code{kernelshap} and \code{shapviz} logic.
+#'    1. This function relies on \code{kernelshap} and \code{shapviz} logic.
 #'    2. (To be tested) The function should work with regression SVM models as well.
 #' @return
 #'    The function outputs a \code{rbio_shap} class object.
