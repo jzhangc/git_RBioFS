@@ -102,6 +102,6 @@ The function outputs a \code{rbio_shap} class object.
 Individualized SHAP analysis for SVM model.
 }
 \details{
-1. This fucntion relies on \code{kernelshap} and \code{shapviz} logic.
+1. This function relies on \code{kernelshap} and \code{shapviz} logic.
    2. (To be tested) The function should work with regression SVM models as well.
 }
