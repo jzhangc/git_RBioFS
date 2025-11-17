@@ -279,9 +279,9 @@ rbioFS_PCA <- function(input = NULL, export.name = NULL, export.mode = c("full",
 
       if (biplot.loadingplot) {
         cat("For now, loadingplot is unavailable when using more then two PCs. \n")
-        biplot.loadingplot <- FALSE
-        loadingValuePlot <- NULL
       }
+      biplot.loadingplot <- FALSE
+      loadingValuePlot <- NULL
 
       # custom functions for the paired scoreplot
       ellipsefunc <- function(data = score_x, mapping, label.method = biplot.sampleLabel.type,
