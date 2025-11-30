@@ -61,9 +61,6 @@ Update log
     
     (ADDED)
       - Update to SVM functions(s)
-        - Random state argument "randomState" added for the following functions:
-          - rbioClass_svm_cv()
-          - rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2()
         - Plot aesthetics updated for consistency for functions:
           - rbioClass_svm_roc_auc()
           - rbioClass_svm_roc_auc_inter()
@@ -75,6 +72,9 @@ Update log
           - rbioClass_plsda_roc_auc()
           - rbioFS_plsda_vip_plot()
           - rbioClass_plsda_jackknife()
+
+      - Update to rRF-FS function(s)
+        - Random state functionality added for rbioFS_rf_initialFS() and rbioFS_rf_SFS()
 
       - Update to PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object
