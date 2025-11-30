@@ -74,7 +74,9 @@ Update log
           - rbioClass_plsda_jackknife()
 
       - Update to rRF-FS function(s)
-        - Random state functionality added for rbioFS_rf_initialFS() and rbioFS_rf_SFS()
+        - Random state functionality added the following functions:
+          - rbioFS_rf_initialFS(), rbioFS_rf_SFS()
+          - rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2()
 
       - Update to PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object

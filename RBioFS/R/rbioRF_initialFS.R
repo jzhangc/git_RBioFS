@@ -212,10 +212,8 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
   #### run time initiation
   start_time <- Sys.time()
 
-  #### check arguments
-  if (parallelComputing){
-    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
-  }
+  #### check arguments and check seed
+  if (parallelComputing) clusterType <- match.arg(clusterType)
 
   #### check the variables
   if (ncol(x) == 1){

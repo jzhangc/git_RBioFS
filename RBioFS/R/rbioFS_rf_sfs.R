@@ -195,10 +195,8 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
   #### run time initiation
   start_time <- Sys.time()
 
-  #### check arguments
-  if (parallelComputing){
-    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
-  }
+  #### check arguments and check seed
+  if (parallelComputing) clusterType <- match.arg(clusterType)
 
   #### prepare the dataframe
   training <- data.frame(x, check.names = FALSE)
@@ -218,7 +216,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
 
   # recursive RF using par-apply functions
   rf_modelling_func <- function(j){
-    set.seed(i)
+    set.seed(j)
     rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree,
                                      importance = TRUE, proximity = TRUE)
     if (is.factor(tgt)) {

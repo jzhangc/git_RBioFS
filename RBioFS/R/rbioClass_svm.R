@@ -317,7 +317,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   ## initiate the run time
   start_time <- Sys.time()
 
-  ## check arguments
+  ## check arguments and seed
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
   if (is.factor(y)) {
     # if (nlevels(y) > 3) warning("y has more than three groups. SVM is not recommended.\n")
@@ -378,6 +378,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 
   # nested CV-FS function
   nested_cvfs_func <- function(i) {
+    # set.seed(i) # see is set with the rRF-FS functions
     if (verbose) cat(paste0("Iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
@@ -490,6 +491,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 
   # nested CV-M function: SVM modelling for nested CV iterations
   nested_cvm_func <- function(i, ...){
+    set.seed(i)
     fs <- nested_cvfs.list[[i]]$fs
     fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
     cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
@@ -891,6 +893,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 
   # nested CV function
   nestedcv_func <- function(i) {
+    set.seed(i)
     # if (verbose) cat(paste0("Nested CV iteration: ", i, "|", cross.k, "..."))
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
