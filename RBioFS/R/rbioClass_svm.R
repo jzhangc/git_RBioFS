@@ -314,7 +314,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
                                  fs.count.cutoff = cross.k,
                                  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                  verbose = TRUE){
-  ## initiate the run time and set seed
+  ## initiate the run time
   start_time <- Sys.time()
 
   ## check arguments
@@ -830,7 +830,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
                                     fs.count.cutoff = cross.k,
                                     parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                                     verbose = TRUE){
-  ## initiate the run time and set seed
+  ## initiate the run time
   start_time <- Sys.time()
 
   ## check arguments
@@ -1315,8 +1315,9 @@ rbioClass_svm_cv <- function(x, y,
                              tune.method = c("cross", "boot", "fix"),
                              tune.cross.k = 10, tune.boot.n = 10, ...,
                              parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                             randomState = NULL,
                              verbose = TRUE){
-  ## initiate the run time and set seed
+  ## initiate the run time
   start_time <- Sys.time()
 
   ## check arguments

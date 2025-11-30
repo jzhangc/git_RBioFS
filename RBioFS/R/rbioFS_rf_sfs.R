@@ -218,6 +218,7 @@ rbioFS_rf_SFS <- function(objTitle = "x_vs_tgt",
 
   # recursive RF using par-apply functions
   rf_modelling_func <- function(j){
+    set.seed(i)
     rf <- randomForest::randomForest(x = training[, 1:j, drop = FALSE], y = tgt, ntree = nTree,
                                      importance = TRUE, proximity = TRUE)
     if (is.factor(tgt)) {

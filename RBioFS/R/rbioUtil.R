@@ -323,7 +323,8 @@ rbioUtil_perm_plot.default <- function(baseplt,
   baseplt <- baseplt +
     ggtitle(ifelse(plot.display.Title, "Permutation test", NULL)) +
     xlab(plot.xLabel) +
-    ylab(plot.yLabel)
+    ylab(plot.yLabel) +
+    theme_bw()
 
   if (plot.rightsideY) {
     plt <- baseplt +

@@ -967,11 +967,6 @@ rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
                   axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
         }
 
-        # # below not needed for ggplot 2 3.5.0
-        # if (plot.rightsideY){
-        #   plt <- RBioplot::rightside_y(plt)
-        # }
-
         # save
         # grid.newpage()
         if (is.null(fileprefix)){
@@ -1447,7 +1442,7 @@ rbioClass_svm_perm <- function(object,
   ## initiate the run time
   start_time <- Sys.time()
 
-  ## check arguments
+    ## check arguments
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
   if (object$model.type == "regression") {
     if (!"tot.MSE" %in% names(object) || is.null(object$tot.MSE)) stop("Regression SVM model object has to include tot.accuracy value from Cross-Validation for permutation test. \n")
@@ -1725,6 +1720,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
                                           verbose = TRUE) {
   # --- arg check ---
   if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
+  if (randomState == 0) randomState <- NULL
 
   # --- shap calculation ---
   start_time <- Sys.time()
@@ -1882,6 +1878,7 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
   # --- arg check ---
   if (!any(class(model) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
   plot.type <- match.arg(plot.type)
+  if (randomState == 0) randomState <- NULL
 
   # --- shap calculation ---
   start_time <- Sys.time()

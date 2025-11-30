@@ -244,6 +244,7 @@ rbioFS_rf_initialFS <- function(objTitle = "x_vs_tgt",
 
   ## RF modelling
   rf_modelling_func <- function(i){
+    set.seed(i)
     rf <- randomForest::randomForest(x = training, y = tgt, ntree = nTree, mtry = mTry, importance = TRUE,
                                      proximity = TRUE)
 

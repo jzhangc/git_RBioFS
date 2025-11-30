@@ -18,6 +18,7 @@ rbioClass_svm_cv(
   parallelComputing = TRUE,
   n_cores = parallel::detectCores() - 1,
   clusterType = c("PSOCK", "FORK"),
+  randomState = NULL,
   verbose = TRUE
 )
 }
