@@ -130,7 +130,7 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
       if (verbose) cat("newdata.label is converted to factor. \n")
       newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
-    center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
+    # center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
   }
   if (!any(class(newdata) %in% c("data.frame", "matrix")) & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
   if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
@@ -138,15 +138,21 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }
   if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same number of variables as the training data.")
-  if (center.scale.newdata){
-    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
-  }
+  # if (center.scale.newdata){
+  #   if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
+  # }
 
   ## process data
   if (center.scale.newdata){ # using training data mean and sd
-    if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
-    centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
-    test <- centered_newdata
+    if (is.null(object$center.scaledX)) {
+      warning(paste0("No center.scaledX found in training data while center.scale.newdata = TRUE. Proceeding without center.scale.newdata\n"))
+      centered_newdata <- NULL
+      test <- newdata
+    } else{
+      if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
+      centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+      test <- centered_newdata
+    }
   } else {
     centered_newdata <- NULL
     test <- newdata
@@ -377,7 +383,7 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
       if (verbose) cat("newdata.label is converted to factor. \n")
       newdata.label <- factor(newdata.label, levels = unique(newdata.label))
     }
-    center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
+    # center.scale.newdata <- TRUE # automatically center.scale training data X when no new data is provided
   }
   if (!any(class(newdata) %in% c("data.frame", "matrix")) & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
   if (any(class(newdata) == "data.frame") | is.null(dim(newdata))){
@@ -385,15 +391,21 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
     newdata <- as.matrix(sapply(newdata, as.numeric))
   }
   if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same number of variables as the training data.")
-  if (center.scale.newdata){
-    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
-  }
+  # if (center.scale.newdata){
+  #   if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
+  # }
 
   ## process data
   if (center.scale.newdata){ # using training data mean and sd
-    if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
-    centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
-    test <- centered_newdata
+    if (is.null(object$center.scaledX)) {
+      warning(paste0("No center.scaledX found in training data while center.scale.newdata = TRUE. Proceeding without center.scale.newdata\n"))
+      centered_newdata <- NULL
+      test <- newdata
+    } else{
+      if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
+      centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+      test <- centered_newdata
+    }
   } else {
     centered_newdata <- NULL
     test <- newdata

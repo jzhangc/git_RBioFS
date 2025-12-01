@@ -66,6 +66,9 @@ Update log
           - rbioClass_svm_roc_auc_inter()
           - rbioClass_svm_cv_roc_auc(), rbioClass_svm_cv_roc_auc_v2()
           - rbioClass_svm_cv_roc_auc_mean()
+        - Center.scale behaviour updated for rbioClass_svm_roc_auc() and rbioClass_svm_roc_auc_inter()
+          - center.scale = TRUE on a SVM model trained with center.scale = FALSE would no longer stop the function. Instead, a warning will be given and proceed with center.scale = FALSE
+          - No newdata would no longer default center.scale to TRUE
 
       - Update to PLS function(s)
         - Plot aesthetics updated for consistency for functions:
