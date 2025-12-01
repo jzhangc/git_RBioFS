@@ -630,6 +630,8 @@ rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
   # --- prediction ---
   if (!is.null(object$center.scaledX)) {
     x <-  t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+  } else {
+    x <- newdata
   }
   pred <- e1071:::predict.svm(object, x, probability = TRUE, ...)
   prob_dfm <- attr(pred, "probabilities")

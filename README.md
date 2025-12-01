@@ -60,7 +60,7 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
     
     (ADDED)
-      - Update to SVM functions(s)
+      - Update to SVM and SVM assessment functions(s)
         - Plot aesthetics updated for consistency for functions:
           - rbioClass_svm_roc_auc()
           - rbioClass_svm_roc_auc_inter()
@@ -69,6 +69,7 @@ Update log
         - Center.scale behaviour updated for rbioClass_svm_roc_auc() and rbioClass_svm_roc_auc_inter()
           - center.scale = TRUE on a SVM model trained with center.scale = FALSE would no longer stop the function. Instead, a warning will be given and proceed with center.scale = FALSE
           - No newdata would no longer default center.scale to TRUE
+        - A bug fixed for rbio_shap_svm_label_prob() where the function crashes when the input SVM model was not trained with center.scale = FALSE
 
       - Update to PLS function(s)
         - Plot aesthetics updated for consistency for functions:
