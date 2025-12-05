@@ -1968,7 +1968,7 @@ rbioClass_plsda_roc_auc <- function(object, newdata, newdata.label, center.newda
     plt_list[] <- foreach(k = 1:length(plot.comps)) %do% {
 
       plt <- ggplot(data = roc_dfm_list[[k]], aes(x = fpr, y = tpr, group = group, colour = group)) +
-        geom_line(aes(linetype = group), size = plot.lineSize) +
+        geom_line(aes(linetype = group),  linewidth = plot.lineSize) +
         geom_point(aes(shape = group), size = plot.SymbolSize) +
         geom_abline(intercept = 0) +
         ggtitle(ifelse(plot.display.Title, comp_axis_lbl[k], NULL)) +
