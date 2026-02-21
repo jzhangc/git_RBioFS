@@ -76,6 +76,7 @@ Update log
           - rbioClass_plsda_roc_auc()
           - rbioFS_plsda_vip_plot()
           - rbioClass_plsda_jackknife()
+        - rbioReg_plsr_ncomp_select() updated with ggplot2 4.x support
 
       - Update to rRF-FS function(s)
         - Random state functionality added the following functions:

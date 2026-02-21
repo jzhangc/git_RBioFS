@@ -134,7 +134,7 @@ rbioReg_plsr <- function(x, y, method = "simpls",
 #' @import foreach
 #' @importFrom GGally ggpairs
 #' @importFrom grid grid.newpage grid.draw
-#' @importFrom RBioplot rightside_y multi_plot_shared_legend
+#' @importFrom RBioplot multi_plot_shared_legend
 #' @importFrom pls RMSEP
 #' @examples
 #' \dontrun{
@@ -230,18 +230,10 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
       plt <- ggplot(data = rmsep_dfm_list[[i]], aes(x = comps, y = value, colour = variable)) +
         geom_line(aes(linetype = variable)) +
         geom_point(aes(shape = variable), size = plot.SymbolSize) +
-        ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list)[i], NULL)) +
+        ggtitle(ifelse(plot.display.Title, names(rmsep_dfm_list[[i]]), NULL)) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
-              legend.position = "bottom", legend.key = element_blank(),
-              legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
-              axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+        theme_bw()
 
       if (plot.optm.ncomp.line){
         plt <- plt +
@@ -249,7 +241,30 @@ rbioReg_plsr_ncomp_select <- function(object, ...,
       }
 
       if (plot.rightsideY & length(rmsep_dfm_list) == 1){
-        plt <- rightside_y(plt)
+        plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.key = element_blank(),
+                legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.key = element_blank(),
+                legend.text = element_text(size = plot.legendSize), legend.title = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
       }
       plt
     }
