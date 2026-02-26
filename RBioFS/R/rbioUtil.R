@@ -622,7 +622,6 @@ na_summary <- function(data, by = c("row", "col")) {
 #'    3. \code{newdata} will be standardized using training data's col mean and sd, if the input \code{rbiosvm} model \code{object} contains standardization information:
 #'       \code{object$center.scaledX}.This means the model was trainined using standardization.
 #' @return Vector or data frame of prediction probabilities.
-#' @import e1071
 rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
   # --- arg check ---
   if (!any(class(object) %in% c("rbiosvm"))) stop("object has to be a \"rbiosvm\" class.\n")
