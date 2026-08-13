@@ -64,7 +64,7 @@ rbioClass_svm_ncv_fs_v3(
 
 \item{sampleIds}{A character vector of sample IDs (one per row of \code{x}). When provided, samples with the same ID are kept together in the same fold.
 This is essential for repeated-measures or clustered data where multiple rows correspond to the same subject/group.
-Default is \code{NULL}, which behaves like v2 (independent samples).}
+Default is \code{NULL}, which behaves like v1 and v2 (independent samples).}
 
 \item{fs.method}{Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.}
 
@@ -156,7 +156,7 @@ Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM with 
 This "v3" adds sample-ID-aware fold assignment to ensure that samples sharing the same ID (e.g., multiple measurements from the same subject)
 are always placed in the same fold. This prevents data leakage in repeated-measures or clustered experimental designs.
 
-When \code{sampleIds} is \code{NULL} or missing, the function behaves identically to \code{rbioClass_svm_ncv_fs_v2}.
+When \code{sampleIds} is \code{NULL} or missing, the function behaves identically to \code{rbioClass_svm_ncv_fs}.
 When provided, the function groups rows by unique sample IDs and assigns entire groups to folds.
 
 For classification with \code{sampleIds}, stratification is performed at the group level: each unique sample ID's group

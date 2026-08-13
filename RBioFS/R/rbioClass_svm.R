@@ -1210,7 +1210,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
 #' @param sampleIds A character vector of sample IDs (one per row of \code{x}). When provided, samples with the same ID are kept together in the same fold.
 #'   This is essential for repeated-measures or clustered data where multiple rows correspond to the same subject/group.
-#'   Default is \code{NULL}, which behaves like v2 (independent samples).
+#'   Default is \code{NULL}, which behaves like v1 and v2 (independent samples).
 #' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -1284,7 +1284,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' This "v3" adds sample-ID-aware fold assignment to ensure that samples sharing the same ID (e.g., multiple measurements from the same subject)
 #' are always placed in the same fold. This prevents data leakage in repeated-measures or clustered experimental designs.
 #'
-#' When \code{sampleIds} is \code{NULL} or missing, the function behaves identically to \code{rbioClass_svm_ncv_fs_v2}.
+#' When \code{sampleIds} is \code{NULL} or missing, the function behaves identically to \code{rbioClass_svm_ncv_fs}.
 #' When provided, the function groups rows by unique sample IDs and assigns entire groups to folds.
 #'
 #' For classification with \code{sampleIds}, stratification is performed at the group level: each unique sample ID's group
