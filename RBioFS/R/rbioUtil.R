@@ -764,3 +764,51 @@ sv_importance_shapviz <- function(object, kind = c("bar", "beeswarm", "both", "n
   }
   p
 }
+
+
+#' @title .assign_group_folds_stratified
+#' @description
+#'    Internal helper 1 of 2: group-level fold assignment for nested CV
+#'    Stratified group assignment: for each class level, distribute that class's groups to folds
+.assign_group_folds_stratified <- function(sampleIds, y, cross.k, class_table) {
+  unique_groups <- unique(sampleIds)
+  fold_assignment <- integer(length(unique_groups))
+  names(fold_assignment) <- unique_groups
+
+  for (lvl in levels(y)) {
+    rows_for_class <- which(y == lvl)
+    groups_for_class <- unique(sampleIds[rows_for_class])
+    n_g <- length(groups_for_class)
+    v <- rep(1:cross.k, times = floor(n_g / cross.k))
+    if (n_g %% cross.k != 0) {
+      v <- c(v, sample(1:cross.k, n_g %% cross.k))
+    }
+    sample.v <- sample(v)
+    for (j in seq_along(groups_for_class)) {
+      fold_assignment[groups_for_class[j]] <- sample.v[j]
+    }
+  }
+  return(fold_assignment)
+}
+
+
+#' @title .assign_group_folds_simple
+#' @description
+#'    Internal helper 2 of 2: group-level fold assignment for nested CV
+#'    Simple greedy regression group assignment: balance by unweighted group mean
+.assign_group_folds_simple <- function(groups, group_mean_y, cross.k) {
+  fold_sums <- numeric(cross.k)
+  fold_assignment2 <- integer(length(groups))
+  names(fold_assignment2) <- groups
+
+  ord <- order(group_mean_y, decreasing = TRUE)
+
+  for (j in ord) {
+    g <- groups[j]
+    gmean <- group_mean_y[j]
+    best_fold <- which.min(fold_sums)
+    fold_assignment2[g] <- best_fold
+    fold_sums[best_fold] <- fold_sums[best_fold] + gmean
+  }
+  return(fold_assignment2)
+}

@@ -1333,49 +1333,6 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #'
 #' }
 #' @export
-
-## Internal helpers: group-level fold assignment for nested CV
-
-## Stratified group assignment: for each class level, distribute that class's groups to folds
-.assign_group_folds_stratified <- function(sampleIds, y, cross.k, class_table) {
-  unique_groups <- unique(sampleIds)
-  fold_assignment <- integer(length(unique_groups))
-  names(fold_assignment) <- unique_groups
-
-  for (lvl in levels(y)) {
-    rows_for_class <- which(y == lvl)
-    groups_for_class <- unique(sampleIds[rows_for_class])
-    n_g <- length(groups_for_class)
-    v <- rep(1:cross.k, times = floor(n_g / cross.k))
-    if (n_g %% cross.k != 0) {
-      v <- c(v, sample(1:cross.k, n_g %% cross.k))
-    }
-    sample.v <- sample(v)
-    for (j in seq_along(groups_for_class)) {
-      fold_assignment[groups_for_class[j]] <- sample.v[j]
-    }
-  }
-  return(fold_assignment)
-}
-
-## Simple greedy regression group assignment: balance by unweighted group mean
-.assign_group_folds_simple <- function(groups, group_mean_y, cross.k) {
-  fold_sums <- numeric(cross.k)
-  fold_assignment2 <- integer(length(groups))
-  names(fold_assignment2) <- groups
-
-  ord <- order(group_mean_y, decreasing = TRUE)
-
-  for (j in ord) {
-    g <- groups[j]
-    gmean <- group_mean_y[j]
-    best_fold <- which.min(fold_sums)
-    fold_assignment2[g] <- best_fold
-    fold_sums[best_fold] <- fold_sums[best_fold] + gmean
-  }
-  return(fold_assignment2)
-}
-
 rbioClass_svm_ncv_fs_v3 <- function(x, y,
                                      univariate.fs = FALSE, uni.log2trans = TRUE, uni.contrast = NULL,
                                      uni.alpha = 0.05, uni.fdr = FALSE,
@@ -1444,16 +1401,18 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     ## nested cv-fs
     # processing training data
    dfm <- data.frame(y, x, check.names = FALSE)
-   if (has_group_ids) {
-       if (model_type == "regression"){
-         ## regression: assign groups to folds using greedy variance minimisation
-         fold_assignment <- .assign_group_folds_simple(groups = unique_groups, group_mean_y = sapply(split(seq_len(nrow(dfm)), sampleIds), function(idx) mean(as.numeric(dfm$y[idx]))), cross.k = cross.k)
-         fold <- fold_assignment[sampleIds]
-         } else {
-         ## classification: stratified group assignment
-         y_summary <- table(dfm$y)
-         fold_assignment <- .assign_group_folds_stratified(sampleIds = sampleIds, y = dfm$y, cross.k = cross.k, class_table = y_summary)
-         fold <- fold_assignment[sampleIds]
+    if (has_group_ids) {
+        if (model_type == "regression"){
+           ## regression: assign groups to folds using greedy variance minimisation
+          fold_assignment <- .assign_group_folds_simple(groups = unique_groups, group_mean_y = sapply(split(seq_len(nrow(dfm)), sampleIds), function(idx) mean(as.numeric(dfm$y[idx]))), cross.k = cross.k)
+          sample_id_to_fold <- fold_assignment
+          fold <- fold_assignment[sampleIds]
+           } else {
+            ## classification: stratified group assignment
+          y_summary <- table(dfm$y)
+          fold_assignment <- .assign_group_folds_stratified(sampleIds = sampleIds, y = dfm$y, cross.k = cross.k, class_table = y_summary)
+          sample_id_to_fold <- fold_assignment
+          fold <- fold_assignment[sampleIds]
          }
        names(fold) <- NULL
        random_sample_idx <- NULL
@@ -1667,7 +1626,8 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
      }
    if (verbose) cat("Done!\n")
 
-    # below: cv.model.idx: best models index
+      # below: cv.model.idx: best models index
+   nested.cv.list <- nested_cvm.list    # set up nested.cv.list instead of using new nested_cvm.list for compatibility
    if (model_type == "classification"){
      nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
        nested.cv.list[[i]]$nested.cv.accuracy
