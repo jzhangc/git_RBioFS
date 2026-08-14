@@ -65,7 +65,10 @@ Update log
     (ADDED)
       - New rRF-FS and CV-rRF-FS-SVM function(s)
         - rbioClass_svm_ncv_fs_v3() added to acommodate samples with same sample IDs to be kept together in the same fold during cross-validation
-      
+
+      - New Util function(s)
+        - Two helper functions ".assign_group_folds_stratified" and ".assign_group_folds_stratified()" added to support rbioClass_svm_ncv_fs_v3()
+
       - Update to SVM and SVM assessment functions(s)
         - Plot aesthetics updated for consistency for functions:
           - rbioClass_svm_roc_auc()
