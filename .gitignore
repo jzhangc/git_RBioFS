@@ -7,6 +7,9 @@ prompt.md
 .Rhistory
 .Rapp.history
 
+# agents
+AGENTS.md
+
 # Session Data files
 .RData
 

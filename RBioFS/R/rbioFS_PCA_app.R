@@ -329,7 +329,7 @@ rbioFS_PCA_app <- function(){
           ylab(pc_axis_lbl[2]) +
           theme_bw() +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = input$fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = input$fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),

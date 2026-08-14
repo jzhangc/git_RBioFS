@@ -500,7 +500,7 @@ rbioFS_app <- function(){
           ylab(input$initialFS_xLabel) + # the arguments for x and y labls are switched as the figure will be rotated
           geom_hline(yintercept = 0) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(hjust = 0.5, face = "bold"),
                 axis.title = element_text(face = "bold"),
                 legend.position = "bottom",
@@ -729,7 +729,7 @@ rbioFS_app <- function(){
           ylab(input$SFS_yLabel) + # the arguments for x and y labls are switched as the figure is rotated
           geom_vline(xintercept = min(SFS_data()$feature_subsets_with_min_OOBerror_plus_1SD), linetype = "dashed") +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(hjust = 0.5, face = "bold"),
                 axis.title = element_text(face = "bold"),
                 legend.position = "bottom",
