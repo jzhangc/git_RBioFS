@@ -1393,10 +1393,20 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
      n_groups <- length(unique_groups)
       if (n_groups < cross.k) {
         warning(paste0("Number of unique sample IDs (", n_groups,
-                         ") is less than cross.k (", cross.k,
-                         "). Some folds will be empty in certain iterations."))
-       }
-     }
+                           ") is less than cross.k (", cross.k,
+                           "). Some folds will be empty in certain iterations."))
+        }
+
+      # Check that samples with the same sampleIds have the same class label
+      labels_by_group <- tapply(y, sampleIds, function(labs) unique(as.character(labs)))
+      conflicting <- names(labels_by_group)[sapply(labels_by_group, length) > 1]
+      if (length(conflicting) > 0) {
+        conflicting_details <- paste(conflicting, collapse = ", ")
+        stop(paste0("Samples with the same sample ID have different class labels (IDs: ",
+                      conflicting_details, "). ",
+                      "Samples sharing the same sample ID must have the same class label for proper cross-validation."))
+        }
+      }
 
     ## nested cv-fs
     # processing training data
