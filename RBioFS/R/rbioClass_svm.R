@@ -1601,7 +1601,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
      }
 
 
-    # computing
+  # computing
   if (verbose){
     cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
     cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))

@@ -26,10 +26,13 @@ Installation
         
         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories())
         
-  - Install development build
+  - Install pre-stable build
         
         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
-        
+  
+  - Install nightly build
+
+        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "nightly")
 
 Update log
 
@@ -60,6 +63,9 @@ Update log
         - When set, rbioFS_PCA() also displays loadingplot when using more than 2 PCs
     
     (ADDED)
+      - New rRF-FS and CV-rRF-FS-SVM function(s)
+        - rbioClass_svm_ncv_fs_v3() added to acommodate samples with same sample IDs to be kept together in the same fold during cross-validation
+      
       - Update to SVM and SVM assessment functions(s)
         - Plot aesthetics updated for consistency for functions:
           - rbioClass_svm_roc_auc()
@@ -78,7 +84,7 @@ Update log
           - rbioClass_plsda_jackknife()
         - rbioReg_plsr_ncomp_select() updated with ggplot2 4.x support
 
-      - Update to rRF-FS function(s)
+      - Update to rRF-FS and CV-rRF-FS-SVM function(s)
         - Random state functionality added the following functions:
           - rbioFS_rf_initialFS(), rbioFS_rf_SFS()
           - rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2()
