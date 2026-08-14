@@ -88,6 +88,7 @@ Update log
         - Random state functionality added the following functions:
           - rbioFS_rf_initialFS(), rbioFS_rf_SFS()
           - rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2()
+          - "rbiosvm_nestedcv" class updated with "sampleIds" and "sampleIdToFold" items for v1, v2, and v3 of rbioClass_svm_ncv_fs() functions
 
       - Update to PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object
