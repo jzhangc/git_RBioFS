@@ -1,7 +1,11 @@
 # agents
-docs/
+data
+results
+.vscode
+log
 AGENTS.md
-prompt.md
+prompts.md
+*session_*
 
 # History files
 .Rhistory

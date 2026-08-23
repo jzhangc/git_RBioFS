@@ -1,0 +1,7 @@
+write a v3 version of the "rbioClass_svm_ncv_fs" function: rbioClass_svm_ncv_fs_v3, which would make sure samples (i.e. rows of x, or y) with same sample IDs will be kept together in the same fold during cross-validation. This is important for scenarios where samples are not independent, such as when multiple measurements are taken from the same subject. The v3 function should be based on "rbioClass_svm_ncv_fs", not v2. Reference: RBioFS/R/rbioClass_svm.R, lines 177-696.
+
+I moved the helper functions into their own blocks in the RBioFS/R/rbioUtil.R file, test if rbioClass_svm_ncv_fs_v3 still works. remove all the temporary files after testing if needed. 
+
+the potential "could not find function tune" bug context: the rbioClass_svm_ncv_fs v1, v2, and v3 call rbioClass_svm function for SVM modelling, and rbioClass_svm calls tune function from the e1071 package as its dependency. given this context, test if this bug still exists
+
+For the rbioClass_svm_ncv_fs_v3 function in RBioFS/R/rbioClass_svm.R, add a error handling logic that, if there are samples with the same sample IDs, these sample cannot have different class labels. If such a case is detected, the function should throw an informative error message indicating that samples with the same sample IDs must have the same class label for proper cross-validation. Reference: RBioFS/R/rbioClass_svm.R, lines 1187-1796. Reference for where the helper functions are stored: RBioFS/R/rbioUtil.R. 
