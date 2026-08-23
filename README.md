@@ -11,28 +11,52 @@ To cite in publication
 
 Installation
 
-  - Install devtools (if not already done)
-  
-        install.packages("devtools")
-        
-  - Install bioconductor (if not already done)
-        
-        if (!requireNamespace("BiocManager"))
-            install.packages("BiocManager")
-            
-        BiocManager::install()
-                
-  - Install stable release
-        
-        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories())
-        
-  - Install pre-stable build
-        
-        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
-  
-  - Install nightly build
+   Install using pak (recommended)
 
-        devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "nightly")
+      - Install pak (if not already done)
+
+         install.packages("pak")
+
+      - Set Bioconductor repositories (pak reads R's global repos option)
+
+         options(repos = BiocManager::repositories())
+
+      - Install stable release
+
+         pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS")
+
+      - Install pre-stable build
+
+         pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS@beta")
+
+      - Install nightly build
+
+         pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS@nightly")
+
+   Install using devtools
+
+    - Install devtools (if not already done)
+   
+         install.packages("devtools")
+         
+    - Install bioconductor (if not already done)
+         
+         if (!requireNamespace("BiocManager"))
+             install.packages("BiocManager")
+             
+         BiocManager::install()
+                 
+    - Install stable release
+         
+         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories())
+         
+    - Install pre-stable build
+         
+         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
+   
+    - Install nightly build
+
+         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "nightly")
 
 Update log
 
@@ -102,6 +126,9 @@ Update log
         - Plot aesthetics updated for consistency for function(s):
           - rbioUtil_perm_plot()
         - A bug fixed for rbioUtil_fscount_plot() where function crashes when plotting
+
+      - Other updates
+        - README.md updated with installation via the pak package
 
 
     0.8.2 (August.30.2025)
