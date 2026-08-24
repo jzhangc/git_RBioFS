@@ -9,54 +9,72 @@ To cite in publication
     Zhang J, Richardson DJ, Dunkley BT. 2020. Classifying post-traumatic stress disorder using the magnetoencephalographic connectome and machine learning. Scientific Reports. 10(1): 5937. doi: 10.1038/s41598-020-62713-5.
 
 
-Installation
+## Installation
 
-   Install using pak (recommended)
+Install from the `nightly` branch (the active development source) unless a stable
+or pre-stable build is intended. `RBioFS` depends on Bioconductor packages, so
+point R at the Bioconductor repositories before installing (both `devtools` and
+`pak` read R's global `repos` option / pass `repos = BiocManager::repositories()`)
+and make sure `BiocManager` is installed and `BiocManager::install()` has been run.
 
-      - Install pak (if not already done)
+`pak` (recommended) has no `ref` argument; the build is encoded in the URL as
+`github::jzhangc/git_RBioFS/RBioFS@<build>`. `install_github` takes the build via
+its `ref` argument.
 
-         install.packages("pak")
+### From GitHub with `pak`
 
-      - Set Bioconductor repositories (pak reads R's global repos option)
+```r
+if (!requireNamespace("pak", quietly = TRUE))
+    install.packages("pak")
 
-         options(repos = BiocManager::repositories())
+# set Bioconductor repositories (pak reads R's global repos option)
+options(repos = BiocManager::repositories())
 
-      - Install stable release
+# stable release
+pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS")
 
-         pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS")
+# pre-stable build (beta)
+pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS@beta")
 
-      - Install pre-stable build
+# nightly build
+pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS@nightly")
+```
 
-         pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS@beta")
+### From GitHub with `devtools`
 
-      - Install nightly build
+```r
+if (!requireNamespace("devtools", quietly = TRUE))
+    install.packages("devtools")
 
-         pak::pkg_install("github::jzhangc/git_RBioFS/RBioFS@nightly")
+# install Bioconductor support (if not already done)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
 
-   Install using devtools
+# stable release
+devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories())
 
-    - Install devtools (if not already done)
-   
-         install.packages("devtools")
-         
-    - Install bioconductor (if not already done)
-         
-         if (!requireNamespace("BiocManager"))
-             install.packages("BiocManager")
-             
-         BiocManager::install()
-                 
-    - Install stable release
-         
-         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories())
-         
-    - Install pre-stable build
-         
-         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
-   
-    - Install nightly build
+# pre-stable build (beta)
+devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "beta")
 
-         devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "nightly")
+# nightly build
+devtools::install_github("jzhangc/git_RBioFS/RBioFS", repos = BiocManager::repositories(), ref = "nightly")
+```
+
+`install_github` forwards `ref` to the underlying `remotes::install_github`;
+`ref` accepts a branch name (here, `beta` or `nightly`) and defaults to
+`"HEAD"` (the repository's default branch, the stable release).
+
+### From source
+
+```r
+# from a source checkout
+R CMD INSTALL .
+
+# or, build and install the tarball
+R CMD build .
+R CMD INSTALL RBioFS_<version>.tar.gz
+```
 
 Update log
 
