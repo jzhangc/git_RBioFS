@@ -1,3 +1,12 @@
+# agents
+data
+results
+.vscode
+log
+AGENTS.md
+prompts.md
+*session_*
+
 # History files
 .Rhistory
 .Rapp.history
