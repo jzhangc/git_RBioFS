@@ -112,6 +112,7 @@ Update log
         - Two helper functions ".assign_group_folds_stratified" and ".assign_group_folds_stratified()" added to support rbioClass_svm_ncv_fs_v3()
 
       - Update to SVM and SVM assessment functions(s)
+        - rbioClass_svm has been updated with parallel computing support
         - Plot aesthetics updated for consistency for functions:
           - rbioClass_svm_roc_auc()
           - rbioClass_svm_roc_auc_inter()

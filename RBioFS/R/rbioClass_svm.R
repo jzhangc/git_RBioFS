@@ -3,13 +3,14 @@
 #' @description Support Vector Machine (SVM) modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param svm.cross.k Fold of cross validation. Default is \code{10}.
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
-#' @param ... Additional arguments for \code{svm} function from \code{e1071mc} pacakge.
+#' @param ... Additional arguments for \code{svm} function from \code{e1071mc} package.
+#' @param n_cores Number of CPU cores to use. Default is \code{NULL}, or the total number cores minus one.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
 #'
@@ -51,9 +52,11 @@
 #' The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
 #' Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
 #'
+#' When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071::svm()} and \code{e1017::tune()}
+#'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
-#' @importFrom e1071mc svm tune tune.control
+#' @importFrom e1071mc svm svm_mc tune tune_mc tune.control
 #' @examples
 #' \dontrun{
 #' svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial", center = TRUE, scale = FALSE)
@@ -62,6 +65,7 @@
 rbioClass_svm <- function(x, y, center.scale = TRUE,
                           kernel = c("radial", "linear", "polynomial", "sigmoid"), svm.cross.k = 10,
                           tune.method = c("cross", "boot", "fix"), tune.cross.k = 10, tune.boot.n = 10, ...,
+                          n_cores = NULL,
                           verbose = TRUE){
   ## check arguments
   if (is.factor(y)){
@@ -75,6 +79,11 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (any(class(x) == "data.frame") | is.vector(x)){
     if (verbose) cat("x converted to a matrix object.\n")
     x <- as.matrix(sapply(x, as.numeric))
+  }
+  if (is.null(n_cores)) {
+    n_cores <- 1
+  } else if (n_cores > 1) {
+    if (verbose) cat("Parallal computing enabled. \n")
   }
   # if (class(y) != "factor"){
   #   if (verbose) cat("y is converted to factor. \n")
@@ -116,17 +125,31 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   # tune parameters
   gamma_start <- ifelse(is.vector(X), 1, 1 / ncol(X))  # starting gamma value per svm() default settings
   if (verbose) cat(paste0("Grid searching for parameter optimization with ", tune.method, " method (speed depending on hardware configuration)..."))
-  svm_tuned <- tune(svm, kernel = kernel,
-                    train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                    tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n))
+  if (n_cores > 1) {
+    svm_tuned <- tune_mc(svm, kernel = kernel,
+                         train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
+                         tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n),
+                         n_cores = n_cores)
+  } else {
+    svm_tuned <- tune(svm, kernel = kernel,
+                      train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
+                      tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n))
+  }
   if (verbose) cat("DONE!\n")
 
   # svm
   if (verbose) cat("SVM modelling...")
-  m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
-           cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-           scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-           cross = svm.cross.k, ...)
+  if (n_cores > 1) {
+    m <- svm_mc(x = X, y = y, kernel = kernel, probability = TRUE,
+             cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
+             scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+             cross = svm.cross.k, n_cores = n_cores, ...)
+  } else {
+    m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
+                cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
+                scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+                cross = svm.cross.k, ...)
+  }
   if (verbose) cat("Done!\n")
 
   # return

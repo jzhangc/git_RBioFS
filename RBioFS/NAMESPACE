@@ -90,8 +90,10 @@ importFrom(data.table,data.table)
 importFrom(doParallel,registerDoParallel)
 importFrom(e1071mc,
   svm,
+  svm_mc,
   tune,
-  tune.control
+  tune.control,
+  tune_mc
 )
 importFrom(future,
   multicore,

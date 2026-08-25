@@ -14,6 +14,7 @@ rbioClass_svm(
   tune.cross.k = 10,
   tune.boot.n = 10,
   ...,
+  n_cores = NULL,
   verbose = TRUE
 )
 }
@@ -22,7 +23,7 @@ rbioClass_svm(
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and deviding by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
@@ -34,7 +35,9 @@ rbioClass_svm(
 
 \item{tune.boot.n}{Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.}
 
-\item{...}{Additional arguments for \code{svm} function from \code{e1071mc} pacakge.}
+\item{...}{Additional arguments for \code{svm} function from \code{e1071mc} package.}
+
+\item{n_cores}{Number of CPU cores to use. Default is \code{NULL}, or the total number cores minus one.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
@@ -82,6 +85,8 @@ center.scale process for the test data for ROC-AUC analysis. Usually, we center.
 
 The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
 Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
+
+When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071::svm()} and \code{e1017::tune()}
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
