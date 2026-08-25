@@ -34,14 +34,14 @@ rbioClass_svm(
 
 \item{tune.boot.n}{Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.}
 
-\item{...}{Additional arguments for \code{svm} function from \code{e1071} pacakge.}
+\item{...}{Additional arguments for \code{svm} function from \code{e1071mc} pacakge.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a SVM model object, with classes "svm" and "rbiosvm".
 
-Additional items for \code{rbiosvm} object to \code{svm} object from e1071 package:
+Additional items for \code{rbiosvm} object to \code{svm} object from e1071mc package:
 
 \code{inputX}: raw input predictor data.
 

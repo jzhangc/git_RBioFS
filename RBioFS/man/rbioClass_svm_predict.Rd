@@ -66,7 +66,7 @@ Although optional, the \code{newdata} matrix should be centered prior to testing
          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
          column mean and column standard deviation.
 
-         The default posterior probability calculation method \code{"logistic"} is the \code{e1071} package's implementation of logistic regression model.
+         The default posterior probability calculation method \code{"logistic"} is the \code{e1071mc} package's implementation of logistic regression model.
          See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
 
          If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.

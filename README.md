@@ -146,6 +146,7 @@ Update log
         - A bug fixed for rbioUtil_fscount_plot() where function crashes when plotting
 
       - Other updates
+        - e1071 is fully removed as a depencency, replaced by e1071mc (https://github.com/jzhangc/e1071mc)
         - README.md updated with installation via the pak package
 
 

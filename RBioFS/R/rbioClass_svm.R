@@ -9,11 +9,11 @@
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
-#' @param ... Additional arguments for \code{svm} function from \code{e1071} pacakge.
+#' @param ... Additional arguments for \code{svm} function from \code{e1071mc} pacakge.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
 #'
-#' Additional items for \code{rbiosvm} object to \code{svm} object from e1071 package:
+#' Additional items for \code{rbiosvm} object to \code{svm} object from e1071mc package:
 #'
 #' \code{inputX}: raw input predictor data.
 #'
@@ -53,7 +53,7 @@
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
-#' @importFrom e1071 svm tune tune.control
+#' @importFrom e1071mc svm tune tune.control
 #' @examples
 #' \dontrun{
 #' svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial", center = TRUE, scale = FALSE)
@@ -276,7 +276,7 @@ print.rbiosvm <- function(x, ...){
 #' For parallel computing, the nested CV rRF-FS part uses parallel for the rRF-FS functions \code{rbioFS_rf_initialFS} and \code{rbioFS_rf_SFS},
 #' i.e. the \code{parallelComputing} argument in these two functions. This would lead to as many CPU threads as set likely being used due to the number of trees
 #' often exceeding the number of threads. However, the SVM process is paralleled per CV iteration, e.g. 10-fold CV would use 10 CPU threads, which may lead to
-#' insufficient CPU thread utilization. This problem would not likely be solved unless the SVM dependency \code{e1071} is updated with parallel computing,
+#' insufficient CPU thread utilization. This problem would not likely be solved unless the SVM dependency \code{e1071mc} is updated with parallel computing,
 #' or a different SVM dependency that has parallel computing is used.
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
@@ -2180,7 +2180,7 @@ rbioClass_svm_cv <- function(x, y,
 #'          The option \code{center.scale.newdata = FALSE} is for the already centered the data matrix. This center.scale process should use training data's
 #'          column mean and column standard deviation.
 #'
-#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071} package's implementation of logistic regression model.
+#'          The default posterior probability calculation method \code{"logistic"} is the \code{e1071mc} package's implementation of logistic regression model.
 #'          See \code{\link{rbioClass_plsda_predict}} for description for "Bayes" and "softmax" method.
 #'
 #'          If \code{sampleID.vector = NULL} or missing, the function uses row numbers as label.

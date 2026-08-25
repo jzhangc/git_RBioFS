@@ -615,7 +615,7 @@ na_summary <- function(data, by = c("row", "col")) {
 #' @param object A SVM model object, in \code{rbiosvm} class.
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param col_idx Probability column (i.e. label or outcome) index or name for which the probability vector is extracted.
-#' @param ... Additional parameters for the \code{e1071:::predict.svm} method.
+#' @param ... Additional parameters for the \code{e1071mc:::predict.svm} method.
 #' @details
 #'    1. \code{newdata} should not include outcome column.
 #'    2. \code{newdata} should be 0-1 scaled.
@@ -632,7 +632,7 @@ rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
   } else {
     x <- newdata
   }
-  pred <- e1071:::predict.svm(object, x, probability = TRUE, ...)
+  pred <- e1071mc:::predict.svm(object, x, probability = TRUE, ...)
   prob_dfm <- attr(pred, "probabilities")
 
   # --- prob extraction ---

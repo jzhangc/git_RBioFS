@@ -1774,7 +1774,7 @@ rbioClass_svm_shap_aggregated <- function(model, X, bg_X = NULL, bg_n = 200L,
     ks_list <- vector(mode = "list", length = 1)
     ks_list[[1]] <- kernelshap(model, X = X,
                                bg_X = bg_X,
-                               pred_fun = as.numeric(e1071:::predict.svm(model, X)),
+                               pred_fun = as.numeric(e1071mc:::predict.svm(model, X)),
                                parallel = pc,
                                seed = randomState,
                                verbose = verbose) # needed to be updated with prediction scaling
@@ -1922,11 +1922,11 @@ rbioClass_svm_shap_individual <- function(model, X, bg_X, bg_n = 200L,
                      seed = randomState,
                      verbose = verbose)
   } else {
-    l <- as.numeric(e1071:::predict.svm(model, X))  # needed to be updated with scaling
+    l <- as.numeric(e1071mc:::predict.svm(model, X))  # needed to be updated with scaling
     ks <- kernelshap(model, X = X,
                      bg_X = bg_X,
                      bg_n = bg_n,
-                     pred_fun = as.numeric(e1071:::predict.svm(model, X)),
+                     pred_fun = as.numeric(e1071mc:::predict.svm(model, X)),
                      parallel = pc,
                      seed = randomState,
                      verbose = verbose)

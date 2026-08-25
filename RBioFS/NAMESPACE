@@ -82,50 +82,72 @@ import(pls)
 import(shapviz)
 import(shiny)
 importFrom(GGally,ggpairs)
-importFrom(RBioplot,multi_plot_shared_legend)
-importFrom(RBioplot,rightside_y)
+importFrom(RBioplot,
+  multi_plot_shared_legend,
+  rightside_y
+)
 importFrom(data.table,data.table)
 importFrom(doParallel,registerDoParallel)
-importFrom(e1071,svm)
-importFrom(e1071,tune)
-importFrom(e1071,tune.control)
-importFrom(future,multicore)
-importFrom(future,multisession)
-importFrom(future,plan)
+importFrom(e1071mc,
+  svm,
+  tune,
+  tune.control
+)
+importFrom(future,
+  multicore,
+  multisession,
+  plan
+)
 importFrom(ggpubr,ggarrange)
-importFrom(grid,grid.draw)
-importFrom(grid,grid.newpage)
-importFrom(gtable,gtable_add_cols)
-importFrom(gtable,gtable_add_grob)
+importFrom(grid,
+  grid.draw,
+  grid.newpage
+)
+importFrom(gtable,
+  gtable_add_cols,
+  gtable_add_grob
+)
 importFrom(kernelshap,kernelshap)
 importFrom(klaR,NaiveBayes)
-importFrom(limma,arrayWeights)
-importFrom(limma,backgroundCorrect)
-importFrom(limma,backgroundCorrect.matrix)
-importFrom(limma,eBayes)
-importFrom(limma,lmFit)
-importFrom(limma,makeContrasts)
-importFrom(limma,normalizeBetweenArrays)
-importFrom(limma,topTable)
-importFrom(matrixStats,colSds)
-importFrom(matrixStats,rowMeans2)
-importFrom(matrixStats,rowSds)
+importFrom(limma,
+  arrayWeights,
+  backgroundCorrect,
+  backgroundCorrect.matrix,
+  eBayes,
+  lmFit,
+  makeContrasts,
+  normalizeBetweenArrays,
+  topTable
+)
+importFrom(matrixStats,
+  colSds,
+  rowMeans2,
+  rowSds
+)
 importFrom(mltools,one_hot)
 importFrom(pROC,roc)
-importFrom(parallel,detectCores)
-importFrom(parallel,makeCluster)
-importFrom(parallel,parApply)
-importFrom(parallel,parLapply)
-importFrom(parallel,stopCluster)
-importFrom(pls,R2)
-importFrom(pls,RMSEP)
-importFrom(pls,mvrValstats)
-importFrom(pls,plsr)
-importFrom(randomForest,importance)
-importFrom(randomForest,randomForest)
-importFrom(randomForest,rfImpute)
+importFrom(parallel,
+  detectCores,
+  makeCluster,
+  parApply,
+  parLapply,
+  stopCluster
+)
+importFrom(pls,
+  R2,
+  RMSEP,
+  mvrValstats,
+  plsr
+)
+importFrom(randomForest,
+  importance,
+  randomForest,
+  rfImpute
+)
 importFrom(reshape2,melt)
-importFrom(rpart,prune)
-importFrom(rpart,rpart)
+importFrom(rpart,
+  prune,
+  rpart
+)
 importFrom(scales,rescale_none)
 importFrom(splines,ns)

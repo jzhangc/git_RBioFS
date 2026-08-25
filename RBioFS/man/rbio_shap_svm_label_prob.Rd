@@ -13,7 +13,7 @@ rbio_shap_svm_label_prob(object, newdata, col_idx = NULL, ...)
 
 \item{col_idx}{Probability column (i.e. label or outcome) index or name for which the probability vector is extracted.}
 
-\item{...}{Additional parameters for the \code{e1071:::predict.svm} method.}
+\item{...}{Additional parameters for the \code{e1071mc:::predict.svm} method.}
 }
 \value{
 Vector or data frame of prediction probabilities.
