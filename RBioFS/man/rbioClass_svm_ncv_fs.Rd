@@ -156,7 +156,7 @@ We only use \code{best.fs.count} for thresholding because it is going to be the 
 For parallel computing, the nested CV rRF-FS part uses parallel for the rRF-FS functions \code{rbioFS_rf_initialFS} and \code{rbioFS_rf_SFS},
 i.e. the \code{parallelComputing} argument in these two functions. This would lead to as many CPU threads as set likely being used due to the number of trees
 often exceeding the number of threads. However, the SVM process is paralleled per CV iteration, e.g. 10-fold CV would use 10 CPU threads, which may lead to
-insufficient CPU thread utilization. This problem would not likely be solved unless the SVM dependency \code{e1071mc} is updated with parallel computing,
+insufficient CPU thread utilization.
 or a different SVM dependency that has parallel computing is used.
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
