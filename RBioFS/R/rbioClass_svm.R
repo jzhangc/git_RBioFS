@@ -1629,11 +1629,11 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     cat(paste0("Parallel computing:", ifelse(parallelComputing, " ON\n", " OFF\n")))
     cat(paste0("Data center.scale: ", ifelse(center.scale, " ON\n", " OFF\n")))
     cat(paste0("Univariate reduction: ", ifelse(univariate.fs, " ON\n", " OFF\n")))
-    if (has_group_ids){
-      cat(paste0("Group-aware fold assignment: ON (", length(unique(sampleIds)), " unique groups, ", cross.k, " folds)\n"))
-      } else {
+    if (has_group_ids && length(unique(sampleIds)) < length(sampleIds)){
+      cat(paste0("Group-aware fold assignment: ON (", length(sampleIds), " sample IDs, ", length(unique(sampleIds)), " unique)\n"))
+       } else {
       cat("Group-aware fold assignment: OFF (independent samples)\n")
-      }
+       }
     cat("\n")
     cat("Nested cross-validation with feature selection (speed depending on hardware configuration): \n")
     cat("Nested CV rRF-FS: \n")
