@@ -33,7 +33,7 @@ rbioClass_svm_roc_auc_inter(
 \arguments{
 \item{object}{A \code{rbiosvm} object.}
 
-\item{fileprefix}{String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.}
+\item{fileprefix}{String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.}
 
 \item{newdata}{A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.}
 

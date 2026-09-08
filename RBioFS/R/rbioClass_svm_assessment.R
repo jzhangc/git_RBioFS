@@ -293,7 +293,7 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
 #'
 #' @description Interpolated ROC-AUC analysis and ploting for SVM model, for classification model only.
 #' @param object A \code{rbiosvm} object.
-#' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The corresponding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
 #' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
@@ -504,9 +504,8 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
                 input.newdata = newdata,
                 input.newdata.label = newdata.label,
                 newdata.center.scaled = centered_newdata)
+                
     class(out) <- c("svm_roc_auc", "svm_roc_auc_inter")
-
-
     if (is.null(fileprefix)) {  # export
       assign(paste0(deparse(substitute(object)), "_svm_roc_auc_inter"), out, envir = .GlobalEnv)
     } else {
@@ -2012,3 +2011,679 @@ print.rbio_shap <- function(x, ...) {
   cat(paste0("   SHAP run time: ", x$run_time, " \n"))
   cat("\n")
 }
+
+
+#' @title rbioClass_svm_pr_auc
+#'
+#' @description Precision-Recall (P-R) AUC analysis and plotting, with class-specific F1, F1-macro and F1-micro, for SVM classification models.
+#' @param object A \code{rbiosvm} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
+#' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
+#' @param newdata.label The corresponding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
+#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param prplot If to generate a precision-recall plot. Default is \code{TRUE}.
+#' @param pr_avg_curve String. Whether to add an averaged P-R curve (and its P-R AUC) as one extra curve on top of the per-class P-R curves. One of \code{"micro", "macro"} or \code{NULL}. Default is \code{NULL} (no averaged curve is added or exported). When set to \code{"macro"}, the averaged curve is the point-wise mean of the per-class precision on a common recall grid, and the exported AUC is the unweighted mean of the per-class P-R AUC. When set to \code{"micro"}, all samples are pooled into a single global P-R curve (using the argmax-of-probabilities prediction as the ranking), and the exported AUC is the trapezoidal area under that pooled curve.
+#' @param plot.smooth If to smooth the curves. Default is \code{FALSE}. (Not applied to the precision-recall curve, which is built directly from the thresholds.)
+#' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"recall"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"precision"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return Prints P-R AUC and F1 values in the console. And a pdf file for the precision-recall plot. The function also exports a results list as a \code{svm_pr_auc} class to the environment.
+#'
+#'         Items of the \code{svm_pr_auc} class:
+#'          \code{model.type}
+#'          \code{svm.pr_object}
+#'          \code{svm.pr_dataframe}
+#'           \code{svm.f1}
+#'           \code{svm.pr_avg_auc}
+#'           \code{input.newdata}
+#'          \code{input.newdata.label}
+#'          \code{newdata.center.scaled}
+#'
+#' @details Uses the one-vs-others scheme (consistent with \code{\link{rbioClass_svm_roc_auc}}) to build a precision-recall curve per class from the predicted class probabilities. The P-R AUC for each class is the trapezoidal area under its precision-recall curve.
+#'
+#'          A precision-recall curve (and therefore a P-R AUC) is only meaningful when there is at least one case and at least one control for the class; otherwise that class is reported as \code{NULL} (the same behavior as \code{rbioClass_svm_roc_auc}).
+#'
+#'          When \code{pr_avg_curve} is set, an averaged precision-recall curve (and its P-R AUC) is added as one extra curve on top of the per-class curves (\code{"micro"} or \code{"macro"}). Under \code{"macro"}, the averaged curve is the point-wise mean of the per-class precision on a common recall grid, and the exported P-R AUC (\code{svm.pr_avg_auc}) is the unweighted mean of the per-class P-R AUC. Under \code{"micro"}, all samples are pooled into a single global precision-recall curve (using the argmax-of-probabilities prediction as the ranking), and the exported P-R AUC is the trapezoidal area under that pooled curve. The averaged curve is always skipped when no valid per-class curve is available, and \code{svm.pr_avg_auc} is \code{NULL} unless a valid averaged curve is computed.
+#'
+#'          F1 metrics are derived from the final (argmax of class probabilities) prediction against the true labels, via the confusion matrix:
+#'           \itemize{
+#'             \item class-specific F1: per-class F1, with each class treated as positive vs. all others.
+#'             \item F1-macro: unweighted mean of the per-class F1.
+#'             \item F1-micro: global F1 from aggregate true/false positives and negatives, equal to the overall accuracy for one-hot labels.
+#'           }
+#'
+#'          When \code{newdata} is not provided, the function uses the training data from the input SVM object, and the training data is automatically center.scaled.
+#'
+#'          Although optional, the \code{newdata} matrix should use training data's column mean and column standard deviation to center.scale prior to P-R AUC analysis. The option \code{center.scale.newdata = FALSE} is used when the whole (training and test sets) data were center.scaled before SVM training and testing.
+#'
+#' @import ggplot2
+#' @import foreach
+#' @importFrom grid grid.draw
+#' @examples
+#' \dontrun{
+#' rbioClass_svm_pr_auc(object = svm_m, newdata = svm_test[, -1],
+#'                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
+#' }
+#' @export
+rbioClass_svm_pr_auc <- function(object, fileprefix = NULL,
+                                 newdata = NULL, newdata.label = NULL,
+                                 center.scale.newdata = TRUE,
+                                 prplot = TRUE,
+                                 pr_avg_curve = NULL,
+                                 plot.smooth = FALSE,
+                                 plot.SymbolSize = 2, plot.lineSize = 1,
+                                 plot.display.Title = TRUE, plot.titleSize = 10,
+                                 plot.fontType = "sans",
+                                 plot.xLabel = "recall", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                 plot.yLabel = "precision", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                 plot.legendSize = 9, plot.rightsideY = TRUE,
+                                 plot.Width = 170, plot.Height = 150,
+                                 verbose = TRUE) {
+  ## argument check
+  if (!any(class(object) %in% c('rbiosvm'))) stop("object needs to be \"rbiosvm\" class.")
+  if (object$model.type != "classification") stop("object needs to be a \"classification\" model")
+  if (is.null(newdata)) {
+    cat("No newdata input, proceed with training data.\n\n")
+    newdata <- object$inputX
+    newdata.label <- object$inputY
+    if (any(class(newdata.label) != "factor")) {
+      if (verbose) cat("newdata.label is converted to factor. \n")
+      newdata.label <- factor(newdata.label, levels = unique(newdata.label))
+    }
+  }
+  if (!any(class(newdata) %in% c("data.frame", "matrix")) & !is.null(dim(newdata))) stop("newdata needs to be a matrix, data.frame or vector.")
+  if (any(class(newdata) == "data.frame") | is.null(dim(newdata))) {
+    if (verbose) cat("newdata converted to a matrix object.\n")
+    newdata <- as.matrix(sapply(newdata, as.numeric))
+  }
+  if (ncol(newdata) != ncol(object$inputX)) stop("test data should have the same number of variables as the training data.")
+  if (!is.null(pr_avg_curve) && !any(pr_avg_curve %in% c("micro", "macro"))) stop("pr_avg_curve must be \"micro\", \"macro\" or NULL.")
+
+  ## process data
+  if (center.scale.newdata) { # using training data mean and sd
+    if (is.null(object$center.scaledX)) {
+      warning(paste0("No center.scaledX found in training data while center.scale.newdata = TRUE. Proceeding without center.scale.newdata\n"))
+      centered_newdata <- NULL
+      test <- newdata
+    } else {
+      if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
+      centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+      test <- centered_newdata
+    }
+  } else {
+    centered_newdata <- NULL
+    test <- newdata
+  }
+
+  ## prediction
+  pred <- predict(object, newdata = test, decision.values = TRUE, probability = TRUE)     # prediction
+  pred_prob <- attr(pred, "probabilities")
+  outcome <- newdata.label     # original label
+
+  ## helper: trapezoidal area under a precision-recall curve
+  pr_auc_area <- function(recall, precision) {
+    ord <- order(recall)
+    recall <- recall[ord]
+    precision <- precision[ord]
+    if (recall[1] > 0) {
+      recall <- c(0, recall)
+      precision <- c(precision[1], precision)
+    }
+    sum(diff(recall) * (precision[-length(precision)] + precision[-1]) / 2)
+  }
+
+  ## P-R AUC calculation (one-vs-others, mirrors rbioClass_svm_roc_auc)
+  pr_auc_list <- vector(mode = "list", length = length(levels(outcome)))
+    pr_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
+      response <- outcome
+      predictor <- pred_prob[, levels(response)[i]]      # probability of the current outcome
+      truth <- as.numeric(response == levels(response)[i])      # 1 = current class (positive), 0 = others (control)
+    n_pos <- sum(truth)
+    n_neg <- length(truth) - n_pos
+    if (n_pos > 0 && n_neg > 0) {
+      idx <- order(predictor, decreasing = TRUE)      # descending probability => descending threshold
+      pred_sorted <- predictor[idx]
+      truth_sorted <- truth[idx]
+      cum_tp <- cumsum(truth_sorted)
+      cum_fp <- cumsum(1 - truth_sorted)
+      precision <- cum_tp / (cum_tp + cum_fp)
+      recall <- cum_tp / n_pos
+      threshold <- pred_sorted
+      auc <- pr_auc_area(recall, precision)
+      if (length(levels(outcome)) == 2) {
+        cat(paste0("P-R AUC - ", levels(outcome)[i], ": ", auc, "\n"))
+      } else {
+        cat(paste0(" P-R AUC - ", levels(outcome)[i], " (vs Others): ", auc, "\n"))
+      }
+      return(list(precision = precision, recall = recall, threshold = threshold, auc = auc))
+    } else {
+      cat(paste0("No case or no control observed for class ", levels(outcome)[i], ". P-R AUC skipped.\n"))
+      return(NULL)
+    }
+  }
+  names(pr_auc_list) <- unique(outcome)
+
+  ## averaged (macro/micro) P-R curve + AUC
+  pr_avg_auc <- NULL
+  pr_avg_curve_df <- NULL
+  if (!is.null(pr_avg_curve)) {
+    valid_classes <- Filter(Negate(is.null), pr_auc_list)
+    if (length(valid_classes) == 0) {
+      cat("No valid per-class P-R curve available. Averaged P-R curve skipped.\n")
+    } else if (pr_avg_curve == "macro") {
+      all_recall <- unlist(lapply(valid_classes, function(x) x$recall))
+      grid <- unique(c(0, sort(all_recall)))
+      interp_pr <- function(recall, precision, xout) {
+        if (xout < recall[1]) return(precision[1])
+        if (xout > recall[length(recall)]) return(NA_real_)
+        approx(recall, precision, xout = xout, ties = "mean")$y
+      }
+      macro_prec <- sapply(grid, function(xout) {
+        pvals <- sapply(valid_classes, function(x) interp_pr(x$recall, x$precision, xout))
+        mean(pvals, na.rm = TRUE)
+      })
+      pr_avg_curve_df <- data.frame(precision = macro_prec, recall = grid,
+                                    threshold = NA_real_,
+                                    group = rep("macro (avg)", length(grid)),
+                                    row.names = NULL, check.names = FALSE)
+      pr_avg_auc <- mean(sapply(valid_classes, function(x) x$auc))
+      cat(paste0("P-R AUC (macro average): ", pr_avg_auc, "\n"))
+    } else if (pr_avg_curve == "micro") {
+      pred_class <- colnames(pred_prob)[max.col(pred_prob)]
+      pred_prob_class <- max(pred_prob, byrow = TRUE)
+      oidx <- order(pred_prob_class, decreasing = TRUE)
+      correct <- (pred_class == as.character(outcome))
+      is_tp <- correct
+      cum_tp <- cumsum(is_tp[oidx])
+      cum_fp <- cumsum(!is_tp[oidx])
+      micro_precision <- cum_tp / (cum_tp + cum_fp)
+      n_pos_total <- sum(is_tp)
+      if (n_pos_total > 0) {
+        micro_recall <- cum_tp / n_pos_total
+        pr_avg_curve_df <- data.frame(precision = micro_precision, recall = micro_recall,
+                                      threshold = NA_real_,
+                                      group = rep("micro (avg)", length(micro_recall)),
+                                      row.names = NULL, check.names = FALSE)
+        pr_avg_auc <- pr_auc_area(micro_recall, micro_precision)
+        cat(paste0("P-R AUC (micro average): ", pr_avg_auc, "\n"))
+      } else {
+        cat("No correct prediction observed. Micro P-R curve skipped.\n")
+      }
+    }
+  }
+
+  pr_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
+    perf <- pr_auc_list[[i]]
+    if (is.null(perf)) return(NULL)
+    precision <- perf$precision
+    recall <- perf$recall
+    thresholds <- perf$threshold
+    if (length(levels(outcome)) == 2) {
+      df <- data.frame(precision = precision, recall = recall, threshold = thresholds,
+                        group = rep(levels(outcome)[i], times = length(recall)),
+                        row.names = NULL, check.names = FALSE)
+    } else {
+      df <- data.frame(precision = precision, recall = recall, threshold = thresholds,
+                        group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = length(recall)),
+                        row.names = NULL, check.names = FALSE)
+    }
+    df <- df[order(df$recall), ]
+    return(df)
+  }
+
+  if (!is.null(pr_avg_curve_df)) {
+    pr_dfm <- rbind(pr_dfm, pr_avg_curve_df)
+    pr_dfm <- pr_dfm[order(pr_dfm$group, pr_dfm$recall), ]
+    pr_dfm$group <- factor(pr_dfm$group, levels = unique(pr_dfm$group))
+  }
+
+  ## F1 calculation (from final argmax-of-probabilities prediction)
+  pred_class <- colnames(pred_prob)[max.col(pred_prob)]
+  pred_lab <- factor(pred_class, levels = levels(outcome))
+  conf <- table(true = outcome, pred = pred_lab)
+
+  f1_perclass <- numeric(ncol(conf))
+  for (i in 1:ncol(conf)) {
+    tp <- conf[i, i]
+    fp <- sum(conf[, i]) - tp
+    fn <- sum(conf[i, ]) - tp
+    prec_i <- if ((tp + fp) > 0) tp / (tp + fp) else 0
+    rec_i <- if ((tp + fn) > 0) tp / (tp + fn) else 0
+    f1_i <- if ((prec_i + rec_i) > 0) 2 * prec_i * rec_i / (prec_i + rec_i) else 0
+    f1_perclass[i] <- f1_i
+  }
+  names(f1_perclass) <- colnames(conf)
+
+  f1_macro <- mean(f1_perclass)
+  f1_micro <- sum(diag(conf)) / sum(conf)     # = overall accuracy for one-hot labels
+
+  f1_res <- list(
+    per.class = data.frame(class = names(f1_perclass), F1 = f1_perclass, row.names = NULL, check.names = FALSE),
+    macro = data.frame(metric = "F1-macro", F1 = f1_macro, row.names = NULL, check.names = FALSE),
+    micro = data.frame(metric = "F1-micro", F1 = f1_micro, row.names = NULL, check.names = FALSE)
+  )
+
+  if (verbose) {
+    cat("F1 (class-specific):\n")
+    for (i in 1:nrow(f1_res$per.class)) {
+      cat("      ", f1_res$per.class$class[i], ": ", f1_res$per.class$F1[i], "\n")
+    }
+    cat("F1-macro: ", f1_macro, "\n")
+    cat("F1-micro: ", f1_micro, "\n")
+  }
+
+  ## return
+  if (any(sapply(pr_auc_list, is.null))) {
+    cat("Either no case or no control observed for some class. P-R AUC partially failed. \n")
+  }
+
+  out <- list(model.type = object$model.type,
+              svm.pr_object = pr_auc_list,
+              svm.pr_dataframe = pr_dfm,
+              svm.f1 = f1_res,
+              svm.pr_avg_auc = pr_avg_auc,
+              input.newdata = newdata,
+              input.newdata.label = newdata.label,
+              newdata.center.scaled = centered_newdata)
+  class(out) <- "svm_pr_auc"
+  if (is.null(fileprefix)) {     # export
+    assign(paste0(deparse(substitute(object)), "_svm_pr_auc"), out, envir = .GlobalEnv)
+  } else {
+    assign(paste0(as.character(fileprefix), "_svm_pr_auc"), out, envir = .GlobalEnv)
+  }
+
+  ## plotting
+  if (prplot) {
+    if (is.null(pr_dfm) || nrow(pr_dfm) == 0) {
+      cat("P-R data empty. No plot can be generated. \n")
+    } else {
+      if (verbose) cat(paste("Plot being saved to file: ", deparse(substitute(object)), ".svm.pr.pdf...", sep = ""))     # initial message
+
+      plt <- ggplot(data = pr_dfm, aes(x = recall, y = precision, group = group, colour = group)) +
+        geom_line(aes(linetype = group), linewidth = plot.lineSize) +
+        geom_point(aes(shape = group), size = plot.SymbolSize) +
+        ggtitle(ifelse(plot.display.Title, "Precision-Recall", NULL)) +
+        xlab(plot.xLabel) +
+        ylab(plot.yLabel) +
+        theme_bw()
+
+      if (plot.rightsideY) {
+        plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank(),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      } else {
+        plt <- plt +
+          scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+      }
+
+      if (is.null(fileprefix)) {
+        ggsave(filename = paste(deparse(substitute(object)),".svm.pr.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
+      } else {
+        ggsave(filename = paste(as.character(fileprefix),".svm.pr.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
+      }
+      grid.draw(plt)
+       if (verbose) cat("Done!\n")
+      }
+    }
+
+   return(out)
+ }
+
+
+#' @title rbioClass_svm_cv_pr_auc
+#'
+#' @description Precision-Recall (P-R) AUC analysis and plotting, with class-specific F1, F1-macro and F1-micro, for SVM cross-validation (CV) models, for classification only.
+#' @param object A \code{rbiosvm_nestedcv} or \code{rbiosvm_cv} object.
+#' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
+#' @param prplot If to generate a precision-recall plot. Default is \code{TRUE}.
+#' @param plot.smooth If to smooth the curves. Default is \code{FALSE}. (Not applied to the precision-recall curve, which is built directly from the thresholds.)
+#' @param plot.display.Title If to show the name of the y class. Default is \code{TRUE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is avaiable on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.SymbolSize Symbol size. Default is \code{2}.
+#' @param plot.lineSize Line size. Default is \code{1}.
+#' @param plot.xLabel X-axis label. Type with quotation marks. Could be NULL. Default is \code{"recall"}.
+#' @param plot.xLabelSize X-axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yLabel Y-axis label. Type with quotation marks. Could be NULL. Default is \code{"precision"}.
+#' @param plot.yLabelSize Y-axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param plot.legendSize Legend size. Default is \code{9}.
+#' @param plot.rightsideY If to show the right side y-axis. Default is \code{FALSE}.
+#' @param plot.Width Scoreplot width. Default is \code{170}.
+#' @param plot.Height Scoreplot height. Default is \code{150}.
+#' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return Prints per-fold P-R AUC and F1 values in the console. And a pdf file for the precision-recall plot (one file per class), with each CV fold drawn as a separate curve.
+#'         The function also exports a P-R results list (one element per CV fold) to the environment, in a format analogous to the \code{auc_res_list} of \code{\link{rbioClass_svm_cv_roc_auc}}.
+#'
+#'          Items of each element of the returned list (one per CV fold):
+#'          \code{svm.pr_object}
+#'          \code{svm.pr_dataframe}
+#'          \code{svm.f1}
+#'          \code{svm.pr_auc}
+#'
+#' @details Uses the one-vs-others scheme (consistent with \code{\link{rbioClass_svm_roc_auc}} and \code{\link{rbioClass_svm_cv_roc_auc}}) to build a precision-recall curve per class from the predicted class probabilities. The P-R AUC for each class is the trapezoidal area under its precision-recall curve, computed per CV fold.
+#'
+#'          A precision-recall curve (and therefore a P-R AUC) is only meaningful when there is at least one case and at least one control for the class; otherwise that class is reported as \code{NULL} for that fold (the same behavior as \code{rbioClass_svm_cv_roc_auc}).
+#'
+#'          F1 metrics (class-specific F1, F1-macro, F1-micro) are derived, per CV fold, from the final (argmax of class probabilities) prediction against the true labels, via the confusion matrix:
+#'           \itemize{
+#'             \item class-specific F1: per-class F1, with each class treated as positive vs. all others.
+#'             \item F1-macro: unweighted mean of the per-class F1.
+#'             \item F1-micro: global F1 from aggregate true/false positives and negatives, equal to the overall accuracy for one-hot labels.
+#'           }
+#'
+#'          The test data included in the input \code{rbiosvm_nestedcv} / \code{rbiosvm_cv} is already normalized with training data information.
+#'          So there is no need for additional data transformation.
+#'
+#' @import ggplot2
+#' @import foreach
+#' @importFrom grid grid.draw
+#' @examples
+#' \dontrun{
+#' rbioClass_svm_cv_pr_auc(object = svm_nested_cv)
+#' }
+#' @export
+rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
+                                    prplot = TRUE,
+                                    plot.smooth = FALSE,
+                                    plot.SymbolSize = 2, plot.lineSize = 1,
+                                    plot.display.Title = TRUE, plot.titleSize = 10,
+                                    plot.fontType = "sans",
+                                    plot.xLabel = "recall", plot.xLabelSize = 10, plot.xTickLblSize = 10,
+                                    plot.yLabel = "precision", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+                                    plot.legendSize = 9, plot.rightsideY = TRUE,
+                                    plot.Width = 170, plot.Height = 150,
+                                    verbose = TRUE) {
+  # ---- argements check ----
+  if (!any(class(object) %in% c('rbiosvm_nestedcv', 'rbiosvm_cv'))) stop("object needs to be \"rbiosvm_nestedcv\" or \"rbiosvm_cv\" classes.")
+
+  # ---- read in data ----
+  if (class(object) == 'rbiosvm_nestedcv') {
+    cv_model_list <- object$nested.cv.models
+   } else {
+    cv_model_list <- object$cv.models
+   }
+
+  if (object$model.type == "regression") {
+    stop('Precision-Recall AUC only applies to classification models.')
+   }
+
+   # --- check the validity of and, if needed, process the model list ---
+  for (m in names(cv_model_list)) {
+    if (verbose) cat(paste0("processing model: ", m))
+    if ("simpleError" %in% class(cv_model_list[[m]])) {
+      cv_model_list[[m]] <- NULL
+     }
+    if (verbose) cat("\n")
+   }
+
+  if (length(cv_model_list) < 1) stop("No valid model found in the object.")
+
+   # ---- intermediate function: trapezoidal area under a precision-recall curve ----
+  pr_auc_area <- function(recall, precision) {
+    ord <- order(recall)
+    recall <- recall[ord]
+    precision <- precision[ord]
+    if (recall[1] > 0) {
+      recall <- c(0, recall)
+      precision <- c(precision[1], precision)
+     }
+    sum(diff(recall) * (precision[-length(precision)] + precision[-1]) / 2)
+   }
+
+   # ---- intermediate function: per-fold P-R AUC + F1 ----
+  cv_pr_auc_func <- function(x) {
+    # data
+    cv_test <- x$cv_test_data
+    cv_test_x <- cv_test[, !names(cv_test) %in% "y"]
+    cv_test_y <- droplevels(cv_test$y)      # to deal with fragments without all the classes
+
+     # model
+    cv_m <- x$cv_svm_model
+
+     # pred
+    pred <- predict(cv_m, newdata = cv_test_x, decision.values = TRUE, probability = TRUE)     # prediction
+    pred_prob <- attr(pred, "probabilities")
+     outcome <- cv_test_y         # original label
+
+     if (verbose) cat("-----\n")
+
+    # P-R AUC calculation (one-vs-others, mirrors rbioClass_svm_pr_auc / rbioClass_svm_cv_roc_auc)
+    pr_auc_list <- vector(mode = "list", length = length(levels(outcome)))
+    pr_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
+      response <- outcome
+      cur_lvl <- levels(response)[i]
+         # a CV training fold that never observed this class has no probability
+         # column for it; skipping it avoids a "subscript out of bounds" crash.
+      if (!cur_lvl %in% colnames(pred_prob)) {
+        cat(paste0("Class ", cur_lvl, " absent from model probability output; P-R AUC skipped.\n"))
+        return(NULL)
+           }
+      predictor <- pred_prob[, cur_lvl]        # probability of the current outcome
+      truth <- as.numeric(response == cur_lvl)        # 1 = current class (positive), 0 = others (control)
+      n_pos <- sum(truth)
+      n_neg <- length(truth) - n_pos
+      if (n_pos > 0 && n_neg > 0) {
+        idx <- order(predictor, decreasing = TRUE)       # descending probability => descending threshold
+        pred_sorted <- predictor[idx]
+        truth_sorted <- truth[idx]
+        cum_tp <- cumsum(truth_sorted)
+        cum_fp <- cumsum(1 - truth_sorted)
+        precision <- cum_tp / (cum_tp + cum_fp)
+        recall <- cum_tp / n_pos
+        threshold <- pred_sorted
+        auc <- pr_auc_area(recall, precision)
+        if (length(levels(outcome)) == 2) {
+          cat(paste0("P-R AUC - ", levels(outcome)[i], ": ", auc, "\n"))
+         } else {
+          cat(paste0(" P-R AUC - ", levels(outcome)[i], " (vs Others): ", auc, "\n"))
+         }
+        return(list(precision = precision, recall = recall, threshold = threshold, auc = auc))
+       } else {
+        cat(paste0("No case or no control observed for class ", levels(outcome)[i], ". P-R AUC skipped.\n"))
+        return(NULL)
+       }
+     }
+    names(pr_auc_list) <- unique(outcome)
+
+     # per-class P-R AUC vector
+    pr_auc_perclass <- sapply(pr_auc_list, function(e) if (is.null(e)) NA_real_ else e$auc)
+    names(pr_auc_perclass) <- names(pr_auc_list)
+
+     # F1 calculation (from final argmax-of-probabilities prediction, mirrors rbioClass_svm_pr_auc)
+    pred_class <- colnames(pred_prob)[max.col(pred_prob)]
+    pred_lab <- factor(pred_class, levels = levels(outcome))
+    conf <- table(true = outcome, pred = pred_lab)
+
+    f1_perclass <- numeric(ncol(conf))
+    for (i in 1:ncol(conf)) {
+      tp <- conf[i, i]
+      fp <- sum(conf[, i]) - tp
+      fn <- sum(conf[i, ]) - tp
+      prec_i <- if ((tp + fp) > 0) tp / (tp + fp) else 0
+      rec_i <- if ((tp + fn) > 0) tp / (tp + fn) else 0
+      f1_i <- if ((prec_i + rec_i) > 0) 2 * prec_i * rec_i / (prec_i + rec_i) else 0
+      f1_perclass[i] <- f1_i
+     }
+    names(f1_perclass) <- colnames(conf)
+
+    f1_macro <- mean(f1_perclass)
+    f1_micro <- sum(diag(conf)) / sum(conf)      # = overall accuracy for one-hot labels
+
+    f1_res <- list(
+      per.class = data.frame(class = names(f1_perclass), F1 = f1_perclass, row.names = NULL, check.names = FALSE),
+      macro = data.frame(metric = "F1-macro", F1 = f1_macro, row.names = NULL, check.names = FALSE),
+      micro = data.frame(metric = "F1-micro", F1 = f1_micro, row.names = NULL, check.names = FALSE)
+     )
+
+    if (verbose) {
+      cat("F1 (class-specific):\n")
+      for (i in 1:nrow(f1_res$per.class)) {
+        cat("       ", f1_res$per.class$class[i], ": ", f1_res$per.class$F1[i], "\n")
+       }
+      cat("F1-macro: ", f1_macro, "\n")
+      cat("F1-micro: ", f1_micro, "\n")
+     }
+
+     # P-R dataframe (one group per class, mirrors rbioClass_svm_pr_auc)
+    pr_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
+      perf <- pr_auc_list[[i]]
+      if (is.null(perf)) return(NULL)
+      precision <- perf$precision
+      recall <- perf$recall
+      thresholds <- perf$threshold
+      if (length(levels(outcome)) == 2) {
+        df <- data.frame(precision = precision, recall = recall, threshold = thresholds,
+                          group = rep(levels(outcome)[i], times = length(recall)),
+                          row.names = NULL, check.names = FALSE)
+       } else {
+        df <- data.frame(precision = precision, recall = recall, threshold = thresholds,
+                          group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = length(recall)),
+                          row.names = NULL, check.names = FALSE)
+       }
+      df <- df[order(df$recall), ]
+      return(df)
+     }
+
+     # return
+    if (any(sapply(pr_auc_list, is.null))) {
+      out <- NULL
+     } else {
+      out <- list(svm.pr_object = pr_auc_list,
+                  svm.pr_dataframe = pr_dfm,
+                  svm.f1 = f1_res,
+                  svm.pr_auc = pr_auc_perclass)
+     }
+    return(out)
+   }
+
+   # ---- compute and return ----
+  pr_auc_res_list <- vector(mode = "list", length = length(cv_model_list))
+  pr_auc_res_list[] <- foreach(i = 1:length(cv_model_list)) %do% {
+    out <- cv_pr_auc_func(cv_model_list[[i]])
+    out
+   }
+  names(pr_auc_res_list) <- names(cv_model_list)
+
+  if (any(sapply(pr_auc_res_list, is.null))) {
+    cat("NULL element removed from the CV P-R AUC list.\n")
+    pr_auc_res_list <- pr_auc_res_list[-which(sapply(pr_auc_res_list, is.null))]
+   }
+
+   # export
+  if (class(object) == 'rbiosvm_nestedcv') {
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_nestedcv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
+     } else {
+      assign(paste(as.character(fileprefix), "_svm_nestedcv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
+     }
+   } else {
+    if (is.null(fileprefix)) {
+      assign(paste(deparse(substitute(object)), "_svm_cv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
+     } else {
+      assign(paste(as.character(fileprefix), "_svm_cv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
+     }
+   }
+
+   # ---- plotting ----
+  if (prplot) {
+    if (length(pr_auc_res_list) < 1) {
+      cat("P-R data empty. No plots can be generated. \n")
+     } else {
+      plot_dfm <- foreach(i = 1:length(pr_auc_res_list), .combine = "rbind") %do% {
+        dfm <- pr_auc_res_list[[i]]$svm.pr_dataframe
+        dfm$cv_fold <- names(pr_auc_res_list)[i]
+        dfm
+       }
+      plot_dfm$cv_fold <- factor(plot_dfm$cv_fold, levels = unique(plot_dfm$cv_fold))
+
+      for (i in 1:length(unique(plot_dfm$group))) {
+        if (verbose) cat(paste0("Plot being saved to file: ", deparse(substitute(object)), ".cv_pr.", unique(plot_dfm$group)[i], ".pdf..."))   # initial message
+
+        plot_dfm_g <- plot_dfm[plot_dfm$group %in% unique(plot_dfm$group)[i], ]
+
+        plt <- ggplot(data = plot_dfm_g, aes(x = recall, y = precision, group = cv_fold, colour = cv_fold)) +
+          geom_line(aes(linetype = cv_fold), linewidth = plot.lineSize) +
+          ggtitle(ifelse(plot.display.Title, "Precision-Recall", NULL)) +
+          xlab(plot.xLabel) +
+          ylab(plot.yLabel) +
+          theme_bw()
+
+        if (plot.rightsideY) {
+          plt <- plt +
+            scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA), sec.axis = dup_axis()) +
+            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                  panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                  plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                  axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                  axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                  axis.title.y.right = element_blank(),
+                  legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                  legend.key = element_blank(),
+                  axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                  axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+         } else {
+          plt <- plt +
+            scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
+            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                  panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+                  plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType, hjust = 0.5),
+                  axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                  axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                  legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = plot.legendSize),
+                  legend.key = element_blank(),
+                  axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
+                  axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
+         }
+
+          # save
+        if (is.null(fileprefix)) {
+          ggsave(filename = paste0(deparse(substitute(object)), ".cv_pr.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+                 width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
+         } else {
+          ggsave(filename = paste0(as.character(fileprefix), ".cv_pr.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
+                 width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
+         }
+        grid.draw(plt)
+        if (verbose) cat("Done!\n")
+       }
+     }
+   }
+
+  return(pr_auc_res_list)
+ }
