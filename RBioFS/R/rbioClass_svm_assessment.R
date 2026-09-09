@@ -170,6 +170,13 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
   roc_auc_list <- vector(mode = "list", length = length(levels(outcome)))
   roc_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
     response <- outcome
+    cur_lvl <- levels(response)[i]
+    # a CV training fold that never observed this class has no probability
+    # column for it; skipping it avoids a "subscript out of bounds" crash.
+    if (!cur_lvl %in% colnames(pred_prob)) {
+      cat(paste0("Class ", cur_lvl, " absent from model probability output; AUC skipped.\n"))
+      return(NULL)
+    }
     predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
     levels(response)[-i] <- "others"
     # predictor <- dummy(pred)
@@ -279,14 +286,16 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
         ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       } else {
-        ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
-               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-      }
+         ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
+                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        }
       grid.draw(plt)
       if (verbose) cat("Done!\n")
+      }
     }
-  }
-}
+
+  return(out)
+ }
 
 
 #' @title rbioClass_svm_roc_auc_inter
@@ -420,6 +429,13 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
   roc_auc_list <- vector(mode = "list", length = length(levels(outcome)))
   roc_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
     response <- outcome
+    cur_lvl <- levels(response)[i]
+    # a CV training fold that never observed this class has no probability
+    # column for it; skipping it avoids a "subscript out of bounds" crash.
+    if (!cur_lvl %in% colnames(pred_prob)) {
+      cat(paste0("Class ", cur_lvl, " absent from model probability output; AUC skipped.\n"))
+      return(NULL)
+    }
     predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
     levels(response)[-i] <- "others"
     # predictor <- dummy(pred)
@@ -580,14 +596,16 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
         ggsave(filename = paste(deparse(substitute(object)),".svm.roc_inter.pdf", sep = ""), plot = plt,
                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       } else {
-        ggsave(filename = paste(as.character(fileprefix),".svm.roc_inter.pdf", sep = ""), plot = plt,
-               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-      }
+         ggsave(filename = paste(as.character(fileprefix),".svm.roc_inter.pdf", sep = ""), plot = plt,
+                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+        }
       grid.draw(plt)
       if (verbose) cat("Done!\n")
+      }
     }
-  }
-}
+
+  return(out)
+ }
 
 
 #' @title svm_cv_rocauc_helper
@@ -667,6 +685,13 @@ svm_cv_rocauc_helper <- function(object, roc.smooth = FALSE, verbose = TRUE) {
     roc_auc_list <- vector(mode = "list", length = length(levels(cv_test_y)))
     roc_auc_list[] <- foreach(i = 1:length(levels(cv_test_y))) %do% {
       response <- cv_test_y
+      cur_lvl <- levels(response)[i]
+      # a CV training fold that never observed this class has no probability
+      # column for it; skipping it avoids a "subscript out of bounds" crash.
+      if (!cur_lvl %in% colnames(pred_prob)) {
+        cat(paste0("Class ", cur_lvl, " absent from model probability output; AUC skipped.\n"))
+        return(NULL)
+      }
       predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
       levels(response)[-i] <- "others"
       splt <- split(predictor, response)  # split function splist array according to a factor
@@ -849,6 +874,13 @@ rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
     roc_auc_list <- vector(mode = "list", length = length(levels(cv_test_y)))
     roc_auc_list[] <- foreach(i = 1:length(levels(cv_test_y))) %do% {
       response <- cv_test_y
+      cur_lvl <- levels(response)[i]
+      # a CV training fold that never observed this class has no probability
+      # column for it; skipping it avoids a "subscript out of bounds" crash.
+      if (!cur_lvl %in% colnames(pred_prob)) {
+        cat(paste0("Class ", cur_lvl, " absent from model probability output; AUC skipped.\n"))
+        return(NULL)
+      }
       predictor <- pred_prob[, levels(response)[i]]  # probability of the current outcome
       levels(response)[-i] <- "others"
       splt <- split(predictor, response)  # split function splist array according to a factor
@@ -979,20 +1011,22 @@ rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
         }
 
         # save
-        # grid.newpage()
+         # grid.newpage()
         if (is.null(fileprefix)){
           ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-        } else {
+         } else {
           ggsave(filename = paste0(as.character(fileprefix),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-        }
+         }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
-      }
-    }
-  }
-}
+       }
+     }
+   }
+
+  return(auc_res_list)
+ }
 
 
 #' @title rbioClass_svm_cv_roc_auc_v2
@@ -1131,16 +1165,18 @@ rbioClass_svm_cv_roc_auc_v2 <- function(object, fileprefix = NULL,
         if (is.null(fileprefix)){
           ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-        } else {
+          } else {
           ggsave(filename = paste0(as.character(fileprefix),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-        }
+          }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
+        }
       }
     }
-  }
-}
+
+  return(auc_res_list)
+ }
 
 
 #' @title rbioClass_svm_cv_roc_auc_mean
@@ -1381,10 +1417,12 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
     if (is.null(fileprefix)) {
       assign(paste(deparse(substitute(object)), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
     } else {
-      assign(paste(as.character(fileprefix), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
+       assign(paste(as.character(fileprefix), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
+      }
     }
-  }
-}
+
+  return(out_list)
+ }
 
 
 #' @title rbioClass_svm_perm()
@@ -2150,6 +2188,13 @@ rbioClass_svm_pr_auc <- function(object, fileprefix = NULL,
   pr_auc_list <- vector(mode = "list", length = length(levels(outcome)))
     pr_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
       response <- outcome
+      cur_lvl <- levels(response)[i]
+      # a CV training fold that never observed this class has no probability
+      # column for it; skipping it avoids a "subscript out of bounds" crash.
+      if (!cur_lvl %in% colnames(pred_prob)) {
+        cat(paste0("Class ", cur_lvl, " absent from model probability output; P-R AUC skipped.\n"))
+        return(NULL)
+      }
       predictor <- pred_prob[, levels(response)[i]]      # probability of the current outcome
       truth <- as.numeric(response == levels(response)[i])      # 1 = current class (positive), 0 = others (control)
     n_pos <- sum(truth)
@@ -2488,12 +2533,12 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
     pr_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
       response <- outcome
       cur_lvl <- levels(response)[i]
-         # a CV training fold that never observed this class has no probability
-         # column for it; skipping it avoids a "subscript out of bounds" crash.
+      # a CV training fold that never observed this class has no probability
+      # column for it; skipping it avoids a "subscript out of bounds" crash.
       if (!cur_lvl %in% colnames(pred_prob)) {
         cat(paste0("Class ", cur_lvl, " absent from model probability output; P-R AUC skipped.\n"))
         return(NULL)
-           }
+      }
       predictor <- pred_prob[, cur_lvl]        # probability of the current outcome
       truth <- as.numeric(response == cur_lvl)        # 1 = current class (positive), 0 = others (control)
       n_pos <- sum(truth)
