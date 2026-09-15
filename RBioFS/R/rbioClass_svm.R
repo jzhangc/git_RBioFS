@@ -2237,7 +2237,10 @@ rbioClass_svm_predict <- function(object,
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
   # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
-    if (is.null(object$center.scaledX)) stop("No center.scaledX found in training data while center.scale.newdata = TRUE.")
+    if (is.null(object$center.scaledX)) {
+      warning("No center.scaledX found in training data while center.scale.newdata = TRUE, proceed with center.scale.newdata = FALSE")
+      center.scale.newdata <- FALSE
+      }
   }
   if (!missing(sampleID.vector) & !is.null(sampleID.vector)){
     if (length(sampleID.vector) != nrow(newdata)){

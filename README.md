@@ -122,6 +122,9 @@ Update log
         - Center.scale behaviour updated for rbioClass_svm_roc_auc() and rbioClass_svm_roc_auc_inter()
           - center.scale = TRUE on a SVM model trained with center.scale = FALSE would no longer stop the function. Instead, a warning will be given and proceed with center.scale = FALSE
           - No newdata would no longer default center.scale to TRUE
+        - rbioClass_svm_predict() updates:
+          - The "center.scale.newdata" argument default now set to FALSE
+          - When "center.scale.newdata = TRUE"" and no object$center.scaledX is found in the input rbiosvm object, instead of error, the function now throws a warning and sets "center.scale.newdata = FALSE" to proceed
         - A bug fixed for rbio_shap_svm_label_prob() where the function crashes when the input SVM model was not trained with center.scale = FALSE
 
       - Update to PLS function(s)
