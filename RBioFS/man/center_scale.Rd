@@ -18,9 +18,9 @@ Outputs a list containing centered matrix.
 data centering function with scale option
 }
 \details{
-This function is needed to pre-process data when conducting plsda analysis.
+This function is needed to pre-process data when conducting svm and plsda analysis.
          And the function can also be used for other purposes when needed.
-         With the colSds function from matrixStats package to calcualte column standard deviation,
+         With the colSds function from matrixStats package to calculate column standard deviation,
          this function is faster than the native \code{scale} function when \code{scale = TRUE}.
 
          The scale here really means "z-score standardization": (x - mean(X)) / SD

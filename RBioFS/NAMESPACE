@@ -9,6 +9,7 @@ S3method(print,rbiosvm_nestedcv)
 S3method(print,rbiosvm_perm)
 S3method(print,rf_ifs)
 S3method(print,rf_sfs)
+S3method(print,zcore_minmax)
 S3method(rbioUtil_fscount_plot,default)
 S3method(rbioUtil_fscount_plot,rbiosvm_nestedcv)
 S3method(rbioUtil_perm_plot,default)
@@ -75,6 +76,7 @@ export(singleIMP)
 export(substr_right)
 export(svm_cv_rocauc_helper)
 export(uni_PreProc)
+export(zcore_minmax)
 import(doFuture)
 import(doParallel)
 import(foreach)
@@ -124,6 +126,9 @@ importFrom(limma,
   topTable
 )
 importFrom(matrixStats,
+  colMaxs,
+  colMeans2,
+  colMins,
   colSds,
   rowMeans2,
   rowSds

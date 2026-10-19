@@ -110,9 +110,9 @@ rbioNorm <- function(RawData, NormMtd = "quantile",
 #' @param x Input matrix. Make sure it is a matrix. Typically, row is samples, and column the features.
 #' @param scale Logical, whether to scale the data or not. Default is \code{TRUE}.
 #' @return Outputs a list containing centered matrix.
-#' @details This function is needed to pre-process data when conducting plsda analysis.
+#' @details This function is needed to pre-process data when conducting svm and plsda analysis.
 #'          And the function can also be used for other purposes when needed.
-#'          With the colSds function from matrixStats package to calcualte column standard deviation,
+#'          With the colSds function from matrixStats package to calculate column standard deviation,
 #'          this function is faster than the native \code{scale} function when \code{scale = TRUE}.
 #'
 #'          The scale here really means "z-score standardization": (x - mean(X)) / SD

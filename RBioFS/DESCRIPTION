@@ -24,4 +24,4 @@ Imports:
 Remotes:
     jzhangc/git_R_STATS_KBS/package/rbioplot,
     jzhangc/e1071mc
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

@@ -111,8 +111,11 @@ Update log
 
       - New Util function(s)
         - Two helper functions ".assign_group_folds_stratified" and ".assign_group_folds_stratified()" added to support rbioClass_svm_ncv_fs_v3()
+        - New zscore_minmax() function to replace the center_scale() function, with zscore and min-max transformations, more accurate documentation and better performance
 
       - Update to SVM and SVM assessment functions(s)
+        - rbioClass_svm() updated with new zscore_minmax() function for data transformation, replacing the old center_scale() function, while ensure compatibility. The new transformation options (zscore and minmax) are properly integrated into the function, and documentation updated accordingly.
+          - All functions calling rbioClass_svm(), such as, but not limited to, rbioClass_svm_cv(), rbioClass_svm_ncv_fs_v3() and rbioClass_svm_perm() have been updated to use the new zscore_minmax() function for data transformation, replacing the old center_scale() function, while ensure compatibility. The new transformation options (zscore and minmax) are properly integrated into these functions, and documentation updated accordingly.
         - rbioClass_svm has been updated with parallel computing support
         - Plot aesthetics updated for consistency for functions:
           - rbioClass_svm_roc_auc()

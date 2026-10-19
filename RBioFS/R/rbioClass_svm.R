@@ -3,7 +3,15 @@
 #' @description Support Vector Machine (SVM) modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+#'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+#'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
+#' @param zscore Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+#'   \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+#'   \code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.
+#' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+#'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+#'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param svm.cross.k Fold of cross validation. Default is \code{10}.
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
@@ -46,11 +54,28 @@
 #'
 #' If \code{svm.cross.k} is set to 0, no cross validation is used for the final modelling.
 #'
-#' The center.scale is \code{(x -  col.mean)/col.sd}. Raw data for SVM should be center.scaled. The training data column mean and column sd are used by the
-#' center.scale process for the test data for ROC-AUC analysis. Usually, we center.scale the training data and use the col.mean and col.sd for center.scaling the test data.
+#' When \code{center.scale = TRUE}, the input transform is selected by \code{zscore} and \code{minmax}
+#' and is computed by \code{\link{zcore_minmax}}:
+#' \itemize{
+#'   \item \code{zscore = TRUE} (default) applies z-score standardization, \code{(x - col.mean) / col.sd},
+#'     so every feature has mean \eqn{0} and SD \eqn{1}. The fitted column means and SDs are stored on the
+#'     model (\code{center.scaledX$meanX}, \code{center.scaledX$columnSD}) and reused to transform test data
+#'     during ROC-AUC/PR-AUC assessment, so the train and test sets are put on the same scale.
+#'   \item \code{minmax = TRUE} applies min-max normalization, \code{(x - col.min) / (col.max - col.min)},
+#'     mapping every feature to \eqn{[0, 1]}. The fitted \code{colMin} and \code{colMax} are likewise stored
+#'     on the model for re-application to new data.
+#'   \item When both are \code{TRUE}, the transforms are applied in a fixed order:
+#'     \strong{z-score first, then min-max}. Min-max must run last to preserve its \eqn{[0, 1]} range
+#'     (applying z-score afterwards would reintroduce negative, unbounded values), and z-scoring first puts
+#'     features of different raw scales on a common footing before the \eqn{[0, 1]} stretch.
+#' }
+#' The default \code{center.scale = TRUE, zscore = TRUE, minmax = FALSE} reproduces the previous
+#' center-and-scale (z-score) behaviour exactly.
 #'
-#' The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
-#' Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
+#' The option \code{center.scale = FALSE} is for prior center.scaled or otherwise pre-transformed whole data
+#' (training + test sets), i.e. transform the data then split for training and test sets. It is only used for
+#' pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and
+#' utility (i.e. classify unknown data).
 #'
 #' When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071::svm()} and \code{e1017::tune()}
 #'
@@ -59,13 +84,28 @@
 #' @importFrom e1071mc svm svm_mc tune tune_mc tune.control
 #' @examples
 #' \dontrun{
-#' svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial", center = TRUE, scale = FALSE)
+#' # default: z-score standardization (center + scale)
+#' svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial")
+#'
+#' # min-max normalization (each feature mapped to [0, 1])
+#' svm_mm <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+#'                          kernel = "radial", center.scale = TRUE, zscore = FALSE, minmax = TRUE)
+#'
+#' # z-score first, then min-max (output in [0, 1])
+#' svm_zm <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+#'                          kernel = "radial", zscore = TRUE, minmax = TRUE)
+#'
+#' # no transform (data already pre-processed)
+#' svm_raw <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+#'                           kernel = "radial", center.scale = FALSE)
 #' }
 #' @export
 rbioClass_svm <- function(x, y, center.scale = TRUE,
                           kernel = c("radial", "linear", "polynomial", "sigmoid"), svm.cross.k = 10,
                           tune.method = c("cross", "boot", "fix"), tune.cross.k = 10, tune.boot.n = 10, ...,
                           n_cores = NULL,
+                          zscore = TRUE,
+                          minmax = FALSE,
                           verbose = TRUE){
   ## check arguments
   if (is.factor(y)){
@@ -95,8 +135,9 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 
   ## data processing
   if (center.scale){
-    if (verbose) cat(paste0("Data centered with the scaling prior to modelling.\n"))
-    centered_X <- center_scale(x, scale = TRUE)  # center data with the option of scaling
+    if (verbose) cat(paste0("Data transformed (z-score=", zscore, ", min-max=", minmax,
+                            "); z-score applied first, then min-max.\n"))
+    centered_X <- zcore_minmax(x, zscore = zscore, minmax = minmax, verbose = FALSE)
     X <- centered_X$centerX
   } else {
     X <- x
@@ -207,7 +248,15 @@ print.rbiosvm <- function(x, ...){
 #' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.
 #' @param uni.alpha Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.
 #' @param uni.fdr Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+#'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+#'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
+#' @param zscore Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+#'   \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+#'   \code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.
+#' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+#'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+#'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -326,17 +375,17 @@ print.rbiosvm <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_ncv_fs <- function(x, y,
-                                 univariate.fs = FALSE, uni.log2trans = TRUE, uni.contrast = NULL,
-                                 uni.alpha = 0.05, uni.fdr = FALSE,
-                                 center.scale = TRUE,
-                                 kernel = c("radial", "linear", "polynomial", "sigmoid"),
-                                 cross.k = 10, cross.best.model.method = c("none", "median"),
-                                 tune.method = c("cross", "boot", "fix"),
-                                 tune.cross.k = 10, tune.boot.n = 10, ...,
-                                 fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-                                 fs.count.cutoff = cross.k,
-                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                 verbose = TRUE){
+                                  univariate.fs = FALSE, uni.log2trans = TRUE, uni.contrast = NULL,
+                                  uni.alpha = 0.05, uni.fdr = FALSE,
+                                  center.scale = TRUE, zscore = TRUE, minmax = FALSE,
+                                  kernel = c("radial", "linear", "polynomial", "sigmoid"),
+                                  cross.k = 10, cross.best.model.method = c("none", "median"),
+                                  tune.method = c("cross", "boot", "fix"),
+                                  tune.cross.k = 10, tune.boot.n = 10, ...,
+                                  fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+                                  fs.count.cutoff = cross.k,
+                                  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                  verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
 
@@ -470,10 +519,10 @@ rbioClass_svm_ncv_fs <- function(x, y,
 
     # fs
     if (center.scale){
-      fs_training_x <- center_scale(cv_training_x, scale = TRUE)$centerX  # without y
-    } else {
+      fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX    # without y
+      } else {
       fs_training_x <- cv_training_x
-    }
+      }
 
     fs <- tryCatch({  # rRF-FS with error handling
       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
@@ -521,16 +570,14 @@ rbioClass_svm_ncv_fs <- function(x, y,
     uni_sig_fs <- nested_cvfs.list$uni_sig_fs
 
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
+                          zscore = zscore, minmax = minmax,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
     # processing test data
     fs_test <- nested_cvfs.list[[i]]$fs_test
-    if (center.scale){ # using training data mean and sd
-      centered_newdata <- t((t(fs_test[, -1]) - cv_m$center.scaledX$meanX) / cv_m$center.scaledX$columnSD)
-      fs_test[, -1] <- centered_newdata
-    } else {
-      centered_newdata <- NULL
+    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
+      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
@@ -731,7 +778,15 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.
 #' @param uni.alpha Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.
 #' @param uni.fdr Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+#'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+#'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
+#' @param zscore Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+#'   \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+#'   \code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.
+#' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+#'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+#'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -846,17 +901,17 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' }
 #' @export
 rbioClass_svm_ncv_fs_v2 <- function(x, y,
-                                    univariate.fs = FALSE, uni.log2trans = TRUE, uni.contrast = NULL,
-                                    uni.alpha = 0.05, uni.fdr = FALSE,
-                                    center.scale = TRUE,
-                                    kernel = c("radial", "linear", "polynomial", "sigmoid"),
-                                    cross.k = 10, cross.best.model.method = c("none", "median"),
-                                    tune.method = c("cross", "boot", "fix"),
-                                    tune.cross.k = 10, tune.boot.n = 10,
-                                    fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-                                    fs.count.cutoff = cross.k,
-                                    parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                    verbose = TRUE){
+                                     univariate.fs = FALSE, uni.log2trans = TRUE, uni.contrast = NULL,
+                                     uni.alpha = 0.05, uni.fdr = FALSE,
+                                     center.scale = TRUE, zscore = TRUE, minmax = FALSE,
+                                     kernel = c("radial", "linear", "polynomial", "sigmoid"),
+                                     cross.k = 10, cross.best.model.method = c("none", "median"),
+                                     tune.method = c("cross", "boot", "fix"),
+                                     tune.cross.k = 10, tune.boot.n = 10,
+                                     fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+                                     fs.count.cutoff = cross.k,
+                                     parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                     verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
 
@@ -987,7 +1042,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 
     # fs
     if (center.scale){
-      fs_training_x <- center_scale(cv_training_x, scale = TRUE)$centerX  # without y
+      fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX  # without y
     } else {
       fs_training_x <- cv_training_x
     }
@@ -1016,15 +1071,13 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     })
 
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
+                          zscore = zscore, minmax = minmax,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
     # processing test data
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
-    if (center.scale){ # using training data mean and sd
-      centered_newdata <- t((t(fs_test[, -1]) - cv_m$center.scaledX$meanX) / cv_m$center.scaledX$columnSD)
-      fs_test[, -1] <- centered_newdata
-    } else {
-      centered_newdata <- NULL
+    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
+      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
@@ -1219,7 +1272,15 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.
 #' @param uni.alpha Only set if \code{univariate.fs = TRUE}, the p value alpha. Default is \code{0.05}.
 #' @param uni.fdr Only set if \code{univariate.fs = TRUE}, if to use FDR for the p value. Default is \code{FALSE}.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+#'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+#'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
+#' @param zscore Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+#'   \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+#'   \code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.
+#' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+#'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+#'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -1359,7 +1420,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 rbioClass_svm_ncv_fs_v3 <- function(x, y,
                                      univariate.fs = FALSE, uni.log2trans = TRUE, uni.contrast = NULL,
                                      uni.alpha = 0.05, uni.fdr = FALSE,
-                                     center.scale = TRUE,
+                                     center.scale = TRUE, zscore = TRUE, minmax = FALSE,
                                      kernel = c("radial", "linear", "polynomial", "sigmoid"),
                                      cross.k = 10, cross.best.model.method = c("none", "median"),
                                      tune.method = c("cross", "boot", "fix"),
@@ -1433,7 +1494,8 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
 
     ## nested cv-fs
     # processing training data
-   dfm <- data.frame(y, x, check.names = FALSE)
+    sample_id_to_fold <- NULL  # default; populated below only when sampleIds is provided (group-aware path)
+    dfm <- data.frame(y, x, check.names = FALSE)
     if (has_group_ids) {
         if (model_type == "regression"){
            ## regression: assign groups to folds using greedy variance minimisation
@@ -1542,15 +1604,15 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
        uni_sig_fs <- NULL
        }
 
-      # fs
-     if (center.scale){
-       fs_training_x <- center_scale(cv_training_x, scale = TRUE)$centerX    # without y
-       } else {
-       fs_training_x <- cv_training_x
-       }
+    # fs
+    if (center.scale){
+      fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX  # without y
+    } else {
+      fs_training_x <- cv_training_x
+    }
 
-     fs <- tryCatch({    # rRF-FS with error handling
-       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
+    fs <- tryCatch({  # rRF-FS with error handling
+      rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
                            nTree = rf.ifs.ntree,
                            parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
                            plot = FALSE)
@@ -1588,40 +1650,38 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
 
     # nested CV-M function: SVM modelling for nested CV iterations
    nested_cvm_func <- function(i, ...){
-     set.seed(i)
-     fs <- nested_cvfs.list[[i]]$fs
-     fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
-     cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
-     uni_sig_fs <- nested_cvfs.list$uni_sig_fs
+    set.seed(i)
+    fs <- nested_cvfs.list[[i]]$fs
+    fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
+    cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
+    uni_sig_fs <- nested_cvfs.list$uni_sig_fs
 
-     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
-                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
+                          zscore = zscore, minmax = minmax,
+                          svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
+                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
       # processing test data
-     fs_test <- nested_cvfs.list[[i]]$fs_test
-     if (center.scale){ # using training data mean and sd
-       centered_newdata <- t((t(fs_test[, -1]) - cv_m$center.scaledX$meanX) / cv_m$center.scaledX$columnSD)
-       fs_test[, -1] <- centered_newdata
-       } else {
-       centered_newdata <- NULL
-       }
-     pred <- predict(cv_m, newdata = fs_test[, -1])
-     if (model_type == "classification"){
-       accu <- sum(diag(table(pred, fs_test$y))) / length(fs_test$y)    # accuracy = total TP / total (TP: true positive)
-       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
-                       cv_svm_model = cv_m, nested.cv.accuracy = accu, cv_test_data = fs_test)
-       } else {
-       error <- pred - fs_test$y
-       rmse <- sqrt(mean(error^2))
-       rsq <- cor(pred, fs_test$y)
-       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
-                       cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq, cv_test_data = fs_test)
-       }
+    fs_test <- nested_cvfs.list[[i]]$fs_test
+    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
+      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
+      }
+    pred <- predict(cv_m, newdata = fs_test[, -1])
+    if (model_type == "classification"){
+      accu <- sum(diag(table(pred, fs_test$y))) / length(fs_test$y)    # accuracy = total TP / total (TP: true positive)
+      tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
+                      cv_svm_model = cv_m, nested.cv.accuracy = accu, cv_test_data = fs_test)
+      } else {
+      error <- pred - fs_test$y
+      rmse <- sqrt(mean(error^2))
+      rsq <- cor(pred, fs_test$y)
+      tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
+                      cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq, cv_test_data = fs_test)
+      }
 
-     cat(paste0("cvm iteration ", i, "...Done!\n"))
-     return(tmp_out)
-     }
+    cat(paste0("cvm iteration ", i, "...Done!\n"))
+    return(tmp_out)
+    }
 
 
   # computing
@@ -1834,7 +1894,15 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @description Cross-validation modelling and assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
 #' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
-#' @param center.scale Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.
+#' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+#'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+#'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
+#' @param zscore Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+#'   \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+#'   \code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.
+#' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+#'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+#'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -1931,14 +1999,14 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' }
 #' @export
 rbioClass_svm_cv <- function(x, y,
-                             center.scale = TRUE,
-                             kernel = c("radial", "linear", "polynomial", "sigmoid"),
-                             cross.k = 10, cross.best.model.method = c("none", "median"),
-                             tune.method = c("cross", "boot", "fix"),
-                             tune.cross.k = 10, tune.boot.n = 10, ...,
-                             parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                             randomState = NULL,
-                             verbose = TRUE){
+                              center.scale = TRUE, zscore = TRUE, minmax = FALSE,
+                              kernel = c("radial", "linear", "polynomial", "sigmoid"),
+                              cross.k = 10, cross.best.model.method = c("none", "median"),
+                              tune.method = c("cross", "boot", "fix"),
+                              tune.cross.k = 10, tune.boot.n = 10, ...,
+                              parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                              randomState = NULL,
+                              verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
 
@@ -1996,23 +2064,21 @@ rbioClass_svm_cv <- function(x, y,
 
     # fs
     if (center.scale){
-      cv_training_x <- center_scale(cv_training_x, scale = TRUE)$centerX  # without y
+      cv_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX  # without y
     } else {
       cv_training_x <- cv_training_x
     }
 
     cv_m <- rbioClass_svm(x = cv_training_x, y = cv_training_y, center.scale = center.scale,
+                    zscore = zscore, minmax = minmax,
                     svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                     tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
 
     # processing test data
     cv_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ]
 
-    if (center.scale){ # using training data mean and sd
-      centered_newdata <- t((t(cv_test[, -1]) - cv_m$center.scaledX$meanX) / cv_m$center.scaledX$columnSD)
-      cv_test[, -1] <- centered_newdata
-    } else {
-      centered_newdata <- NULL
+    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
+      cv_test[, -1] <- .apply_zcore_minmax(cv_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = cv_test[, -1])
     if (model_type == "classification"){
@@ -2170,7 +2236,11 @@ rbioClass_svm_cv <- function(x, y,
 #' @param newdata Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.
 #' @param export.name String. Optional user defined export name prefix. Default is \code{NULL}.
 #' @param sampleID.vector A character vector containing annotation (i.e. labels) for the samples. Default is \code{NULL}.
-#' @param center.scale.newdata If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.
+#' @param center.scale.newdata If to center the newdata. When \code{TRUE} (default), the newdata is re-transformed
+#'   with the same parameters the training data was fitted with, in the stored order z-score \eqn{\rightarrow} min-max
+#'   (i.e. \code{object$center.scaledX$meanX}/\code{$columnSD} and, when min-max was used at fit time,
+#'   \code{$colMin}/\code{$colMax}). When \code{FALSE}, the newdata is used as-is (assumed already transformed).
+#'   Default is \code{TRUE}.
 #' @param newdata.y Only required for regression study. The default is \code{NULL}.
 #' @param prob.method Method to calculate classification probability. Options are \code{"logistic"}, \code{"softmax"} and \code{"Bayes"}. See details for more information. Default is \code{"logistic"}.
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
@@ -2267,8 +2337,8 @@ rbioClass_svm_predict <- function(object,
     newdata <- as.matrix(newdata)  # testing
   }
   if (center.scale.newdata){
-    if (verbose) cat("Data center.scaled using training data column mean and sd, prior to predicting.")
-    centerdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    if (verbose) cat("Data re-transformed using fitted training parameters (z-score then min-max, as stored), prior to predicting.")
+    centerdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
     test <- centerdata
   } else {
     centerdata <- NULL

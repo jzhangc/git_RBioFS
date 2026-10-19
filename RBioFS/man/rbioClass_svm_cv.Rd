@@ -8,6 +8,8 @@ rbioClass_svm_cv(
   x,
   y,
   center.scale = TRUE,
+  zscore = TRUE,
+  minmax = FALSE,
   kernel = c("radial", "linear", "polynomial", "sigmoid"),
   cross.k = 10,
   cross.best.model.method = c("none", "median"),
@@ -27,7 +29,17 @@ rbioClass_svm_cv(
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.}
+
+\item{zscore}{Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+\eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+\code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.}
+
+\item{minmax}{Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+\eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 

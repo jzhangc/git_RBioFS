@@ -20,7 +20,11 @@ rbioClass_svm_predict(
 
 \item{newdata}{Input data to be classified. Make sure it is a \code{matrix} class and has the same variables as the model, i.e. same number of columns as the training data.}
 
-\item{center.scale.newdata}{If to center the newdata. When \code{TRUE}, it will also apply the same scaling option as the \code{object}. Default is \code{TRUE}.}
+\item{center.scale.newdata}{If to center the newdata. When \code{TRUE} (default), the newdata is re-transformed
+with the same parameters the training data was fitted with, in the stored order z-score \eqn{\rightarrow} min-max
+(i.e. \code{object$center.scaledX$meanX}/\code{$columnSD} and, when min-max was used at fit time,
+\code{$colMin}/\code{$colMax}). When \code{FALSE}, the newdata is used as-is (assumed already transformed).
+Default is \code{TRUE}.}
 
 \item{export.name}{String. Optional user defined export name prefix. Default is \code{NULL}.}
 

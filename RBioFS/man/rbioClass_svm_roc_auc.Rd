@@ -39,7 +39,7 @@ rbioClass_svm_roc_auc(
 
 \item{newdata.label}{The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.}
 
-\item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
+\item{center.scale.newdata}{Logical, whether to re-transform the newdata with the training data's fitted parameters, in the stored order z-score \eqn{\rightarrow} min-max (column mean and SD, and, when min-max was used at fit time, the column min/max bounds). Default is \code{TRUE}.}
 
 \item{rocplot}{If to generate a ROC plot. Default is \code{TRUE}.}
 

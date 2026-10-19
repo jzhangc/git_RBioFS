@@ -132,7 +132,7 @@ rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
 #' @param object Classification model object. The object should be either \code{rbiosvm}, or \code{rbiomvr} classes.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.
-#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param center.scale.newdata Logical, whether to re-transform the newdata with the training data's fitted parameters, in the stored order z-score \eqn{\rightarrow} min-max (column mean and SD, and, when min-max was used at fit time, the column min/max bounds). Default is \code{TRUE}.
 #' @details accuracy = true predictions/total predictions
 #' @return A list includes:
 #'         (1) Numerical model accuracy value based on the input test data.
@@ -158,9 +158,9 @@ rbioUtil_classif_accuracy <- function(object, newdata, newdata.label, center.sca
 
 
   ## process data
-  if (center.scale.newdata){ # using training data mean and sd
-    if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
-    centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+  if (center.scale.newdata){ # re-apply the fitted train transform (z-score then min-max) to test data
+    if (verbose) cat(paste0("Data re-transformed using fitted training parameters (z-score then min-max, as stored), prior to modelling.\n"))
+    centered_newdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
     test <- centered_newdata
   } else {
     centered_newdata <- NULL
@@ -628,7 +628,7 @@ rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
 
   # --- prediction ---
   if (!is.null(object$center.scaledX)) {
-    x <-  t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    x <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
   } else {
     x <- newdata
   }
@@ -811,4 +811,288 @@ sv_importance_shapviz <- function(object, kind = c("bar", "beeswarm", "both", "n
     fold_sums[best_fold] <- fold_sums[best_fold] + gmean
   }
   return(fold_assignment2)
+}
+
+
+#' @title zcore_minmax
+#'
+#' @description A faster, drop-in replacement for \code{\link{center_scale}} that supports
+#'   both z-score standardization and min-max normalization, applied to matrix or data.frame
+#'   input. Unlike \code{center_scale}, it (i) is built entirely on compiled \pkg{matrixStats}
+#'   primitives plus \code{\link[base]{sweep}} instead of the base \code{\link[base]{scale}} /
+#'   double-transpose idiom, (ii) exposes the fitted parameters (column means, SDs, and the
+#'   min/max bounds) so the same transform can be re-applied to new data, and (iii) lets the
+#'   user choose z-score, min-max, or both.
+#'
+#' @param x A \code{"matrix"} or \code{"data.frame"} (or a 1-D numeric vector, treated as a
+#'   single column). Conventionally rows are samples and columns are features. All columns must
+#'   be numeric (or coercible without information loss); non-numeric data raises an error.
+#' @param zscore Logical. Whether to apply z-score standardization,
+#'   \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}.
+#'   This replaces the \code{scale} argument of the legacy \code{center_scale}.
+#' @param minmax Logical. Whether to apply min-max normalization,
+#'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}.
+#'   Default is \code{FALSE}. At least one of \code{zscore} or \code{minmax} must be
+#'   \code{TRUE}.
+#' @param na.rm Logical. If \code{TRUE} (default) missing values are ignored when fitting the
+#'   parameters and a warning is issued listing how many are present. If \code{FALSE}, any
+#'   missing value raises an error.
+#' @param verbose Logical. Whether to print progress messages. Default is \code{TRUE}. This
+#'   controls messages only, not warnings or errors.
+#'
+#' @return A list (S3 class \code{"zcore_minmax"}) with:
+#' \describe{
+#'   \item{centerX}{The transformed data as a numeric matrix (z-score first, then min-max).}
+#'   \item{zscore}{The \code{zscore} flag that was used.}
+#'   \item{meanX}{Per-column means used for centering, or \code{NULL} if \code{zscore = FALSE}.}
+#'   \item{columnSD}{Per-column (SDs) used for scaling, or \code{NULL} if \code{zscore = FALSE}.}
+#'   \item{minmax}{The \code{minmax} flag that was used.}
+#'   \item{colMin}{Per-column minima of the (optionally) z-scored data used for min-max, or
+#'     \code{NULL} if \code{minmax = FALSE}.}
+#'   \item{colMax}{Per-column maxima of the (optionally) z-scored data used for min-max, or
+#'     \code{NULL} if \code{minmax = FALSE}.}
+#'   \item{n.na}{Number of missing values found in \code{x} (0 if none).}
+#' }
+#'
+#' @details
+#'   \strong{Re-applying the transform to new data.} The returned object carries the fitted
+#'   parameters, so the identical transform can be reproduced on new data:
+#' \preformatted{
+#'   x_train <- zcore_minmax(train, zscore = TRUE, minmax = TRUE)
+#'   z <- sweep(sweep(new, 2, x_train$meanX, "-"), 2, x_train$columnSD, "/")
+#'   if (x_train$minmax)
+#'     z <- sweep(sweep(z, 2, x_train$colMin, "-"), 2, (x_train$colMax - x_train$colMin), "/")
+#' }
+#'
+#'   \strong{Transform order: z-score first, then min-max.} When both transforms are requested
+#'   they are always applied in the order z-score \eqn{\rightarrow} min-max. The rationale:
+#' \itemize{
+#'   \item Min-max guarantees the \eqn{[0, 1]} range only when it is the \emph{last} step.
+#'     Applying z-score after min-max reintroduces negative and unbounded values, destroying
+#'     that guarantee. So to keep min-max's \eqn{[0, 1]} property, min-max must run last.
+#'   \item Z-scoring first puts every feature on a common statistical footing (mean
+#'     \eqn{0}, variance \eqn{1}) before the bounds are computed, so features of different
+#'     raw scales and spreads contribute comparably when the [0, 1] stretch is applied.
+#'     This is the regime the distance/regularization models in this package (SVM, PLS-DA)
+#'     assume.
+#'   \item The two orders are not commutative: \code{zscore} then \code{minmax} yields
+#'     \eqn{[0, 1]} data whose per-feature shape is the standardized shape; \code{minmax}
+#'     then \code{zscore} yields unstandardized, unbounded data. The chosen order is the only
+#'     one that preserves min-max's defining property while still standardizing first.
+#' }
+#'
+#'   \strong{Speed.} The legacy \code{center_scale} used the base \code{scale()} and a
+#'   double \code{t()} transpose. This function uses compiled \pkg{matrixStats} routines
+#'   (\code{colMeans2}, \code{colSds}, \code{colMins}, \code{colMaxs}) together with
+#'   \code{\link[base]{sweep}}, which is faster and avoids the double transpose. Column-wise
+#'   \code{sweep} is also used (rather than \code{matrix - vector} or
+#'   \code{matrix / vector}) to avoid R's column-wise recycling, which would
+#'   silently mis-align a length-\eqn{p} vector against an \eqn{n \times p} matrix
+#'   when \eqn{n != p}.
+#'
+#' @importFrom matrixStats colMeans2 colSds colMins colMaxs
+#'
+#' @examples
+#' \dontrun{
+#' # z-score only (drop-in for center_scale(x, scale = TRUE))
+#' res <- zcore_minmax(x, zscore = TRUE, minmax = FALSE)
+#' centered <- res$centerX
+#'
+#' # z-score then min-max
+#' res2 <- zcore_minmax(x, zscore = TRUE, minmax = TRUE)
+#'
+#' # re-apply the fitted transform to new data
+#' new_z <- sweep(sweep(newdata, 2, res2$meanX, "-"), 2, res2$columnSD, "/")
+#' new_z <- sweep(sweep(new_z, 2, res2$colMin, "-"), 2, (res2$colMax - res2$colMin), "/")
+#' }
+#'
+#' @export
+zcore_minmax <- function(x,
+                         zscore = TRUE,
+                         minmax = FALSE,
+                         na.rm = TRUE,
+                         verbose = TRUE) {
+  # ---- argument validation ----
+  if (!is.logical(zscore) || length(zscore) != 1L || is.na(zscore))
+    stop("`zscore` must be a single TRUE or FALSE.")
+  if (!is.logical(minmax) || length(minmax) != 1L || is.na(minmax))
+    stop("`minmax` must be a single TRUE or FALSE.")
+  if (!is.logical(na.rm) || length(na.rm) != 1L || is.na(na.rm))
+    stop("`na.rm` must be a single TRUE or FALSE.")
+  if (!is.logical(verbose) || length(verbose) != 1L || is.na(verbose))
+    stop("`verbose` must be a single TRUE or FALSE.")
+  if (!zscore && !minmax)
+    stop("at least one of 'zscore' or 'minmax' must be TRUE.")
+
+  # ---- input coercion ----
+  # matrix: keep as-is; data.frame: require all-numeric then coerce; vector: single column.
+  if (is.data.frame(x)) {
+    non_num <- names(which(!vapply(x, is.numeric, logical(1))))
+    if (length(non_num) > 0L)
+      stop("input data.frame contains non-numeric column(s): ",
+           paste(non_num, collapse = ", "), ". All columns must be numeric.")
+    x <- as.matrix(x, mode = "numeric")   # fast path, preserves colnames
+  } else if (is.matrix(x)) {
+    if (!is.numeric(x))
+      stop("input matrix must be numeric.")
+  } else if (is.vector(x)) {
+    if (!is.numeric(x))
+      stop("input vector must be numeric.")
+    x <- matrix(x, nrow = length(x), ncol = 1L)
+  } else {
+    stop("`x` must be a matrix, data.frame or numeric vector.")
+  }
+
+  if (nrow(x) == 0L || ncol(x) == 0L)
+    stop("input 'x' must be non-empty (at least one row and one column).")
+
+  if (is.null(colnames(x)))
+    colnames(x) <- paste0("feature_", seq_len(ncol(x)))
+
+  # ---- missing-value handling ----
+  x_na <- sum(is.na(x), na.rm = TRUE)
+  if (x_na > 0L) {
+    if (na.rm) {
+      warning("found ", x_na, " missing value(s) in 'x'; fitting parameters with na.rm = TRUE.")
+    } else {
+      stop("found ", x_na, " missing value(s) in 'x'; set na.rm = TRUE to ignore them.")
+    }
+  }
+
+  z <- x
+
+  # ---- z-score step (first) ----
+  if (zscore) {
+    if (verbose) cat("z-score standardization applied.\n")
+    col_mean <- matrixStats::colMeans2(z, na.rm = na.rm)
+    col_sd <- matrixStats::colSds(z, center = col_mean, na.rm = na.rm)
+    if (any(abs(col_sd) < .Machine$double.eps^0.5))
+      warning("Scaling with (near) zero standard deviation in one or more columns.")
+    # sweep does column-wise ops without R's column-recycling pitfall
+    z <- sweep(sweep(z, 2, col_mean, "-"), 2, col_sd, "/")
+  } else {
+    col_mean <- NULL
+    col_sd <- NULL
+  }
+
+  # ---- min-max step (second) ----
+  if (minmax) {
+    if (verbose) cat("min-max normalization applied (after z-score).\n")
+    col_min <- matrixStats::colMins(z, na.rm = na.rm)
+    col_max <- matrixStats::colMaxs(z, na.rm = na.rm)
+    denom <- col_max - col_min
+    if (any(abs(denom) < .Machine$double.eps^0.5))
+      warning("Min-max with (near) zero range in one or more columns (constant feature).")
+    z <- sweep(sweep(z, 2, col_min, "-"), 2, denom, "/")
+  } else {
+    col_min <- NULL
+    col_max <- NULL
+  }
+
+  # ---- output (same list form as center_scale, plus min-max params) ----
+  out <- list(
+    centerX = z,
+    zscore = zscore,
+    meanX = col_mean,
+    columnSD = col_sd,
+    minmax = minmax,
+    colMin = col_min,
+    colMax = col_max,
+    n.na = x_na
+  )
+  class(out) <- "zcore_minmax"
+  out
+}
+
+
+#' @title print.zcore_minmax
+#'
+#' @rdname zcore_minmax
+#' @param x A \code{"zcore_minmax"} object returned by \code{\link{zcore_minmax}}.
+#' @param ... Ignored.
+#' @return Invisible \code{x}.
+#' @export
+print.zcore_minmax <- function(x, ...) {
+  cat("zcore_minmax result\n")
+  cat("  transformed matrix:  ", nrow(x$centerX), " samples x ", ncol(x$centerX), " features\n", sep = "")
+  cat("  zscore:              ", x$zscore, "\n", sep = "")
+  cat("  minmax:              ", x$minmax, "\n", sep = "")
+  cat("  order:               ", if (x$zscore && x$minmax) "z-score -> min-max" else
+      if (x$zscore) "z-score only" else "min-max only", "\n", sep = "")
+  cat("  missing values:      ", x$n.na, "\n", sep = "")
+  if (x$zscore)
+    cat("  fitted params:       meanX (", ncol(x$centerX), " values), columnSD (", ncol(x$centerX), " values)\n", sep = "")
+  if (x$minmax)
+    cat("  fitted params:       colMin, colMax (", ncol(x$centerX), " values each)\n", sep = "")
+  invisible(x)
+}
+
+
+#' Re-apply a fitted \code{zcore_minmax} transform to new data.
+#'
+#' @description Internal helper that mirrors \code{\link{zcore_minmax}}'s fitted parameters
+#'   to new data, preserving the stored transform order (z-score first, then min-max). It is
+#'   the single, consistent way to transform test / new data with the parameters fitted on the
+#'   training set, and supersedes the legacy ad-hoc expression
+#'   \code{t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)},
+#'   which only re-applied the z-score step and ignored min-max.
+#'
+#' @param x A \code{"newdata"} matrix or data.frame to transform. Conventionally rows are
+#'   samples, columns are features; must have the same number of columns as the fitted params.
+#' @param params A fitted parameters list as returned by \code{\link{zcore_minmax}} (i.e. an
+#'   \code{"rbiosvm"} object's \code{center.scaledX} element, or a \code{zcore_minmax} result).
+#'   Recognised fields: \code{zscore}, \code{minmax}, \code{meanX}, \code{columnSD},
+#'   \code{colMin}, \code{colMax}.
+#' @param verbose Logical. Whether to print progress messages. Default is \code{TRUE}.
+#'
+#' @return A numeric matrix with the same dimensions as \code{x}, transformed using the stored
+#'   parameters in the order z-score \eqn{\rightarrow} min-max.
+#'
+#' @details
+#'   The function is legacy-safe: if the fitted parameters carry a \code{minmax} flag but
+#'   \code{colMin} and \code{colMax} are \code{NULL} (e.g. a model built before min-max support),
+#'   only the z-score step is applied and a warning is issued, reproducing the historical
+#'   z-score-only behaviour. A NULL or empty \code{params} returns \code{x} unchanged, matching
+#'   \code{center.scale = FALSE} behaviour.
+#'
+#' @keywords internal
+.apply_zcore_minmax <- function(x, params, verbose = TRUE) {
+  if (is.null(params) || length(params) == 0L)
+    return(x)
+
+  # data.frame -> matrix (all numeric), matching the legacy re-application path;
+  # a 1-D numeric vector (e.g. a fold that selected a single feature) is treated as one column.
+  if (is.data.frame(x)) {
+    non_num <- names(which(!vapply(x, is.numeric, logical(1))))
+    if (length(non_num) > 0L)
+      stop("input data.frame contains non-numeric column(s): ",
+           paste(non_num, collapse = ", "), ".")
+    x <- as.matrix(x, mode = "numeric")
+  } else if (is.numeric(x) && is.null(dim(x))) {
+    x <- matrix(x, nrow = length(x), ncol = 1L)
+  } else if (!is.matrix(x)) {
+    stop("'x' must be a matrix, data.frame or numeric vector.")
+  }
+
+  out <- x
+
+  # ---- z-score step (first), if fitted ----
+  if (!is.null(params$meanX) && !is.null(params$columnSD)) {
+    if (verbose) cat("Re-applying z-score with training-data column mean and SD.\n")
+    # sweep avoids R's column-wise recycling pitfall (length-p vs n x p)
+    out <- sweep(sweep(out, 2L, params$meanX, "-"), 2L, params$columnSD, "/")
+  }
+
+  # ---- min-max step (last), if fitted and bounds available ----
+  if (!is.null(params$colMin) && !is.null(params$colMax)) {
+    denom <- params$colMax - params$colMin
+    if (verbose) cat("Re-applying min-max with training-data column min/max bounds.\n")
+    out <- sweep(sweep(out, 2L, params$colMin, "-"), 2L, denom, "/")
+  } else if (isTRUE(params$minmax)) {
+    # min-max was requested at fit time but bounds are missing (legacy object) -> z-score only
+    warning("min-max was requested at fit time but colMin/colMax are missing; ",
+            "re-applying z-score only (legacy behaviour).")
+  }
+
+  out
 }

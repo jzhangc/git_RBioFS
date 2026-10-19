@@ -15,7 +15,9 @@ rbioClass_svm(
   tune.boot.n = 10,
   ...,
   n_cores = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  zscore = TRUE,
+  minmax = FALSE
 )
 }
 \arguments{
@@ -23,7 +25,9 @@ rbioClass_svm(
 
 \item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
 
-\item{center.scale}{Logical, whether center and scale the data, i.e. subtracting mean (col.mean) and dividing by standard deviation (col.sd). Default is \code{TRUE}.}
+\item{center.scale}{Logical, master switch for the input transform. When \code{TRUE} (default) the training data
+is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
+pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.}
 
 \item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
@@ -40,6 +44,14 @@ rbioClass_svm(
 \item{n_cores}{Number of CPU cores to use. Default is \code{NULL}, or the total number cores minus one.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
+
+\item{zscore}{Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
+\eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
+\code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.}
+
+\item{minmax}{Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
+\eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
+At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.}
 }
 \value{
 Returns a SVM model object, with classes "svm" and "rbiosvm".
@@ -80,11 +92,28 @@ Same goes for \code{svm.cross.k} argument.
 
 If \code{svm.cross.k} is set to 0, no cross validation is used for the final modelling.
 
-The center.scale is \code{(x -  col.mean)/col.sd}. Raw data for SVM should be center.scaled. The training data column mean and column sd are used by the
-center.scale process for the test data for ROC-AUC analysis. Usually, we center.scale the training data and use the col.mean and col.sd for center.scaling the test data.
+When \code{center.scale = TRUE}, the input transform is selected by \code{zscore} and \code{minmax}
+and is computed by \code{\link{zcore_minmax}}:
+\itemize{
+  \item \code{zscore = TRUE} (default) applies z-score standardization, \code{(x - col.mean) / col.sd},
+    so every feature has mean \eqn{0} and SD \eqn{1}. The fitted column means and SDs are stored on the
+    model (\code{center.scaledX$meanX}, \code{center.scaledX$columnSD}) and reused to transform test data
+    during ROC-AUC/PR-AUC assessment, so the train and test sets are put on the same scale.
+  \item \code{minmax = TRUE} applies min-max normalization, \code{(x - col.min) / (col.max - col.min)},
+    mapping every feature to \eqn{[0, 1]}. The fitted \code{colMin} and \code{colMax} are likewise stored
+    on the model for re-application to new data.
+  \item When both are \code{TRUE}, the transforms are applied in a fixed order:
+    \strong{z-score first, then min-max}. Min-max must run last to preserve its \eqn{[0, 1]} range
+    (applying z-score afterwards would reintroduce negative, unbounded values), and z-scoring first puts
+    features of different raw scales on a common footing before the \eqn{[0, 1]} stretch.
+}
+The default \code{center.scale = TRUE, zscore = TRUE, minmax = FALSE} reproduces the previous
+center-and-scale (z-score) behaviour exactly.
 
-The option \code{center.scale = FALSE} is for prior center.scaled whole data (training + test sets), i.e center scale the data then split for training and test sets.
-Such process is only used for pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and utility (i.e. classify unknown data).
+The option \code{center.scale = FALSE} is for prior center.scaled or otherwise pre-transformed whole data
+(training + test sets), i.e. transform the data then split for training and test sets. It is only used for
+pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and
+utility (i.e. classify unknown data).
 
 When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071::svm()} and \code{e1017::tune()}
 
@@ -92,6 +121,19 @@ The function also supports regression study, in which case, the performance metr
 }
 \examples{
 \dontrun{
-svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial", center = TRUE, scale = FALSE)
+# default: z-score standardization (center + scale)
+svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial")
+
+# min-max normalization (each feature mapped to [0, 1])
+svm_mm <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+                         kernel = "radial", center.scale = TRUE, zscore = FALSE, minmax = TRUE)
+
+# z-score first, then min-max (output in [0, 1])
+svm_zm <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+                         kernel = "radial", zscore = TRUE, minmax = TRUE)
+
+# no transform (data already pre-processed)
+svm_raw <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+                          kernel = "radial", center.scale = FALSE)
 }
 }

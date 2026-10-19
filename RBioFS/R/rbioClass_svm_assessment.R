@@ -29,7 +29,7 @@ rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
   }
 
   # computation
-  center_scale_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+  center_scale_newdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
   pred <- predict(object, center_scale_newdata)
   err <- newdata.y - pred
   ss_res <- sum(err^2)  # sum of residual squares
@@ -48,7 +48,7 @@ rbioReg_svm_r2 <- function(object, newdata=NULL, newdata.y=NULL){
 #' @param fileprefix String. A file prefix to use for export file name, instead of the objecte name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The correspoding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
-#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param center.scale.newdata Logical, whether to re-transform the newdata with the training data's fitted parameters, in the stored order z-score \eqn{\rightarrow} min-max (column mean and SD, and, when min-max was used at fit time, the column min/max bounds). Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -149,8 +149,8 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
       centered_newdata <- NULL
       test <- newdata
     } else{
-      if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
-      centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+      if (verbose) cat(paste0("Data re-transformed using fitted training parameters (z-score then min-max, as stored), prior to modelling.\n"))
+      centered_newdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
       test <- centered_newdata
     }
   } else {
@@ -305,7 +305,7 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
 #' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The corresponding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
-#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param center.scale.newdata Logical, whether to re-transform the newdata with the training data's fitted parameters, in the stored order z-score \eqn{\rightarrow} min-max (column mean and SD, and, when min-max was used at fit time, the column min/max bounds). Default is \code{TRUE}.
 #' @param rocplot If to generate a ROC plot. Default is \code{TRUE}.
 #' @param plot.smooth If to smooth the curves. Uses binormal method to smooth the curves. Default is \code{FALSE}.
 #' @param plot.comps Number of comps to plot. Default is \code{1:object$ncomp}
@@ -411,8 +411,8 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
       centered_newdata <- NULL
       test <- newdata
     } else{
-      if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
-      centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+      if (verbose) cat(paste0("Data re-transformed using fitted training parameters (z-score then min-max, as stored), prior to modelling.\n"))
+      centered_newdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
       test <- centered_newdata
     }
   } else {
@@ -1701,7 +1701,7 @@ rbioReg_svm_rmse <- function(object, newdata=NULL, newdata.y=NULL){
   if (is.null(newdata)){
     out_rmse <- sqrt(object$tot.MSE)
   } else {
-    center_scale_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+    center_scale_newdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
     pred <- predict(object, center_scale_newdata)
     err <- newdata.y - pred
     out_rmse <- sqrt(mean(err^2))
@@ -2058,7 +2058,7 @@ print.rbio_shap <- function(x, ...) {
 #' @param fileprefix String. A file prefix to use for export file name, instead of the object name. Default is \code{NULL}.
 #' @param newdata A data matrix or vector for test data. Make sure it is a \code{matrix} or \code{vector} without labels, as well as the same feature numbers as the training set.
 #' @param newdata.label The corresponding label vector to the data. Make sure it is a \code{factor} object. Defaults is \code{NULL}.
-#' @param center.scale.newdata Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.
+#' @param center.scale.newdata Logical, whether to re-transform the newdata with the training data's fitted parameters, in the stored order z-score \eqn{\rightarrow} min-max (column mean and SD, and, when min-max was used at fit time, the column min/max bounds). Default is \code{TRUE}.
 #' @param prplot If to generate a precision-recall plot. Default is \code{TRUE}.
 #' @param pr_avg_curve String. Whether to add an averaged P-R curve (and its P-R AUC) as one extra curve on top of the per-class P-R curves. One of \code{"micro", "macro"} or \code{NULL}. Default is \code{NULL} (no averaged curve is added or exported). When set to \code{"macro"}, the averaged curve is the point-wise mean of the per-class precision on a common recall grid, and the exported AUC is the unweighted mean of the per-class P-R AUC. When set to \code{"micro"}, all samples are pooled into a single global P-R curve (using the argmax-of-probabilities prediction as the ranking), and the exported AUC is the trapezoidal area under that pooled curve.
 #' @param plot.smooth If to smooth the curves. Default is \code{FALSE}. (Not applied to the precision-recall curve, which is built directly from the thresholds.)
@@ -2158,8 +2158,8 @@ rbioClass_svm_pr_auc <- function(object, fileprefix = NULL,
       centered_newdata <- NULL
       test <- newdata
     } else {
-      if (verbose) cat(paste0("Data center.scaled using training data column mean and sd, prior to modelling.\n"))
-      centered_newdata <- t((t(newdata) - object$center.scaledX$meanX) / object$center.scaledX$columnSD)
+      if (verbose) cat(paste0("Data re-transformed using fitted training parameters (z-score then min-max, as stored), prior to modelling.\n"))
+      centered_newdata <- .apply_zcore_minmax(newdata, params = object$center.scaledX, verbose = FALSE)
       test <- centered_newdata
     }
   } else {

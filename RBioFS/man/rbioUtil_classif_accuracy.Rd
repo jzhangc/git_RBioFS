@@ -19,7 +19,7 @@ rbioUtil_classif_accuracy(
 
 \item{newdata.label}{Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.}
 
-\item{center.scale.newdata}{Logical, whether center and scale the newdata with training data mean and standard deviation. Default is \code{TRUE}.}
+\item{center.scale.newdata}{Logical, whether to re-transform the newdata with the training data's fitted parameters, in the stored order z-score \eqn{\rightarrow} min-max (column mean and SD, and, when min-max was used at fit time, the column min/max bounds). Default is \code{TRUE}.}
 }
 \value{
 A list includes:
