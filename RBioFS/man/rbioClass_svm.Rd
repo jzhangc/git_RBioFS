@@ -15,9 +15,11 @@ rbioClass_svm(
   tune.boot.n = 10,
   ...,
   n_cores = NULL,
-  verbose = TRUE,
   zscore = TRUE,
-  minmax = FALSE
+  minmax = FALSE,
+  stratify = TRUE,
+  sampleIds = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -43,8 +45,6 @@ pre-transformed). The actual transform is selected by \code{zscore} / \code{minm
 
 \item{n_cores}{Number of CPU cores to use. Default is \code{NULL}, or the total number cores minus one.}
 
-\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
-
 \item{zscore}{Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
 \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
 \code{zscore} and \code{minmax} are \code{TRUE}, z-score is applied first, then min-max.}
@@ -52,6 +52,27 @@ pre-transformed). The actual transform is selected by \code{zscore} / \code{minm
 \item{minmax}{Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
 \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.}
+
+\item{stratify}{Logical. Whether the inner tuning cross-validation is stratified
+(class-balanced for classification; variance-minimising for regression).
+When \code{TRUE} (default), the inner CV folds are built so that every fold
+keeps the overall class proportion (for classification) or a balanced response
+spread (for regression), preventing single-class folds on imbalanced data.
+This is a \strong{behaviour change} relative to the previous contiguous
+(\code{cut}-based) split: tuned \code{cost}/\code{gamma}, reported CV
+accuracy/RMSE, and (in the nested feature-selection functions) the selected
+feature set may shift. Default is \code{TRUE}.}
+
+\item{sampleIds}{Optional vector of group / repeated-measures identifiers, one
+per row, with \code{length} equal to the number of rows of \code{x}.
+When supplied (this takes precedence over \code{stratify}), the inner CV
+folds are group-aware: rows sharing an id are never split across folds
+(classification uses a group-level stratified assignment, regression a
+variance-minimising greedy one). For classification, rows sharing an id must
+share one class label. If the number of unique ids is below
+\code{tune.cross.k} a warning is raised. Default is \code{NULL}.}
+
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 Returns a SVM model object, with classes "svm" and "rbiosvm".
@@ -75,12 +96,28 @@ Additional items for \code{rbiosvm} object to \code{svm} object from e1071mc pac
 \code{tune.boot.n}: n number for grid search when using bootstrap, i.e. \code{tune.method = "boot"}.
 
 \code{model.type}: the SVM model type, "classification" or "regression".
+
+\code{stratify}: whether the inner tuning cross-validation was stratified (class-balanced for classification, variance-minimising for regression).
+
+\code{sampleIds}: the group / repeated-measures identifiers used for group-aware inner CV folds, if any; otherwise \code{NULL}.
 }
 \description{
 Support Vector Machine (SVM) modelling
 }
 \details{
 Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
+
+The \strong{inner tuning CV} (i.e. the CV used to select \code{cost}/\code{gamma} via
+\code{e1071mc::tune()} / \code{e1071mc::tune_mc()} with \code{sampling = tune.method = "cross"})
+is now non-leakage-capable via the \pkg{e1071mc} fork: when \code{stratify = TRUE}
+(the new default) the folds are class-balanced for classification or variance-minimised
+for regression, so a single-class fold can no longer occur on an imbalanced data set.
+This is a \strong{behaviour change}: tuned parameters, reported CV accuracy/RMSE, and
+(in the nested feature-selection wrappers) the selected feature set may shift relative to
+the previous contiguous split. Supplying \code{sampleIds} makes the folds group-aware so
+that rows sharing an id are never split across folds (repeated-measures / multi-omics
+safe). For \code{tune.method = "fix"} or \code{"boot"} no split is drawn and these flags
+have no effect; \code{stratify = TRUE} with \code{tune.method = "fix"} emits a warning.
 
 Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
 

@@ -196,8 +196,9 @@ rbioClass_svm_ncv_fs_legacy <- function(x, y,
                                  tune.cross.k = 10, tune.boot.n = 10, ...,
                                  fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                  fs.count.cutoff = cross.k,
-                                 parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                 verbose = TRUE){
+                                  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                  stratify = TRUE, sampleIds = NULL,
+                                  verbose = TRUE){
   ## initiate the run time and set seed
   start_time <- Sys.time()
 
@@ -259,6 +260,12 @@ rbioClass_svm_ncv_fs_legacy <- function(x, y,
     }
     random_sample_idx <- NULL
   }
+  # Align the group ids to whatever row order dfm_randomized is in (regression
+  # shuffles with random_sample_idx; classification keeps the original order).
+  # Only reindex when the regression shuffle happened, otherwise a NULL index
+  # would collapse sampleIds to length 0.
+  if (!is.null(sampleIds) && !is.null(random_sample_idx))
+    sampleIds <- sampleIds[random_sample_idx]
 
   # nested CV function
   nestedcv_func <- function(i) {
@@ -268,6 +275,9 @@ rbioClass_svm_ncv_fs_legacy <- function(x, y,
     # below: remove columns with constant value
     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
+    # sub-sample the group ids to the outer-fold training rows so the inner
+    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # optional uni
     # outcome should be a list of features to subset the cv_training first
@@ -372,7 +382,9 @@ rbioClass_svm_ncv_fs_legacy <- function(x, y,
 
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
+                          stratify = stratify, sampleIds = train_sampleIds,
+                          verbose = FALSE, ...)
     # processing test data
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
     if (center.scale){ # using training data mean and sd

@@ -1,0 +1,1214 @@
+
+R version 4.6.1 (2026-06-24) -- "Happy Hop"
+Copyright (C) 2026 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin23
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "RBioFS"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('RBioFS')
+Written by Jing Zhang, Ph.D. Please direct questions to jzhangcad@gmail.com.
+
+  To cite in publication:
+    Genuer R, Poggi JM, Tuleau-Malot C. 2010. Variable selection using random forests. Pattern Recognition Letters.
+  31(14): 2225-2236.
+    Zhang J, Hadj-Moussa H, Storey KB. 2016. Current progress of high-throughput microRNA differential
+  expression analysis and random forest gene selection for model and non-model systems: an R implementation.
+  J Integr Bioinform. 13: 306. doi: 10.1515/jib-2016-306.
+    Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor
+  to reflect anoxia and freezing survival adaptations. Genomics. 112(6): 4385-4398. doi: 10.1016/j.ygeno.2020.07.036.
+    Zhang J, Richardson DJ, Dunkley BT. 2020. Classifying post-traumatic stress disorder using the
+  magnetoencephalographic connectome and machine learning. Scientific Reports. 10(1): 5937.
+  doi: 10.1038/s41598-020-62713-5.
+
+  For more details, please visit: http://kenstoreylab.com/?page_id=2542
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("center_scale")
+> ### * center_scale
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: center_scale
+> ### Title: center_scale
+> ### Aliases: center_scale
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D centerX <- center_scale(data, scale = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("convertToFactor")
+> ### * convertToFactor
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: convertToFactor
+> ### Title: convertToFactor
+> ### Aliases: convertToFactor
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D   convertToFactor(dfm = dfm, cols = c("gender", "regions"))
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("dummy")
+> ### * dummy
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: dummy
+> ### Title: dummy
+> ### Aliases: dummy
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D y <- dummy(y)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("fs_csv_generator")
+> ### * fs_csv_generator
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: fs_csv_generator
+> ### Title: fs_csv_generator
+> ### Aliases: fs_csv_generator
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D fs_csv_generator(objTitle = "test", geneSymbol.var = "Gene.Symbol", fltdata = fltdata, anno = annot,
+> ##D de.dfm = diana_medaka_DE$HTvC, tgt = Tgt, group.var = "Treatment")
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("na_summary")
+> ### * na_summary
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: na_summary
+> ### Title: na_summary
+> ### Aliases: na_summary
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D   na_summary(data = data, by = "row")
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda")
+> ### * rbioClass_plsda
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda
+> ### Title: rbioClass_plsda
+> ### Aliases: rbioClass_plsda
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda(x, y, ncomp = 20)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_jackknife")
+> ### * rbioClass_plsda_jackknife
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_jackknife
+> ### Title: rbioClass_plsda_jackknife
+> ### Aliases: rbioClass_plsda_jackknife
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_jackknife(object = new_model_optm, use.mean = FALSE,
+> ##D                        sig.p = 0.05, plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+> ##D                        plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+> ##D                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+> ##D                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+> ##D                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+> ##D                        plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                        plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+> ##D                        plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+> ##D                        plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_ncomp_select")
+> ### * rbioClass_plsda_ncomp_select
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_ncomp_select
+> ### Title: rbioClass_plsda_ncomp_select()
+> ### Aliases: rbioClass_plsda_ncomp_select
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
+> ##D          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_perm")
+> ### * rbioClass_plsda_perm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_perm
+> ### Title: rbioClass_plsda_perm()
+> ### Aliases: rbioClass_plsda_perm
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_perm(object = new_model_optm, perm.method = "by_y", nperm = 999, adjCV = TRUE, parallelComputing = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_predict")
+> ### * rbioClass_plsda_predict
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_predict
+> ### Title: rbioClass_plsda_predict
+> ### Aliases: rbioClass_plsda_predict
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_predict(object = new_model_optm, newdata = newdata, prob.method = "Bayes",
+> ##D                      plot.sampleLabel.type = "none", plot.sampleLabel.vector = NULL, plot.sampleLabel.padding = 0.5,
+> ##D                      multi_plot.ncol = length(levels(object$inputY)), multi_plot.nrow = 1, multi_plot.legend.pos = "bottom",
+> ##D                      plot.SymbolSize = 2, plot.display.Title = TRUE, plot.titleSize = 10,
+> ##D                      plot.fontType = "sans", plot.unclassifiedColour = "gray", plot.classifiedColour = "red",
+> ##D                      plot.xLabel = "Samples", plot.xLabelSize = 10, plot.xTickLblSize = 6, plot.xTickItalic = FALSE,
+> ##D                      plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+> ##D                      plot.yLabel = "Predicted values", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                      plot.legendSize = 9,
+> ##D                      plot.Width = 170, plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_q2r2")
+> ### * rbioClass_plsda_q2r2
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_q2r2
+> ### Title: rbioClass_plsda_q2r2()
+> ### Aliases: rbioClass_plsda_q2r2
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_q2r2(object = new_model, multi_plot.ncol = 2, multi_plot.nrow = 2, intercept = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_roc_auc")
+> ### * rbioClass_plsda_roc_auc
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_roc_auc
+> ### Title: rbioClass_plsda_roc_auc()
+> ### Aliases: rbioClass_plsda_roc_auc
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_roc_auc(object = model_binary, rocplot = TRUE, plot.comps = 1:2)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_scoreplot")
+> ### * rbioClass_plsda_scoreplot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_scoreplot
+> ### Title: rbioClass_plsda_scoreplot
+> ### Aliases: rbioClass_plsda_scoreplot
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_scoreplot(new_model, comps = c(1, 2, 3), plot.ellipse = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_plsda_tuplot")
+> ### * rbioClass_plsda_tuplot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_plsda_tuplot
+> ### Title: rbioClass_plsda_tuplot
+> ### Aliases: rbioClass_plsda_tuplot
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_tuplot(new_model, comps = c(1, 2, 3))
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm")
+> ### * rbioClass_svm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm
+> ### Title: rbioClass_svm
+> ### Aliases: rbioClass_svm
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D # default: z-score standardization (center + scale)
+> ##D svm_model <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1], kernel = "radial")
+> ##D 
+> ##D # min-max normalization (each feature mapped to [0, 1])
+> ##D svm_mm <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+> ##D                          kernel = "radial", center.scale = TRUE, zscore = FALSE, minmax = TRUE)
+> ##D 
+> ##D # z-score first, then min-max (output in [0, 1])
+> ##D svm_zm <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+> ##D                          kernel = "radial", zscore = TRUE, minmax = TRUE)
+> ##D 
+> ##D # no transform (data already pre-processed)
+> ##D svm_raw <- rbioClass_svm(x = training_set[, -1], y = training_set[, 1],
+> ##D                           kernel = "radial", center.scale = FALSE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_cv")
+> ### * rbioClass_svm_cv
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_cv
+> ### Title: rbioClass_svm_cv
+> ### Aliases: rbioClass_svm_cv
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D svm_cv <- rbioClass_svm_cv(x = mydata[, -c(1:2)],
+> ##D                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+> ##D                                      center.scale = TRUE,
+> ##D                                      cross.k = 5,
+> ##D                                      tune.method = "cross",
+> ##D                                      tune.cross.k = 5,
+> ##D                                      parallelComputing = TRUE, clusterType = "FORK")
+> ##D 
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_cv_pr_auc")
+> ### * rbioClass_svm_cv_pr_auc
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_cv_pr_auc
+> ### Title: rbioClass_svm_cv_pr_auc
+> ### Aliases: rbioClass_svm_cv_pr_auc
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_cv_pr_auc(object = svm_nested_cv)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_cv_roc_auc")
+> ### * rbioClass_svm_cv_roc_auc
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_cv_roc_auc
+> ### Title: rbioClass_svm_cv_roc_auc
+> ### Aliases: rbioClass_svm_cv_roc_auc
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_cv_roc_auc(object = svm_nested_cv)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_cv_roc_auc_v2")
+> ### * rbioClass_svm_cv_roc_auc_v2
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_cv_roc_auc_v2
+> ### Title: rbioClass_svm_cv_roc_auc_v2
+> ### Aliases: rbioClass_svm_cv_roc_auc_v2
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_cv_roc_auc_v2(object = svm_nested_cv)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_ncv_fs")
+> ### * rbioClass_svm_ncv_fs
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_ncv_fs
+> ### Title: rbioClass_svm_ncv_fs
+> ### Aliases: rbioClass_svm_ncv_fs
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D svm_nestedcv <- rbioClass_svm_ncv_fs(x = mydata[, -c(1:2)],
+> ##D                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+> ##D                                      center.scale = TRUE,
+> ##D                                      cross.k = 5,
+> ##D                                      tune.method = "cross",
+> ##D                                      tune.cross.k = 5,
+> ##D                                      fs.method = "rf",
+> ##D                                      rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+> ##D                                      parallelComputing = TRUE, clusterType = "FORK")
+> ##D 
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_ncv_fs_legacy")
+> ### * rbioClass_svm_ncv_fs_legacy
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_ncv_fs_legacy
+> ### Title: rbioClass_svm_ncv_fs_legacy
+> ### Aliases: rbioClass_svm_ncv_fs_legacy
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D svm_nestedcv <- rbioClass_svm_ncv_fs_legacy(x = mydata[, -c(1:2)],
+> ##D                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+> ##D                                      center.scale = TRUE,
+> ##D                                      cross.k = 5,
+> ##D                                      tune.method = "cross",
+> ##D                                      tune.cross.k = 5,
+> ##D                                      fs.method = "rf",
+> ##D                                      rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+> ##D                                      parallelComputing = TRUE, clusterType = "FORK")
+> ##D 
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_ncv_fs_v2")
+> ### * rbioClass_svm_ncv_fs_v2
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_ncv_fs_v2
+> ### Title: rbioClass_svm_ncv_fs_v2
+> ### Aliases: rbioClass_svm_ncv_fs_v2
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D svm_nestedcv <- rbioClass_svm_ncv_fs_v2(x = mydata[, -c(1:2)],
+> ##D                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+> ##D                                      center.scale = TRUE,
+> ##D                                      cross.k = 5,
+> ##D                                      tune.method = "cross",
+> ##D                                      tune.cross.k = 5,
+> ##D                                      fs.method = "rf",
+> ##D                                      rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+> ##D                                      parallelComputing = TRUE, clusterType = "FORK")
+> ##D 
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_ncv_fs_v3")
+> ### * rbioClass_svm_ncv_fs_v3
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_ncv_fs_v3
+> ### Title: rbioClass_svm_ncv_fs_v3
+> ### Aliases: rbioClass_svm_ncv_fs_v3
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D # Example with independent samples (same as v2):
+> ##D svm_nestedcv <- rbioClass_svm_ncv_fs_v3(x = mydata[, -c(1:2)],
+> ##D                                          y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+> ##D                                          center.scale = TRUE,
+> ##D                                          cross.k = 5,
+> ##D                                          sampleIds = NULL)
+> ##D 
+> ##D # Example with group-dependent samples (e.g., repeated measures from same subject):
+> ##D svm_nestedcv_grouped <- rbioClass_svm_ncv_fs_v3(x = mydata[, -c(1:2)],
+> ##D                                                   y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+> ##D                                                   center.scale = TRUE,
+> ##D                                                   cross.k = 5,
+> ##D                                                   sampleIds = mydata$SubjectID)
+> ##D 
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_perm")
+> ### * rbioClass_svm_perm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_perm
+> ### Title: rbioClass_svm_perm()
+> ### Aliases: rbioClass_svm_perm
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_plsda_perm()
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_pr_auc")
+> ### * rbioClass_svm_pr_auc
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_pr_auc
+> ### Title: rbioClass_svm_pr_auc
+> ### Aliases: rbioClass_svm_pr_auc
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_pr_auc(object = svm_m, newdata = svm_test[, -1],
+> ##D                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_roc_auc")
+> ### * rbioClass_svm_roc_auc
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_roc_auc
+> ### Title: rbioClass_svm_roc_auc
+> ### Aliases: rbioClass_svm_roc_auc
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_roc_auc(object = svm_m, newdata = svm_test[, -1],
+> ##D                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioClass_svm_roc_auc_inter")
+> ### * rbioClass_svm_roc_auc_inter
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioClass_svm_roc_auc_inter
+> ### Title: rbioClass_svm_roc_auc_inter
+> ### Aliases: rbioClass_svm_roc_auc_inter
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_roc_auc_itner(object = svm_m, newdata = svm_test[, -1],
+> ##D                       newdata.label = factor(svm_test$y, levels = unique(svm_test$y)))
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS")
+> ### * rbioFS
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS
+> ### Title: rbioFS
+> ### Aliases: rbioFS
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS(file = "test.csv", impute = TRUE, imputeIter = 50, quantileNorm = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_PCA")
+> ### * rbioFS_PCA
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_PCA
+> ### Title: rbioFS_PCA
+> ### Aliases: rbioFS_PCA
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_PCA(input = pcaDfm, sampleIDVar = "conditions", groupIDVar = "samples",
+> ##D biplot.ellipse = TRUE, biplot.loadingplot = TRUE, biplot.Width = 200, biplot.Height = 170)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_PCA.file")
+> ### * rbioFS_PCA.file
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_PCA.file
+> ### Title: rbioFS_PCA.file
+> ### Aliases: rbioFS_PCA.file
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_PCA.file(file = "data.csv", ellipse = TRUE, loadingPlot = TRUE, biplotWidth = 200, biplotHeight = 170)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_PCA_app")
+> ### * rbioFS_PCA_app
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_PCA_app
+> ### Title: rbioFS_PCA_app
+> ### Aliases: rbioFS_PCA_app
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_PCA_app() # launch the app version by running the function
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_app")
+> ### * rbioFS_app
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_app
+> ### Title: rbioFS_app
+> ### Aliases: rbioFS_app
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_app() # launch the app version by running the function
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_plsda_vip")
+> ### * rbioFS_plsda_vip
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_plsda_vip
+> ### Title: rbioFS_plsda_vip
+> ### Aliases: rbioFS_plsda_vip
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_plsda_vip(object = new_model_optm, boostrap = TRUE, boot.m = 50,
+> ##D                  vip.alpha = 0.8,
+> ##D                  plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+> ##D                  plot.sig.line = TRUE,
+> ##D                  plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+> ##D                  plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+> ##D                  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+> ##D                  plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2,
+> ##D                  plot.rightsideY = TRUE,
+> ##D                  plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+> ##D                  plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+> ##D                  plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_plsda_vip_plot")
+> ### * rbioFS_plsda_vip_plot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_plsda_vip_plot
+> ### Title: rbioFS_plsda_vip_plot
+> ### Aliases: rbioFS_plsda_vip_plot
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_plsda_vip_plot(vip_obj = plsda_m_vip,
+> ##D                       plot.title = TRUE, plot.titleSize = 10,
+> ##D                       plot.sig.line = TRUE,
+> ##D                       plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+> ##D                       plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+> ##D                       plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+> ##D                       plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+> ##D                       plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                       plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+> ##D                       plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+> ##D                       plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_rf_SFS")
+> ### * rbioFS_rf_SFS
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_rf_SFS
+> ### Title: rbioFS_rf_SFS
+> ### Aliases: rbioFS_rf_SFS
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, parallelComputing = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_rf_SFS_plot")
+> ### * rbioFS_rf_SFS_plot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_rf_SFS_plot
+> ### Title: rbioFS_rf_SFS_plot
+> ### Aliases: rbioFS_rf_SFS_plot
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_rf_SFS_plot(object = data_SFS, n = "all",plot.title = TRUE, plot.titleSize = 10,
+> ##D                        plot.outlineCol = "black", plot.errorbar = "sem", plot.errorbarWidth = 0.2,
+> ##D                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+> ##D                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+> ##D                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+> ##D                        plot.yLabel = "Mean Decrease in Accuracy", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                        plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+> ##D                        plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+> ##D                        plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_rf_SFS_v2")
+> ### * rbioFS_rf_SFS_v2
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_rf_SFS_v2
+> ### Title: rbioFS_rf_SFS_v2
+> ### Aliases: rbioFS_rf_SFS_v2
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_rf_SFS(training_HCvTC, tgtVar_HCvTC, parallelComputing = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_rf_initialFS")
+> ### * rbioFS_rf_initialFS
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_rf_initialFS
+> ### Title: rbioFS_rf_initialFS
+> ### Aliases: rbioFS_rf_initialFS
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_rf_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_rf_initialFS_plot")
+> ### * rbioFS_rf_initialFS_plot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_rf_initialFS_plot
+> ### Title: rbioFS_rf_initialFS_plot
+> ### Aliases: rbioFS_rf_initialFS_plot
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_rf_initialFS_plot(object = data_initial_FS, n = "all",plot.title = TRUE, plot.titleSize = 10,
+> ##D                        plot.outlineCol = "black", plot.errorbar = "sem", plot.errorbarWidth = 0.2,
+> ##D                        plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+> ##D                        plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+> ##D                        plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2, plot.rightsideY = TRUE,
+> ##D                        plot.yLabel = "Mean Decrease in Accuracy", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                        plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+> ##D                        plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+> ##D                        plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioFS_rf_initialFS_v2")
+> ### * rbioFS_rf_initialFS_v2
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioFS_rf_initialFS_v2
+> ### Title: rbioFS_rf_initialFS_v2
+> ### Aliases: rbioFS_rf_initialFS_v2
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioFS_rf_initialFS(training_HCvTC, tgtVar_HCvTC, n = 40, errorbar = "SEM", plotWidth = 400, plotHeight = 200)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioIMP")
+> ### * rbioIMP
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioIMP
+> ### Title: rbioIMP
+> ### Aliases: rbioIMP
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D mydfm <- rbioIMP(raw[-c(1:2)], raw$Conditions, raw$sampleName, method = "rf", transpo = TRUE, iter = 10, ntree = 501) # make sure no annotation variable present in the data file.
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioNorm")
+> ### * rbioNorm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioNorm
+> ### Title: rbioNorm
+> ### Aliases: rbioNorm
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D normdata <- rbioNorm(rawT, correctBG = FLASE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioReg_plsr")
+> ### * rbioReg_plsr
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioReg_plsr
+> ### Title: rbioReg_plsr
+> ### Aliases: rbioReg_plsr
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioReg_plsr(x, y, ncomp = 20)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioReg_plsr_ncomp_select")
+> ### * rbioReg_plsr_ncomp_select
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioReg_plsr_ncomp_select
+> ### Title: rbioReg_plsr_ncomp_select()
+> ### Aliases: rbioReg_plsr_ncomp_select
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioReg_plsr_ncomp_select(new_model,  multi_plot.ncol = 2, multi_plot.nrow = 2, plot.optm.ncomp.line = T,
+> ##D          ncomp.selection.method = "randomization", randomization.nperm = 999, randomization.alpha = 0.05)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioReg_plsr_perm")
+> ### * rbioReg_plsr_perm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioReg_plsr_perm
+> ### Title: rbioReg_plsr_perm()
+> ### Aliases: rbioReg_plsr_perm
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioReg_plsr_perm(object = new_model_optm, nperm = 999, adjCV = TRUE, parallelComputing = TRUE)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioReg_plsr_vip")
+> ### * rbioReg_plsr_vip
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioReg_plsr_vip
+> ### Title: rbioReg_plsr_vip
+> ### Aliases: rbioReg_plsr_vip
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioReg_plsr_vip(object = new_model_optm, boostrap = TRUE, boot.m = 50,
+> ##D                  vip.alpha = 0.8,
+> ##D                  plot = TRUE, plot.title = TRUE, plot.titleSize = 10,
+> ##D                  plot.sig.line = TRUE,
+> ##D                  plot.outlineCol = "black", plot.errorbar = "SEM", plot.errorbarWidth = 0.2,
+> ##D                  plot.errorbarLblSize = 6, plot.fontType = "sans", plot.xLabel = "Features",
+> ##D                  plot.xLabelSize = 10, plot.xTickLblSize = 10, plot.xTickItalic = FALSE,
+> ##D                  plot.xTickBold = FALSE, plot.xAngle = 90, plot.xhAlign = 1, plot.xvAligh = 0.2,
+> ##D                  plot.rightsideY = TRUE,
+> ##D                  plot.yLabel = "Coefficients", plot.yLabelSize = 10, plot.yTickLblSize = 10,
+> ##D                  plot.yTickItalic = FALSE, plot.yTickBold = FALSE, plot.legendSize = 9,
+> ##D                  plot.legendTtl = FALSE, plot.legendTtlSize = 9, plot.Width = 170,
+> ##D                  plot.Height = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioReg_svm_r2")
+> ### * rbioReg_svm_r2
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioReg_svm_r2
+> ### Title: rbioReg_svm_r2
+> ### Aliases: rbioReg_svm_r2
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D  test_r2 <- rbioReg_svm_r2(object = svm_m, newdata = svm_test[,-1], newdata.y = svm_test$y)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioReg_svm_rmse")
+> ### * rbioReg_svm_rmse
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioReg_svm_rmse
+> ### Title: rbioReg_svm_rmse
+> ### Aliases: rbioReg_svm_rmse
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D  test_rmse <- rbioReg_svm_rmse(object = svm_m, newdata = svm_test[,-1], newdata.y = svm_test$y)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioUtil_classif_accuracy")
+> ### * rbioUtil_classif_accuracy
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioUtil_classif_accuracy
+> ### Title: Title rbioUtil_classif_accuracy
+> ### Aliases: rbioUtil_classif_accuracy
+> 
+> ### ** Examples
+> 
+> 
+> ## Not run: 
+> ##D rbioUtil_classif_accuracy(perm_res = svm_model_perm)
+> ## End(Not run)
+> 
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioUtil_classplot")
+> ### * rbioUtil_classplot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioUtil_classplot
+> ### Title: rbioUtil_classplot
+> ### Aliases: rbioUtil_classplot
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioUtil_classplot(pred.obj = new_model_optm_plsda_predict, multi_plot.ncol = 4, multi_plot.nrow = 4, plot.probLabelSize = 2)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioUtil_onehotEncoding")
+> ### * rbioUtil_onehotEncoding
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioUtil_onehotEncoding
+> ### Title: rbioUtil_onehotEncoding
+> ### Aliases: rbioUtil_onehotEncoding
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D   rbioUtil_onehotEncoding(dfm = data, cols = c("gender"), export_mode = "dfm")
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("rbioUtil_perm_plot")
+> ### * rbioUtil_perm_plot
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: rbioUtil_perm_plot
+> ### Title: Title rbioUtil_perm_plot
+> ### Aliases: rbioUtil_perm_plot rbioUtil_perm_plot.rbiosvm_perm
+> ###   rbioUtil_perm_plot.rbiomvr_perm rbioUtil_perm_plot.default
+> 
+> ### ** Examples
+> 
+> 
+> ## Not run: 
+> ##D rbioUtil_perm_plot(perm_res = svm_model_perm)
+> ## End(Not run)
+> 
+> 
+> 
+> 
+> cleanEx()
+> nameEx("singleIMP")
+> ### * singleIMP
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: singleIMP
+> ### Title: singleIMP
+> ### Aliases: singleIMP
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D mydfm <- singleIMP(myVector, methd = "mean")
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("substr_right")
+> ### * substr_right
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: substr_right
+> ### Title: substr_right
+> ### Aliases: substr_right
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D   substr_right("abc", 2)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("svm_cv_rocauc_helper")
+> ### * svm_cv_rocauc_helper
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: svm_cv_rocauc_helper
+> ### Title: svm_cv_rocauc_helper
+> ### Aliases: svm_cv_rocauc_helper
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D rbioClass_svm_cv_roc_auc(object = svm_nested_cv)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("zcore_minmax")
+> ### * zcore_minmax
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: zcore_minmax
+> ### Title: zcore_minmax
+> ### Aliases: zcore_minmax print.zcore_minmax
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D # z-score only (drop-in for center_scale(x, scale = TRUE))
+> ##D res <- zcore_minmax(x, zscore = TRUE, minmax = FALSE)
+> ##D centered <- res$centerX
+> ##D 
+> ##D # z-score then min-max
+> ##D res2 <- zcore_minmax(x, zscore = TRUE, minmax = TRUE)
+> ##D 
+> ##D # re-apply the fitted transform to new data
+> ##D new_z <- sweep(sweep(newdata, 2, res2$meanX, "-"), 2, res2$columnSD, "/")
+> ##D new_z <- sweep(sweep(new_z, 2, res2$colMin, "-"), 2, (res2$colMax - res2$colMin), "/")
+> ## End(Not run)
+> 
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  1.062 0.076 1.142 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

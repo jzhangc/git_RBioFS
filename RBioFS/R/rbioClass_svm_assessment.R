@@ -286,16 +286,16 @@ rbioClass_svm_roc_auc <- function(object, fileprefix = NULL,
         ggsave(filename = paste(deparse(substitute(object)),".svm.roc.pdf", sep = ""), plot = plt,
                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       } else {
-         ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
-                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-        }
+        ggsave(filename = paste(as.character(fileprefix),".svm.roc.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      }
       grid.draw(plt)
       if (verbose) cat("Done!\n")
-      }
     }
+  }
 
   return(out)
- }
+}
 
 
 #' @title rbioClass_svm_roc_auc_inter
@@ -596,16 +596,16 @@ rbioClass_svm_roc_auc_inter <- function(object, fileprefix = NULL,
         ggsave(filename = paste(deparse(substitute(object)),".svm.roc_inter.pdf", sep = ""), plot = plt,
                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       } else {
-         ggsave(filename = paste(as.character(fileprefix),".svm.roc_inter.pdf", sep = ""), plot = plt,
-                width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-        }
+        ggsave(filename = paste(as.character(fileprefix),".svm.roc_inter.pdf", sep = ""), plot = plt,
+               width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+      }
       grid.draw(plt)
       if (verbose) cat("Done!\n")
-      }
     }
+  }
 
   return(out)
- }
+}
 
 
 #' @title svm_cv_rocauc_helper
@@ -1015,18 +1015,18 @@ rbioClass_svm_cv_roc_auc <- function(object, fileprefix = NULL,
         if (is.null(fileprefix)){
           ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-         } else {
+        } else {
           ggsave(filename = paste0(as.character(fileprefix),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-         }
+        }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
-       }
-     }
-   }
+      }
+    }
+  }
 
   return(auc_res_list)
- }
+}
 
 
 #' @title rbioClass_svm_cv_roc_auc_v2
@@ -1165,18 +1165,18 @@ rbioClass_svm_cv_roc_auc_v2 <- function(object, fileprefix = NULL,
         if (is.null(fileprefix)){
           ggsave(filename = paste0(deparse(substitute(object)),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-          } else {
+        } else {
           ggsave(filename = paste0(as.character(fileprefix),".cv_roc.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
-          }
+        }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
-        }
       }
     }
+  }
 
   return(auc_res_list)
- }
+}
 
 
 #' @title rbioClass_svm_cv_roc_auc_mean
@@ -1417,12 +1417,12 @@ rbioClass_svm_cv_roc_auc_mean <- function(object, fileprefix = NULL,
     if (is.null(fileprefix)) {
       assign(paste(deparse(substitute(object)), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
     } else {
-       assign(paste(as.character(fileprefix), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
-      }
+      assign(paste(as.character(fileprefix), "_svm_cv_rocauc_mean", sep = ""), out_list, envir = .GlobalEnv)
     }
+  }
 
   return(out_list)
- }
+}
 
 
 #' @title rbioClass_svm_perm()
@@ -2186,17 +2186,17 @@ rbioClass_svm_pr_auc <- function(object, fileprefix = NULL,
 
   ## P-R AUC calculation (one-vs-others, mirrors rbioClass_svm_roc_auc)
   pr_auc_list <- vector(mode = "list", length = length(levels(outcome)))
-    pr_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
-      response <- outcome
-      cur_lvl <- levels(response)[i]
+  pr_auc_list[] <- foreach(i = 1:length(levels(outcome))) %do% {
+    response <- outcome
+    cur_lvl <- levels(response)[i]
       # a CV training fold that never observed this class has no probability
       # column for it; skipping it avoids a "subscript out of bounds" crash.
-      if (!cur_lvl %in% colnames(pred_prob)) {
-        cat(paste0("Class ", cur_lvl, " absent from model probability output; P-R AUC skipped.\n"))
-        return(NULL)
-      }
-      predictor <- pred_prob[, levels(response)[i]]      # probability of the current outcome
-      truth <- as.numeric(response == levels(response)[i])      # 1 = current class (positive), 0 = others (control)
+    if (!cur_lvl %in% colnames(pred_prob)) {
+      cat(paste0("Class ", cur_lvl, " absent from model probability output; P-R AUC skipped.\n"))
+      return(NULL)
+    }
+    predictor <- pred_prob[, levels(response)[i]]      # probability of the current outcome
+    truth <- as.numeric(response == levels(response)[i])      # 1 = current class (positive), 0 = others (control)
     n_pos <- sum(truth)
     n_neg <- length(truth) - n_pos
     if (n_pos > 0 && n_neg > 0) {
@@ -2401,12 +2401,12 @@ rbioClass_svm_pr_auc <- function(object, fileprefix = NULL,
                width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
       }
       grid.draw(plt)
-       if (verbose) cat("Done!\n")
-      }
+      if (verbose) cat("Done!\n")
     }
+  }
 
-   return(out)
- }
+  return(out)
+}
 
 
 #' @title rbioClass_svm_cv_pr_auc
@@ -2480,22 +2480,22 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
   # ---- read in data ----
   if (class(object) == 'rbiosvm_nestedcv') {
     cv_model_list <- object$nested.cv.models
-   } else {
+  } else {
     cv_model_list <- object$cv.models
-   }
+  }
 
   if (object$model.type == "regression") {
     stop('Precision-Recall AUC only applies to classification models.')
-   }
+  }
 
    # --- check the validity of and, if needed, process the model list ---
   for (m in names(cv_model_list)) {
     if (verbose) cat(paste0("processing model: ", m))
     if ("simpleError" %in% class(cv_model_list[[m]])) {
       cv_model_list[[m]] <- NULL
-     }
+    }
     if (verbose) cat("\n")
-   }
+  }
 
   if (length(cv_model_list) < 1) stop("No valid model found in the object.")
 
@@ -2507,9 +2507,9 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
     if (recall[1] > 0) {
       recall <- c(0, recall)
       precision <- c(precision[1], precision)
-     }
+    }
     sum(diff(recall) * (precision[-length(precision)] + precision[-1]) / 2)
-   }
+  }
 
    # ---- intermediate function: per-fold P-R AUC + F1 ----
   cv_pr_auc_func <- function(x) {
@@ -2524,9 +2524,9 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
      # pred
     pred <- predict(cv_m, newdata = cv_test_x, decision.values = TRUE, probability = TRUE)     # prediction
     pred_prob <- attr(pred, "probabilities")
-     outcome <- cv_test_y         # original label
+    outcome <- cv_test_y         # original label
 
-     if (verbose) cat("-----\n")
+    if (verbose) cat("-----\n")
 
     # P-R AUC calculation (one-vs-others, mirrors rbioClass_svm_pr_auc / rbioClass_svm_cv_roc_auc)
     pr_auc_list <- vector(mode = "list", length = length(levels(outcome)))
@@ -2555,15 +2555,15 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
         auc <- pr_auc_area(recall, precision)
         if (length(levels(outcome)) == 2) {
           cat(paste0("P-R AUC - ", levels(outcome)[i], ": ", auc, "\n"))
-         } else {
+        } else {
           cat(paste0(" P-R AUC - ", levels(outcome)[i], " (vs Others): ", auc, "\n"))
-         }
+        }
         return(list(precision = precision, recall = recall, threshold = threshold, auc = auc))
-       } else {
+      } else {
         cat(paste0("No case or no control observed for class ", levels(outcome)[i], ". P-R AUC skipped.\n"))
         return(NULL)
-       }
-     }
+      }
+    }
     names(pr_auc_list) <- unique(outcome)
 
      # per-class P-R AUC vector
@@ -2584,7 +2584,7 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
       rec_i <- if ((tp + fn) > 0) tp / (tp + fn) else 0
       f1_i <- if ((prec_i + rec_i) > 0) 2 * prec_i * rec_i / (prec_i + rec_i) else 0
       f1_perclass[i] <- f1_i
-     }
+    }
     names(f1_perclass) <- colnames(conf)
 
     f1_macro <- mean(f1_perclass)
@@ -2600,10 +2600,10 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
       cat("F1 (class-specific):\n")
       for (i in 1:nrow(f1_res$per.class)) {
         cat("       ", f1_res$per.class$class[i], ": ", f1_res$per.class$F1[i], "\n")
-       }
+      }
       cat("F1-macro: ", f1_macro, "\n")
       cat("F1-micro: ", f1_micro, "\n")
-     }
+    }
 
      # P-R dataframe (one group per class, mirrors rbioClass_svm_pr_auc)
     pr_dfm <- foreach(i = 1:length(levels(outcome)), .combine = "rbind") %do% {
@@ -2616,65 +2616,65 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
         df <- data.frame(precision = precision, recall = recall, threshold = thresholds,
                           group = rep(levels(outcome)[i], times = length(recall)),
                           row.names = NULL, check.names = FALSE)
-       } else {
+      } else {
         df <- data.frame(precision = precision, recall = recall, threshold = thresholds,
                           group = rep(paste0(levels(outcome)[i], " (vs Others)"), times = length(recall)),
                           row.names = NULL, check.names = FALSE)
-       }
+      }
       df <- df[order(df$recall), ]
       return(df)
-     }
+    }
 
      # return
     if (any(sapply(pr_auc_list, is.null))) {
       out <- NULL
-     } else {
+    } else {
       out <- list(svm.pr_object = pr_auc_list,
                   svm.pr_dataframe = pr_dfm,
                   svm.f1 = f1_res,
                   svm.pr_auc = pr_auc_perclass)
-     }
+    }
     return(out)
-   }
+  }
 
    # ---- compute and return ----
   pr_auc_res_list <- vector(mode = "list", length = length(cv_model_list))
   pr_auc_res_list[] <- foreach(i = 1:length(cv_model_list)) %do% {
     out <- cv_pr_auc_func(cv_model_list[[i]])
     out
-   }
+  }
   names(pr_auc_res_list) <- names(cv_model_list)
 
   if (any(sapply(pr_auc_res_list, is.null))) {
     cat("NULL element removed from the CV P-R AUC list.\n")
     pr_auc_res_list <- pr_auc_res_list[-which(sapply(pr_auc_res_list, is.null))]
-   }
+  }
 
    # export
   if (class(object) == 'rbiosvm_nestedcv') {
     if (is.null(fileprefix)) {
       assign(paste(deparse(substitute(object)), "_svm_nestedcv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
-     } else {
+    } else {
       assign(paste(as.character(fileprefix), "_svm_nestedcv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
-     }
-   } else {
+    }
+  } else {
     if (is.null(fileprefix)) {
       assign(paste(deparse(substitute(object)), "_svm_cv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
-     } else {
+    } else {
       assign(paste(as.character(fileprefix), "_svm_cv_pr_auc", sep = ""), pr_auc_res_list, envir = .GlobalEnv)
-     }
-   }
+    }
+  }
 
    # ---- plotting ----
   if (prplot) {
     if (length(pr_auc_res_list) < 1) {
       cat("P-R data empty. No plots can be generated. \n")
-     } else {
+    } else {
       plot_dfm <- foreach(i = 1:length(pr_auc_res_list), .combine = "rbind") %do% {
         dfm <- pr_auc_res_list[[i]]$svm.pr_dataframe
         dfm$cv_fold <- names(pr_auc_res_list)[i]
         dfm
-       }
+      }
       plot_dfm$cv_fold <- factor(plot_dfm$cv_fold, levels = unique(plot_dfm$cv_fold))
 
       for (i in 1:length(unique(plot_dfm$group))) {
@@ -2702,7 +2702,7 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
                   legend.key = element_blank(),
                   axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
                   axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
-         } else {
+        } else {
           plt <- plt +
             scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, NA)) +
             theme(panel.background = element_rect(fill = 'white', colour = 'black'),
@@ -2714,21 +2714,21 @@ rbioClass_svm_cv_pr_auc <- function(object, fileprefix = NULL,
                   legend.key = element_blank(),
                   axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType),
                   axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5))
-         }
+        }
 
           # save
         if (is.null(fileprefix)) {
           ggsave(filename = paste0(deparse(substitute(object)), ".cv_pr.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
-         } else {
+        } else {
           ggsave(filename = paste0(as.character(fileprefix), ".cv_pr.", unique(plot_dfm$group)[i], ".pdf"), plot = plt,
                  width = plot.Width, height = plot.Height, units = "mm", dpi = 600)
-         }
+        }
         grid.draw(plt)
         if (verbose) cat("Done!\n")
-       }
-     }
-   }
+      }
+    }
+  }
 
   return(pr_auc_res_list)
- }
+}

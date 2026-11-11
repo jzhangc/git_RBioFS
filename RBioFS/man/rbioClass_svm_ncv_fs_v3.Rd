@@ -23,6 +23,7 @@ rbioClass_svm_ncv_fs_v3(
   tune.boot.n = 10,
   ...,
   sampleIds = NULL,
+  stratify = TRUE,
   fs.method = "rf",
   rf.ifs.ntree = 1001,
   rf.sfs.ntree = 1001,
@@ -77,6 +78,12 @@ At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{ce
 \item{sampleIds}{A character vector of sample IDs (one per row of \code{x}). When provided, samples with the same ID are kept together in the same fold.
 This is essential for repeated-measures or clustered data where multiple rows correspond to the same subject/group.
 Default is \code{NULL}, which behaves like v1 and v2 (independent samples).}
+
+\item{stratify}{Logical. Whether the inner tuning cross-validation is stratified
+(class-balanced for classification; variance-minimising for regression). When
+\code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
+keep the overall class proportion in every fold, so a single-class fold cannot
+occur on an imbalanced data set. Default is \code{TRUE}.}
 
 \item{fs.method}{Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.}
 

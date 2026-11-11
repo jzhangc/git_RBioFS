@@ -21,6 +21,8 @@ rbioClass_svm_cv(
   n_cores = parallel::detectCores() - 1,
   clusterType = c("PSOCK", "FORK"),
   randomState = NULL,
+  stratify = TRUE,
+  sampleIds = NULL,
   verbose = TRUE
 )
 }
@@ -60,6 +62,20 @@ At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{ce
 \item{n_cores}{Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+
+\item{stratify}{Logical. Whether the inner tuning cross-validation is stratified
+(class-balanced for classification; variance-minimising for regression). When
+\code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
+keep the overall class proportion in every fold, so a single-class fold cannot
+occur on an imbalanced data set. This is a behaviour change: tuned
+\code{cost}/\code{gamma}, reported CV accuracy/RMSE, and (because the inner CV
+drives the nested rRF-FS) the selected feature set may shift relative to the
+previous contiguous split. Default is \code{TRUE}.}
+
+\item{sampleIds}{Optional vector of group / repeated-measures identifiers, one
+per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
+\code{stratify}) the inner CV folds become group-aware: rows sharing an id
+are never split across folds. Default is \code{NULL}.}
 
 \item{verbose}{whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }

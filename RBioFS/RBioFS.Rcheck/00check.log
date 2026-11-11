@@ -1,0 +1,580 @@
+* using log directory ‘/Users/jingzhang/Documents/git_repo/git_RBioFS/RBioFS/RBioFS.Rcheck’
+* using R version 4.6.1 (2026-06-24)
+* using platform: aarch64-apple-darwin23
+* R was compiled by
+    Apple clang version 17.0.0 (clang-1700.3.19.1)
+    GNU Fortran (GCC) 14.2.0
+* running under: macOS Golden Gate 27.0.1
+* using session charset: UTF-8
+* current time: 2026-11-01 02:34:06 UTC
+* using options ‘--no-manual --no-vignettes’
+* checking for file ‘RBioFS/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘RBioFS’ version ‘0.8.3-20261031’
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘RBioFS’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Malformed Title field: should not end in a period.
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking code files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking whether startup messages can be suppressed ... OK
+* checking dependencies in R code ... WARNING
+Namespaces in Imports field not imported from:
+  ‘ROCR’ ‘edgeR’ ‘gplots’
+  All declared Imports should be used.
+Missing or unexported object: ‘RBioFS::rbioReg_plsr_vip_plot’
+Unexported objects imported by ':::' calls:
+  ‘shapviz:::.get_color_scale’ ‘shapviz:::.get_imp’
+  ‘shapviz:::.scale_X’ ‘shapviz:::position_bee’
+  See the note in ?`:::` about the use of this operator.
+There are ::: calls to the package's namespace in its code. A package
+  almost never needs to use ::: for its own objects:
+  ‘rbio_shap_svm_label_prob’ ‘shap_g_theme_helper’
+* checking S3 generic/method consistency ... WARNING
+rbioUtil_fscount_plot:
+  function(object, ...)
+rbioUtil_fscount_plot.default:
+  function(dfm, feature_var, count_var, export.name, threshold,
+           plot.preview, plot.title, plot.titleSize, plot.sig.line,
+           plot.outlineCol, plot.fillCol, plot.errorbarLblSize,
+           plot.fontType, plot.xLabel, plot.xLabelSize,
+           plot.xTickLblSize, plot.xTickItalic, plot.xTickBold,
+           plot.xAngle, plot.xhAlign, plot.xvAlign, plot.rightsideY,
+           plot.yLabel, plot.yLabelSize, plot.yTickLblSize,
+           plot.yTickItalic, plot.yTickBold, plot.legendSize,
+           plot.legendTtl, plot.legendTtlSize, plot.Width, plot.Height)
+
+rbioUtil_perm_plot:
+  function(perm_res, ...)
+rbioUtil_perm_plot.default:
+  function(baseplt, plot.display.Title, plot.titleSize, plot.fontType,
+           plot.xLabel, plot.xLabelSize, plot.xTickLblSize,
+           plot.yLabel, plot.yLabelSize, plot.yTickLblSize,
+           plot.legendSize, plot.rightsideY)
+See section ‘Generic functions and methods’ in the ‘Writing R
+Extensions’ manual.
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+dummy: no visible global function definition for ‘model.matrix’
+fs_csv_generator: no visible global function definition for
+  ‘complete.cases’
+fs_csv_generator: no visible binding for global variable ‘Tgt’
+fs_csv_generator: no visible global function definition for ‘write.csv’
+randomiz.test: no visible global function definition for ‘runif’
+rbioClass_plsda_jackknife: no visible global function definition for
+  ‘coef’
+rbioClass_plsda_jackknife: no visible global function definition for
+  ‘pt’
+rbioClass_plsda_jackknife: no visible binding for global variable
+  ‘features’
+rbioClass_plsda_jackknife: no visible binding for global variable
+  ‘coefficients’
+rbioClass_plsda_jackknife: no visible binding for global variable ‘sig’
+rbioClass_plsda_ncomp_select: no visible binding for global variable
+  ‘i’
+rbioClass_plsda_ncomp_select: no visible binding for global variable
+  ‘sd’
+rbioClass_plsda_ncomp_select: no visible binding for global variable
+  ‘comps’
+rbioClass_plsda_ncomp_select: no visible binding for global variable
+  ‘value’
+rbioClass_plsda_ncomp_select: no visible binding for global variable
+  ‘variable’
+rbioClass_plsda_perm: no visible binding for global variable ‘i’
+rbioClass_plsda_perm : by_y_func: no visible binding for global
+  variable ‘j’
+rbioClass_plsda_perm : by_feature_per_y_func: no visible binding for
+  global variable ‘m’
+rbioClass_plsda_perm : by_feature_per_y_func: no visible binding for
+  global variable ‘j’
+rbioClass_plsda_perm: no visible global function definition for
+  ‘write.csv’
+rbioClass_plsda_predict: no visible binding for global variable ‘x’
+rbioClass_plsda_predict: no visible global function definition for
+  ‘predict’
+rbioClass_plsda_predict: no visible binding for global variable ‘i’
+rbioClass_plsda_predict : <anonymous>: no visible binding for global
+  variable ‘i’
+rbioClass_plsda_predict: no visible binding for global variable ‘j’
+rbioClass_plsda_predict: no visible binding for global variable
+  ‘predicted.value’
+rbioClass_plsda_predict: no visible binding for global variable ‘Within
+  threshold’
+rbioClass_plsda_q2r2: no visible binding for global variable ‘i’
+rbioClass_plsda_q2r2: no visible binding for global variable
+  ‘components’
+rbioClass_plsda_q2r2: no visible binding for global variable ‘value’
+rbioClass_plsda_q2r2: no visible binding for global variable ‘variable’
+rbioClass_plsda_q2r2: no visible global function definition for
+  ‘median’
+rbioClass_plsda_roc_auc: no visible global function definition for
+  ‘predict’
+rbioClass_plsda_roc_auc: no visible binding for global variable ‘i’
+rbioClass_plsda_roc_auc: no visible binding for global variable ‘j’
+rbioClass_plsda_roc_auc: no visible binding for global variable ‘k’
+rbioClass_plsda_roc_auc: no visible binding for global variable ‘group’
+rbioClass_plsda_scoreplot: no visible binding for global variable
+  ‘axis1’
+rbioClass_plsda_scoreplot: no visible binding for global variable
+  ‘group’
+rbioClass_plsda_scoreplot: no visible binding for global variable
+  ‘sample.label’
+rbioClass_plsda_scoreplot: no visible binding for global variable
+  ‘axis2’
+rbioClass_plsda_scoreplot : ellipsefunc: no visible binding for global
+  variable ‘group’
+rbioClass_plsda_scoreplot : ellipsefunc: no visible binding for global
+  variable ‘sample.label’
+rbioClass_plsda_scoreplot : densityfunc: no visible binding for global
+  variable ‘group’
+rbioClass_plsda_tuplot: no visible binding for global variable ‘i’
+rbioClass_plsda_tuplot: no visible binding for global variable ‘u’
+rbioClass_plsda_tuplot: no visible binding for global variable ‘y’
+rbioClass_plsda_tuplot: no visible binding for global variable
+  ‘sampleID’
+rbioClass_svm_cv: no visible binding for global variable ‘i’
+rbioClass_svm_cv : cv_func: no visible global function definition for
+  ‘predict’
+rbioClass_svm_cv : cv_func: no visible global function definition for
+  ‘cor’
+rbioClass_svm_cv: no visible global function definition for ‘median’
+rbioClass_svm_cv: no visible global function definition for ‘sd’
+rbioClass_svm_cv_pr_auc : cv_pr_auc_func: no visible global function
+  definition for ‘predict’
+rbioClass_svm_cv_pr_auc: no visible binding for global variable
+  ‘recall’
+rbioClass_svm_cv_pr_auc: no visible binding for global variable
+  ‘precision’
+rbioClass_svm_cv_pr_auc: no visible binding for global variable
+  ‘cv_fold’
+rbioClass_svm_cv_roc_auc : cv_auc_func: no visible global function
+  definition for ‘predict’
+rbioClass_svm_cv_roc_auc: no visible binding for global variable ‘fpr’
+rbioClass_svm_cv_roc_auc: no visible binding for global variable ‘tpr’
+rbioClass_svm_cv_roc_auc: no visible binding for global variable
+  ‘cv_fold’
+rbioClass_svm_cv_roc_auc_mean: no visible global function definition
+  for ‘approx’
+rbioClass_svm_cv_roc_auc_mean: no visible binding for global variable
+  ‘m’
+rbioClass_svm_cv_roc_auc_mean: no visible global function definition
+  for ‘sd’
+rbioClass_svm_cv_roc_auc_v2: no visible binding for global variable
+  ‘fpr’
+rbioClass_svm_cv_roc_auc_v2: no visible binding for global variable
+  ‘tpr’
+rbioClass_svm_cv_roc_auc_v2: no visible binding for global variable
+  ‘cv_fold’
+rbioClass_svm_ncv_fs: no visible binding for global variable ‘i’
+rbioClass_svm_ncv_fs : nested_cvfs_func: no visible global function
+  definition for ‘model.matrix’
+rbioClass_svm_ncv_fs : nested_cvfs_func: no visible global function
+  definition for ‘contrasts.fit’
+rbioClass_svm_ncv_fs : nested_cvm_func: no visible global function
+  definition for ‘predict’
+rbioClass_svm_ncv_fs : nested_cvm_func: no visible global function
+  definition for ‘cor’
+rbioClass_svm_ncv_fs: no visible global function definition for
+  ‘median’
+rbioClass_svm_ncv_fs: no visible global function definition for ‘sd’
+rbioClass_svm_ncv_fs_legacy: no visible binding for global variable ‘i’
+rbioClass_svm_ncv_fs_legacy : nestedcv_func: no visible global function
+  definition for ‘model.matrix’
+rbioClass_svm_ncv_fs_legacy : nestedcv_func: no visible global function
+  definition for ‘contrasts.fit’
+rbioClass_svm_ncv_fs_legacy : nestedcv_func: no visible global function
+  definition for ‘predict’
+rbioClass_svm_ncv_fs_legacy : nestedcv_func: no visible global function
+  definition for ‘cor’
+rbioClass_svm_ncv_fs_legacy: no visible global function definition for
+  ‘median’
+rbioClass_svm_ncv_fs_legacy: no visible global function definition for
+  ‘sd’
+rbioClass_svm_ncv_fs_v2: no visible binding for global variable ‘i’
+rbioClass_svm_ncv_fs_v2 : nestedcv_func: no visible global function
+  definition for ‘model.matrix’
+rbioClass_svm_ncv_fs_v2 : nestedcv_func: no visible global function
+  definition for ‘contrasts.fit’
+rbioClass_svm_ncv_fs_v2 : nestedcv_func: no visible global function
+  definition for ‘predict’
+rbioClass_svm_ncv_fs_v2 : nestedcv_func: no visible global function
+  definition for ‘cor’
+rbioClass_svm_ncv_fs_v2: no visible global function definition for
+  ‘median’
+rbioClass_svm_ncv_fs_v2: no visible global function definition for ‘sd’
+rbioClass_svm_ncv_fs_v3: no visible binding for global variable ‘i’
+rbioClass_svm_ncv_fs_v3 : nested_cvfs_func: no visible global function
+  definition for ‘model.matrix’
+rbioClass_svm_ncv_fs_v3 : nested_cvfs_func: no visible global function
+  definition for ‘contrasts.fit’
+rbioClass_svm_ncv_fs_v3 : nested_cvm_func: no visible global function
+  definition for ‘predict’
+rbioClass_svm_ncv_fs_v3 : nested_cvm_func: no visible global function
+  definition for ‘cor’
+rbioClass_svm_ncv_fs_v3: no visible global function definition for
+  ‘median’
+rbioClass_svm_ncv_fs_v3: no visible global function definition for ‘sd’
+rbioClass_svm_perm : by_feature_per_y_func: no visible binding for
+  global variable ‘m’
+rbioClass_svm_perm: no visible binding for global variable ‘i’
+rbioClass_svm_perm: no visible global function definition for
+  ‘write.csv’
+rbioClass_svm_pr_auc: no visible global function definition for
+  ‘predict’
+rbioClass_svm_pr_auc : interp_pr: no visible global function definition
+  for ‘approx’
+rbioClass_svm_pr_auc: no visible binding for global variable ‘group’
+rbioClass_svm_predict: no visible global function definition for
+  ‘predict’
+rbioClass_svm_predict: no visible binding for global variable ‘i’
+rbioClass_svm_roc_auc: no visible global function definition for
+  ‘predict’
+rbioClass_svm_roc_auc: no visible binding for global variable ‘i’
+rbioClass_svm_roc_auc: no visible binding for global variable ‘group’
+rbioClass_svm_roc_auc_inter: no visible global function definition for
+  ‘predict’
+rbioClass_svm_roc_auc_inter: no visible global function definition for
+  ‘approx’
+rbioClass_svm_roc_auc_inter: no visible binding for global variable
+  ‘group’
+rbioFS: no visible global function definition for ‘read.csv’
+rbioFS: no visible binding for global variable ‘imput’
+rbioFS: no visible global function definition for ‘write.csv’
+rbioFS_PCA: no visible global function definition for ‘prcomp’
+rbioFS_PCA: no visible binding for global variable ‘PC’
+rbioFS_PCA: no visible binding for global variable ‘axis1’
+rbioFS_PCA: no visible binding for global variable ‘group’
+rbioFS_PCA: no visible binding for global variable ‘sample.label’
+rbioFS_PCA: no visible binding for global variable ‘axis2’
+rbioFS_PCA : ellipsefunc: no visible binding for global variable
+  ‘group’
+rbioFS_PCA : ellipsefunc: no visible binding for global variable
+  ‘sample.label’
+rbioFS_PCA : densityfunc: no visible binding for global variable
+  ‘group’
+rbioFS_PCA.file: no visible global function definition for ‘read.csv’
+rbioFS_PCA_app : <anonymous>: no visible global function definition for
+  ‘read.table’
+rbioFS_PCA_app : <anonymous>: no visible global function definition for
+  ‘head’
+rbioFS_PCA_app : <anonymous> : <anonymous>: no visible global function
+  definition for ‘write.csv’
+rbioFS_PCA_app : <anonymous>: no visible global function definition for
+  ‘prcomp’
+rbioFS_PCA_app : <anonymous>: no visible binding for global variable
+  ‘PC’
+rbioFS_PCA_app : <anonymous>: no visible binding for global variable
+  ‘axis1’
+rbioFS_PCA_app : <anonymous>: no visible binding for global variable
+  ‘axis2’
+rbioFS_PCA_app : <anonymous>: no visible binding for global variable
+  ‘Group’
+rbioFS_app : <anonymous>: no visible global function definition for
+  ‘read.table’
+rbioFS_app : <anonymous>: no visible global function definition for
+  ‘head’
+rbioFS_app : <anonymous> : <anonymous>: no visible global function
+  definition for ‘write.csv’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘i’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘sd’
+rbioFS_app : <anonymous>: no visible global function definition for
+  ‘predict’
+rbioFS_app : <anonymous>: no visible global function definition for
+  ‘tail’
+rbioFS_app : <anonymous>: no visible binding for global variable
+  ‘Target’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘Mean’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘SEM’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘SD’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘name’
+rbioFS_app : <anonymous>: no visible binding for global variable ‘r’
+rbioFS_app : <anonymous> : tmpFunc: no visible global function
+  definition for ‘tail’
+rbioFS_app : <anonymous>: no visible binding for global variable
+  ‘Features’
+rbioFS_app : <anonymous>: multiple local function definitions for
+  ‘tmpFunc’ with different formal arguments
+rbioFS_plsda_vip: no visible binding for global variable ‘j’
+rbioFS_plsda_vip: no visible binding for global variable ‘m’
+rbioFS_plsda_vip: no visible binding for global variable ‘i’
+rbioFS_plsda_vip: no visible binding for global variable ‘n’
+rbioFS_plsda_vip_plot: no visible binding for global variable ‘i’
+rbioFS_plsda_vip_plot: no visible binding for global variable ‘j’
+rbioFS_plsda_vip_plot: no visible binding for global variable
+  ‘Features’
+rbioFS_plsda_vip_plot: no visible binding for global variable ‘VIP’
+rbioFS_rf_SFS : rf_modelling_func: no visible global function
+  definition for ‘tail’
+rbioFS_rf_SFS: no visible binding for global variable ‘m’
+rbioFS_rf_SFS: no visible binding for global variable ‘j’
+rbioFS_rf_SFS: no visible binding for global variable ‘sd’
+rbioFS_rf_SFS: no visible global function definition for ‘write.csv’
+rbioFS_rf_SFS_plot: no visible global function definition for ‘head’
+rbioFS_rf_SFS_plot: no visible binding for global variable ‘Features’
+rbioFS_rf_SFS_plot: no visible binding for global variable ‘Mean’
+rbioFS_rf_SFS_v2 : rf_modelling_func: no visible global function
+  definition for ‘tail’
+rbioFS_rf_SFS_v2: no visible binding for global variable ‘m’
+rbioFS_rf_SFS_v2: no visible binding for global variable ‘j’
+rbioFS_rf_SFS_v2: no visible binding for global variable ‘sd’
+rbioFS_rf_SFS_v2: no visible global function definition for ‘write.csv’
+rbioFS_rf_initialFS: no visible binding for global variable ‘i’
+rbioFS_rf_initialFS: no visible binding for global variable ‘sd’
+rbioFS_rf_initialFS: no visible global function definition for
+  ‘predict’
+rbioFS_rf_initialFS: no visible global function definition for
+  ‘write.csv’
+rbioFS_rf_initialFS_plot: no visible global function definition for
+  ‘head’
+rbioFS_rf_initialFS_plot: no visible binding for global variable
+  ‘Target’
+rbioFS_rf_initialFS_plot: no visible binding for global variable ‘Mean’
+rbioFS_rf_initialFS_v2: no visible binding for global variable ‘i’
+rbioFS_rf_initialFS_v2: no visible binding for global variable ‘sd’
+rbioFS_rf_initialFS_v2: no visible global function definition for
+  ‘predict’
+rbioFS_rf_initialFS_v2: no visible global function definition for
+  ‘write.csv’
+rbioIMP : <anonymous>: no visible global function definition for ‘ave’
+rbioReg_plsr_ncomp_select: no visible binding for global variable ‘i’
+rbioReg_plsr_ncomp_select: no visible binding for global variable ‘sd’
+rbioReg_plsr_ncomp_select: no visible binding for global variable
+  ‘comps’
+rbioReg_plsr_ncomp_select: no visible binding for global variable
+  ‘value’
+rbioReg_plsr_ncomp_select: no visible binding for global variable
+  ‘variable’
+rbioReg_plsr_perm: no visible binding for global variable ‘i’
+rbioReg_plsr_perm : by_y_func: no visible binding for global variable
+  ‘j’
+rbioReg_plsr_perm: no visible binding for global variable ‘perm.method’
+rbioReg_plsr_perm: no visible global function definition for
+  ‘write.csv’
+rbioReg_plsr_vip : boot.func: no visible binding for global variable
+  ‘m’
+rbioReg_plsr_vip: no visible binding for global variable ‘i’
+rbioReg_plsr_vip: no visible binding for global variable ‘m’
+rbioReg_plsr_vip: no visible binding for global variable ‘j’
+rbioReg_plsr_vip: no visible binding for global variable ‘n’
+rbioReg_svm_r2: no visible global function definition for ‘predict’
+rbioReg_svm_rmse: no visible global function definition for ‘predict’
+rbioUtil_classif_accuracy: no visible global function definition for
+  ‘predict’
+rbioUtil_classplot: no visible binding for global variable
+  ‘Probability’
+rbioUtil_classplot: no visible binding for global variable ‘Class’
+rbioUtil_classplot: no visible binding for global variable
+  ‘precent.label’
+rbioUtil_classplot: no visible binding for global variable
+  ‘repel.label.pos’
+rbioUtil_fscount_plot.default: no visible global function definition
+  for ‘show’
+rbioUtil_perm_plot.rbiomvr_perm: no visible binding for global variable
+  ‘nperm’
+rbioUtil_perm_plot.rbiomvr_perm: no visible binding for global variable
+  ‘comparison’
+rbioUtil_perm_plot.rbiosvm_perm: no visible binding for global variable
+  ‘nperm’
+rbioUtil_perm_plot.rbiosvm_perm: no visible binding for global variable
+  ‘tot.RMSE’
+rbioUtil_perm_plot.rbiosvm_perm: no visible binding for global variable
+  ‘tot.accuracy’
+sv_importance_shapviz: no visible binding for global variable ‘value’
+sv_importance_shapviz: no visible binding for global variable ‘feature’
+sv_importance_shapviz: no visible binding for global variable ‘Var2’
+sv_importance_shapviz: no visible binding for global variable ‘color’
+svm_cv_rocauc_helper : cv_auc_func: no visible global function
+  definition for ‘predict’
+svm_cv_rocauc_helper : cv_auc_func: no visible binding for global
+  variable ‘i’
+svm_cv_rocauc_helper: no visible binding for global variable ‘i’
+uni_PreProc: no visible binding for global variable ‘i’
+uni_PreProc: no visible global function definition for ‘write.csv’
+Undefined global functions or variables:
+  Class Features Group Mean PC Probability SD SEM Target Tgt VIP Var2
+  Within threshold approx ave axis1 axis2 coef coefficients color
+  comparison complete.cases components comps contrasts.fit cor cv_fold
+  feature features fpr group head i imput j k m median model.matrix n
+  name nperm perm.method prcomp precent.label precision predict
+  predicted.value pt r read.csv read.table recall repel.label.pos runif
+  sample.label sampleID sd show sig tail tot.RMSE tot.accuracy tpr u
+  value variable write.csv x y
+Consider adding
+  importFrom("methods", "show")
+  importFrom("stats", "approx", "ave", "coef", "coefficients",
+             "complete.cases", "cor", "median", "model.matrix", "prcomp",
+             "predict", "pt", "runif", "sd")
+  importFrom("utils", "head", "read.csv", "read.table", "tail",
+             "write.csv")
+to your NAMESPACE file (and ensure that your DESCRIPTION Imports field
+contains 'methods').
+* checking Rd files ... NOTE
+checkRd: (-1) rbioClass_plsda_predict.Rd:156: Lost braces; missing escapes or markup?
+   156 | The conventional wisdom is to use "Bayes" method for unbalanced classification, and {"softmax"} for balanced situation.
+       |                                                                                     ^
+prepare_Rd: rbioClass_svm_predict.Rd:81-86: Dropping empty section \examples
+* checking Rd metadata ... OK
+* checking Rd cross-references ... WARNING
+Missing link(s) in Rd file 'rbioClass_plsda_predict.Rd':
+  ‘rbioClass_plsda_classplot()’
+
+Missing link(s) in Rd file 'rbioFS_plsda_vip_plot.Rd':
+  ‘rbioFS_plsda_VIP’
+
+Missing link(s) in Rd file 'shap_g_theme_helper.Rd':
+  ‘rbioClass_svm_shap_aggreated’
+
+Missing link(s) in Rd file 'uni_PreProc.Rd':
+  ‘rbioarray_filter_combine’
+
+See section 'Cross-references' in the 'Writing R Extensions' manual.
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Undocumented arguments in Rd file 'dot-assign_group_folds_simple.Rd'
+  ‘groups’ ‘group_mean_y’ ‘cross.k’
+
+Undocumented arguments in Rd file 'dot-assign_group_folds_stratified.Rd'
+  ‘sampleIds’ ‘y’ ‘cross.k’ ‘class_table’
+
+Undocumented arguments in Rd file 'dummy.Rd'
+  ‘drop2nd’
+Documented arguments not in \usage in Rd file 'dummy.Rd':
+  ‘scale’
+
+Undocumented arguments in Rd file 'randomiz.test.Rd'
+  ‘residualsNew’ ‘residualsReference’ ‘nperm’
+
+Undocumented arguments in Rd file 'rbioClass_plsda_jackknife.Rd'
+  ‘plot’
+
+Undocumented arguments in Rd file 'rbioClass_plsda_predict.Rd'
+  ‘plot.xTickItalic’
+
+Undocumented arguments in Rd file 'rbioClass_svm_cv.Rd'
+  ‘randomState’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_cv_roc_auc.Rd':
+  ‘plot.comps’ ‘plot.SymbolSize’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_cv_roc_auc_mean.Rd':
+  ‘plot.comps’ ‘plot.SymbolSize’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_cv_roc_auc_v2.Rd':
+  ‘plot.comps’ ‘plot.SymbolSize’
+
+Undocumented arguments in Rd file 'rbioClass_svm_ncv_fs_legacy.Rd'
+  ‘stratify’ ‘sampleIds’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_ncv_fs_v2.Rd':
+  ‘...’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_pr_auc.Rd':
+  ‘plot.comps’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_roc_auc.Rd':
+  ‘plot.comps’
+
+Documented arguments not in \usage in Rd file 'rbioClass_svm_roc_auc_inter.Rd':
+  ‘plot.comps’
+
+Undocumented arguments in Rd file 'rbioClass_svm_shap_aggregated.Rd'
+  ‘plot.bee.colorscale’ ‘plot.bar.color’ ‘plot.legendPosition’
+
+Undocumented arguments in Rd file 'rbioClass_svm_shap_individual.Rd'
+  ‘y’ ‘plot.bee.colorscale’ ‘plot.bar.color’ ‘plot.legendPosition’
+
+Undocumented arguments in Rd file 'rbioFS.Rd'
+  ‘SFS_Title’
+
+Undocumented arguments in Rd file 'rbioFS_plsda_vip_plot.Rd'
+  ‘plot.legendSize’ ‘plot.legendTtl’ ‘plot.legendTtlSize’
+
+Undocumented arguments in Rd file 'rbioFS_rf_SFS_plot.Rd'
+  ‘plot.symbolSize’
+Documented arguments not in \usage in Rd file 'rbioFS_rf_SFS_plot.Rd':
+  ‘plot.SymbolSize’
+
+Undocumented arguments in Rd file 'rbioUtil_classif_accuracy.Rd'
+  ‘verbose’
+
+Undocumented arguments in Rd file 'rbioUtil_classplot.Rd'
+  ‘pred.obj’ ‘multi_plot.stripLblSize’
+Documented arguments not in \usage in Rd file 'rbioUtil_classplot.Rd':
+  ‘pred.object’ ‘plot.SymbolSize’
+
+Undocumented arguments in Rd file 'rbioUtil_fscount_plot.Rd'
+  ‘plot.sig.line’ ‘plot.errorbarLblSize’ ‘plot.legendSize’
+  ‘plot.legendTtl’ ‘plot.legendTtlSize’
+
+Undocumented arguments in Rd file 'rbioUtil_perm_plot.Rd'
+  ‘baseplt’
+Documented arguments not in \usage in Rd file 'rbioUtil_perm_plot.Rd':
+  ‘baseplot’
+
+Undocumented arguments in Rd file 'shap_g_theme_helper.Rd'
+  ‘g’ ‘plot.SymbolSize’ ‘plot.lineSize’ ‘plot.display.Title’
+  ‘plot.title’ ‘plot.titleSize’ ‘plot.fontType’ ‘plot.xLabel’
+  ‘plot.xLabelSize’ ‘plot.xTickLblSize’ ‘plot.yLabel’ ‘plot.yLabelSize’
+  ‘plot.yTickLblSize’ ‘plot.legendPosition’ ‘plot.legendSize’
+  ‘plot.Width’ ‘plot.Height’
+
+Undocumented arguments in Rd file 'sv_importance_shapviz.Rd'
+  ‘object’ ‘kind’ ‘max_display’ ‘fill’ ‘bar_width’ ‘bee_width’
+  ‘bee_adjust’ ‘viridis_args’ ‘color_bar_title’ ‘show_numbers’
+  ‘format_fun’ ‘number_size’ ‘sort_features’ ‘...’
+
+Documented arguments not in \usage in Rd file 'svm_cv_rocauc_helper.Rd':
+  ‘fileprefix’
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking examples ... OK
+* checking for unstated dependencies in ‘tests’ ... WARNING
+'library' or 'require' call not declared from: ‘testthat’
+* checking tests ... ERROR
+  Running ‘testthat.R’
+Running the tests in ‘tests/testthat.R’ failed.
+Last 13 lines of output:
+  Differences:
+  `actual` is a list
+  `expected` is NULL
+  
+  ── Failure ('test-rbioClass_svm_absent_class.R:84:3'): rbioClass_svm_cv_roc_auc handles absent-class fold without crashing ──
+  Expected `res` to be NULL.
+  Differences:
+  `actual` is a list
+  `expected` is NULL
+  
+  
+  [ FAIL 2 | WARN 0 | SKIP 0 | PASS 98 ]
+  Error:
+  ! Test failures.
+  Execution halted
+* DONE
+Status: 1 ERROR, 5 WARNINGs, 3 NOTEs

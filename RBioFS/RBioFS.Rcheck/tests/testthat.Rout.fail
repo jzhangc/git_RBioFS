@@ -1,0 +1,136 @@
+
+R version 4.6.1 (2026-06-24) -- "Happy Hop"
+Copyright (C) 2026 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin23
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(testthat)
+> library(RBioFS)
+Written by Jing Zhang, Ph.D. Please direct questions to jzhangcad@gmail.com.
+
+  To cite in publication:
+    Genuer R, Poggi JM, Tuleau-Malot C. 2010. Variable selection using random forests. Pattern Recognition Letters.
+  31(14): 2225-2236.
+    Zhang J, Hadj-Moussa H, Storey KB. 2016. Current progress of high-throughput microRNA differential
+  expression analysis and random forest gene selection for model and non-model systems: an R implementation.
+  J Integr Bioinform. 13: 306. doi: 10.1515/jib-2016-306.
+    Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor
+  to reflect anoxia and freezing survival adaptations. Genomics. 112(6): 4385-4398. doi: 10.1016/j.ygeno.2020.07.036.
+    Zhang J, Richardson DJ, Dunkley BT. 2020. Classifying post-traumatic stress disorder using the
+  magnetoencephalographic connectome and machine learning. Scientific Reports. 10(1): 5937.
+  doi: 10.1038/s41598-020-62713-5.
+
+  For more details, please visit: http://kenstoreylab.com/?page_id=2542
+> 
+> # Standard testthat runner invoked by `R CMD check` (and by:
+> #   Rscript tests/testthat.R)
+> #
+> # The function under test (rbioClass_svm_cv_pr_auc) is loaded from the
+> # installed RBioFS package.
+> test_check("RBioFS")
+Class A absent from model probability output; AUC skipped.
+Either no control or no case obesevated. ROC-AUC fails. 
+Class A absent from model probability output; AUC skipped.
+Either no control or no case obesevated. ROC-AUC fails. 
+Class A absent from model probability output; AUC skipped.
+NULL element removed from the CV ROC-AUC list.
+Saving _problems/test-rbioClass_svm_absent_class-70.R
+Class A absent from model probability output; AUC skipped.
+NULL element removed from the CV ROC-AUC list.
+Saving _problems/test-rbioClass_svm_absent_class-84.R
+Class A absent from model probability output; P-R AUC skipped.
+No case or no control observed for class B. P-R AUC skipped.
+No case or no control observed for class C. P-R AUC skipped.
+Either no case or no control observed for some class. P-R AUC partially failed. 
+P-R AUC - A: 0.954920634920635
+P-R AUC - B: 0.931345598845599
+P-R AUC - A: 0.898391053391053
+P-R AUC - B: 0.957536764705882
+P-R AUC - A: 0.990454545454545
+P-R AUC - B: 0.990454545454545
+P-R AUC - A: 0.954920634920635
+P-R AUC - B: 0.931345598845599
+P-R AUC - A: 0.898391053391053
+P-R AUC - B: 0.957536764705882
+P-R AUC - A: 0.990454545454545
+P-R AUC - B: 0.990454545454545
+ P-R AUC - A (vs Others): 0.189466022118404
+ P-R AUC - B (vs Others): 0.221255291089394
+ P-R AUC - C (vs Others): 0.218541746256194
+ P-R AUC - A (vs Others): 1
+ P-R AUC - B (vs Others): 0.711111111111111
+ P-R AUC - C (vs Others): 0.763888888888889
+ P-R AUC - A (vs Others): 0.189466022118404
+ P-R AUC - B (vs Others): 0.221255291089394
+ P-R AUC - C (vs Others): 0.218541746256194
+ P-R AUC - A (vs Others): 1
+ P-R AUC - B (vs Others): 0.711111111111111
+ P-R AUC - C (vs Others): 0.763888888888889
+ P-R AUC - A (vs Others): 0.189466022118404
+ P-R AUC - B (vs Others): 0.221255291089394
+ P-R AUC - C (vs Others): 0.218541746256194
+Class A absent from model probability output; P-R AUC skipped.
+NULL element removed from the CV P-R AUC list.
+P-R AUC - A: 0.954920634920635
+P-R AUC - B: 0.931345598845599
+P-R AUC - A: 0.898391053391053
+P-R AUC - B: 0.957536764705882
+P-R AUC - A: 0.990454545454545
+P-R AUC - B: 0.990454545454545
+P-R AUC - A: 0.954920634920635
+P-R AUC - B: 0.931345598845599
+P-R AUC - A: 0.898391053391053
+P-R AUC - B: 0.957536764705882
+P-R AUC - A: 0.990454545454545
+P-R AUC - B: 0.990454545454545
+P-R AUC - A: 0.954920634920635
+P-R AUC - B: 0.931345598845599
+P-R AUC - A: 0.898391053391053
+P-R AUC - B: 0.957536764705882
+P-R AUC - A: 0.990454545454545
+P-R AUC - B: 0.990454545454545
+P-R AUC - A: 0.954920634920635
+P-R AUC - B: 0.931345598845599
+P-R AUC - A: 0.898391053391053
+P-R AUC - B: 0.957536764705882
+P-R AUC - A: 0.990454545454545
+P-R AUC - B: 0.990454545454545
+zcore_minmax result
+  transformed matrix:  24 samples x 5 features
+  zscore:              TRUE
+  minmax:              TRUE
+  order:               z-score -> min-max
+  missing values:      0
+  fitted params:       meanX (5 values), columnSD (5 values)
+  fitted params:       colMin, colMax (5 values each)
+[ FAIL 2 | WARN 0 | SKIP 0 | PASS 98 ]
+
+══ Failed tests ════════════════════════════════════════════════════════════════
+── Failure ('test-rbioClass_svm_absent_class.R:70:3'): rbioClass_svm_cv_roc_auc_v2 handles absent-class fold without crashing ──
+Expected `res` to be NULL.
+Differences:
+`actual` is a list
+`expected` is NULL
+
+── Failure ('test-rbioClass_svm_absent_class.R:84:3'): rbioClass_svm_cv_roc_auc handles absent-class fold without crashing ──
+Expected `res` to be NULL.
+Differences:
+`actual` is a list
+`expected` is NULL
+
+
+[ FAIL 2 | WARN 0 | SKIP 0 | PASS 98 ]
+Error:
+! Test failures.
+Execution halted

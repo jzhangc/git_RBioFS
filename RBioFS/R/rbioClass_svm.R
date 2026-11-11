@@ -12,6 +12,23 @@
 #' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
 #'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 #'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
+#' @param stratify Logical. Whether the inner tuning cross-validation is stratified
+#'   (class-balanced for classification; variance-minimising for regression).
+#'   When \code{TRUE} (default), the inner CV folds are built so that every fold
+#'   keeps the overall class proportion (for classification) or a balanced response
+#'   spread (for regression), preventing single-class folds on imbalanced data.
+#'   This is a \strong{behaviour change} relative to the previous contiguous
+#'   (\code{cut}-based) split: tuned \code{cost}/\code{gamma}, reported CV
+#'   accuracy/RMSE, and (in the nested feature-selection functions) the selected
+#'   feature set may shift. Default is \code{TRUE}.
+#' @param sampleIds Optional vector of group / repeated-measures identifiers, one
+#'   per row, with \code{length} equal to the number of rows of \code{x}.
+#'   When supplied (this takes precedence over \code{stratify}), the inner CV
+#'   folds are group-aware: rows sharing an id are never split across folds
+#'   (classification uses a group-level stratified assignment, regression a
+#'   variance-minimising greedy one). For classification, rows sharing an id must
+#'   share one class label. If the number of unique ids is below
+#'   \code{tune.cross.k} a warning is raised. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param svm.cross.k Fold of cross validation. Default is \code{10}.
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
@@ -42,7 +59,23 @@
 #'
 #' \code{model.type}: the SVM model type, "classification" or "regression".
 #'
+#' \code{stratify}: whether the inner tuning cross-validation was stratified (class-balanced for classification, variance-minimising for regression).
+#'
+#' \code{sampleIds}: the group / repeated-measures identifiers used for group-aware inner CV folds, if any; otherwise \code{NULL}.
+#'
 #' @details Model is trained with probability calculation enabled, so that \code{\link{rbioClass_svm_predict}} will be able calculate prediction probabilities.
+#'
+#' The \strong{inner tuning CV} (i.e. the CV used to select \code{cost}/\code{gamma} via
+#' \code{e1071mc::tune()} / \code{e1071mc::tune_mc()} with \code{sampling = tune.method = "cross"})
+#' is now non-leakage-capable via the \pkg{e1071mc} fork: when \code{stratify = TRUE}
+#' (the new default) the folds are class-balanced for classification or variance-minimised
+#' for regression, so a single-class fold can no longer occur on an imbalanced data set.
+#' This is a \strong{behaviour change}: tuned parameters, reported CV accuracy/RMSE, and
+#' (in the nested feature-selection wrappers) the selected feature set may shift relative to
+#' the previous contiguous split. Supplying \code{sampleIds} makes the folds group-aware so
+#' that rows sharing an id are never split across folds (repeated-measures / multi-omics
+#' safe). For \code{tune.method = "fix"} or \code{"boot"} no split is drawn and these flags
+#' have no effect; \code{stratify = TRUE} with \code{tune.method = "fix"} emits a warning.
 #'
 #' Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
 #'
@@ -106,6 +139,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
                           n_cores = NULL,
                           zscore = TRUE,
                           minmax = FALSE,
+                          stratify = TRUE,
+                          sampleIds = NULL,
                           verbose = TRUE){
   ## check arguments
   if (is.factor(y)){
@@ -132,6 +167,36 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   # if (!kernel %in% c("radial", "linear", "polynomial", "sigmoid")) stop("kernel needs to be exactly one of \"radial\", \"linear\", \"polynomial\", or \"sigmoid\".")
   kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
   tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
+
+  ## Validate / align non-leakage CV flags (stratify, sampleIds)
+  if (!is.null(sampleIds)) {
+    if (length(sampleIds) != nrow(x))
+      stop("sampleIds must have the same length as the number of rows in x (", nrow(x), ").")
+    # For classification, rows sharing an ID must share one class label
+    # (mirrors the e1071mc helper's check; in regression the repeated
+    # responses vary by design, so no label-conflict check applies).
+    if (model_type == "classification") {
+      lbl_by_id <- tapply(y, factor(sampleIds), function(l) unique(as.character(l)))
+      conflict <- names(lbl_by_id)[vapply(lbl_by_id, length, integer(1)) > 1L]
+      if (length(conflict) > 0L)
+        stop("Rows with the same sample ID have differing class labels (IDs: ",
+             paste(conflict, collapse = ", "), "). Rows sharing an ID must share ",
+             "one label for grouped cross-validation.")
+    }
+    if (length(unique(sampleIds)) < tune.cross.k)
+      warning(paste0("Number of unique sample IDs (", length(unique(sampleIds)),
+                     ") is less than tune.cross.k (", tune.cross.k,
+                     "). Some folds may be empty in the inner tune CV."))
+  }
+  if (isTRUE(stratify) && tune.method == "fix")
+    warning("stratify is ignored for tune.method = \"fix\" (fixed split, no inner cross-validation).")
+  # Defensive guard: on an imbalanced classification, the legacy contiguous split
+  # can place a small class entirely in one fold, producing a single-class fold.
+  if (model_type == "classification" && !isTRUE(stratify) && is.null(sampleIds) &&
+      tune.method == "cross" && any(as.numeric(table(y)) < tune.cross.k))
+    warning(paste0("With ", tune.cross.k, "-fold inner CV and ", tune.method,
+                   " tuning, a class has fewer members than folds.",
+                   " Set stratify = TRUE (and/or supply sampleIds) to avoid single-class folds."))
 
   ## data processing
   if (center.scale){
@@ -167,14 +232,16 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   gamma_start <- ifelse(is.vector(X), 1, 1 / ncol(X))  # starting gamma value per svm() default settings
   if (verbose) cat(paste0("Grid searching for parameter optimization with ", tune.method, " method (speed depending on hardware configuration)..."))
   if (n_cores > 1) {
-    svm_tuned <- tune_mc(svm, kernel = kernel,
+    svm_tuned <- tune_mc(svm, kernel = kernel, scale = FALSE,
                          train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                         tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n),
+                         tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n,
+                                                  stratify = isTRUE(stratify), sampleIds = sampleIds),
                          n_cores = n_cores)
   } else {
-    svm_tuned <- tune(svm, kernel = kernel,
+    svm_tuned <- tune(svm, kernel = kernel, scale = FALSE,
                       train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                      tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n))
+                      tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n,
+                                               stratify = isTRUE(stratify), sampleIds = sampleIds))
   }
   if (verbose) cat("DONE!\n")
 
@@ -184,12 +251,14 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
     m <- svm_mc(x = X, y = y, kernel = kernel, probability = TRUE,
              cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
              scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-             cross = svm.cross.k, n_cores = n_cores, ...)
+             cross = svm.cross.k, n_cores = n_cores,
+             stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
   } else {
     m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
                 cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
                 scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-                cross = svm.cross.k, ...)
+                cross = svm.cross.k,
+                stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
   }
   if (verbose) cat("Done!\n")
 
@@ -201,6 +270,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   m$y.scale <- NULL
   m$center.scaledX <- centered_X
   m$class.weights <- wgt
+  m$stratify <- isTRUE(stratify)
+  m$sampleIds <- sampleIds
   m$svm.cross.k <- svm.cross.k
   m$tune.method <- tune.method
   m$tune.cross.k <- if(tune.method == "cross") tune.cross.k else NULL
@@ -257,6 +328,18 @@ print.rbiosvm <- function(x, ...){
 #' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
 #'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 #'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
+#' @param stratify Logical. Whether the inner tuning cross-validation is stratified
+#'   (class-balanced for classification; variance-minimising for regression). When
+#'   \code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
+#'   keep the overall class proportion in every fold, so a single-class fold cannot
+#'   occur on an imbalanced data set. This is a behaviour change: tuned
+#'   \code{cost}/\code{gamma}, reported CV accuracy/RMSE, and (because the inner CV
+#'   drives the nested rRF-FS) the selected feature set may shift relative to the
+#'   previous contiguous split. Default is \code{TRUE}.
+#' @param sampleIds Optional vector of group / repeated-measures identifiers, one
+#'   per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
+#'   \code{stratify}) the inner CV folds become group-aware: rows sharing an id
+#'   are never split across folds. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -385,6 +468,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
                                   fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                   fs.count.cutoff = cross.k,
                                   parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                  stratify = TRUE, sampleIds = NULL,
                                   verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
@@ -447,6 +531,12 @@ rbioClass_svm_ncv_fs <- function(x, y,
     }
     random_sample_idx <- NULL
   }
+  # Align the group ids to whatever row order dfm_randomized is in (regression
+  # shuffles with random_sample_idx; classification keeps the original order:
+  # dfm_randomized <- dfm).  Only reindex when the regression shuffle happened,
+  # otherwise a NULL index would collapse sampleIds to length 0.
+  if (!is.null(sampleIds) && !is.null(random_sample_idx))
+    sampleIds <- sampleIds[random_sample_idx]
 
   # nested CV-FS function
   nested_cvfs_func <- function(i) {
@@ -457,6 +547,9 @@ rbioClass_svm_ncv_fs <- function(x, y,
     # below: remove columns with constant value
     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
+    # sub-sample the group ids to the outer-fold training rows so the inner
+    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # optional uni
     # outcome should be a list of features to subset the cv_training first
@@ -520,9 +613,9 @@ rbioClass_svm_ncv_fs <- function(x, y,
     # fs
     if (center.scale){
       fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX    # without y
-      } else {
+    } else {
       fs_training_x <- cv_training_x
-      }
+    }
 
     fs <- tryCatch({  # rRF-FS with error handling
       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
@@ -556,7 +649,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
       fs_training_x = fs_training_x,
       cv_training_y = cv_training_y,
       uni_sig_fs = uni_sig_fs,
-      fs_test = fs_test
+      fs_test = fs_test,
+      train_sampleIds = train_sampleIds
     )
     return(cv_fs_out)
   }
@@ -568,11 +662,14 @@ rbioClass_svm_ncv_fs <- function(x, y,
     fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
     cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
     uni_sig_fs <- nested_cvfs.list$uni_sig_fs
+    train_sampleIds <- nested_cvfs.list[[i]]$train_sampleIds
 
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           zscore = zscore, minmax = minmax,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
+                          stratify = stratify, sampleIds = train_sampleIds,
+                          verbose = FALSE, ...)
 
     # processing test data
     fs_test <- nested_cvfs.list[[i]]$fs_test
@@ -733,38 +830,38 @@ rbioClass_svm_ncv_fs <- function(x, y,
   runtime <- end_time - start_time
 
     # export to environment
-   out <- list(univariate.fs = univariate.fs,
-               cv.fold = fold,
-               randomized.sample.index = random_sample_idx,
-               sampleIds = NULL,
-               sampleIdToFold = NULL,
-               model.type = model_type,
-               tot.nested.accuracy.summary = tot.nested.acc.summary,
-               tot.nested.RMSE.summary = tot.nested.rmse.summary,
-               tot.nested.rsq.summary = tot.nested.rsq.summary,
-               nested.accuracy = nested.accu,
-               nested.RMSE = nested.rmse,
-               nested.rsq = nested.rsq,
-               nested.fs.count = fs.count,
-               nested.cv.models = nested.cv.list,
-               best.nested.method = cross.best.model.method,
-               best.nested.index = cv.model.idx,
-               best.nested.accuracy.summary = best.nested.acc.summary,
-               best.nested.rmse.summary = best.nested.acc.summary,
-               best.nested.rsq.summary = best.nested.rsq.summary,
-               best.nested.accuracy = best.nested.accu,
-               best.nested.rmse = best.nested.rmse,
-               best.nested.rsq = best.nested.rsq,
-               best.nested.fs.count = best.nested.fs.count,
-               fs.method = fs.method,
-               fs.count.threshold = fs.count.cutoff,
-               selected.features = selected.features,
-               tune.method = tune.method,
-               tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
-               tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
-               run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
-   class(out) <- "rbiosvm_nestedcv"
-   return(out)
+  out <- list(univariate.fs = univariate.fs,
+              cv.fold = fold,
+              randomized.sample.index = random_sample_idx,
+              sampleIds = NULL,
+              sampleIdToFold = NULL,
+              model.type = model_type,
+              tot.nested.accuracy.summary = tot.nested.acc.summary,
+              tot.nested.RMSE.summary = tot.nested.rmse.summary,
+              tot.nested.rsq.summary = tot.nested.rsq.summary,
+              nested.accuracy = nested.accu,
+              nested.RMSE = nested.rmse,
+              nested.rsq = nested.rsq,
+              nested.fs.count = fs.count,
+              nested.cv.models = nested.cv.list,
+              best.nested.method = cross.best.model.method,
+              best.nested.index = cv.model.idx,
+              best.nested.accuracy.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rsq.summary = best.nested.rsq.summary,
+              best.nested.accuracy = best.nested.accu,
+              best.nested.rmse = best.nested.rmse,
+              best.nested.rsq = best.nested.rsq,
+              best.nested.fs.count = best.nested.fs.count,
+              fs.method = fs.method,
+              fs.count.threshold = fs.count.cutoff,
+              selected.features = selected.features,
+              tune.method = tune.method,
+              tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
+              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+  class(out) <- "rbiosvm_nestedcv"
+  return(out)
 }
 
 
@@ -787,6 +884,18 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
 #'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 #'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
+#' @param stratify Logical. Whether the inner tuning cross-validation is stratified
+#'   (class-balanced for classification; variance-minimising for regression). When
+#'   \code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
+#'   keep the overall class proportion in every fold, so a single-class fold cannot
+#'   occur on an imbalanced data set. This is a behaviour change: tuned
+#'   \code{cost}/\code{gamma}, reported CV accuracy/RMSE, and (because the inner CV
+#'   drives the nested rRF-FS) the selected feature set may shift relative to the
+#'   previous contiguous split. Default is \code{TRUE}.
+#' @param sampleIds Optional vector of group / repeated-measures identifiers, one
+#'   per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
+#'   \code{stratify}) the inner CV folds become group-aware: rows sharing an id
+#'   are never split across folds. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -910,8 +1019,9 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
                                      tune.cross.k = 10, tune.boot.n = 10,
                                      fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                      fs.count.cutoff = cross.k,
-                                     parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                     verbose = TRUE){
+                                      parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                      stratify = TRUE, sampleIds = NULL,
+                                      verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
 
@@ -970,6 +1080,12 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     }
     random_sample_idx <- NULL
   }
+  # Align the group ids to whatever row order dfm_randomized is in (regression
+  # shuffles with random_sample_idx; classification keeps the original order).
+  # Only reindex when the regression shuffle happened, otherwise a NULL index
+  # would collapse sampleIds to length 0.
+  if (!is.null(sampleIds) && !is.null(random_sample_idx))
+    sampleIds <- sampleIds[random_sample_idx]
 
   # nested CV function
   nestedcv_func <- function(i) {
@@ -980,6 +1096,9 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     # below: remove columns with constant value
     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
+    # sub-sample the group ids to the outer-fold training rows so the inner
+    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # optional uni
     # outcome should be a list of features to subset the cv_training first
@@ -1073,7 +1192,9 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           zscore = zscore, minmax = minmax,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE)
+                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
+                          stratify = stratify, sampleIds = train_sampleIds,
+                          verbose = FALSE)
     # processing test data
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
     if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
@@ -1225,38 +1346,38 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
   runtime <- end_time - start_time
 
      # export to environment
-   out <- list(univariate.fs = univariate.fs,
-               cv.fold = fold,
-               randomized.sample.index = random_sample_idx,
-               sampleIds = NULL,
-               sampleIdToFold = NULL,
-               model.type = model_type,
-               tot.nested.accuracy.summary = tot.nested.acc.summary,
-               tot.nested.RMSE.summary = tot.nested.rmse.summary,
-               tot.nested.rsq.summary = tot.nested.rsq.summary,
-               nested.accuracy = nested.accu,
-               nested.RMSE = nested.rmse,
-               nested.rsq = nested.rsq,
-               nested.fs.count = fs.count,
-               nested.cv.models = nested.cv.list,
-               best.nested.method = cross.best.model.method,
-               best.nested.index = cv.model.idx,
-               best.nested.accuracy.summary = best.nested.acc.summary,
-               best.nested.rmse.summary = best.nested.acc.summary,
-               best.nested.rsq.summary = best.nested.rsq.summary,
-               best.nested.accuracy = best.nested.accu,
-               best.nested.rmse = best.nested.rmse,
-               best.nested.rsq = best.nested.rsq,
-               best.nested.fs.count = best.nested.fs.count,
-               fs.method = fs.method,
-               fs.count.threshold = fs.count.cutoff,
-               selected.features = selected.features,
-               tune.method = tune.method,
-               tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
-               tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
-               run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
-   class(out) <- "rbiosvm_nestedcv"
-   return(out)
+  out <- list(univariate.fs = univariate.fs,
+              cv.fold = fold,
+              randomized.sample.index = random_sample_idx,
+              sampleIds = NULL,
+              sampleIdToFold = NULL,
+              model.type = model_type,
+              tot.nested.accuracy.summary = tot.nested.acc.summary,
+              tot.nested.RMSE.summary = tot.nested.rmse.summary,
+              tot.nested.rsq.summary = tot.nested.rsq.summary,
+              nested.accuracy = nested.accu,
+              nested.RMSE = nested.rmse,
+              nested.rsq = nested.rsq,
+              nested.fs.count = fs.count,
+              nested.cv.models = nested.cv.list,
+              best.nested.method = cross.best.model.method,
+              best.nested.index = cv.model.idx,
+              best.nested.accuracy.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rsq.summary = best.nested.rsq.summary,
+              best.nested.accuracy = best.nested.accu,
+              best.nested.rmse = best.nested.rmse,
+              best.nested.rsq = best.nested.rsq,
+              best.nested.fs.count = best.nested.fs.count,
+              fs.method = fs.method,
+              fs.count.threshold = fs.count.cutoff,
+              selected.features = selected.features,
+              tune.method = tune.method,
+              tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
+              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+  class(out) <- "rbiosvm_nestedcv"
+  return(out)
 }
 
 
@@ -1281,6 +1402,11 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
 #'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 #'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
+#' @param stratify Logical. Whether the inner tuning cross-validation is stratified
+#'   (class-balanced for classification; variance-minimising for regression). When
+#'   \code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
+#'   keep the overall class proportion in every fold, so a single-class fold cannot
+#'   occur on an imbalanced data set. Default is \code{TRUE}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -1424,185 +1550,189 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
                                      kernel = c("radial", "linear", "polynomial", "sigmoid"),
                                      cross.k = 10, cross.best.model.method = c("none", "median"),
                                      tune.method = c("cross", "boot", "fix"),
-                                     tune.cross.k = 10, tune.boot.n = 10, ...,
-                                     sampleIds = NULL,
-                                     fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-                                     fs.count.cutoff = cross.k,
-                                     parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                     verbose = TRUE){
+                                      tune.cross.k = 10, tune.boot.n = 10, ...,
+                                      sampleIds = NULL,
+                                      stratify = TRUE,
+                                      fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+                                      fs.count.cutoff = cross.k,
+                                      parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                      verbose = TRUE){
    ## initiate the run time
-   start_time <- Sys.time()
+  start_time <- Sys.time()
 
     ## check arguments
-   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
+  if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
    if (is.factor(y)) {
-     model_type <- "classification"
-   } else {
-     model_type <- "regression"
-   }
+    model_type <- "classification"
+  } else {
+    model_type <- "regression"
+  }
 
-   if (model_type == "classification" && univariate.fs) {
-     if (is.null(uni.contrast)) {
-       stop("When univariate.fs = TRUE, uni.contrast needs to be set for classification study.")
-     } else if (!is.character(uni.contrast)) {
-       stop("uni.contrast needs to be a character string.")
-     }
-   }
+  if (model_type == "classification" && univariate.fs) {
+    if (is.null(uni.contrast)) {
+      stop("When univariate.fs = TRUE, uni.contrast needs to be set for classification study.")
+    } else if (!is.character(uni.contrast)) {
+      stop("uni.contrast needs to be a character string.")
+    }
+  }
 
-   if (cross.k > nrow(x)) stop("Nested cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
+  if (cross.k > nrow(x)) stop("Nested cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
    if (any(class(x) == "data.frame")){
-     if (verbose) cat("data.frame x converted to a matrix object.\n")
+    if (verbose) cat("data.frame x converted to a matrix object.\n")
      x <- as.matrix(sapply(x, as.numeric))
-   }
+  }
 
-   if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
+  if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
    kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
-   cross.best.model.method <- match.arg(tolower(cross.best.model.method), c("none", "median"))
-   tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
-   if (parallelComputing){
-     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
-   }
+  cross.best.model.method <- match.arg(tolower(cross.best.model.method), c("none", "median"))
+  tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
+  if (parallelComputing){
+    clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
+  }
 
    ## Validate and store sampleIds
-   has_group_ids <- !is.null(sampleIds)
-   if (has_group_ids) {
-     if (length(sampleIds) != nrow(x)) {
-       stop("sampleIds must have the same length as the number of rows in x.")
-     }
-     if (!is.character(sampleIds) && !is.factor(sampleIds) && !is.numeric(sampleIds)) {
-       stop("sampleIds must be a character, factor, or numeric vector.")
-     }
-     sampleIds <- as.character(sampleIds)
-     unique_groups <- unique(sampleIds)
-     n_groups <- length(unique_groups)
-      if (n_groups < cross.k) {
-        warning(paste0("Number of unique sample IDs (", n_groups,
-                           ") is less than cross.k (", cross.k,
-                           "). Some folds will be empty in certain iterations."))
-        }
+  has_group_ids <- !is.null(sampleIds)
+  if (has_group_ids) {
+    if (length(sampleIds) != nrow(x)) {
+      stop("sampleIds must have the same length as the number of rows in x.")
+    }
+    if (!is.character(sampleIds) && !is.factor(sampleIds) && !is.numeric(sampleIds)) {
+      stop("sampleIds must be a character, factor, or numeric vector.")
+    }
+    sampleIds <- as.character(sampleIds)
+    unique_groups <- unique(sampleIds)
+    n_groups <- length(unique_groups)
+    if (n_groups < cross.k) {
+      warning(paste0("Number of unique sample IDs (", n_groups,
+                         ") is less than cross.k (", cross.k,
+                         "). Some folds will be empty in certain iterations."))
+    }
 
       # Check that samples with the same sampleIds have the same class label
-      labels_by_group <- tapply(y, sampleIds, function(labs) unique(as.character(labs)))
-      conflicting <- names(labels_by_group)[sapply(labels_by_group, length) > 1]
-      if (length(conflicting) > 0) {
-        conflicting_details <- paste(conflicting, collapse = ", ")
-        stop(paste0("Samples with the same sample ID have different class labels (IDs: ",
-                      conflicting_details, "). ",
-                      "Samples sharing the same sample ID must have the same class label for proper cross-validation."))
-        }
-      }
+    labels_by_group <- tapply(y, sampleIds, function(labs) unique(as.character(labs)))
+    conflicting <- names(labels_by_group)[sapply(labels_by_group, length) > 1]
+    if (length(conflicting) > 0) {
+      conflicting_details <- paste(conflicting, collapse = ", ")
+      stop(paste0("Samples with the same sample ID have different class labels (IDs: ",
+                    conflicting_details, "). ",
+                    "Samples sharing the same sample ID must have the same class label for proper cross-validation."))
+    }
+  }
 
     ## nested cv-fs
     # processing training data
-    sample_id_to_fold <- NULL  # default; populated below only when sampleIds is provided (group-aware path)
-    dfm <- data.frame(y, x, check.names = FALSE)
-    if (has_group_ids) {
-        if (model_type == "regression"){
+  sample_id_to_fold <- NULL  # default; populated below only when sampleIds is provided (group-aware path)
+  dfm <- data.frame(y, x, check.names = FALSE)
+  if (has_group_ids) {
+    if (model_type == "regression"){
            ## regression: assign groups to folds using greedy variance minimisation
-          fold_assignment <- .assign_group_folds_simple(groups = unique_groups, group_mean_y = sapply(split(seq_len(nrow(dfm)), sampleIds), function(idx) mean(as.numeric(dfm$y[idx]))), cross.k = cross.k)
-          sample_id_to_fold <- fold_assignment
-          fold <- fold_assignment[sampleIds]
-           } else {
+      fold_assignment <- .assign_group_folds_simple(groups = unique_groups, group_mean_y = sapply(split(seq_len(nrow(dfm)), sampleIds), function(idx) mean(as.numeric(dfm$y[idx]))), cross.k = cross.k)
+      sample_id_to_fold <- fold_assignment
+      fold <- fold_assignment[sampleIds]
+    } else {
             ## classification: stratified group assignment
-          y_summary <- table(dfm$y)
-          fold_assignment <- .assign_group_folds_stratified(sampleIds = sampleIds, y = dfm$y, cross.k = cross.k, class_table = y_summary)
-          sample_id_to_fold <- fold_assignment
-          fold <- fold_assignment[sampleIds]
-         }
-       names(fold) <- NULL
-       random_sample_idx <- NULL
-       dfm_randomized <- dfm
-        } else {
-       if (model_type == "regression"){
-         random_sample_idx <- sample(nrow(dfm))
-         dfm_randomized <- dfm[random_sample_idx, ]    # randomize samples
-         fold <- cut(1:nrow(dfm_randomized), breaks = cross.k, labels = FALSE)    # create a factor object with fold indices
-         } else {
-         dfm_randomized <- dfm    # no randomization at this point yet
-         y_summary <- table(y)
-         fold <- foreach(i = 1:length(levels(y)), .combine = "c") %do% {
-           min_rep <- y_summary[i] %/% cross.k
-           if (min_rep > 0){
-             remain_size <- y_summary[i] %% cross.k
-             v <- rep(1:cross.k, times = min_rep)
-             if (remain_size > 0) v <- c(v, sample(1:cross.k, remain_size))
+      y_summary <- table(dfm$y)
+      fold_assignment <- .assign_group_folds_stratified(sampleIds = sampleIds, y = dfm$y, cross.k = cross.k, class_table = y_summary)
+      sample_id_to_fold <- fold_assignment
+      fold <- fold_assignment[sampleIds]
+    }
+    names(fold) <- NULL
+    random_sample_idx <- NULL
+    dfm_randomized <- dfm
+  } else {
+    if (model_type == "regression"){
+      random_sample_idx <- sample(nrow(dfm))
+      dfm_randomized <- dfm[random_sample_idx, ]    # randomize samples
+      fold <- cut(1:nrow(dfm_randomized), breaks = cross.k, labels = FALSE)    # create a factor object with fold indices
+    } else {
+      dfm_randomized <- dfm    # no randomization at this point yet
+      y_summary <- table(y)
+      fold <- foreach(i = 1:length(levels(y)), .combine = "c") %do% {
+        min_rep <- y_summary[i] %/% cross.k
+        if (min_rep > 0){
+          remain_size <- y_summary[i] %% cross.k
+          v <- rep(1:cross.k, times = min_rep)
+          if (remain_size > 0) v <- c(v, sample(1:cross.k, remain_size))
              sample(v)    # randomization
-             } else {
-             sample(1:cross.k, size = y_summary[i]) # randomization
-             }
-           }
-         random_sample_idx <- NULL
-         }
-     }
+        } else {
+          sample(1:cross.k, size = y_summary[i]) # randomization
+        }
+      }
+      random_sample_idx <- NULL
+    }
+  }
 
     # nested CV-FS function
-   nested_cvfs_func <- function(i) {
+  nested_cvfs_func <- function(i) {
       # set.seed(i) # see is set with the rRF-FS functions
-     if (verbose) cat(paste0("Iteration: ", i, "|", cross.k, "..."))
-     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
-     cv_training_x <- cv_training[, -1]
-      # below: remove columns with constant value
-     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
-     cv_training_y <- cv_training[, 1]
+    if (verbose) cat(paste0("Iteration: ", i, "|", cross.k, "..."))
+      cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
+    cv_training_x <- cv_training[, -1]
+       # below: remove columns with constant value
+    cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
+    cv_training_y <- cv_training[, 1]
+      # sub-sample the group ids to the outer-fold training rows so the inner
+      # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
-      # optional uni
+       # optional uni
       # outcome should be a list of features to subset the cv_training first
-     if (univariate.fs){
-       if (model_type == "classification") {
-         cv_design <- model.matrix(~ 0 + cv_training_y)
-         colnames(cv_design) <- levels(cv_training_y)
-         } else {
-         nsy <- splines::ns(cv_training_y)
-         cv_design <- model.matrix(~ nsy)
-         }
+    if (univariate.fs){
+      if (model_type == "classification") {
+        cv_design <- model.matrix(~ 0 + cv_training_y)
+        colnames(cv_design) <- levels(cv_training_y)
+      } else {
+        nsy <- splines::ns(cv_training_y)
+        cv_design <- model.matrix(~ nsy)
+      }
 
-       if (uni.log2trans) {
-         E <- apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2))
-         } else {
-         E <- t(cv_training_x)
-         }
+      if (uni.log2trans) {
+        E <- apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2))
+      } else {
+        E <- t(cv_training_x)
+      }
 
-       cv_pair <- data.frame(ProbeName = seq(ncol(cv_training) - 1), pair = colnames(cv_training)[-1])
-       cv_sample <- paste0(colnames(E), "_", cv_training_y)
-       cv_idx <- data.frame(sampleid = colnames(E), group = cv_training_y, sample = cv_sample)
-       cv_rawlist <- list(E = E, genes = cv_pair, targets = cv_idx)
-       cv_normdata <- uni_PreProc(rawlist = cv_rawlist, offset = 2, normMethod = "quantile", bgMethod = "none")
+      cv_pair <- data.frame(ProbeName = seq(ncol(cv_training) - 1), pair = colnames(cv_training)[-1])
+      cv_sample <- paste0(colnames(E), "_", cv_training_y)
+      cv_idx <- data.frame(sampleid = colnames(E), group = cv_training_y, sample = cv_sample)
+      cv_rawlist <- list(E = E, genes = cv_pair, targets = cv_idx)
+      cv_normdata <- uni_PreProc(rawlist = cv_rawlist, offset = 2, normMethod = "quantile", bgMethod = "none")
 
-       cv_fit <- lmFit(cv_normdata$E, design = cv_design, weights = cv_normdata$ArrayWeight)
-       if (model_type == "classification"){
-         contra_string <- unlist(strsplit(uni.contrast, split = ","))
-         contra_string <- gsub(" ", "", contra_string, fixed = TRUE)    # remove all the white space
+      cv_fit <- lmFit(cv_normdata$E, design = cv_design, weights = cv_normdata$ArrayWeight)
+      if (model_type == "classification"){
+        contra_string <- unlist(strsplit(uni.contrast, split = ","))
+        contra_string <- gsub(" ", "", contra_string, fixed = TRUE)    # remove all the white space
           # NOTE: below: use do.call to unpack arguments for makeContrasts()
-         cv_contra <- do.call(makeContrasts, c(as.list(contra_string), levels = as.list(parse(text = "cv_design"))))
-         cv_fit <- contrasts.fit(cv_fit, contrasts = cv_contra)
-         }
-       cv_fit <- eBayes(cv_fit)
-       cv_fit_dfm <- suppressMessages(topTable(cv_fit, number = Inf))
-       cv_fit_dfm$feature <- rownames(cv_fit_dfm)
+        cv_contra <- do.call(makeContrasts, c(as.list(contra_string), levels = as.list(parse(text = "cv_design"))))
+        cv_fit <- contrasts.fit(cv_fit, contrasts = cv_contra)
+      }
+      cv_fit <- eBayes(cv_fit)
+      cv_fit_dfm <- suppressMessages(topTable(cv_fit, number = Inf))
+      cv_fit_dfm$feature <- rownames(cv_fit_dfm)
 
-       if (uni.fdr){ # FDR
-         sig_idx <- which(cv_fit_dfm$adj.P.Val <= uni.alpha)
-         if (length(sig_idx) < 1){
-           pcutoff <- uni.alpha
-           } else {
-           pcutoff <- max(cv_fit_dfm$P.Value[sig_idx])
-           }
-         } else { # NON-FDR
-         pcutoff <- uni.alpha
-         }
+      if (uni.fdr){ # FDR
+        sig_idx <- which(cv_fit_dfm$adj.P.Val <= uni.alpha)
+        if (length(sig_idx) < 1){
+          pcutoff <- uni.alpha
+        } else {
+          pcutoff <- max(cv_fit_dfm$P.Value[sig_idx])
+        }
+      } else { # NON-FDR
+        pcutoff <- uni.alpha
+      }
          # output
-       uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
+      uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
 
-       if (length(uni_sig_fs) == 0) {
-         stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
-         } else {
-         cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
-         cv_training_x <- cv_training[, -1, drop = FALSE]
-         cv_training_y <- cv_training[, 1]
-         }
-       } else {
-       uni_sig_fs <- NULL
-       }
+      if (length(uni_sig_fs) == 0) {
+        stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
+      } else {
+        cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
+        cv_training_x <- cv_training[, -1, drop = FALSE]
+        cv_training_y <- cv_training[, 1]
+      }
+    } else {
+      uni_sig_fs <- NULL
+    }
 
     # fs
     if (center.scale){
@@ -1636,52 +1766,55 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
        })
 
       # processing test data
-     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]    # preserve y and selected features
+    fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]    # preserve y and selected features
 
-     cv_fs_out <- list(
-       fs = fs,
-       fs_training_x = fs_training_x,
-       cv_training_y = cv_training_y,
-       uni_sig_fs = uni_sig_fs,
-       fs_test = fs_test
-       )
-     return(cv_fs_out)
-     }
+    cv_fs_out <- list(
+      fs = fs,
+      fs_training_x = fs_training_x,
+      cv_training_y = cv_training_y,
+      uni_sig_fs = uni_sig_fs,
+      fs_test = fs_test,
+      train_sampleIds = train_sampleIds
+      )
+    return(cv_fs_out)
+  }
 
     # nested CV-M function: SVM modelling for nested CV iterations
-   nested_cvm_func <- function(i, ...){
+  nested_cvm_func <- function(i, ...){
     set.seed(i)
     fs <- nested_cvfs.list[[i]]$fs
     fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
     cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
     uni_sig_fs <- nested_cvfs.list$uni_sig_fs
+    train_sampleIds <- nested_cvfs.list[[i]]$train_sampleIds
 
     cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
                           zscore = zscore, minmax = minmax,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
+                          stratify = stratify, sampleIds = train_sampleIds, ...)
 
       # processing test data
     fs_test <- nested_cvfs.list[[i]]$fs_test
     if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
       fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
-      }
+    }
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
       accu <- sum(diag(table(pred, fs_test$y))) / length(fs_test$y)    # accuracy = total TP / total (TP: true positive)
       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
                       cv_svm_model = cv_m, nested.cv.accuracy = accu, cv_test_data = fs_test)
-      } else {
+    } else {
       error <- pred - fs_test$y
       rmse <- sqrt(mean(error^2))
       rsq <- cor(pred, fs_test$y)
       tmp_out <- list(univariate.fs = univariate.fs, uni.sig.fs = uni_sig_fs, selected.features = fs,
                       cv_svm_model = cv_m, nested.cv.rmse = rmse, nested.cv.rsq = rsq, cv_test_data = fs_test)
-      }
+    }
 
     cat(paste0("cvm iteration ", i, "...Done!\n"))
     return(tmp_out)
-    }
+  }
 
 
   # computing
@@ -1691,171 +1824,171 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     cat(paste0("Univariate reduction: ", ifelse(univariate.fs, " ON\n", " OFF\n")))
     if (has_group_ids && length(unique(sampleIds)) < length(sampleIds)){
       cat(paste0("Group-aware fold assignment: ON (", length(sampleIds), " sample IDs, ", length(unique(sampleIds)), " unique)\n"))
-       } else {
+    } else {
       cat("Group-aware fold assignment: OFF (independent samples)\n")
-       }
+    }
     cat("\n")
     cat("Nested cross-validation with feature selection (speed depending on hardware configuration): \n")
     cat("Nested CV rRF-FS: \n")
-     }
-   nested_cvfs.list <- vector(mode = "list", length = cross.k)
-   nested_cvfs.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nested_cvfs_func(i)
-   names(nested_cvfs.list) <- paste0("cv_fold_", c(1:cross.k))
+  }
+  nested_cvfs.list <- vector(mode = "list", length = cross.k)
+  nested_cvfs.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nested_cvfs_func(i)
+  names(nested_cvfs.list) <- paste0("cv_fold_", c(1:cross.k))
 
-   if (verbose) cat(paste0("SVM for nested CV rRF-FS assessment (", cross.k, " iterations)..."))
+  if (verbose) cat(paste0("SVM for nested CV rRF-FS assessment (", cross.k, " iterations)..."))
    if (parallelComputing) {
-     n_cores <- n_cores
-     cl <- makeCluster(n_cores, type = clusterType)
-     registerDoParallel(cl)
-     on.exit(stopCluster(cl)) # close connect when exiting the function
+    n_cores <- n_cores
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
 
-     nested_cvm.list <- vector(mode = "list", length = cross.k)
-     nested_cvm.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %dopar% nested_cvm_func(i, ...)
-     names(nested_cvm.list) <- paste0("cv_fold_", c(1:cross.k))
-     } else {
-     nested_cvm.list <- vector(mode = "list", length = cross.k)
-     nested_cvm.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nested_cvm_func(i, ...)
-     names(nested_cvm.list) <- paste0("cv_fold_", c(1:cross.k))
-     }
-   if (verbose) cat("Done!\n")
+    nested_cvm.list <- vector(mode = "list", length = cross.k)
+    nested_cvm.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %dopar% nested_cvm_func(i, ...)
+    names(nested_cvm.list) <- paste0("cv_fold_", c(1:cross.k))
+  } else {
+    nested_cvm.list <- vector(mode = "list", length = cross.k)
+    nested_cvm.list[] <- foreach(i = 1:cross.k, .packages = c("foreach", "RBioFS"), .errorhandling = "stop") %do% nested_cvm_func(i, ...)
+    names(nested_cvm.list) <- paste0("cv_fold_", c(1:cross.k))
+  }
+  if (verbose) cat("Done!\n")
 
       # below: cv.model.idx: best models index
    nested.cv.list <- nested_cvm.list    # set up nested.cv.list instead of using new nested_cvm.list for compatibility
-   if (model_type == "classification"){
-     nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
-       nested.cv.list[[i]]$nested.cv.accuracy
-     }
-     nested.rmse <- NULL
-     nested.rsq <- NULL
-     cv.median <- median(nested.accu)
-     cv.model.idx <- which(nested.accu >= cv.median)   # the higher the better
-     best.nested.accu <- nested.accu[cv.model.idx]
-     best.nested.rmse <- NULL
-     best.nested.rsq <- NULL
-   } else {
-     nested.accu <- NULL
-     nested.rmse<- foreach(i = 1:cross.k, .combine = "c") %do% {
-       nested.cv.list[[i]]$nested.cv.rmse
-     }
-     nested.rsq <- foreach(i = 1:cross.k, .combine = "c") %do% {
-       nested.cv.list[[i]]$nested.cv.rsq
-     }
-     cv.median <- median(nested.rmse)
-     cv.model.idx <- which(nested.rmse <= cv.median)   # the lower the better
+  if (model_type == "classification"){
+    nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
+      nested.cv.list[[i]]$nested.cv.accuracy
+    }
+    nested.rmse <- NULL
+    nested.rsq <- NULL
+    cv.median <- median(nested.accu)
+    cv.model.idx <- which(nested.accu >= cv.median)   # the higher the better
+    best.nested.accu <- nested.accu[cv.model.idx]
+    best.nested.rmse <- NULL
+    best.nested.rsq <- NULL
+  } else {
+    nested.accu <- NULL
+    nested.rmse<- foreach(i = 1:cross.k, .combine = "c") %do% {
+      nested.cv.list[[i]]$nested.cv.rmse
+    }
+    nested.rsq <- foreach(i = 1:cross.k, .combine = "c") %do% {
+      nested.cv.list[[i]]$nested.cv.rsq
+    }
+    cv.median <- median(nested.rmse)
+    cv.model.idx <- which(nested.rmse <= cv.median)   # the lower the better
 
-     best.nested.accu <- NULL
-     best.nested.rmse <- nested.rmse[cv.model.idx]
-     best.nested.rsq <- nested.rsq[cv.model.idx]
-   }
+    best.nested.accu <- NULL
+    best.nested.rmse <- nested.rmse[cv.model.idx]
+    best.nested.rsq <- nested.rsq[cv.model.idx]
+  }
 
-   if (cross.best.model.method == "median"){
-     final.cv.list <- nested.cv.list[cv.model.idx]
-   } else {
-     final.cv.list <- nested.cv.list
-     cv.model.idx <- seq(cross.k)
-   }
+  if (cross.best.model.method == "median"){
+    final.cv.list <- nested.cv.list[cv.model.idx]
+  } else {
+    final.cv.list <- nested.cv.list
+    cv.model.idx <- seq(cross.k)
+  }
 
-   nested.fs <- foreach(i = 1:length(nested.cv.list), .combine = "c") %do% {
-     nested.cv.list[[i]]$selected.features
-   }
-   fs.count <- sort(table(nested.fs), decreasing = TRUE)
+  nested.fs <- foreach(i = 1:length(nested.cv.list), .combine = "c") %do% {
+    nested.cv.list[[i]]$selected.features
+  }
+  fs.count <- sort(table(nested.fs), decreasing = TRUE)
 
     # we only use best.fs.count for thresholding becuase it is going to be the same as nest.fs when cross.best.model.method = "none"
-   best.nested.fs <- foreach(i = 1:length(final.cv.list), .combine = "c") %do% {
-     final.cv.list[[i]]$selected.features
-   }
-   best.nested.fs.count <- sort(table(best.nested.fs), decreasing = TRUE)
+  best.nested.fs <- foreach(i = 1:length(final.cv.list), .combine = "c") %do% {
+    final.cv.list[[i]]$selected.features
+  }
+  best.nested.fs.count <- sort(table(best.nested.fs), decreasing = TRUE)
 
-   if (cross.best.model.method == "median"){   # adjust the threshold to 1 if only one model existed
-     if (!any(fs.count >= fs.count.cutoff)) {
-       fs.count.cutoff <-   1
-     }
-   }
+  if (cross.best.model.method == "median"){   # adjust the threshold to 1 if only one model existed
+    if (!any(fs.count >= fs.count.cutoff)) {
+      fs.count.cutoff <-   1
+    }
+  }
 
     # end time
-   end_time <- Sys.time()
+  end_time <- Sys.time()
 
     ## output
-   if (model_type == "classification"){
-     tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
-     names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
-     best.nested.acc.summary <- c(mean(best.nested.accu), sd(best.nested.accu), sd(best.nested.accu)/sqrt(length(cv.model.idx)))
-     names(best.nested.acc.summary) <- c("best.nested.acc.summary", "sd", "sem")
-     tot.nested.rmse.summary <- NULL
-     tot.nested.rsq.summary <- NULL
-     best.nested.rmse.summary <- NULL
-     best.nested.rsq.summary <- NULL
-   } else {
-     tot.nested.acc.summary <- NULL
-     best.nested.acc.summary <- NULL
+  if (model_type == "classification"){
+    tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
+    names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
+    best.nested.acc.summary <- c(mean(best.nested.accu), sd(best.nested.accu), sd(best.nested.accu)/sqrt(length(cv.model.idx)))
+    names(best.nested.acc.summary) <- c("best.nested.acc.summary", "sd", "sem")
+    tot.nested.rmse.summary <- NULL
+    tot.nested.rsq.summary <- NULL
+    best.nested.rmse.summary <- NULL
+    best.nested.rsq.summary <- NULL
+  } else {
+    tot.nested.acc.summary <- NULL
+    best.nested.acc.summary <- NULL
 
-     tot.nested.rmse.summary <- c(mean(nested.rmse), sd(nested.rmse), sd(nested.rmse)/sqrt(cross.k))
-     names(tot.nested.rmse.summary) <- c("tot.nested.RMSE", "sd", "sem")
-     best.nested.rmse.summary <- c(mean(best.nested.rmse), sd(best.nested.rmse), sd(best.nested.rmse)/sqrt(length(cv.model.idx)))
-     names(best.nested.rmse.summary) <- c("best.nested.RMSE.summary", "sd", "sem")
+    tot.nested.rmse.summary <- c(mean(nested.rmse), sd(nested.rmse), sd(nested.rmse)/sqrt(cross.k))
+    names(tot.nested.rmse.summary) <- c("tot.nested.RMSE", "sd", "sem")
+    best.nested.rmse.summary <- c(mean(best.nested.rmse), sd(best.nested.rmse), sd(best.nested.rmse)/sqrt(length(cv.model.idx)))
+    names(best.nested.rmse.summary) <- c("best.nested.RMSE.summary", "sd", "sem")
 
-     tot.nested.rsq.summary <- c(mean(nested.rsq), sd(nested.rsq), sd(nested.rsq)/sqrt(cross.k))
-     names(tot.nested.rsq.summary) <- c("tot.nested.rsq", "sd", "sem")
-     best.nested.rsq.summary <- c(mean(best.nested.rsq), sd(best.nested.rsq), sd(best.nested.rsq)/sqrt(length(cv.model.idx)))
-     names(best.nested.rsq.summary) <- c("best.nested.rsq.summary", "sd", "sem")
-   }
-   selected.features <- names(best.nested.fs.count[which(best.nested.fs.count >= fs.count.cutoff)])
+    tot.nested.rsq.summary <- c(mean(nested.rsq), sd(nested.rsq), sd(nested.rsq)/sqrt(cross.k))
+    names(tot.nested.rsq.summary) <- c("tot.nested.rsq", "sd", "sem")
+    best.nested.rsq.summary <- c(mean(best.nested.rsq), sd(best.nested.rsq), sd(best.nested.rsq)/sqrt(length(cv.model.idx)))
+    names(best.nested.rsq.summary) <- c("best.nested.rsq.summary", "sd", "sem")
+  }
+  selected.features <- names(best.nested.fs.count[which(best.nested.fs.count >= fs.count.cutoff)])
 
     # display
-   if (verbose) {
-     cat("\n")
-     cat("SVM model type: ")
-     cat(model_type)
-     if (model_type == "classification"){
-       cat("\n\n")
-       cat("Best cross-validation accuracy summary: \n")
-       print(best.nested.acc.summary)
-     } else {
-       cat("\n\n")
-       cat("Best cross-validation RMSE summary: \n")
-       print(best.nested.rmse.summary)
-     }
-     cat("\n")
-     cat("Final (best) cross-validation selected features: \n")
-     cat(selected.features)
-   }
+  if (verbose) {
+    cat("\n")
+    cat("SVM model type: ")
+    cat(model_type)
+    if (model_type == "classification"){
+      cat("\n\n")
+      cat("Best cross-validation accuracy summary: \n")
+      print(best.nested.acc.summary)
+    } else {
+      cat("\n\n")
+      cat("Best cross-validation RMSE summary: \n")
+      print(best.nested.rmse.summary)
+    }
+    cat("\n")
+    cat("Final (best) cross-validation selected features: \n")
+    cat(selected.features)
+  }
 
     # run time
-   runtime <- end_time - start_time
+  runtime <- end_time - start_time
 
     # export to environment
-   out <- list(univariate.fs = univariate.fs,
-               cv.fold = fold,
-               randomized.sample.index = random_sample_idx,
-               sampleIds = if (has_group_ids) sampleIds else NULL,
-               sampleIdToFold = sample_id_to_fold,
-               model.type = model_type,
-               tot.nested.accuracy.summary = tot.nested.acc.summary,
-               tot.nested.RMSE.summary = tot.nested.rmse.summary,
-               tot.nested.rsq.summary = tot.nested.rsq.summary,
-               nested.accuracy = nested.accu,
-               nested.RMSE = nested.rmse,
-               nested.rsq = nested.rsq,
-               nested.fs.count = fs.count,
-               nested.cv.models = nested.cv.list,
-               best.nested.method = cross.best.model.method,
-               best.nested.index = cv.model.idx,
-               best.nested.accuracy.summary = best.nested.acc.summary,
-               best.nested.rmse.summary = best.nested.acc.summary,
-               best.nested.rsq.summary = best.nested.rsq.summary,
-               best.nested.accuracy = best.nested.accu,
-               best.nested.rmse = best.nested.rmse,
-               best.nested.rsq = best.nested.rsq,
-               best.nested.fs.count = best.nested.fs.count,
-               fs.method = fs.method,
-               fs.count.threshold = fs.count.cutoff,
-               selected.features = selected.features,
-               tune.method = tune.method,
-               tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
-               tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
-               run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
-   class(out) <- "rbiosvm_nestedcv"
-   return(out)
+  out <- list(univariate.fs = univariate.fs,
+              cv.fold = fold,
+              randomized.sample.index = random_sample_idx,
+              sampleIds = if (has_group_ids) sampleIds else NULL,
+              sampleIdToFold = sample_id_to_fold,
+              model.type = model_type,
+              tot.nested.accuracy.summary = tot.nested.acc.summary,
+              tot.nested.RMSE.summary = tot.nested.rmse.summary,
+              tot.nested.rsq.summary = tot.nested.rsq.summary,
+              nested.accuracy = nested.accu,
+              nested.RMSE = nested.rmse,
+              nested.rsq = nested.rsq,
+              nested.fs.count = fs.count,
+              nested.cv.models = nested.cv.list,
+              best.nested.method = cross.best.model.method,
+              best.nested.index = cv.model.idx,
+              best.nested.accuracy.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rsq.summary = best.nested.rsq.summary,
+              best.nested.accuracy = best.nested.accu,
+              best.nested.rmse = best.nested.rmse,
+              best.nested.rsq = best.nested.rsq,
+              best.nested.fs.count = best.nested.fs.count,
+              fs.method = fs.method,
+              fs.count.threshold = fs.count.cutoff,
+              selected.features = selected.features,
+              tune.method = tune.method,
+              tune.cross.k = if(tune.method == "cross") tune.cross.k else NULL,
+              tune.boot.n = if(tune.method == "boot") tune.boot.n else NULL,
+              run.time = paste0(signif(runtime[[1]], 4), " ", attributes(runtime)[2]))
+  class(out) <- "rbiosvm_nestedcv"
+  return(out)
 }
 
 
@@ -1903,6 +2036,18 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param minmax Logical. When \code{center.scale = TRUE}, whether to apply min-max normalization,
 #'   \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 #'   At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.
+#' @param stratify Logical. Whether the inner tuning cross-validation is stratified
+#'   (class-balanced for classification; variance-minimising for regression). When
+#'   \code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
+#'   keep the overall class proportion in every fold, so a single-class fold cannot
+#'   occur on an imbalanced data set. This is a behaviour change: tuned
+#'   \code{cost}/\code{gamma}, reported CV accuracy/RMSE, and (because the inner CV
+#'   drives the nested rRF-FS) the selected feature set may shift relative to the
+#'   previous contiguous split. Default is \code{TRUE}.
+#' @param sampleIds Optional vector of group / repeated-measures identifiers, one
+#'   per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
+#'   \code{stratify}) the inner CV folds become group-aware: rows sharing an id
+#'   are never split across folds. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -2006,6 +2151,7 @@ rbioClass_svm_cv <- function(x, y,
                               tune.cross.k = 10, tune.boot.n = 10, ...,
                               parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
                               randomState = NULL,
+                              stratify = TRUE, sampleIds = NULL,
                               verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
@@ -2054,6 +2200,12 @@ rbioClass_svm_cv <- function(x, y,
     }
     random_sample_idx <- NULL
   }
+  # Align the group ids to whatever row order dfm_randomized is in (regression
+  # shuffles with random_sample_idx; classification keeps the original order).
+  # Only reindex when the regression shuffle happened, otherwise a NULL index
+  # would collapse sampleIds to length 0.
+  if (!is.null(sampleIds) && !is.null(random_sample_idx))
+    sampleIds <- sampleIds[random_sample_idx]
 
   # nested CV function
   cv_func <- function(i, ...) {
@@ -2061,6 +2213,9 @@ rbioClass_svm_cv <- function(x, y,
     cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
     cv_training_y <- cv_training[, 1]
+    # sub-sample the group ids to the outer-fold training rows so the inner
+    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # fs
     if (center.scale){
@@ -2072,7 +2227,8 @@ rbioClass_svm_cv <- function(x, y,
     cv_m <- rbioClass_svm(x = cv_training_x, y = cv_training_y, center.scale = center.scale,
                     zscore = zscore, minmax = minmax,
                     svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                    tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n, verbose = FALSE, ...)
+                    tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
+                    stratify = stratify, sampleIds = train_sampleIds, verbose = FALSE, ...)
 
     # processing test data
     cv_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ]
@@ -2310,7 +2466,7 @@ rbioClass_svm_predict <- function(object,
     if (is.null(object$center.scaledX)) {
       warning("No center.scaledX found in training data while center.scale.newdata = TRUE, proceed with center.scale.newdata = FALSE")
       center.scale.newdata <- FALSE
-      }
+    }
   }
   if (!missing(sampleID.vector) & !is.null(sampleID.vector)){
     if (length(sampleID.vector) != nrow(newdata)){

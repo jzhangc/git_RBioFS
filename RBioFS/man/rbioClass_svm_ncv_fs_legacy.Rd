@@ -27,6 +27,8 @@ rbioClass_svm_ncv_fs_legacy(
   parallelComputing = TRUE,
   n_cores = parallel::detectCores() - 1,
   clusterType = c("PSOCK", "FORK"),
+  stratify = TRUE,
+  sampleIds = NULL,
   verbose = TRUE
 )
 }
