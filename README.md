@@ -112,6 +112,7 @@ Update log
       - New Util function(s)
         - Two helper functions ".assign_group_folds_stratified" and ".assign_group_folds_stratified()" added to support rbioClass_svm_ncv_fs_v3()
         - New zscore_minmax() function to replace the center_scale() function, with zscore and min-max transformations, more accurate documentation and better performance
+        - New ".subset_zcore_minmax()" helper function added to restrict a fitted zcore_minmax() transform to a subset of columns, so the CV wrappers can re-apply the training-fold transform on the feature selection subset
 
       - Update to SVM and SVM assessment functions(s)
         - rbioClass_svm() updated with new zscore_minmax() function for data transformation, replacing the old center_scale() function, while ensure compatibility. The new transformation options (zscore and minmax) are properly integrated into the function, and documentation updated accordingly.
@@ -129,6 +130,9 @@ Update log
           - The "center.scale.newdata" argument default now set to FALSE
           - When "center.scale.newdata = TRUE"" and no object$center.scaledX is found in the input rbiosvm object, instead of error, the function now throws a warning and sets "center.scale.newdata = FALSE" to proceed
         - A bug fixed for rbio_shap_svm_label_prob() where the function crashes when the input SVM model was not trained with center.scale = FALSE
+        - A bug fixed for rbioClass_svm() where class weights were silently not applied to the model (wrong argument name "class.weight", corrected to "class.weights")
+        - A bug fixed for rbioClass_svm() where tune.method = "boot" was not normalised to "bootstrap" for the tune.control() sampling method
+        - Documentation updated for the stratify/sampleIds behaviour of the inner tuning CV: bootstrap resampling (tune.method = "boot") is not group-aware or stratified, so the flags apply to tune.method = "cross" only; with n_cores <= 1 the final model's internal CV (svm.cross.k > 0) does not support stratified or group-aware folds
 
       - Update to PLS function(s)
         - Plot aesthetics updated for consistency for functions:
@@ -142,6 +146,13 @@ Update log
           - rbioFS_rf_initialFS(), rbioFS_rf_SFS()
           - rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2()
           - "rbiosvm_nestedcv" class updated with "sampleIds" and "sampleIdToFold" items for v1, v2, and v3 of rbioClass_svm_ncv_fs() functions
+        - A bug fixed for rbioClass_svm_cv(), rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3() where the z-score/min-max transform was fitted twice (once in the CV wrapper and again inside rbioClass_svm()): the transform is now fitted once on the outer-fold training rows, the inner model is trained on the already-transformed data (center.scale = FALSE), and the test fold is re-applied with the training-fold parameters
+        - sampleIds validation and messaging added to rbioClass_svm_cv(), rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2(): length check, class label conflict check for classification modelling, and a warning that the outer CV folds are row-level (use rbioClass_svm_ncv_fs_v3() for group-aware outer folds); the input sampleIds is now stored in the "rbiosvm_nestedcv" object
+        - A bug fixed for rbioClass_svm_cv(), rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3() where the "best" RMSE summary item was stored as the accuracy summary for regression modelling
+        - Univariate FS path updated for rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3():
+          - Per-fold uni.sig.fs is now stored (previously the full nested CV list was referenced)
+          - limma::contrasts.fit is now namespaced (the contrast path was dead in the installed package)
+          - NA P.Values (e.g. from NaN expression values after the log2 transform) are dropped instead of surviving as NA feature names
 
       - Update to PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object

@@ -35,7 +35,8 @@
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{svm} function from \code{e1071mc} package.
-#' @param n_cores Number of CPU cores to use. Default is \code{NULL}, or the total number cores minus one.
+#' @param n_cores Number of CPU cores to use. Default is \code{NULL}, which runs the
+#'   model serially (equivalent to \code{n_cores = 1}).
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a SVM model object, with classes "svm" and "rbiosvm".
 #'
@@ -74,8 +75,11 @@
 #' (in the nested feature-selection wrappers) the selected feature set may shift relative to
 #' the previous contiguous split. Supplying \code{sampleIds} makes the folds group-aware so
 #' that rows sharing an id are never split across folds (repeated-measures / multi-omics
-#' safe). For \code{tune.method = "fix"} or \code{"boot"} no split is drawn and these flags
-#' have no effect; \code{stratify = TRUE} with \code{tune.method = "fix"} emits a warning.
+#' safe). For \code{tune.method = "fix"} no split is drawn and these flags have no effect
+#' (\code{stratify = TRUE} with \code{tune.method = "fix"} emits a warning). For
+#' \code{tune.method = "boot"} the bootstrap resamples are drawn with replacement and
+#' are \emph{not} group-aware or stratified: \code{stratify} and \code{sampleIds}
+#' apply to \code{tune.method = "cross"} only.
 #'
 #' Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
 #'
@@ -110,7 +114,16 @@
 #' pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and
 #' utility (i.e. classify unknown data).
 #'
-#' When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071::svm()} and \code{e1017::tune()}
+#' When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071mc::svm()} and \code{e1071mc::tune()}
+#'
+#' Note on the \emph{final} model's internal cross-validation (\code{svm.cross.k > 0}):
+#' with \code{n_cores > 1} the internal CV folds of the final model honour
+#' \code{stratify} / \code{sampleIds} (via \code{e1071mc::svm_mc()}); with
+#' \code{n_cores <= 1} the serial \code{e1071mc::svm()} routes its internal CV through
+#' the libsvm C code, which does not support stratified or group-aware folds, so
+#' \code{stratify} / \code{sampleIds} are silently ignored for that internal CV only
+#' (the fitted model itself is unaffected, and all nested CV wrappers in this package
+#' use \code{svm.cross.k = 0}).
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
@@ -190,6 +203,9 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   }
   if (isTRUE(stratify) && tune.method == "fix")
     warning("stratify is ignored for tune.method = \"fix\" (fixed split, no inner cross-validation).")
+  # e1071mc::tune.control() expects sampling = "bootstrap"; normalise our
+  # "boot" abbreviation so the dispatch never relies on the else-branch.
+  tunecontrol.sampling <- if (tune.method == "boot") "bootstrap" else tune.method
   # Defensive guard: on an imbalanced classification, the legacy contiguous split
   # can place a small class entirely in one fold, producing a single-class fold.
   if (model_type == "classification" && !isTRUE(stratify) && is.null(sampleIds) &&
@@ -234,13 +250,13 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (n_cores > 1) {
     svm_tuned <- tune_mc(svm, kernel = kernel, scale = FALSE,
                          train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                         tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n,
+                         tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
                                                   stratify = isTRUE(stratify), sampleIds = sampleIds),
                          n_cores = n_cores)
   } else {
     svm_tuned <- tune(svm, kernel = kernel, scale = FALSE,
                       train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                      tunecontrol = tune.control(sampling = tune.method, cross = tune.cross.k, nboot = tune.boot.n,
+                      tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
                                                stratify = isTRUE(stratify), sampleIds = sampleIds))
   }
   if (verbose) cat("DONE!\n")
@@ -250,13 +266,13 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (n_cores > 1) {
     m <- svm_mc(x = X, y = y, kernel = kernel, probability = TRUE,
              cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-             scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+             scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
              cross = svm.cross.k, n_cores = n_cores,
              stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
   } else {
     m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
                 cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-                scale = FALSE, class.weight = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+                scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
                 cross = svm.cross.k,
                 stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
   }
@@ -338,8 +354,12 @@ print.rbiosvm <- function(x, ...){
 #'   previous contiguous split. Default is \code{TRUE}.
 #' @param sampleIds Optional vector of group / repeated-measures identifiers, one
 #'   per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
-#'   \code{stratify}) the inner CV folds become group-aware: rows sharing an id
-#'   are never split across folds. Default is \code{NULL}.
+#'   \code{stratify}) the \emph{inner} CV folds become group-aware: rows sharing an id
+#'   are never split across inner folds. NOTE: the \emph{outer} CV folds of this
+#'   function are row-level, so rows sharing an id can still land in different outer
+#'   folds; for fully group-aware (non-leakage) CV of repeated-measures data use
+#'   \code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
+#'   is supplied. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -364,6 +384,8 @@ print.rbiosvm <- function(x, ...){
 #' \code{cv.fold}: number of (outer) cross-validation fold
 #'
 #' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
+#'
+#' \code{sampleIds}: the input sample IDs vector, or \code{NULL} if not provided.
 #'
 #' \code{model.type}: the SVM model type, "classification" or "regression".
 #'
@@ -508,6 +530,28 @@ rbioClass_svm_ncv_fs <- function(x, y,
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
 
+  ## Validate sampleIds (group ids only drive the INNER tuning CV here;
+  ## the OUTER CV folds are row-level, so groups can still be split
+  ## across outer folds)
+  sampleIds_stored <- NULL
+  if (!is.null(sampleIds)) {
+    if (length(sampleIds) != nrow(x))
+      stop("sampleIds must have the same length as the number of rows in x (", nrow(x), ").")
+    if (model_type == "classification") {
+      lbl_by_id <- tapply(y, factor(sampleIds), function(l) unique(as.character(l)))
+      conflict <- names(lbl_by_id)[vapply(lbl_by_id, length, integer(1)) > 1L]
+      if (length(conflict) > 0L)
+        stop("Rows with the same sample ID have differing class labels (IDs: ",
+             paste(conflict, collapse = ", "), "). Rows sharing an ID must share ",
+             "one label for grouped cross-validation.")
+    }
+    warning("sampleIds in rbioClass_svm_ncv_fs only protects the INNER tuning CV: the OUTER ",
+            "CV folds are row-level, so rows sharing an ID can still be split across outer ",
+            "folds (leakage for repeated-measures / clustered data). Use ",
+            "rbioClass_svm_ncv_fs_v3 for group-aware outer folds.")
+    sampleIds_stored <- sampleIds
+  }
+
   ## nested cv-fs
   # processing training data
   dfm <- data.frame(y, x, check.names = FALSE)
@@ -580,7 +624,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
         contra_string <- gsub(" ", "", contra_string, fixed = TRUE)  # remove all the white space
         # NOTE: below: use do.call to unpack arguments for makeContrasts()
         cv_contra <- do.call(makeContrasts, c(as.list(contra_string), levels = as.list(parse(text = "cv_design"))))
-        cv_fit <- contrasts.fit(cv_fit, contrasts = cv_contra)
+        cv_fit <- limma::contrasts.fit(cv_fit, contrasts = cv_contra)
       }
       cv_fit <- eBayes(cv_fit)
       cv_fit_dfm <- suppressMessages(topTable(cv_fit, number = Inf))
@@ -597,7 +641,10 @@ rbioClass_svm_ncv_fs <- function(x, y,
         pcutoff <- uni.alpha
       }
       # output
-      uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
+      # which() (not the raw logical) so that NA P.Values (e.g. from NaN
+      # expression values after log2 transform) are dropped instead of
+      # surviving as NA "feature" names that break the column subsetting
+      uni_sig_fs <- as.character(cv_fit_dfm[which(cv_fit_dfm$P.Value < pcutoff), "feature"])
 
       if (length(uni_sig_fs) == 0) {
         stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
@@ -611,8 +658,16 @@ rbioClass_svm_ncv_fs <- function(x, y,
     }
 
     # fs
+    # Fit the input transform once on the outer-fold training rows and keep the
+    # fitted object: the inner rbioClass_svm call receives already-transformed
+    # data (center.scale = FALSE) and the test fold is transformed with THESE
+    # parameters. Re-fitting inside rbioClass_svm would store near-identity
+    # parameters (a second pass over already-transformed data), leaving the
+    # test fold effectively untransformed (train/test scale mismatch).
+    fs_transform <- NULL
     if (center.scale){
-      fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX    # without y
+      fs_transform <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)
+      fs_training_x <- fs_transform$centerX    # without y
     } else {
       fs_training_x <- cv_training_x
     }
@@ -650,7 +705,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
       cv_training_y = cv_training_y,
       uni_sig_fs = uni_sig_fs,
       fs_test = fs_test,
-      train_sampleIds = train_sampleIds
+      train_sampleIds = train_sampleIds,
+      fs_transform = fs_transform
     )
     return(cv_fs_out)
   }
@@ -661,20 +717,26 @@ rbioClass_svm_ncv_fs <- function(x, y,
     fs <- nested_cvfs.list[[i]]$fs
     fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
     cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
-    uni_sig_fs <- nested_cvfs.list$uni_sig_fs
+    uni_sig_fs <- nested_cvfs.list[[i]]$uni_sig_fs
     train_sampleIds <- nested_cvfs.list[[i]]$train_sampleIds
+    fs_transform <- nested_cvfs.list[[i]]$fs_transform
 
-    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
-                          zscore = zscore, minmax = minmax,
+    # fs_training_x is already transformed with the outer-fold training
+    # parameters, so the inner model is fit with center.scale = FALSE; the
+    # transform must NOT be re-fitted here (see nested_cvfs_func).
+    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = FALSE,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
                           stratify = stratify, sampleIds = train_sampleIds,
                           verbose = FALSE, ...)
 
-    # processing test data
+    # processing test data: re-apply the train-fold transform (z-score then
+    # min-max, as fitted in nested_cvfs_func) to the test rows
     fs_test <- nested_cvfs.list[[i]]$fs_test
-    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
-      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
+    if (!is.null(fs_transform)){
+      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1],
+                                           params = .subset_zcore_minmax(fs_transform, fs),
+                                           verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
@@ -833,7 +895,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   out <- list(univariate.fs = univariate.fs,
               cv.fold = fold,
               randomized.sample.index = random_sample_idx,
-              sampleIds = NULL,
+              sampleIds = sampleIds_stored,
               sampleIdToFold = NULL,
               model.type = model_type,
               tot.nested.accuracy.summary = tot.nested.acc.summary,
@@ -847,7 +909,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
               best.nested.method = cross.best.model.method,
               best.nested.index = cv.model.idx,
               best.nested.accuracy.summary = best.nested.acc.summary,
-              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.rmse.summary,
               best.nested.rsq.summary = best.nested.rsq.summary,
               best.nested.accuracy = best.nested.accu,
               best.nested.rmse = best.nested.rmse,
@@ -894,8 +956,12 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #'   previous contiguous split. Default is \code{TRUE}.
 #' @param sampleIds Optional vector of group / repeated-measures identifiers, one
 #'   per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
-#'   \code{stratify}) the inner CV folds become group-aware: rows sharing an id
-#'   are never split across folds. Default is \code{NULL}.
+#'   \code{stratify}) the \emph{inner} CV folds become group-aware: rows sharing an id
+#'   are never split across inner folds. NOTE: the \emph{outer} CV folds of this
+#'   function are row-level, so rows sharing an id can still land in different outer
+#'   folds; for fully group-aware (non-leakage) CV of repeated-measures data use
+#'   \code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
+#'   is supplied. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -920,6 +986,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' \code{cv.fold}: number of (outer) cross-validation fold
 #'
 #' \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
+#'
+#' \code{sampleIds}: the input sample IDs vector, or \code{NULL} if not provided.
 #'
 #' \code{model.type}: the SVM model type, "classification" or "regression".
 #'
@@ -1084,6 +1152,28 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
   # shuffles with random_sample_idx; classification keeps the original order).
   # Only reindex when the regression shuffle happened, otherwise a NULL index
   # would collapse sampleIds to length 0.
+  ## Validate sampleIds (group ids only drive the INNER tuning CV here;
+  ## the OUTER CV folds are row-level, so groups can still be split
+  ## across outer folds)
+  sampleIds_stored <- NULL
+  if (!is.null(sampleIds)) {
+    if (length(sampleIds) != nrow(x))
+      stop("sampleIds must have the same length as the number of rows in x (", nrow(x), ").")
+    if (model_type == "classification") {
+      lbl_by_id <- tapply(y, factor(sampleIds), function(l) unique(as.character(l)))
+      conflict <- names(lbl_by_id)[vapply(lbl_by_id, length, integer(1)) > 1L]
+      if (length(conflict) > 0L)
+        stop("Rows with the same sample ID have differing class labels (IDs: ",
+             paste(conflict, collapse = ", "), "). Rows sharing an ID must share ",
+             "one label for grouped cross-validation.")
+    }
+    warning("sampleIds in rbioClass_svm_ncv_fs_v2 only protects the INNER tuning CV: the OUTER ",
+            "CV folds are row-level, so rows sharing an ID can still be split across outer ",
+            "folds (leakage for repeated-measures / clustered data). Use ",
+            "rbioClass_svm_ncv_fs_v3 for group-aware outer folds.")
+    sampleIds_stored <- sampleIds
+  }
+
   if (!is.null(sampleIds) && !is.null(random_sample_idx))
     sampleIds <- sampleIds[random_sample_idx]
 
@@ -1129,7 +1219,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
         contra_string <- gsub(" ", "", contra_string, fixed = TRUE)  # remove all the white space
         # NOTE: below: use do.call to unpack arguments for makeContrasts()
         cv_contra <- do.call(makeContrasts, c(as.list(contra_string), levels = as.list(parse(text = "cv_design"))))
-        cv_fit <- contrasts.fit(cv_fit, contrasts = cv_contra)
+        cv_fit <- limma::contrasts.fit(cv_fit, contrasts = cv_contra)
       }
       cv_fit <- eBayes(cv_fit)
       cv_fit_dfm <- suppressMessages(topTable(cv_fit, number = Inf))
@@ -1146,7 +1236,10 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
         pcutoff <- uni.alpha
       }
       # output
-      uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
+      # which() (not the raw logical) so that NA P.Values (e.g. from NaN
+      # expression values after log2 transform) are dropped instead of
+      # surviving as NA "feature" names that break the column subsetting
+      uni_sig_fs <- as.character(cv_fit_dfm[which(cv_fit_dfm$P.Value < pcutoff), "feature"])
 
       if (length(uni_sig_fs) == 0) {
         stop("No statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
@@ -1160,8 +1253,13 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     }
 
     # fs
+    # Fit the input transform once on the outer-fold training rows and keep the
+    # fitted object so the test fold is transformed with the training parameters
+    # (see nested_cvfs_func in rbioClass_svm_ncv_fs for the rationale).
+    fs_transform <- NULL
     if (center.scale){
-      fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX  # without y
+      fs_transform <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)
+      fs_training_x <- fs_transform$centerX  # without y
     } else {
       fs_training_x <- cv_training_x
     }
@@ -1189,16 +1287,19 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
       return(out)
     })
 
-    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
-                          zscore = zscore, minmax = minmax,
+    # fs_training_x is already transformed with the outer-fold training
+    # parameters, so the inner model is fit with center.scale = FALSE.
+    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = FALSE,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
                           stratify = stratify, sampleIds = train_sampleIds,
                           verbose = FALSE)
-    # processing test data
+    # processing test data: re-apply the train-fold transform to the test rows
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]  # preserve y and selected features
-    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
-      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
+    if (!is.null(fs_transform)){ # z-score then min-max, as fitted on the training rows
+      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1],
+                                           params = .subset_zcore_minmax(fs_transform, fs),
+                                           verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
@@ -1349,7 +1450,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
   out <- list(univariate.fs = univariate.fs,
               cv.fold = fold,
               randomized.sample.index = random_sample_idx,
-              sampleIds = NULL,
+              sampleIds = sampleIds_stored,
               sampleIdToFold = NULL,
               model.type = model_type,
               tot.nested.accuracy.summary = tot.nested.acc.summary,
@@ -1363,7 +1464,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
               best.nested.method = cross.best.model.method,
               best.nested.index = cv.model.idx,
               best.nested.accuracy.summary = best.nested.acc.summary,
-              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.rmse.summary,
               best.nested.rsq.summary = best.nested.rsq.summary,
               best.nested.accuracy = best.nested.accu,
               best.nested.rmse = best.nested.rmse,
@@ -1704,7 +1805,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
         contra_string <- gsub(" ", "", contra_string, fixed = TRUE)    # remove all the white space
           # NOTE: below: use do.call to unpack arguments for makeContrasts()
         cv_contra <- do.call(makeContrasts, c(as.list(contra_string), levels = as.list(parse(text = "cv_design"))))
-        cv_fit <- contrasts.fit(cv_fit, contrasts = cv_contra)
+        cv_fit <- limma::contrasts.fit(cv_fit, contrasts = cv_contra)
       }
       cv_fit <- eBayes(cv_fit)
       cv_fit_dfm <- suppressMessages(topTable(cv_fit, number = Inf))
@@ -1721,7 +1822,10 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
         pcutoff <- uni.alpha
       }
          # output
-      uni_sig_fs <- as.character(cv_fit_dfm[cv_fit_dfm$P.Value < pcutoff, "feature"])
+      # which() (not the raw logical) so that NA P.Values (e.g. from NaN
+      # expression values after log2 transform) are dropped instead of
+      # surviving as NA "feature" names that break the column subsetting
+      uni_sig_fs <- as.character(cv_fit_dfm[which(cv_fit_dfm$P.Value < pcutoff), "feature"])
 
       if (length(uni_sig_fs) == 0) {
         stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
@@ -1735,8 +1839,13 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     }
 
     # fs
+    # Fit the input transform once on the outer-fold training rows and keep the
+    # fitted object so the test fold is transformed with the training parameters
+    # (see nested_cvfs_func in rbioClass_svm_ncv_fs for the rationale).
+    fs_transform <- NULL
     if (center.scale){
-      fs_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX  # without y
+      fs_transform <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)
+      fs_training_x <- fs_transform$centerX  # without y
     } else {
       fs_training_x <- cv_training_x
     }
@@ -1774,7 +1883,8 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
       cv_training_y = cv_training_y,
       uni_sig_fs = uni_sig_fs,
       fs_test = fs_test,
-      train_sampleIds = train_sampleIds
+      train_sampleIds = train_sampleIds,
+      fs_transform = fs_transform
       )
     return(cv_fs_out)
   }
@@ -1785,19 +1895,21 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     fs <- nested_cvfs.list[[i]]$fs
     fs_training_x <- nested_cvfs.list[[i]]$fs_training_x
     cv_training_y <- nested_cvfs.list[[i]]$cv_training_y
-    uni_sig_fs <- nested_cvfs.list$uni_sig_fs
+    uni_sig_fs <- nested_cvfs.list[[i]]$uni_sig_fs
     train_sampleIds <- nested_cvfs.list[[i]]$train_sampleIds
+    fs_transform <- nested_cvfs.list[[i]]$fs_transform
 
-    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = center.scale,
-                          zscore = zscore, minmax = minmax,
+    # fs_training_x is already transformed with the outer-fold training
+    # parameters, so the inner model is fit with center.scale = FALSE.
+    cv_m <- rbioClass_svm(x = fs_training_x[, fs], y = cv_training_y, center.scale = FALSE,
                           svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
                           stratify = stratify, sampleIds = train_sampleIds, ...)
 
-      # processing test data
+      # processing test data: re-apply the train-fold transform to the test rows
     fs_test <- nested_cvfs.list[[i]]$fs_test
-    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
-      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
+    if (!is.null(fs_transform)){ # z-score then min-max, as fitted on the training rows
+      fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = fs_transform, verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = fs_test[, -1])
     if (model_type == "classification"){
@@ -1974,7 +2086,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
               best.nested.method = cross.best.model.method,
               best.nested.index = cv.model.idx,
               best.nested.accuracy.summary = best.nested.acc.summary,
-              best.nested.rmse.summary = best.nested.acc.summary,
+              best.nested.rmse.summary = best.nested.rmse.summary,
               best.nested.rsq.summary = best.nested.rsq.summary,
               best.nested.accuracy = best.nested.accu,
               best.nested.rmse = best.nested.rmse,
@@ -2046,8 +2158,12 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'   previous contiguous split. Default is \code{TRUE}.
 #' @param sampleIds Optional vector of group / repeated-measures identifiers, one
 #'   per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
-#'   \code{stratify}) the inner CV folds become group-aware: rows sharing an id
-#'   are never split across folds. Default is \code{NULL}.
+#'   \code{stratify}) the \emph{inner} CV folds become group-aware: rows sharing an id
+#'   are never split across inner folds. NOTE: the \emph{outer} CV folds of this
+#'   function are row-level, so rows sharing an id can still land in different outer
+#'   folds; for fully group-aware (non-leakage) CV of repeated-measures data use
+#'   \code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
+#'   is supplied. Default is \code{NULL}.
 #' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
@@ -2200,6 +2316,26 @@ rbioClass_svm_cv <- function(x, y,
     }
     random_sample_idx <- NULL
   }
+  ## Validate sampleIds (group ids only drive the INNER tuning CV here;
+  ## the OUTER CV folds are row-level, so groups can still be split
+  ## across outer folds)
+  if (!is.null(sampleIds)) {
+    if (length(sampleIds) != nrow(x))
+      stop("sampleIds must have the same length as the number of rows in x (", nrow(x), ").")
+    if (model_type == "classification") {
+      lbl_by_id <- tapply(y, factor(sampleIds), function(l) unique(as.character(l)))
+      conflict <- names(lbl_by_id)[vapply(lbl_by_id, length, integer(1)) > 1L]
+      if (length(conflict) > 0L)
+        stop("Rows with the same sample ID have differing class labels (IDs: ",
+             paste(conflict, collapse = ", "), "). Rows sharing an ID must share ",
+             "one label for grouped cross-validation.")
+    }
+    warning("sampleIds in rbioClass_svm_cv only protects the INNER tuning CV: the OUTER ",
+            "CV folds are row-level, so rows sharing an ID can still be split across outer ",
+            "folds (leakage for repeated-measures / clustered data). Use ",
+            "rbioClass_svm_ncv_fs_v3 (nested) for group-aware outer folds.")
+  }
+
   # Align the group ids to whatever row order dfm_randomized is in (regression
   # shuffles with random_sample_idx; classification keeps the original order).
   # Only reindex when the regression shuffle happened, otherwise a NULL index
@@ -2217,24 +2353,29 @@ rbioClass_svm_cv <- function(x, y,
     # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
     train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
-    # fs
+    # Fit the input transform once on the outer-fold training rows and keep the
+    # fitted object so the test fold is transformed with the training parameters
+    # (see nested_cvfs_func in rbioClass_svm_ncv_fs for the rationale).
+    cv_transform <- NULL
     if (center.scale){
-      cv_training_x <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)$centerX  # without y
+      cv_transform <- zcore_minmax(cv_training_x, zscore = zscore, minmax = minmax, verbose = FALSE)
+      cv_training_x <- cv_transform$centerX  # without y
     } else {
       cv_training_x <- cv_training_x
     }
 
-    cv_m <- rbioClass_svm(x = cv_training_x, y = cv_training_y, center.scale = center.scale,
-                    zscore = zscore, minmax = minmax,
+    # cv_training_x is already transformed with the outer-fold training
+    # parameters, so the inner model is fit with center.scale = FALSE.
+    cv_m <- rbioClass_svm(x = cv_training_x, y = cv_training_y, center.scale = FALSE,
                     svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
                     tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
                     stratify = stratify, sampleIds = train_sampleIds, verbose = FALSE, ...)
 
-    # processing test data
+    # processing test data: re-apply the train-fold transform to the test rows
     cv_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ]
 
-    if (center.scale){ # re-apply the fitted train transform (z-score then min-max) to test data
-      cv_test[, -1] <- .apply_zcore_minmax(cv_test[, -1], params = cv_m$center.scaledX, verbose = FALSE)
+    if (!is.null(cv_transform)){ # z-score then min-max, as fitted on the training rows
+      cv_test[, -1] <- .apply_zcore_minmax(cv_test[, -1], params = cv_transform, verbose = FALSE)
     }
     pred <- predict(cv_m, newdata = cv_test[, -1])
     if (model_type == "classification"){
@@ -2371,7 +2512,7 @@ rbioClass_svm_cv <- function(x, y,
               best.method = cross.best.model.method,
               best.index = cv.model.idx,
               best.accuracy.summary = best.acc.summary,
-              best.rmse.summary = best.acc.summary,
+              best.rmse.summary = best.rmse.summary,
               best.rsq.summary = best.rsq.summary,
               best.accuracy = best.accu,
               best.rmse = best.rmse,

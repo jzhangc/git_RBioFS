@@ -100,8 +100,12 @@ previous contiguous split. Default is \code{TRUE}.}
 
 \item{sampleIds}{Optional vector of group / repeated-measures identifiers, one
 per row, with \code{length} equal to \code{nrow(x)}. When supplied (overrides
-\code{stratify}) the inner CV folds become group-aware: rows sharing an id
-are never split across folds. Default is \code{NULL}.}
+\code{stratify}) the \emph{inner} CV folds become group-aware: rows sharing an id
+are never split across inner folds. NOTE: the \emph{outer} CV folds of this
+function are row-level, so rows sharing an id can still land in different outer
+folds; for fully group-aware (non-leakage) CV of repeated-measures data use
+\code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
+is supplied. Default is \code{NULL}.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
@@ -115,6 +119,8 @@ Additional items for \code{rbiosvm_nestedcv}:
 \code{cv.fold}: number of (outer) cross-validation fold
 
 \code{randomized.sample.index}: randomized sample order for (outer) cross-validation. \code{NULL} for classification modelling (cv.fold already randomized).
+
+\code{sampleIds}: the input sample IDs vector, or \code{NULL} if not provided.
 
 \code{model.type}: the SVM model type, "classification" or "regression".
 

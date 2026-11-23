@@ -1096,3 +1096,32 @@ print.zcore_minmax <- function(x, ...) {
 
   out
 }
+
+
+#' Subset a fitted \code{zcore_minmax} transform to a set of columns.
+#'
+#' @description Internal helper that restricts a fitted \code{\link{zcore_minmax}}
+#'   object to the columns named in \code{cols}, so the transform can be
+#'   re-applied (via \code{\link{.apply_zcore_minmax}}) to a
+#'   data matrix holding only those columns. Needed in the nested CV wrappers,
+#'   where the transform is fitted on the full (constant-column-removed)
+#'   training matrix but only the feature-selection subset is modelled/tested.
+#'   The transform is strictly column-wise, so the subset parameters are exact.
+#'
+#' @param params A fitted parameters list as returned by \code{\link{zcore_minmax}}.
+#'   \code{NULL} is returned unchanged.
+#' @param cols Column names to keep.
+#'
+#' @return A copy of \code{params} with \code{centerX}, \code{meanX}, \code{columnSD},
+#'   \code{colMin} and \code{colMax} restricted to \code{cols} (NULL fields stay NULL).
+#'
+#' @keywords internal
+.subset_zcore_minmax <- function(params, cols) {
+  if (is.null(params)) return(params)
+  params$centerX  <- params$centerX[, cols, drop = FALSE]
+  params$meanX    <- params$meanX[cols]
+  params$columnSD <- params$columnSD[cols]
+  params$colMin   <- params$colMin[cols]
+  params$colMax   <- params$colMax[cols]
+  params
+}

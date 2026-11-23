@@ -43,7 +43,8 @@ pre-transformed). The actual transform is selected by \code{zscore} / \code{minm
 
 \item{...}{Additional arguments for \code{svm} function from \code{e1071mc} package.}
 
-\item{n_cores}{Number of CPU cores to use. Default is \code{NULL}, or the total number cores minus one.}
+\item{n_cores}{Number of CPU cores to use. Default is \code{NULL}, which runs the
+model serially (equivalent to \code{n_cores = 1}).}
 
 \item{zscore}{Logical. When \code{center.scale = TRUE}, whether to apply z-score standardization,
 \eqn{(x - \bar{x}) / s_x} (column mean \eqn{0}, SD \eqn{1}). Default is \code{TRUE}. When both
@@ -116,8 +117,11 @@ This is a \strong{behaviour change}: tuned parameters, reported CV accuracy/RMSE
 (in the nested feature-selection wrappers) the selected feature set may shift relative to
 the previous contiguous split. Supplying \code{sampleIds} makes the folds group-aware so
 that rows sharing an id are never split across folds (repeated-measures / multi-omics
-safe). For \code{tune.method = "fix"} or \code{"boot"} no split is drawn and these flags
-have no effect; \code{stratify = TRUE} with \code{tune.method = "fix"} emits a warning.
+safe). For \code{tune.method = "fix"} no split is drawn and these flags have no effect
+(\code{stratify = TRUE} with \code{tune.method = "fix"} emits a warning). For
+\code{tune.method = "boot"} the bootstrap resamples are drawn with replacement and
+are \emph{not} group-aware or stratified: \code{stratify} and \code{sampleIds}
+apply to \code{tune.method = "cross"} only.
 
 Parameter tuning is for gamma (not applicable when \code{kernel = "linear"}) and cost.
 
@@ -152,7 +156,16 @@ The option \code{center.scale = FALSE} is for prior center.scaled or otherwise p
 pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and
 utility (i.e. classify unknown data).
 
-When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071::svm()} and \code{e1017::tune()}
+When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071mc::svm()} and \code{e1071mc::tune()}
+
+Note on the \emph{final} model's internal cross-validation (\code{svm.cross.k > 0}):
+with \code{n_cores > 1} the internal CV folds of the final model honour
+\code{stratify} / \code{sampleIds} (via \code{e1071mc::svm_mc()}); with
+\code{n_cores <= 1} the serial \code{e1071mc::svm()} routes its internal CV through
+the libsvm C code, which does not support stratified or group-aware folds, so
+\code{stratify} / \code{sampleIds} are silently ignored for that internal CV only
+(the fitted model itself is unaffected, and all nested CV wrappers in this package
+use \code{svm.cross.k = 0}).
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
