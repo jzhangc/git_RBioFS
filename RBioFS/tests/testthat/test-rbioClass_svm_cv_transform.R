@@ -76,6 +76,7 @@ test_that("T1b: rbioClass_svm_cv test fold uses the TRAIN-fold transform (min-ma
 
 # T1c: rbioClass_svm_ncv_fs_v2 (rRF-FS in the loop) test-fold transform
 test_that("T1c: ncv_fs_v2 test fold uses the TRAIN-fold transform", {
+  withr::local_dir(withr::local_tempdir())  # rRF-FS writes iteration artifacts to the CWD
   d <- make_cv_fixture(seed = 13, n = 48)
   set.seed(2026)
   obj <- rbioClass_svm_ncv_fs_v2(x = d$x, y = d$y, cross.k = 2,
@@ -97,6 +98,7 @@ test_that("T1c: ncv_fs_v2 test fold uses the TRAIN-fold transform", {
 
 # T1d: ncv_fs (v1, two-stage list pipeline) test-fold transform
 test_that("T1d: ncv_fs (v1) test fold uses the TRAIN-fold transform", {
+  withr::local_dir(withr::local_tempdir())  # rRF-FS writes iteration artifacts to the CWD
   d <- make_cv_fixture(seed = 14, n = 48)
   set.seed(2026)
   obj <- rbioClass_svm_ncv_fs(x = d$x, y = d$y, cross.k = 2,
@@ -174,6 +176,7 @@ test_that("T3c: ncv_fs rejects same-id rows with different labels", {
 
 # T4: uni.sig.fs is the per-fold univariate list (not NULL)
 test_that("T4: ncv_fs univariate.fs stores per-fold uni.sig.fs", {
+  withr::local_dir(withr::local_tempdir())  # rRF-FS writes iteration artifacts to the CWD
   # two features strongly associated with the class so limma finds them
   set.seed(2026)
   n <- 60
@@ -200,6 +203,7 @@ test_that("T4: ncv_fs univariate.fs stores per-fold uni.sig.fs", {
 
 # T5: v3 outer folds keep groups intact
 test_that("T5: ncv_fs_v3 outer folds keep sampleIds together", {
+  withr::local_dir(withr::local_tempdir())  # rRF-FS writes iteration artifacts to the CWD
   set.seed(2026)
   grp <- rep(1:12, each = 2)           # 12 groups x 2 rows
   y <- factor(c(rep("A", 12), rep("B", 12)))  # groups 1-6 A, 7-12 B

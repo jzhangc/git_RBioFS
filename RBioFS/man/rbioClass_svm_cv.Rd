@@ -63,6 +63,10 @@ At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{ce
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
+\item{randomState}{Optional integer seed for reproducible (outer) CV fold assignment.
+When set, \code{set.seed(randomState)} is called before the folds are drawn.
+Default is \code{NULL} (no seed; fold order is random).}
+
 \item{stratify}{Logical. Whether the inner tuning cross-validation is stratified
 (class-balanced for classification; variance-minimising for regression). When
 \code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)

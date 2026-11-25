@@ -1125,3 +1125,29 @@ print.zcore_minmax <- function(x, ...) {
   params$colMax   <- params$colMax[cols]
   params
 }
+
+#' @title .suppress_dup_ids_warning
+#'
+#' @description Suppresses the e1071mc "unique sample IDs below folds" warning
+#'   that its internal \code{.svm_mc_assign_folds()} emits during
+#'   \code{tune()}/\code{tune_mc()} fold construction. \code{\link{rbioClass_svm}}
+#'   already warns about the same condition up front (before the grid search),
+#'   so without this filter the user would see the warning twice. Every other
+#'   warning raised while evaluating \code{expr} passes through untouched.
+#'
+#' @param expr An expression to evaluate (typically a \code{tune()}/\code{tune_mc()} call).
+#'
+#' @return The value of \code{expr}.
+#'
+#' @keywords internal
+.suppress_dup_ids_warning <- function(expr) {
+  withCallingHandlers(
+    expr,
+    warning = function(w) {
+      if (grepl("^Number of unique sample IDs \\(.*\\) is less than cross \\(.*\\)",
+                conditionMessage(w))) {
+        invokeRestart("muffleWarning")
+      }
+    }
+  )
+}

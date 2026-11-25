@@ -13,6 +13,12 @@
 # Each test below drives the corresponding function with a model trained on B+C
 # only and a test set of class A, so the "A" probability column is absent, and
 # verifies the function returns gracefully instead of crashing.
+#
+# Contract (decided 2026-11-23, see docs/session_followups_checkfixes): when
+# nothing is analyzable the single-model functions return NULL, while the CV
+# functions strip degenerate folds and return a well-formed EMPTY list.
+# This mirrors the partial-degeneration design (folds with no analyzable
+# class are removed, plotting is skipped with "ROC data empty").
 
 # Build an SVM model trained without class A (only B and C).
 # The test data is class A only -> "A" has no column in the probability output.
@@ -66,8 +72,11 @@ test_that("rbioClass_svm_cv_roc_auc_v2 handles absent-class fold without crashin
   res <- rbioClass_svm_cv_roc_auc_v2(object = obj,
                                      fileprefix = withr::local_tempfile(),
                                      rocplot = FALSE, verbose = FALSE)
-  # the single fold had no analyzable class -> NULL (no crash)
-  expect_null(res)
+  # the single fold had no analyzable class: degenerate folds are stripped,
+  # leaving a well-formed EMPTY list, not NULL (no crash). (The cv_auc_res
+  # class is internal to the helper; _v2 returns the bare per-fold list.)
+  expect_type(res, "list")
+  expect_length(res, 0)
 })
 
 # ----- 4. rbioClass_svm_cv_roc_auc cv path (site 852) -----
@@ -81,7 +90,10 @@ test_that("rbioClass_svm_cv_roc_auc handles absent-class fold without crashing",
                                   fileprefix = withr::local_tempfile(),
                                   rocplot = FALSE, plot.smooth = FALSE,
                                   verbose = FALSE)
-  expect_null(res)
+  # the single degenerate fold is stripped -> empty (but well-formed) list,
+  # not NULL (NULL is the single-model contract, tests 1 and 2) (no crash)
+  expect_type(res, "list")
+  expect_length(res, 0)
 })
 
 # ----- 5. rbioClass_svm_pr_auc (site 2153) -----

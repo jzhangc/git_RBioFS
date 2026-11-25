@@ -247,17 +247,22 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   # tune parameters
   gamma_start <- ifelse(is.vector(X), 1, 1 / ncol(X))  # starting gamma value per svm() default settings
   if (verbose) cat(paste0("Grid searching for parameter optimization with ", tune.method, " method (speed depending on hardware configuration)..."))
+  # .suppress_dup_ids_warning(): the e1071mc fold builder warns about
+  # "unique sample IDs < cross" under the same condition already reported
+  # by the up-front warning above; keep the RBioFS one only.
   if (n_cores > 1) {
-    svm_tuned <- tune_mc(svm, kernel = kernel, scale = FALSE,
+    svm_tuned <- .suppress_dup_ids_warning(
+      tune_mc(svm, kernel = kernel, scale = FALSE,
                          train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
                          tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
                                                   stratify = isTRUE(stratify), sampleIds = sampleIds),
-                         n_cores = n_cores)
+                         n_cores = n_cores))
   } else {
-    svm_tuned <- tune(svm, kernel = kernel, scale = FALSE,
+    svm_tuned <- .suppress_dup_ids_warning(
+      tune(svm, kernel = kernel, scale = FALSE,
                       train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
                       tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
-                                               stratify = isTRUE(stratify), sampleIds = sampleIds))
+                                               stratify = isTRUE(stratify), sampleIds = sampleIds)))
   }
   if (verbose) cat("DONE!\n")
 
@@ -607,7 +612,19 @@ rbioClass_svm_ncv_fs <- function(x, y,
       }
 
       if (uni.log2trans) {
-        E <- apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2))
+        E <- suppressWarnings(apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2)))
+        # Explicit NaN/Inf guard: log2(x + 2) is undefined for input values
+        # below -2. Without this check the NaN entries would produce NA
+        # P.Values in the limma output and the affected features would be
+        # dropped silently (or, if all are affected, fail with the generic
+        # "no significant features" stop that hides the real cause).
+        bad_feats <- unique(rownames(E)[unique(row(E)[!is.finite(E)])])
+        if (length(bad_feats) > 0) {
+          stop("The uni.log2trans = TRUE transform produced non-finite values (NaN/Inf) for ",
+               length(bad_feats), " feature(s): input values below -2 are invalid for log2(x + 2). ",
+               "Check the input data for issues (e.g. unshifted counts or negative values), ",
+               "or rerun with uni.log2trans = FALSE.", call. = FALSE)
+        }
       } else {
         E <- t(cv_training_x)
       }
@@ -1202,7 +1219,19 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
       }
 
       if (uni.log2trans) {
-        E <- apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2))
+        E <- suppressWarnings(apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2)))
+        # Explicit NaN/Inf guard: log2(x + 2) is undefined for input values
+        # below -2. Without this check the NaN entries would produce NA
+        # P.Values in the limma output and the affected features would be
+        # dropped silently (or, if all are affected, fail with the generic
+        # "no significant features" stop that hides the real cause).
+        bad_feats <- unique(rownames(E)[unique(row(E)[!is.finite(E)])])
+        if (length(bad_feats) > 0) {
+          stop("The uni.log2trans = TRUE transform produced non-finite values (NaN/Inf) for ",
+               length(bad_feats), " feature(s): input values below -2 are invalid for log2(x + 2). ",
+               "Check the input data for issues (e.g. unshifted counts or negative values), ",
+               "or rerun with uni.log2trans = FALSE.", call. = FALSE)
+        }
       } else {
         E <- t(cv_training_x)
       }
@@ -1788,7 +1817,19 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
       }
 
       if (uni.log2trans) {
-        E <- apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2))
+        E <- suppressWarnings(apply(t(cv_training_x), c(1, 2), FUN = function(x)log2(x + 2)))
+        # Explicit NaN/Inf guard: log2(x + 2) is undefined for input values
+        # below -2. Without this check the NaN entries would produce NA
+        # P.Values in the limma output and the affected features would be
+        # dropped silently (or, if all are affected, fail with the generic
+        # "no significant features" stop that hides the real cause).
+        bad_feats <- unique(rownames(E)[unique(row(E)[!is.finite(E)])])
+        if (length(bad_feats) > 0) {
+          stop("The uni.log2trans = TRUE transform produced non-finite values (NaN/Inf) for ",
+               length(bad_feats), " feature(s): input values below -2 are invalid for log2(x + 2). ",
+               "Check the input data for issues (e.g. unshifted counts or negative values), ",
+               "or rerun with uni.log2trans = FALSE.", call. = FALSE)
+        }
       } else {
         E <- t(cv_training_x)
       }
@@ -2174,6 +2215,9 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @param parallelComputing whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param randomState Optional integer seed for reproducible (outer) CV fold assignment.
+#'   When set, \code{set.seed(randomState)} is called before the folds are drawn.
+#'   Default is \code{NULL} (no seed; fold order is random).
 #' @param verbose whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return Returns a CV SVM model object: \code{rbiosvm_cv}.
 #'
@@ -2271,6 +2315,9 @@ rbioClass_svm_cv <- function(x, y,
                               verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
+
+  # Optional fixed seed: makes the (outer) CV fold assignment reproducible.
+  if (!is.null(randomState)) set.seed(randomState)
 
   ## check arguments
   if (is.factor(y)) {
