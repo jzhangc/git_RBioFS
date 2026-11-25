@@ -36,7 +36,7 @@ rbioClass_svm_ncv_fs_v2(
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
 
-\item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
+\item{y}{Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.}
 
 \item{univariate.fs}{If to use limma-based univariate reduction. Default is \code{FALSE}.}
 
@@ -60,7 +60,7 @@ pre-transformed). The actual transform is selected by \code{zscore} / \code{minm
 \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.}
 
-\item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
+\item{kernel}{SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
 \item{cross.k}{Fold of nested cross validation, i.e. outer loop. Default is \code{10}.}
 
@@ -74,11 +74,11 @@ At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{ce
 
 \item{fs.method}{Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.}
 
-\item{rf.ifs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.}
+\item{rf.ifs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{1001}.}
 
-\item{rf.sfs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.}
+\item{rf.sfs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{1001}.}
 
-\item{fs.count.cutoff}{A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.}
+\item{fs.count.cutoff}{An integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.}
 
 \item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
@@ -167,7 +167,7 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 
-\code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+\code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
 
 \code{run.time}: total run time
 }
@@ -183,8 +183,8 @@ Resulted features from each nested cross-validation round are voted. Features wi
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
 
-When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+for feature count thresholding. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}
 
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
@@ -194,14 +194,14 @@ For classification modelling, the 10-fold CV segmentation is stratified, whereas
 \examples{
 \dontrun{
 svm_nestedcv <- rbioClass_svm_ncv_fs_v2(x = mydata[, -c(1:2)],
-                                     y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-                                     center.scale = TRUE,
-                                     cross.k = 5,
-                                     tune.method = "cross",
-                                     tune.cross.k = 5,
-                                     fs.method = "rf",
-                                     rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-                                     parallelComputing = TRUE, clusterType = "FORK")
+                                        y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+                                        center.scale = TRUE,
+                                        cross.k = 5,
+                                        tune.method = "cross",
+                                        tune.cross.k = 5,
+                                        fs.method = "rf",
+                                        rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+                                        parallelComputing = TRUE, clusterType = "FORK")
 
 }
 }

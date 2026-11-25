@@ -5,7 +5,7 @@
 \alias{rbioUtil_perm_plot.rbiosvm_perm}
 \alias{rbioUtil_perm_plot.rbiomvr_perm}
 \alias{rbioUtil_perm_plot.default}
-\title{Title rbioUtil_perm_plot}
+\title{rbioUtil_perm_plot}
 \usage{
 rbioUtil_perm_plot(perm_res, ...)
 

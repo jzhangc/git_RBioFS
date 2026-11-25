@@ -4,7 +4,7 @@
 \alias{rbioUtil_fscount_plot}
 \alias{rbioUtil_fscount_plot.rbiosvm_nestedcv}
 \alias{rbioUtil_fscount_plot.default}
-\title{Title rbioUtil_fscount_plot}
+\title{rbioUtil_fscount_plot}
 \usage{
 rbioUtil_fscount_plot(object, ...)
 

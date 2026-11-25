@@ -43,7 +43,7 @@ A \code{prediction} object. The items of the object are:
 
 \code{classifier.class}
 
-\code{predited.value}
+\code{predicted.value}
 
 \code{tot.predict.RMSE}
 

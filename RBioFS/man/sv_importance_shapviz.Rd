@@ -25,7 +25,7 @@ sv_importance_shapviz(
 \code{ggplot2} graph object.
 }
 \description{
-A alternative version of \code{sv_importance} function from \code{shapviz} package
+An alternative version of \code{sv_importance} function from \code{shapviz} package
 }
 \details{
 Mainly to add custom graphic settings to the original function

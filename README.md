@@ -110,7 +110,7 @@ Update log
         - rbioClass_svm_ncv_fs_v3() updated with more clearer messaging
 
       - New Util function(s)
-        - Two helper functions ".assign_group_folds_stratified" and ".assign_group_folds_stratified()" added to support rbioClass_svm_ncv_fs_v3()
+        - Two helper functions ".assign_group_folds_stratified()" and ".assign_group_folds_simple()" added to support rbioClass_svm_ncv_fs_v3()
         - New zscore_minmax() function to replace the center_scale() function, with zscore and min-max transformations, more accurate documentation and better performance
         - New ".subset_zcore_minmax()" helper function added to restrict a fitted zcore_minmax() transform to a subset of columns, so the CV wrappers can re-apply the training-fold transform on the feature selection subset
 
@@ -133,6 +133,10 @@ Update log
         - A bug fixed for rbioClass_svm() where class weights were silently not applied to the model (wrong argument name "class.weight", corrected to "class.weights")
         - A bug fixed for rbioClass_svm() where tune.method = "boot" was not normalised to "bootstrap" for the tune.control() sampling method
         - Documentation updated for the stratify/sampleIds behaviour of the inner tuning CV: bootstrap resampling (tune.method = "boot") is not group-aware or stratified, so the flags apply to tune.method = "cross" only; with n_cores <= 1 the final model's internal CV (svm.cross.k > 0) does not support stratified or group-aware folds
+        - The randomState argument of rbioClass_svm_cv() is now wired up: when set, set.seed(randomState) is called before the outer CV fold assignment (reproducible CV). Previously the argument was accepted but ignored
+        - The duplicate "unique sample IDs < folds" warning in rbioClass_svm() is now deduplicated: the e1071mc-side duplicate (emitted during fold construction in tune()/tune_mc()) is suppressed by the internal .suppress_dup_ids_warning() helper, so only the RBioFS up-front warning is shown
+        - Code formatting normalised for rbioClass_svm(), rbioClass_svm_ncv_fs_v2(), rbioClass_svm_ncv_fs_v3() and rbioClass_svm_cv(): continuation lines re-aligned under the first argument (the final svm()/svm_mc() blocks of rbioClass_svm() were aligned to each other's opening line), the rbioClass_svm_ncv_fs_v3() body re-indented to the 2-space standard, roxygen \examples blocks re-aligned. No logic changed
+        - Typos fixed in rbioClass_svm.R code and documentation: "Parallal" -> "Parallel" in the n_cores > 1 message; "ploynomial" -> "polynomial" in the kernel options docs; the no-significant-features stop message now reads "Try running with larger uni.alpha value, or univariate.fs = FALSE"; rf.ifs.ntree/rf.sfs.ntree docs corrected to the actual default (1001, not 501); "predited.value" -> "predicted.value"
 
       - Update to PLS function(s)
         - Plot aesthetics updated for consistency for functions:
@@ -147,12 +151,13 @@ Update log
           - rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2()
           - "rbiosvm_nestedcv" class updated with "sampleIds" and "sampleIdToFold" items for v1, v2, and v3 of rbioClass_svm_ncv_fs() functions
         - A bug fixed for rbioClass_svm_cv(), rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3() where the z-score/min-max transform was fitted twice (once in the CV wrapper and again inside rbioClass_svm()): the transform is now fitted once on the outer-fold training rows, the inner model is trained on the already-transformed data (center.scale = FALSE), and the test fold is re-applied with the training-fold parameters
-        - sampleIds validation and messaging added to rbioClass_svm_cv(), rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2(): length check, class label conflict check for classification modelling, and a warning that the outer CV folds are row-level (use rbioClass_svm_ncv_fs_v3() for group-aware outer folds); the input sampleIds is now stored in the "rbiosvm_nestedcv" object
+        - sampleIds validation and messaging added to rbioClass_svm_cv(), rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2(): length check, class label conflict check for classification modelling, and a warning that the outer CV folds are row-level (use rbioClass_svm_ncv_fs_v3() for group-aware outer folds); the input sampleIds is now stored in the "rbiosvm_nestedcv" object for rbioClass_svm_ncv_fs() and rbioClass_svm_ncv_fs_v2() (rbioClass_svm_cv() does not store it)
         - A bug fixed for rbioClass_svm_cv(), rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3() where the "best" RMSE summary item was stored as the accuracy summary for regression modelling
         - Univariate FS path updated for rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3():
           - Per-fold uni.sig.fs is now stored (previously the full nested CV list was referenced)
           - limma::contrasts.fit is now namespaced (the contrast path was dead in the installed package)
           - NA P.Values (e.g. from NaN expression values after the log2 transform) are dropped instead of surviving as NA feature names
+        - Explicit NaN/Inf guard for the univariate FS path (uni.log2trans = TRUE) of rbioClass_svm_ncv_fs(), rbioClass_svm_ncv_fs_v2() and rbioClass_svm_ncv_fs_v3(): input values below -2 are now rejected with a message that names the affected feature count (previously they produced NaN entries, NA P.Values and silently dropped features)
 
       - Update to PCA function(s)
         - rbioFS_PCA() now exports a "rbiofs_pca" class object
@@ -163,10 +168,15 @@ Update log
         - Plot aesthetics updated for consistency for function(s):
           - rbioUtil_perm_plot()
         - A bug fixed for rbioUtil_fscount_plot() where function crashes when plotting
+        - A bug fixed for na_summary() where the by = "row" case on a data.frame/matrix input returned an empty vector (a loop over a length-0 vector): it now returns the per-row NA ratios like the by = "col" case
+        - Roxygen tags fixed: "#' Title <name>" -> "#' @title <name>" for rbioUtil_fscount_plot(), rbioUtil_classif_accuracy() and the rbioUtil_perm_plot() methods (the generated Rd titles were literally "Title <name>"); broken \link{rbioClass_svm_shap_aggreated} target corrected to rbioClass_svm_shap_aggregated
+        - Typos fixed in rbioUtil.R code and documentation (e.g. "NA ration" -> "NA ratio", "inoput" -> "input", "trainined" -> "trained", wrong documented defaults for plot.probLabel.outside and multi_plot.ncol)
 
       - Other updates
         - e1071 is fully removed as a depencency, replaced by e1071mc (https://github.com/jzhangc/e1071mc)
         - README.md updated with installation via the pak package
+        - testthat (>= 3.0.0) added to Suggests: (test-only dependency)
+        - man/ and NAMESPACE regenerated with roxygen2 after the roxygen comment fixes above (documentation-only changes)
 
 
     0.8.2 (August.30.2025)

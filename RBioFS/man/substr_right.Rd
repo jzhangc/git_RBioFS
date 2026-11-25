@@ -9,7 +9,7 @@ substr_right(x, n)
 \arguments{
 \item{x}{str. Input string.}
 
-\item{n}{int. Optional user defined export name prefix. Default is \code{NULL}.}
+\item{n}{int. Number of characters to extract from the right end of the string.}
 }
 \value{
 character extracted from string.

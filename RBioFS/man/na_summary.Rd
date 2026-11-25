@@ -15,7 +15,7 @@ na_summary(data, by = c("row", "col"))
 Vector or list of vector of NA ratios.
 }
 \description{
-NA ration summary.
+NA ratio summary.
 }
 \examples{
 \dontrun{

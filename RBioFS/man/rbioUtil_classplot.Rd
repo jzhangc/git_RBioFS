@@ -27,7 +27,7 @@ rbioUtil_classplot(
 \arguments{
 \item{export.name}{String. Optional user defined export name prefix. Default is \code{NULL}.}
 
-\item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{nrow(pred.obj)}.}
+\item{multi_plot.ncol}{Number of columns on one figure page. Default is \code{nrow(pred.obj$raw.newdata)}.}
 
 \item{multi_plot.nrow}{Number of rows on one figure page. Default is \code{1}.}
 
@@ -41,9 +41,9 @@ rbioUtil_classplot(
 
 \item{plot.probLabel.padding}{The padding between sample symbol and the label. Default is \code{0.5}.}
 
-\item{plot.probLabel.outside}{If to put the probability label outside of the pies. Default is \code{"TRUE"}.}
+\item{plot.probLabel.outside}{If to put the probability label outside of the pies. Default is \code{FALSE}.}
 
-\item{plot.probLabel.outside.nudge}{Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.}
+\item{plot.probLabel.outside.nudge}{Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{1.5}.}
 
 \item{plot.fontType}{The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.}
 
@@ -63,7 +63,7 @@ rbioUtil_classplot(
 A \code{classification} object with classification probability summary for each sample, as well as pdf figure file when \code{classplot = TRUE}.
 }
 \description{
-Classification plot function for classification prediction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probablity pie charts.
+Classification plot function for classification prediction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probability pie charts.
 }
 \details{
 The function operates in conjunction with the prediction function \code{\link{rbioClass_plsda_predict}}, to which the sample(s) of interested is provided.

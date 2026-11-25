@@ -51,7 +51,7 @@ test_that("uni.log2trans = TRUE fails fast when only SOME features are < -2", {
   )
 })
 
-test_that("uni.log2trans = FALSE is unaffected by sub--2 values (control)", {
+test_that("uni.log2trans = FALSE is unaffected by below -2 values (control)", {
   withr::local_dir(withr::local_tempdir())  # rRF-FS writes iteration artifacts to the CWD
   d <- make_all_below_neg2_data()
   # Engineered class difference that survives uni_PreProc's quantile

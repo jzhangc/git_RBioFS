@@ -2,7 +2,7 @@
 #'
 #' @description Support Vector Machine (SVM) modelling
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param y Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
 #'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
 #'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
@@ -29,7 +29,7 @@
 #'   variance-minimising greedy one). For classification, rows sharing an id must
 #'   share one class label. If the number of unique ids is below
 #'   \code{tune.cross.k} a warning is raised. Default is \code{NULL}.
-#' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param kernel SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param svm.cross.k Fold of cross validation. Default is \code{10}.
 #' @param tune.method Parameter tuning method. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
 #' @param tune.cross.k Set only when \code{tune.method = "cross"}, fold number for cross validation. Default is \code{10}.
@@ -171,7 +171,7 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (is.null(n_cores)) {
     n_cores <- 1
   } else if (n_cores > 1) {
-    if (verbose) cat("Parallal computing enabled. \n")
+    if (verbose) cat("Parallel computing enabled. \n")
   }
   # if (class(y) != "factor"){
   #   if (verbose) cat("y is converted to factor. \n")
@@ -198,8 +198,8 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
     }
     if (length(unique(sampleIds)) < tune.cross.k)
       warning(paste0("Number of unique sample IDs (", length(unique(sampleIds)),
-                     ") is less than tune.cross.k (", tune.cross.k,
-                     "). Some folds may be empty in the inner tune CV."))
+                   ") is less than tune.cross.k (", tune.cross.k,
+                   "). Some folds may be empty in the inner tune CV."))
   }
   if (isTRUE(stratify) && tune.method == "fix")
     warning("stratify is ignored for tune.method = \"fix\" (fixed split, no inner cross-validation).")
@@ -253,16 +253,16 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (n_cores > 1) {
     svm_tuned <- .suppress_dup_ids_warning(
       tune_mc(svm, kernel = kernel, scale = FALSE,
-                         train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                         tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
-                                                  stratify = isTRUE(stratify), sampleIds = sampleIds),
-                         n_cores = n_cores))
+              train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
+              tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
+                                         stratify = isTRUE(stratify), sampleIds = sampleIds),
+              n_cores = n_cores))
   } else {
     svm_tuned <- .suppress_dup_ids_warning(
       tune(svm, kernel = kernel, scale = FALSE,
-                      train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-                      tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
-                                               stratify = isTRUE(stratify), sampleIds = sampleIds)))
+           train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
+           tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
+                                      stratify = isTRUE(stratify), sampleIds = sampleIds)))
   }
   if (verbose) cat("DONE!\n")
 
@@ -270,16 +270,16 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   if (verbose) cat("SVM modelling...")
   if (n_cores > 1) {
     m <- svm_mc(x = X, y = y, kernel = kernel, probability = TRUE,
-             cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-             scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-             cross = svm.cross.k, n_cores = n_cores,
-             stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
-  } else {
-    m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
                 cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
                 scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-                cross = svm.cross.k,
+                cross = svm.cross.k, n_cores = n_cores,
                 stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
+  } else {
+    m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
+             cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
+             scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+             cross = svm.cross.k,
+             stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
   }
   if (verbose) cat("Done!\n")
 
@@ -307,10 +307,10 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
 print.rbiosvm <- function(x, ...){
   cat("Parameters:\n")
   cat("   SVM-Type: ", c("C-classification", "nu-classification",
-                         "one-classification", "eps-regression", "nu-regression")[x$type +
-                                                                                    1], "\n")
+                      "one-classification", "eps-regression", "nu-regression")[x$type +
+                                                                               1], "\n")
   cat(" SVM-Kernel: ", c("linear", "polynomial", "radial",
-                         "sigmoid")[x$kernel + 1], "\n")
+                      "sigmoid")[x$kernel + 1], "\n")
   if (x$type == 0 || x$type == 3 || x$type == 4)
     cat("       cost: ", x$cost, "\n")
   if (x$kernel == 1)
@@ -334,7 +334,7 @@ print.rbiosvm <- function(x, ...){
 #'
 #' @description Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param y Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param univariate.fs If to use limma-based univariate reduction. Default is \code{FALSE}.
 #' @param uni.log2trans Only set if \code{univariate.fs = TRUE}, if to log2 transform data before univariate reduction.
 #' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.
@@ -365,7 +365,7 @@ print.rbiosvm <- function(x, ...){
 #'   folds; for fully group-aware (non-leakage) CV of repeated-measures data use
 #'   \code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
 #'   is supplied. Default is \code{NULL}.
-#' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param kernel SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
 #' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
@@ -373,9 +373,9 @@ print.rbiosvm <- function(x, ...){
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
 #' @param fs.method Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.
-#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.
-#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.
-#' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
+#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{1001}.
+#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{1001}.
+#' @param fs.count.cutoff An integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
 #' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -438,7 +438,7 @@ print.rbiosvm <- function(x, ...){
 #'
 #' \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 #'
-#' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+#' \code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
 #'
 #' \code{run.time}: total run time
 #'
@@ -450,8 +450,8 @@ print.rbiosvm <- function(x, ...){
 #' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 #' meaning maximum number of features selected from the nested cross-validation are reported.
 #'
-#' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median value
-#' for feature count threholding. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}.
+#' When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+#' for feature count thresholding. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}.
 #'
 #' We only use \code{best.fs.count} for thresholding because it is going to be the same as \code{nest.fs} when \code{cross.best.model.method = "none"}.
 #'
@@ -597,7 +597,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
     # sub-sample the group ids to the outer-fold training rows so the inner
-    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    # rbioClass_svm CV is group-aware (rows sharing an id stay in one fold).
     train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # optional uni
@@ -664,7 +664,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
       uni_sig_fs <- as.character(cv_fit_dfm[which(cv_fit_dfm$P.Value < pcutoff), "feature"])
 
       if (length(uni_sig_fs) == 0) {
-        stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
+        stop("\nNo statistically significant features found. Try running with larger uni.alpha value, or univariate.fs = FALSE.")
       } else {
         cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
         cv_training_x <- cv_training[, -1, drop = FALSE]
@@ -852,7 +852,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 
   if (cross.best.model.method == "median"){  # adjust the threshold to 1 if only one model existed
     if (!any(fs.count >= fs.count.cutoff)) {
-      fs.count.cutoff <-  1
+      fs.count.cutoff <- 1
     }
   }
 
@@ -908,7 +908,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
   # run time
   runtime <- end_time - start_time
 
-    # export to environment
+  # export to environment
   out <- list(univariate.fs = univariate.fs,
               cv.fold = fold,
               randomized.sample.index = random_sample_idx,
@@ -948,7 +948,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #'
 #' @description Nested cross-validation feature selection and SVM modelling: CV-rRF-FS-SVM. This is V2 with slightly different parallel computing implementation
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param y Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param univariate.fs If to use limma-based univariate reduction. Default is \code{FALSE}.
 #' @param uni.log2trans Only set if \code{univariate.fs = TRUE}, if to log2 transform data before univariate reduction.
 #' @param uni.contrast Only set if \code{univariate.fs = TRUE} and for a classification study, the contrast for the univariate analysis. Default is \code{NULL}.
@@ -979,7 +979,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #'   folds; for fully group-aware (non-leakage) CV of repeated-measures data use
 #'   \code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
 #'   is supplied. Default is \code{NULL}.
-#' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param kernel SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
 #' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
@@ -987,9 +987,9 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
 #' @param fs.method Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.
-#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.
-#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.
-#' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
+#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{1001}.
+#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{1001}.
+#' @param fs.count.cutoff An integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
 #' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Only set when \code{parallelComputing = TRUE}, the number of CPU cores to use. Default is \code{detectCores() - 1}, or the total number cores minus one.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -1052,7 +1052,7 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #'
 #' \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 #'
-#' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+#' \code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
 #'
 #' \code{run.time}: total run time
 #'
@@ -1066,8 +1066,8 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 #' meaning maximum number of features selected from the nested cross-validation are reported.
 #'
-#' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-#' for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+#' When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+#' for feature count thresholding. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}
 #'
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
@@ -1083,14 +1083,14 @@ rbioClass_svm_ncv_fs <- function(x, y,
 #' @examples
 #' \dontrun{
 #' svm_nestedcv <- rbioClass_svm_ncv_fs_v2(x = mydata[, -c(1:2)],
-#'                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-#'                                      center.scale = TRUE,
-#'                                      cross.k = 5,
-#'                                      tune.method = "cross",
-#'                                      tune.cross.k = 5,
-#'                                      fs.method = "rf",
-#'                                      rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-#'                                      parallelComputing = TRUE, clusterType = "FORK")
+#'                                         y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+#'                                         center.scale = TRUE,
+#'                                         cross.k = 5,
+#'                                         tune.method = "cross",
+#'                                         tune.cross.k = 5,
+#'                                         fs.method = "rf",
+#'                                         rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+#'                                         parallelComputing = TRUE, clusterType = "FORK")
 #'
 #' }
 #' @export
@@ -1104,9 +1104,9 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
                                      tune.cross.k = 10, tune.boot.n = 10,
                                      fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
                                      fs.count.cutoff = cross.k,
-                                      parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                      stratify = TRUE, sampleIds = NULL,
-                                      verbose = TRUE){
+                                     parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                     stratify = TRUE, sampleIds = NULL,
+                                     verbose = TRUE){
   ## initiate the run time
   start_time <- Sys.time()
 
@@ -1204,7 +1204,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
     # sub-sample the group ids to the outer-fold training rows so the inner
-    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    # rbioClass_svm CV is group-aware (rows sharing an id stay in one fold).
     train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # optional uni
@@ -1271,7 +1271,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
       uni_sig_fs <- as.character(cv_fit_dfm[which(cv_fit_dfm$P.Value < pcutoff), "feature"])
 
       if (length(uni_sig_fs) == 0) {
-        stop("No statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
+        stop("No statistically significant features found. Try running with larger uni.alpha value, or univariate.fs = FALSE.")
       } else {
         cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
         cv_training_x <- cv_training[, -1, drop = FALSE]
@@ -1412,7 +1412,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
   }
   fs.count <- sort(table(nested.fs), decreasing = TRUE)
 
-  # we only use best.fs.count for thresholding becuase it is going to be the same as nest.fs when cross.best.model.method = "none"
+  # we only use best.fs.count for thresholding because it is going to be the same as nest.fs when cross.best.model.method = "none"
   best.nested.fs <- foreach(i = 1:length(final.cv.list), .combine = "c") %do% {
     final.cv.list[[i]]$selected.features
   }
@@ -1420,7 +1420,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 
   if (cross.best.model.method == "median"){  # adjust the threshold to 1 if only one model existed
     if (!any(fs.count >= fs.count.cutoff)) {
-      fs.count.cutoff <-  1
+      fs.count.cutoff <- 1
     }
   }
 
@@ -1475,7 +1475,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
   # run time
   runtime <- end_time - start_time
 
-     # export to environment
+  # export to environment
   out <- list(univariate.fs = univariate.fs,
               cv.fold = fold,
               randomized.sample.index = random_sample_idx,
@@ -1537,7 +1537,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #'   \code{TRUE} (default) the inner CV folds (built via the \pkg{e1071mc} fork)
 #'   keep the overall class proportion in every fold, so a single-class fold cannot
 #'   occur on an imbalanced data set. Default is \code{TRUE}.
-#' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param kernel SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
 #' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
@@ -1545,9 +1545,9 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' @param tune.boot.n Set only when \code{tune.method = "boot"}, bootstrap iterations. Default is \code{10}.
 #' @param ... Additional arguments for \code{rbioClass_svm}.
 #' @param fs.method Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.
-#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.
-#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.
-#' @param fs.count.cutoff A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
+#' @param rf.ifs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{1001}.
+#' @param rf.sfs.ntree Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{1001}.
+#' @param fs.count.cutoff An integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.
 #' @param sampleIds A character vector of sample IDs (one per row of \code{x}). When provided, samples with the same ID are kept together in the same fold.
 #'   This is essential for repeated-measures or clustered data where multiple rows correspond to the same subject/group.
 #'   Default is \code{NULL}, which behaves like v1 and v2 (independent samples).
@@ -1615,7 +1615,7 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #'
 #' \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 #'
-#' \code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+#' \code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
 #'
 #' \code{run.time}: total run time
 #'
@@ -1640,8 +1640,8 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 #' meaning maximum number of features selected from the nested cross-validation are reported.
 #'
-#' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-#' for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+#' When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+#' for feature count thresholding. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}
 #'
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
@@ -1659,17 +1659,17 @@ rbioClass_svm_ncv_fs_v2 <- function(x, y,
 #' \dontrun{
 #' # Example with independent samples (same as v2):
 #' svm_nestedcv <- rbioClass_svm_ncv_fs_v3(x = mydata[, -c(1:2)],
-#'                                          y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-#'                                          center.scale = TRUE,
-#'                                          cross.k = 5,
-#'                                          sampleIds = NULL)
+#'                                         y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+#'                                         center.scale = TRUE,
+#'                                         cross.k = 5,
+#'                                         sampleIds = NULL)
 #'
 #' # Example with group-dependent samples (e.g., repeated measures from same subject):
 #' svm_nestedcv_grouped <- rbioClass_svm_ncv_fs_v3(x = mydata[, -c(1:2)],
-#'                                                   y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-#'                                                   center.scale = TRUE,
-#'                                                   cross.k = 5,
-#'                                                   sampleIds = mydata$SubjectID)
+#'                                                 y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+#'                                                 center.scale = TRUE,
+#'                                                 cross.k = 5,
+#'                                                 sampleIds = mydata$SubjectID)
 #'
 #' }
 #' @export
@@ -1680,19 +1680,19 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
                                      kernel = c("radial", "linear", "polynomial", "sigmoid"),
                                      cross.k = 10, cross.best.model.method = c("none", "median"),
                                      tune.method = c("cross", "boot", "fix"),
-                                      tune.cross.k = 10, tune.boot.n = 10, ...,
-                                      sampleIds = NULL,
-                                      stratify = TRUE,
-                                      fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
-                                      fs.count.cutoff = cross.k,
-                                      parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
-                                      verbose = TRUE){
-   ## initiate the run time
+                                     tune.cross.k = 10, tune.boot.n = 10, ...,
+                                     sampleIds = NULL,
+                                     stratify = TRUE,
+                                     fs.method = "rf", rf.ifs.ntree = 1001, rf.sfs.ntree = 1001,
+                                     fs.count.cutoff = cross.k,
+                                     parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = c("PSOCK", "FORK"),
+                                     verbose = TRUE){
+  ## initiate the run time
   start_time <- Sys.time()
 
-    ## check arguments
+  ## check arguments
   if (!fs.method %in% c("rf")) stop("So far, fs.method has to be \"rf\". More methods will be implemented")
-   if (is.factor(y)) {
+  if (is.factor(y)) {
     model_type <- "classification"
   } else {
     model_type <- "regression"
@@ -1707,20 +1707,20 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
   }
 
   if (cross.k > nrow(x)) stop("Nested cross-validation fold setting cross.k exceeded limit. Hint: max at total sample number.\n")
-   if (any(class(x) == "data.frame")){
+  if (any(class(x) == "data.frame")){
     if (verbose) cat("data.frame x converted to a matrix object.\n")
-     x <- as.matrix(sapply(x, as.numeric))
+    x <- as.matrix(sapply(x, as.numeric))
   }
 
   if (fs.count.cutoff %% 1 != 0 | fs.count.cutoff < 1 | fs.count.cutoff > cross.k) stop("fs.count.cutoff should be an integer between 1 and cross.k.")
-   kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
+  kernel <- match.arg(tolower(kernel), c("radial", "linear", "polynomial", "sigmoid"))
   cross.best.model.method <- match.arg(tolower(cross.best.model.method), c("none", "median"))
   tune.method <- match.arg(tolower(tune.method), c("cross", "boot", "fix"))
   if (parallelComputing){
     clusterType <- match.arg(clusterType, c("PSOCK", "FORK"))
   }
 
-   ## Validate and store sampleIds
+  ## Validate and store sampleIds
   has_group_ids <- !is.null(sampleIds)
   if (has_group_ids) {
     if (length(sampleIds) != nrow(x)) {
@@ -1732,35 +1732,35 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     sampleIds <- as.character(sampleIds)
     unique_groups <- unique(sampleIds)
     n_groups <- length(unique_groups)
-    if (n_groups < cross.k) {
-      warning(paste0("Number of unique sample IDs (", n_groups,
-                         ") is less than cross.k (", cross.k,
-                         "). Some folds will be empty in certain iterations."))
+  if (n_groups < cross.k) {
+    warning(paste0("Number of unique sample IDs (", n_groups,
+                   ") is less than cross.k (", cross.k,
+                   "). Some folds will be empty in certain iterations."))
     }
 
-      # Check that samples with the same sampleIds have the same class label
+    # Check that samples with the same sampleIds have the same class label
     labels_by_group <- tapply(y, sampleIds, function(labs) unique(as.character(labs)))
     conflicting <- names(labels_by_group)[sapply(labels_by_group, length) > 1]
     if (length(conflicting) > 0) {
       conflicting_details <- paste(conflicting, collapse = ", ")
       stop(paste0("Samples with the same sample ID have different class labels (IDs: ",
-                    conflicting_details, "). ",
-                    "Samples sharing the same sample ID must have the same class label for proper cross-validation."))
+                  conflicting_details, "). ",
+                  "Samples sharing the same sample ID must have the same class label for proper cross-validation."))
     }
   }
 
-    ## nested cv-fs
-    # processing training data
+  ## nested cv-fs
+  # processing training data
   sample_id_to_fold <- NULL  # default; populated below only when sampleIds is provided (group-aware path)
   dfm <- data.frame(y, x, check.names = FALSE)
   if (has_group_ids) {
     if (model_type == "regression"){
-           ## regression: assign groups to folds using greedy variance minimisation
+      ## regression: assign groups to folds using greedy variance minimisation
       fold_assignment <- .assign_group_folds_simple(groups = unique_groups, group_mean_y = sapply(split(seq_len(nrow(dfm)), sampleIds), function(idx) mean(as.numeric(dfm$y[idx]))), cross.k = cross.k)
       sample_id_to_fold <- fold_assignment
       fold <- fold_assignment[sampleIds]
     } else {
-            ## classification: stratified group assignment
+      ## classification: stratified group assignment
       y_summary <- table(dfm$y)
       fold_assignment <- .assign_group_folds_stratified(sampleIds = sampleIds, y = dfm$y, cross.k = cross.k, class_table = y_summary)
       sample_id_to_fold <- fold_assignment
@@ -1783,7 +1783,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
           remain_size <- y_summary[i] %% cross.k
           v <- rep(1:cross.k, times = min_rep)
           if (remain_size > 0) v <- c(v, sample(1:cross.k, remain_size))
-             sample(v)    # randomization
+          sample(v)    # randomization
         } else {
           sample(1:cross.k, size = y_summary[i]) # randomization
         }
@@ -1792,21 +1792,21 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     }
   }
 
-    # nested CV-FS function
+  # nested CV-FS function
   nested_cvfs_func <- function(i) {
-      # set.seed(i) # see is set with the rRF-FS functions
+    # set.seed(i) # see is set with the rRF-FS functions
     if (verbose) cat(paste0("Iteration: ", i, "|", cross.k, "..."))
-      cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
+    cv_training <- dfm_randomized[which(fold != i, arr.ind = TRUE), ]
     cv_training_x <- cv_training[, -1]
-       # below: remove columns with constant value
+    # below: remove columns with constant value
     cv_training_x <- cv_training_x[,!apply(cv_training_x, MARGIN = 2, function(x) max(x, na.rm = TRUE) == min(x, na.rm = TRUE))]
     cv_training_y <- cv_training[, 1]
-      # sub-sample the group ids to the outer-fold training rows so the inner
-      # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    # sub-sample the group ids to the outer-fold training rows so the inner
+    # rbioClass_svm CV is group-aware (rows sharing an id stay in one fold).
     train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
-       # optional uni
-      # outcome should be a list of features to subset the cv_training first
+    # optional uni
+    # outcome should be a list of features to subset the cv_training first
     if (univariate.fs){
       if (model_type == "classification") {
         cv_design <- model.matrix(~ 0 + cv_training_y)
@@ -1844,7 +1844,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
       if (model_type == "classification"){
         contra_string <- unlist(strsplit(uni.contrast, split = ","))
         contra_string <- gsub(" ", "", contra_string, fixed = TRUE)    # remove all the white space
-          # NOTE: below: use do.call to unpack arguments for makeContrasts()
+        # NOTE: below: use do.call to unpack arguments for makeContrasts()
         cv_contra <- do.call(makeContrasts, c(as.list(contra_string), levels = as.list(parse(text = "cv_design"))))
         cv_fit <- limma::contrasts.fit(cv_fit, contrasts = cv_contra)
       }
@@ -1862,14 +1862,14 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
       } else { # NON-FDR
         pcutoff <- uni.alpha
       }
-         # output
+      # output
       # which() (not the raw logical) so that NA P.Values (e.g. from NaN
       # expression values after log2 transform) are dropped instead of
       # surviving as NA "feature" names that break the column subsetting
       uni_sig_fs <- as.character(cv_fit_dfm[which(cv_fit_dfm$P.Value < pcutoff), "feature"])
 
       if (length(uni_sig_fs) == 0) {
-        stop("\nNo statistically significant features found. Try runing with larger uni.alpha value, or univarate.fs = FALSE.")
+        stop("\nNo statistically significant features found. Try running with larger uni.alpha value, or univariate.fs = FALSE.")
       } else {
         cv_training <- cv_training[, c("y", uni_sig_fs), drop = FALSE]
         cv_training_x <- cv_training[, -1, drop = FALSE]
@@ -1893,29 +1893,29 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
 
     fs <- tryCatch({  # rRF-FS with error handling
       rbioFS_rf_initialFS(objTitle = paste0("svm_nested_iter_", i), x = fs_training_x, y = cv_training_y, nTimes = 50,
-                           nTree = rf.ifs.ntree,
-                           parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
-                           plot = FALSE)
-       # fs <- svm_nested_initial_FS$feature_initial_FS
-       rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
-                     x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
-                     nTree = rf.sfs.ntree,
-                     parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
-                     plot = FALSE)
-       if (verbose) cat("Done!\n")
-       if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
-         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
-         } else {
-         out <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
-         }
-       },
-     error = function(e){
-       cat(paste0("\nErrors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n", "\tError message: ", e, "\n"))
-       out <- colnames(fs_training_x)
-       return(out)
-       })
+                          nTree = rf.ifs.ntree,
+                          parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
+                          plot = FALSE)
+      # fs <- svm_nested_initial_FS$feature_initial_FS
+      rbioFS_rf_SFS(objTitle = paste0("svm_nested_iter_", i),
+                    x = eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$training_initial_FS, y = cv_training_y, nTimes = 50,
+                    nTree = rf.sfs.ntree,
+                    parallelComputing = parallelComputing, clusterType = clusterType, n_cores = n_cores,
+                    plot = FALSE)
+      if (verbose) cat("Done!\n")
+      if (length(eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features) > 1){
+        out <- eval(parse(text = paste0("svm_nested_iter_", i, "_SFS")))$selected_features
+        } else {
+        out <- eval(parse(text = paste0("svm_nested_iter_", i, "_initial_FS")))$feature_initial_FS
+        }
+    },
+    error = function(e){
+      cat(paste0("\nErrors occurred during rRF-FS, skipping rRF-FS for CV iteration: ", i, "...\n", "\tError message: ", e, "\n"))
+      out <- colnames(fs_training_x)
+      return(out)
+    })
 
-      # processing test data
+    # processing test data
     fs_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ][, c("y", fs)]    # preserve y and selected features
 
     cv_fs_out <- list(
@@ -1926,11 +1926,11 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
       fs_test = fs_test,
       train_sampleIds = train_sampleIds,
       fs_transform = fs_transform
-      )
+    )
     return(cv_fs_out)
   }
 
-    # nested CV-M function: SVM modelling for nested CV iterations
+  # nested CV-M function: SVM modelling for nested CV iterations
   nested_cvm_func <- function(i, ...){
     set.seed(i)
     fs <- nested_cvfs.list[[i]]$fs
@@ -1947,7 +1947,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
                           tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
                           stratify = stratify, sampleIds = train_sampleIds, ...)
 
-      # processing test data: re-apply the train-fold transform to the test rows
+    # processing test data: re-apply the train-fold transform to the test rows
     fs_test <- nested_cvfs.list[[i]]$fs_test
     if (!is.null(fs_transform)){ # z-score then min-max, as fitted on the training rows
       fs_test[, -1] <- .apply_zcore_minmax(fs_test[, -1], params = fs_transform, verbose = FALSE)
@@ -1989,7 +1989,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
   names(nested_cvfs.list) <- paste0("cv_fold_", c(1:cross.k))
 
   if (verbose) cat(paste0("SVM for nested CV rRF-FS assessment (", cross.k, " iterations)..."))
-   if (parallelComputing) {
+  if (parallelComputing) {
     n_cores <- n_cores
     cl <- makeCluster(n_cores, type = clusterType)
     registerDoParallel(cl)
@@ -2005,8 +2005,8 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
   }
   if (verbose) cat("Done!\n")
 
-      # below: cv.model.idx: best models index
-   nested.cv.list <- nested_cvm.list    # set up nested.cv.list instead of using new nested_cvm.list for compatibility
+  # below: cv.model.idx: best models index
+  nested.cv.list <- nested_cvm.list    # set up nested.cv.list instead of using new nested_cvm.list for compatibility
   if (model_type == "classification"){
     nested.accu <- foreach(i = 1:cross.k, .combine = "c") %do% {
       nested.cv.list[[i]]$nested.cv.accuracy
@@ -2014,7 +2014,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     nested.rmse <- NULL
     nested.rsq <- NULL
     cv.median <- median(nested.accu)
-    cv.model.idx <- which(nested.accu >= cv.median)   # the higher the better
+    cv.model.idx <- which(nested.accu >= cv.median)  # the higher the better
     best.nested.accu <- nested.accu[cv.model.idx]
     best.nested.rmse <- NULL
     best.nested.rsq <- NULL
@@ -2027,7 +2027,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
       nested.cv.list[[i]]$nested.cv.rsq
     }
     cv.median <- median(nested.rmse)
-    cv.model.idx <- which(nested.rmse <= cv.median)   # the lower the better
+    cv.model.idx <- which(nested.rmse <= cv.median)  # the lower the better
 
     best.nested.accu <- NULL
     best.nested.rmse <- nested.rmse[cv.model.idx]
@@ -2046,22 +2046,22 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
   }
   fs.count <- sort(table(nested.fs), decreasing = TRUE)
 
-    # we only use best.fs.count for thresholding becuase it is going to be the same as nest.fs when cross.best.model.method = "none"
+  # we only use best.fs.count for thresholding because it is going to be the same as nest.fs when cross.best.model.method = "none"
   best.nested.fs <- foreach(i = 1:length(final.cv.list), .combine = "c") %do% {
     final.cv.list[[i]]$selected.features
   }
   best.nested.fs.count <- sort(table(best.nested.fs), decreasing = TRUE)
 
-  if (cross.best.model.method == "median"){   # adjust the threshold to 1 if only one model existed
+  if (cross.best.model.method == "median"){  # adjust the threshold to 1 if only one model existed
     if (!any(fs.count >= fs.count.cutoff)) {
-      fs.count.cutoff <-   1
+      fs.count.cutoff <- 1
     }
   }
 
-    # end time
+  # end time
   end_time <- Sys.time()
 
-    ## output
+  ## output
   if (model_type == "classification"){
     tot.nested.acc.summary <- c(mean(nested.accu), sd(nested.accu), sd(nested.accu)/sqrt(cross.k))
     names(tot.nested.acc.summary) <- c("tot.nested.accuracy", "sd", "sem")
@@ -2087,7 +2087,7 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
   }
   selected.features <- names(best.nested.fs.count[which(best.nested.fs.count >= fs.count.cutoff)])
 
-    # display
+  # display
   if (verbose) {
     cat("\n")
     cat("SVM model type: ")
@@ -2106,10 +2106,10 @@ rbioClass_svm_ncv_fs_v3 <- function(x, y,
     cat(selected.features)
   }
 
-    # run time
+  # run time
   runtime <- end_time - start_time
 
-    # export to environment
+  # export to environment
   out <- list(univariate.fs = univariate.fs,
               cv.fold = fold,
               randomized.sample.index = random_sample_idx,
@@ -2179,7 +2179,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'
 #' @description Cross-validation modelling and assessment for SVM modelling. It evaluates the overall performance of SVM modelling given the training data.
 #' @param x Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.
-#' @param y Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.
+#' @param y Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.
 #' @param center.scale Logical, master switch for the input transform. When \code{TRUE} (default) the training data
 #'   is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
 #'   pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.
@@ -2205,7 +2205,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'   folds; for fully group-aware (non-leakage) CV of repeated-measures data use
 #'   \code{\link{rbioClass_svm_ncv_fs_v3}}. A warning is emitted when \code{sampleIds}
 #'   is supplied. Default is \code{NULL}.
-#' @param kernel SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
+#' @param kernel SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.
 #' @param cross.k Fold of nested cross validation, i.e. outer loop. Default is \code{10}.
 #' @param cross.best.model.method The method to select the best cv models for feature selection. Options are \code{"median"} and \code{"none"}. Default is \code{"median"}.
 #' @param tune.method Parameter tuning method, i.e. inner loop. Options are \code{"cross"} (i.e. cross validation), \code{"boot"} (i.e. bootstrap), and \code{"fix"}. Default is \code{"cross"}.
@@ -2246,7 +2246,7 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #'      \code{cv.models}: all the CV SVM models
 #'
 #'      \code{final.cv.models}: the CV SVM models selected by the \code{cross.best.model.method}.
-#'                              when \code{cross.best.model.method = NULL}, \code{final.cv.models} is the same as \code{cv.models}.
+#'                              when \code{cross.best.model.method = "none"}, \code{final.cv.models} is the same as \code{cv.models}.
 #'
 #'      \code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
 #'
@@ -2279,8 +2279,8 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' This function is very similar to \code{\link{rbioClass_svm_ncv_fs}}.
 #' However, this function is intended for evaluating the final model, whereas the latter is for feature selection.
 #'
-#' When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-#' for feature count threshold. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+#' When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+#' for feature count threshold. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
@@ -2294,12 +2294,12 @@ print.rbiosvm_nestedcv <- function(x, ...){
 #' @examples
 #' \dontrun{
 #' svm_cv <- rbioClass_svm_cv(x = mydata[, -c(1:2)],
-#'                                      y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-#'                                      center.scale = TRUE,
-#'                                      cross.k = 5,
-#'                                      tune.method = "cross",
-#'                                      tune.cross.k = 5,
-#'                                      parallelComputing = TRUE, clusterType = "FORK")
+#'                            y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+#'                            center.scale = TRUE,
+#'                            cross.k = 5,
+#'                            tune.method = "cross",
+#'                            tune.cross.k = 5,
+#'                            parallelComputing = TRUE, clusterType = "FORK")
 #'
 #' }
 #' @export
@@ -2397,7 +2397,7 @@ rbioClass_svm_cv <- function(x, y,
     cv_training_x <- cv_training[, -1]
     cv_training_y <- cv_training[, 1]
     # sub-sample the group ids to the outer-fold training rows so the inner
-    # rbioClass_sVM CV is group-aware (rows sharing an id stay in one fold).
+    # rbioClass_svm CV is group-aware (rows sharing an id stay in one fold).
     train_sampleIds <- if (!is.null(sampleIds)) sampleIds[which(fold != i)] else NULL
 
     # Fit the input transform once on the outer-fold training rows and keep the
@@ -2414,9 +2414,9 @@ rbioClass_svm_cv <- function(x, y,
     # cv_training_x is already transformed with the outer-fold training
     # parameters, so the inner model is fit with center.scale = FALSE.
     cv_m <- rbioClass_svm(x = cv_training_x, y = cv_training_y, center.scale = FALSE,
-                    svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
-                    tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
-                    stratify = stratify, sampleIds = train_sampleIds, verbose = FALSE, ...)
+                          svm.cross.k = 0, tune.method = tune.method, kernel = kernel,
+                          tune.cross.k = tune.cross.k, tune.boot.n = tune.boot.n,
+                          stratify = stratify, sampleIds = train_sampleIds, verbose = FALSE, ...)
 
     # processing test data: re-apply the train-fold transform to the test rows
     cv_test <- dfm_randomized[which(fold == i, arr.ind = TRUE), ]
@@ -2594,7 +2594,7 @@ rbioClass_svm_cv <- function(x, y,
 #'
 #' \code{classifier.class}
 #'
-#' \code{predited.value}
+#' \code{predicted.value}
 #'
 #' \code{tot.predict.RMSE}
 #'
@@ -2637,7 +2637,7 @@ rbioClass_svm_cv <- function(x, y,
 rbioClass_svm_predict <- function(object,
                                   newdata, center.scale.newdata = TRUE, export.name = NULL,
                                   sampleID.vector = NULL, newdata.y = NULL,
-                                  prob.method = c("logistic",  "Bayes", "softmax"),
+                                  prob.method = c("logistic", "Bayes", "softmax"),
                                   verbose = TRUE){
   ## argument check
   if (!any(class(object) %in% c("rbiosvm"))) stop("object needs to be a \"rbiosvm\" class.")
@@ -2649,7 +2649,7 @@ rbioClass_svm_predict <- function(object,
   }
   if (!any(class(newdata) %in% c("matrix", "data.frame"))) stop("newdata has to be either a matrix or data.frame object.")
   if (ncol(newdata) != ncol(object$inputX)) stop("newdata needs to have the same number of variables, i.e. columns, as the object.")
-  # if (!prob.method %in% c("logistic",  "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
+  # if (!prob.method %in% c("logistic", "Bayes", "softmax")) stop("Probability method should be either \"softmax\" or \"Bayes\".")
   if (center.scale.newdata){
     if (is.null(object$center.scaledX)) {
       warning("No center.scaledX found in training data while center.scale.newdata = TRUE, proceed with center.scale.newdata = FALSE")
@@ -2665,7 +2665,7 @@ rbioClass_svm_predict <- function(object,
   if (object$model.type == "classification"){
     newdata.y <- NULL
     y <- newdata.y
-    prob.method <- match.arg(prob.method, c("logistic",  "Bayes", "softmax"))
+    prob.method <- match.arg(prob.method, c("logistic", "Bayes", "softmax"))
     probability <- TRUE
   } else {
     if (missing(newdata.y) || is.null(newdata.y) || length(newdata.y) != nrow(newdata)) stop("Please set the correct outcome value vector newdata.y for regression study.")
@@ -2730,7 +2730,7 @@ rbioClass_svm_predict <- function(object,
       prob_dfm <- data.frame(Sample = rep(rownames(prob)[i], times = ncol(prob)),
                              Class = colnames(prob), Probability = prob[i, ], stringsAsFactors = FALSE, row.names = NULL)
       prob_dfm$Sample <- factor(prob_dfm$Sample, unique(prob_dfm$Sample))
-      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel lable position, seemingly from bottom up
+      prob_dfm$repel.label.pos <- rev(cumsum(rev(prob_dfm$Probability)) - rev(prob_dfm$Probability) / 2)  # calculate the repel label position, seemingly from bottom up
       prob_dfm$precent.label <- paste0(signif(prob_dfm$Probability, 4) * 100, "%")
       prob_dfm$Class <- factor(prob_dfm$Class, unique(prob_dfm$Class))
       return(prob_dfm)

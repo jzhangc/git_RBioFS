@@ -2,7 +2,7 @@
 % Please edit documentation in R/rbioUtil.R
 \name{rbioUtil_classif_accuracy}
 \alias{rbioUtil_classif_accuracy}
-\title{Title rbioUtil_classif_accuracy}
+\title{rbioUtil_classif_accuracy}
 \usage{
 rbioUtil_classif_accuracy(
   object,

@@ -14,13 +14,13 @@ rbioUtil_onehotEncoding(data, cols, export_mode = c("dfm", "dt"))
 \item{export_mode}{str. Export as data.table or data.frame. Default is \code{"dfm"}.}
 }
 \value{
-data.frame with columns one hot encoded.
+data.frame with columns one-hot encoded.
 }
 \description{
 Convert data.frame features into factors.
 }
 \details{
-The output data.frame has all the data of the inoput data, as opposed to just encoded columns.
+The output data.frame has all the data of the input data, as opposed to just encoded columns.
 }
 \examples{
 \dontrun{

@@ -29,7 +29,7 @@ rbioClass_svm_cv(
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
 
-\item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
+\item{y}{Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.}
 
 \item{center.scale}{Logical, master switch for the input transform. When \code{TRUE} (default) the training data
 is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
@@ -43,7 +43,7 @@ pre-transformed). The actual transform is selected by \code{zscore} / \code{minm
 \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.}
 
-\item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
+\item{kernel}{SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
 \item{cross.k}{Fold of nested cross validation, i.e. outer loop. Default is \code{10}.}
 
@@ -115,7 +115,7 @@ Items for \code{rbiosvm_cv}:
      \code{cv.models}: all the CV SVM models
 
      \code{final.cv.models}: the CV SVM models selected by the \code{cross.best.model.method}.
-                             when \code{cross.best.model.method = NULL}, \code{final.cv.models} is the same as \code{cv.models}.
+                             when \code{cross.best.model.method = "none"}, \code{final.cv.models} is the same as \code{cv.models}.
 
      \code{nested.cv.models}: all the cv models with test data. NOTE: the test data is center-scaled with training data if \code{center.scale = TRUE}.
 
@@ -150,8 +150,8 @@ Cross-validation modelling and assessment for SVM modelling. It evaluates the ov
 This function is very similar to \code{\link{rbioClass_svm_ncv_fs}}.
 However, this function is intended for evaluating the final model, whereas the latter is for feature selection.
 
-When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-for feature count threshold. When there is no change in performance across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+for feature count threshold. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 
@@ -160,12 +160,12 @@ For classification modelling, the 10-fold CV segmentation is stratified, whereas
 \examples{
 \dontrun{
 svm_cv <- rbioClass_svm_cv(x = mydata[, -c(1:2)],
-                                     y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-                                     center.scale = TRUE,
-                                     cross.k = 5,
-                                     tune.method = "cross",
-                                     tune.cross.k = 5,
-                                     parallelComputing = TRUE, clusterType = "FORK")
+                           y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+                           center.scale = TRUE,
+                           cross.k = 5,
+                           tune.method = "cross",
+                           tune.cross.k = 5,
+                           parallelComputing = TRUE, clusterType = "FORK")
 
 }
 }

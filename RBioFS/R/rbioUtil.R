@@ -1,4 +1,4 @@
-#' Title rbioUtil_fscount_plot
+#' @title rbioUtil_fscount_plot
 #'
 #' @description Bar graph for the FS count numbers
 #' @param object Object or data frame containing FS count information. This currently supports S3 classes \code{table}, \code{data.frame} and \code{rbiosvm_nestedcv}.
@@ -14,7 +14,7 @@ rbioUtil_fscount_plot <- function(object, ...){
 }
 
 
-#' Title rbioUtil_fscount_plot.rbiosvm_nestedcv
+#' @title rbioUtil_fscount_plot.rbiosvm_nestedcv
 #' @rdname rbioUtil_fscount_plot
 #' @method rbioUtil_fscount_plot rbiosvm_nestedcv
 #' @param object A \code{rbiosvm_nestedcv} object.
@@ -33,7 +33,7 @@ rbioUtil_fscount_plot.rbiosvm_nestedcv <- function(object, export.name, ...) {
 }
 
 
-#' Title rbioUtil_fscount_plot.default
+#' @title rbioUtil_fscount_plot.default
 #' @rdname rbioUtil_fscount_plot
 #' @method rbioUtil_fscount_plot default
 #' @param dfm Input data.frame.
@@ -126,7 +126,7 @@ rbioUtil_fscount_plot.default <- function(dfm, feature_var, count_var,
 
 
 
-#' Title rbioUtil_classif_accuracy
+#' @title rbioUtil_classif_accuracy
 #'
 #' @description Classification accuracy calculation function
 #' @param object Classification model object. The object should be either \code{rbiosvm}, or \code{rbiomvr} classes.
@@ -180,7 +180,7 @@ rbioUtil_classif_accuracy <- function(object, newdata, newdata.label, center.sca
 
 
 
-#' Title rbioUtil_perm_plot
+#' @title rbioUtil_perm_plot
 #'
 #' @description Plotting function for permutation test results.
 #' @param perm_res Permutation test results object. The object should be either \code{rbiosvm_perm}, or \code{rbiomvr_perm} classes.
@@ -198,7 +198,7 @@ rbioUtil_perm_plot <- function(perm_res, ...){
 }
 
 
-#' Title rbioUtil_perm_plot.rbiosvm_perm
+#' @title rbioUtil_perm_plot.rbiosvm_perm
 #'
 #' @rdname rbioUtil_perm_plot
 #' @method rbioUtil_perm_plot rbiosvm_perm
@@ -243,7 +243,7 @@ rbioUtil_perm_plot.rbiosvm_perm <- function(perm_res, plot.SymbolSize = 2,
 }
 
 
-#' Title rbioUtil_perm_plot.rbiomvr_perm
+#' @title rbioUtil_perm_plot.rbiomvr_perm
 #'
 #' @rdname rbioUtil_perm_plot
 #' @method rbioUtil_perm_plot rbiomvr_perm
@@ -290,7 +290,7 @@ rbioUtil_perm_plot.rbiomvr_perm <- function(perm_res, plot.SymbolSize = 2,
 }
 
 
-#' Title rbioUtil_perm_plot.default
+#' @title rbioUtil_perm_plot.default
 #'
 #' @rdname rbioUtil_perm_plot
 #' @method rbioUtil_perm_plot default
@@ -362,18 +362,18 @@ rbioUtil_perm_plot.default <- function(baseplt,
 
 #' @title rbioUtil_classplot
 #'
-#' @description Classification plot function for classification prediction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probablity pie charts.
+#' @description Classification plot function for classification prediction. The function uses \code{prediction} object generated from \code{\link{rbioClass_plsda_predict}} or \code{\link{rbioClass_svm_predict}} to generate classification probability pie charts.
 #' @param pred.object A \code{prediction} object, which can be obtained from function \code{\link{rbioClass_plsda_predict}}.
 #' @param export.name String. Optional user defined export name prefix. Default is \code{NULL}.
-#' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj)}.
+#' @param multi_plot.ncol Number of columns on one figure page. Default is \code{nrow(pred.obj$raw.newdata)}.
 #' @param multi_plot.nrow Number of rows on one figure page. Default is \code{1}.
 #' @param multi_plot.legend.pos The legend position. Only effective when multi-plot is generated. Options are \code{"bottom"}, \code{"top"}, \code{"left"} and \code{"right"}. Default is \code{"bottom"}.
 #' @param plot.Title Plot title. Default is \code{FALSE}.
 #' @param plot.titleSize The font size of the plot title. Default is \code{10}.
 #' @param plot.probLabelSize The size of the sample label. Default is \code{2}.
 #' @param plot.probLabel.padding The padding between sample symbol and the label. Default is \code{0.5}.
-#' @param plot.probLabel.outside If to put the probability label outside of the pies. Default is \code{"TRUE"}.
-#' @param plot.probLabel.outside.nudge Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{"1.5"}.
+#' @param plot.probLabel.outside If to put the probability label outside of the pies. Default is \code{FALSE}.
+#' @param plot.probLabel.outside.nudge Set only when \code{plot.probLabel.outside = TRUE}, adjustment to nudge the starting position of each label. Default is \code{1.5}.
 #' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
 #' @param plot.SymbolSize Symbol size. Default is \code{2}.
 #' @param plot.legendSize Legend size. Default is \code{9}.
@@ -402,7 +402,7 @@ rbioUtil_classplot <- function(pred.obj, export.name = NULL,
                               plot.Width = 170, plot.Height = 150,
                               verbose = TRUE){
   ## check arguments
-  if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a  \"prediction\" class. Use functions like rbioClass_plsda_predict() to generate one.")
+  if (!any(class(pred.obj) %in% "prediction")) stop("pred.obj needs to be a \"prediction\" class. Use functions like rbioClass_plsda_predict() to generate one.")
   if (pred.obj$model.type != "classification") stop("the function only supports \"classification\".")
   if (is.null(export.name)){
     export.name <- deparse(substitute(pred.obj))
@@ -493,12 +493,12 @@ convertToFactor <- function(dfm, cols) {
 #' y <- dummy(y)
 #' }
 #' @export
-dummy <- function (x, drop2nd = FALSE){  # integrate into the main function eventually
+dummy <- function(x, drop2nd = FALSE){  # integrate into the main function eventually
   if (!is.factor(x)){  # use this one for the arguments
     stop("'x' should be a factor")
   }
   y <- model.matrix(~x - 1)
-  # below: remove unecessary array attributes
+  # below: remove unnecessary array attributes
   colnames(y) <- gsub("^x", "", colnames(y))
   attributes(y)$assign <- NULL
   attributes(y)$contrasts <- NULL
@@ -516,9 +516,9 @@ dummy <- function (x, drop2nd = FALSE){  # integrate into the main function even
 #' @param data data.frame. Input data.frame.
 #' @param cols str or vector of strings. Column names to encode.
 #' @param export_mode str. Export as data.table or data.frame. Default is \code{"dfm"}.
-#' @return data.frame with columns one hot encoded.
+#' @return data.frame with columns one-hot encoded.
 #' @details
-#'  The output data.frame has all the data of the inoput data, as opposed to just encoded columns.
+#'  The output data.frame has all the data of the input data, as opposed to just encoded columns.
 #' @importFrom mltools one_hot
 #' @importFrom data.table data.table
 #' @examples
@@ -548,7 +548,7 @@ rbioUtil_onehotEncoding <- function(data, cols, export_mode = c("dfm", "dt")) {
 #'
 #' @description Extract n'th character from string from right.
 #' @param x str. Input string.
-#' @param n int. Optional user defined export name prefix. Default is \code{NULL}.
+#' @param n int. Number of characters to extract from the right end of the string.
 #' @return character extracted from string.
 #' @examples
 #' \dontrun{
@@ -562,7 +562,7 @@ substr_right <- function(x, n){
 
 #' @title na_summary
 #'
-#' @description NA ration summary.
+#' @description NA ratio summary.
 #' @param data data.frame, matrix list of data.frames or matrices. Input data.
 #' @param by str. Summarize by row or column. Default is \code{"row"}.
 #' @return Vector or list of vector of NA ratios.
@@ -572,7 +572,7 @@ substr_right <- function(x, n){
 #' }
 #' @export
 na_summary <- function(data, by = c("row", "col")) {
-  if (length(by) >1) stop("only set one value for \"by\". ")
+  if (length(by) > 1) stop("only set one value for \"by\". ")
   by <- match.arg(by)
 
   if ("list" %in% class(data)) {
@@ -593,12 +593,9 @@ na_summary <- function(data, by = c("row", "col")) {
     )
 
   } else if (any(c("data.frame", "matrix") %in% class(data))) {
-    out <- vector()
     switch(by,
            row = {
-             for (i in 1:length(out)) {
-               out <- rowSums(is.na(data))/ncol(data)
-             }
+             out <- rowSums(is.na(data))/ncol(data)
            },
            col = {
              out <- colSums(is.na(data))/nrow(data)
@@ -620,7 +617,7 @@ na_summary <- function(data, by = c("row", "col")) {
 #'    1. \code{newdata} should not include outcome column.
 #'    2. \code{newdata} should be 0-1 scaled.
 #'    3. \code{newdata} will be standardized using training data's col mean and sd, if the input \code{rbiosvm} model \code{object} contains standardization information:
-#'       \code{object$center.scaledX}.This means the model was trainined using standardization.
+#'       \code{object$center.scaledX}. This means the model was trained using standardization.
 #' @return Vector or data frame of prediction probabilities.
 rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
   # --- arg check ---
@@ -647,7 +644,7 @@ rbio_shap_svm_label_prob <- function(object, newdata, col_idx = NULL, ...) {
 
 #' @title shap_g_theme_helper
 #' @description
-#'    A helper function to set the plot themes for the \code{\link{rbioClass_svm_shap_aggreated}} function.
+#'    A helper function to set the plot themes for the \code{\link{rbioClass_svm_shap_aggregated}} function.
 #' @import ggplot2
 #' @return \code{ggplot2} graph object.
 shap_g_theme_helper <- function(g,
@@ -677,7 +674,7 @@ shap_g_theme_helper <- function(g,
 
 #' @title sv_importance_shapviz
 #' @description
-#' A alternative version of \code{sv_importance} function from \code{shapviz} package
+#' An alternative version of \code{sv_importance} function from \code{shapviz} package
 #'
 #' @details
 #'    Mainly to add custom graphic settings to the original function
@@ -739,7 +736,7 @@ sv_importance_shapviz <- function(object, kind = c("bar", "beeswarm", "both", "n
       shapviz:::.get_color_scale(
         viridis_args = viridis_args,
         bar = !is.null(color_bar_title),
-        ncol = length(unique(df$color))   # Special case of constant feature values
+        ncol = length(unique(df$color))  # Special case of constant feature values
       ) +
       ggplot2::labs(
         x = "SHAP value", y = ggplot2::element_blank(), color = color_bar_title
@@ -759,7 +756,7 @@ sv_importance_shapviz <- function(object, kind = c("bar", "beeswarm", "both", "n
         size = number_size
       ) +
       ggplot2::scale_x_continuous(
-        expand = ggplot2::expansion(mult = 0.05 + c(0.12 *!is_bar, 0.09 * is_bar))
+        expand = ggplot2::expansion(mult = 0.05 + c(0.12 * !is_bar, 0.09 * is_bar))
       )
   }
   p

@@ -25,5 +25,5 @@ Helper function to extract probability vectors from svm model predictions.
 1. \code{newdata} should not include outcome column.
    2. \code{newdata} should be 0-1 scaled.
    3. \code{newdata} will be standardized using training data's col mean and sd, if the input \code{rbiosvm} model \code{object} contains standardization information:
-      \code{object$center.scaledX}.This means the model was trainined using standardization.
+      \code{object$center.scaledX}. This means the model was trained using standardization.
 }

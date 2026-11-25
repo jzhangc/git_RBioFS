@@ -25,13 +25,13 @@ rbioClass_svm(
 \arguments{
 \item{x}{Input data matrix (e.g., independent variables, predictors, features, X, etc). Make sure it is either a matrix or a dataframe.}
 
-\item{y}{Input response variable (e.g.,dependent variables, Y etc). Make sure it is \code{factor} class.}
+\item{y}{Input response variable (e.g., dependent variables, Y etc). Make sure it is \code{factor} class.}
 
 \item{center.scale}{Logical, master switch for the input transform. When \code{TRUE} (default) the training data
 is transformed before modelling; when \code{FALSE} the data is used as-is (for data that is already
 pre-transformed). The actual transform is selected by \code{zscore} / \code{minmax}. Default is \code{TRUE}.}
 
-\item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
+\item{kernel}{SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
 \item{svm.cross.k}{Fold of cross validation. Default is \code{10}.}
 

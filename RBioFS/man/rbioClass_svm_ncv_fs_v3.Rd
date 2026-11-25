@@ -61,7 +61,7 @@ pre-transformed). The actual transform is selected by \code{zscore} / \code{minm
 \eqn{(x - \min(x)) / (\max(x) - \min(x))}, mapping each column to \eqn{[0, 1]}. Default is \code{FALSE}.
 At least one of \code{zscore} or \code{minmax} must be \code{TRUE} when \code{center.scale = TRUE}.}
 
-\item{kernel}{SVM kernel. Options are \code{"linear", "ploynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
+\item{kernel}{SVM kernel. Options are \code{"linear", "polynomial", "radial", "sigmoid"}. Default is \code{"radial"}, aka RBF.}
 
 \item{cross.k}{Fold of nested cross validation, i.e. outer loop. Default is \code{10}.}
 
@@ -87,11 +87,11 @@ occur on an imbalanced data set. Default is \code{TRUE}.}
 
 \item{fs.method}{Feature selection method. Only \code{"rf"} (i.e. random forest) is supported so far. Default is \code{"rf"}.}
 
-\item{rf.ifs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{501}.}
+\item{rf.ifs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the initial feature selection step of recursive feature selection. Default is \code{1001}.}
 
-\item{rf.sfs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{501}.}
+\item{rf.sfs.ntree}{Set only when \code{fs.method = "rf"}, ntree setting for the sequential forward selection step of recursive feature selection. Default is \code{1001}.}
 
-\item{fs.count.cutoff}{A integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.}
+\item{fs.count.cutoff}{An integer for feature vote cutoff. Default is outer loop cross-validation fold \code{cross.k}.}
 
 \item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
@@ -162,7 +162,7 @@ Additional items for \code{rbiosvm_nestedcv}:
 
 \code{tune.cross.k}: fold number for (inner) loop if cross-validation is chosen
 
-\code{tune.boot.n}: iternation number for (inner) loop if bootstrap is chosen
+\code{tune.boot.n}: iteration number for (inner) loop if bootstrap is chosen
 
 \code{run.time}: total run time
 }
@@ -191,8 +191,8 @@ Resulted features from each nested cross-validation round are voted. Features wi
 It is also a good idea to set \code{fs.count.cutoff} as \code{cross.k - 1}. Notably, \code{fs.count.cutoff = 1} is "no threshold",
 meaning maximum number of features selected from the nested cross-validation are reported.
 
-When \code{cross.best.model.method = "median"}, the function only use models with accuracy/RMSE equal or better than the median valaue
-for feature count threholding. When there is no change in perforamce across cv models, the function behaves same as \code{cross.best.model.method = "none"}
+When \code{cross.best.model.method = "median"}, the function only uses models with accuracy/RMSE equal or better than the median value
+for feature count thresholding. When there is no change in performance across cv models, the function behaves the same as \code{cross.best.model.method = "none"}
 
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
@@ -204,17 +204,17 @@ the group-level covariate distribution is balanced via variance minimisation or 
 \dontrun{
 # Example with independent samples (same as v2):
 svm_nestedcv <- rbioClass_svm_ncv_fs_v3(x = mydata[, -c(1:2)],
-                                         y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-                                         center.scale = TRUE,
-                                         cross.k = 5,
-                                         sampleIds = NULL)
+                                        y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+                                        center.scale = TRUE,
+                                        cross.k = 5,
+                                        sampleIds = NULL)
 
 # Example with group-dependent samples (e.g., repeated measures from same subject):
 svm_nestedcv_grouped <- rbioClass_svm_ncv_fs_v3(x = mydata[, -c(1:2)],
-                                                  y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
-                                                  center.scale = TRUE,
-                                                  cross.k = 5,
-                                                  sampleIds = mydata$SubjectID)
+                                                y = factor(mydata$Conditions, levels = unique(mydata$Conditions)),
+                                                center.scale = TRUE,
+                                                cross.k = 5,
+                                                sampleIds = mydata$SubjectID)
 
 }
 }
