@@ -95,7 +95,6 @@ importFrom(doParallel,registerDoParallel)
 importFrom(e1071mc,
   svm,
   svm_mc,
-  tune,
   tune.control,
   tune_mc
 )

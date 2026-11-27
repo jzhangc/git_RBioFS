@@ -81,3 +81,26 @@ test_that("2.4(d) n_cores=1 (serial tune) vs n_cores=2 (parallel tune_mc) give i
   expect_true(isTRUE(all.equal(m1$cost, m2$cost)))
   expect_true(isTRUE(all.equal(suppressWarnings(m1$gamma), suppressWarnings(m2$gamma))))
 })
+
+test_that("2.4(e) unified svm_mc/tune_mc path: n_cores=NULL (->1) == n_cores=1, and model carries n_cores", {
+  # After the svm()/tune() -> svm_mc()/tune_mc() unification, the serial path
+  # (n_cores = NULL, coerced to 1) and an explicit n_cores = 1 must be
+  # bit-identical (same seed -> same .svm_mc_assign_folds() folds -> same
+  # tuned cost/gamma), and the fitted model must expose the n_cores field that
+  # svm_mc() attaches (proof the model was fit via svm_mc, not the old svm()).
+  y <- factor(c(rep("A", 30), rep("B", 30)))
+  set.seed(2030); x <- matrix(rnorm(60 * 6), 60, 6)
+  args <- list(x = x, y = y, kernel = "radial", svm.cross.k = 0,
+               tune.method = "cross", tune.cross.k = 5,
+               stratify = TRUE, verbose = FALSE)
+  set.seed(2030); m_null <- do.call(rbioClass_svm, c(list(n_cores = NULL), args))
+  set.seed(2030); m_one  <- do.call(rbioClass_svm, c(list(n_cores = 1L), args))
+  # serial parity: NULL (->1) and explicit 1 give identical tuned params
+  expect_true(isTRUE(all.equal(m_null$cost, m_one$cost)))
+  expect_true(isTRUE(all.equal(suppressWarnings(m_null$gamma),
+                               suppressWarnings(m_one$gamma))))
+  # the model was fit via svm_mc(): it carries the n_cores field, set to 1
+  expect_true("n_cores" %in% names(m_one))
+  expect_equal(as.integer(m_one$n_cores), 1L)
+  expect_equal(as.integer(m_null$n_cores), 1L)
+})

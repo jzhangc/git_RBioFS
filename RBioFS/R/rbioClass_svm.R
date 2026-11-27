@@ -114,20 +114,25 @@
 #' pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and
 #' utility (i.e. classify unknown data).
 #'
-#' When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071mc::svm()} and \code{e1071mc::tune()}
+#' The model is always fit via \code{e1071mc::svm_mc()} and the parameters tuned via
+#' \code{e1071mc::tune_mc()}. When \code{n_cores > 1} these run in parallel; when
+#' \code{n_cores <= 1} (or \code{NULL}, which is treated as \code{1}) they delegate to the
+#' serial \code{e1071mc::svm()} / \code{e1071mc::tune()} internally. The \emph{inner tuning}
+#' CV folds are built by the same \code{.svm_mc_assign_folds()} helper in both paths, so
+#' \code{stratify} / \code{sampleIds} are honoured whether or not parallelization is used
+#' (leakage-proof tuning in serial mode).
 #'
 #' Note on the \emph{final} model's internal cross-validation (\code{svm.cross.k > 0}):
 #' with \code{n_cores > 1} the internal CV folds of the final model honour
-#' \code{stratify} / \code{sampleIds} (via \code{e1071mc::svm_mc()}); with
-#' \code{n_cores <= 1} the serial \code{e1071mc::svm()} routes its internal CV through
-#' the libsvm C code, which does not support stratified or group-aware folds, so
-#' \code{stratify} / \code{sampleIds} are silently ignored for that internal CV only
-#' (the fitted model itself is unaffected, and all nested CV wrappers in this package
-#' use \code{svm.cross.k = 0}).
+#' \code{stratify} / \code{sampleIds} (via the R-level \code{e1071mc} cross-validation); with
+#' \code{n_cores <= 1} the internal CV routes through the libsvm C code, which does not
+#' support stratified or group-aware folds, so \code{stratify} / \code{sampleIds} are
+#' silently ignored for that internal CV only (the fitted model itself is unaffected, and
+#' all nested CV wrappers in this package use \code{svm.cross.k = 0}).
 #'
 #' The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 #'
-#' @importFrom e1071mc svm svm_mc tune tune_mc tune.control
+#' @importFrom e1071mc svm svm_mc tune_mc tune.control
 #' @examples
 #' \dontrun{
 #' # default: z-score standardization (center + scale)
@@ -250,37 +255,31 @@ rbioClass_svm <- function(x, y, center.scale = TRUE,
   # .suppress_dup_ids_warning(): the e1071mc fold builder warns about
   # "unique sample IDs < cross" under the same condition already reported
   # by the up-front warning above; keep the RBioFS one only.
-  if (n_cores > 1) {
-    svm_tuned <- .suppress_dup_ids_warning(
-      tune_mc(svm, kernel = kernel, scale = FALSE,
-              train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-              tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
-                                         stratify = isTRUE(stratify), sampleIds = sampleIds),
-              n_cores = n_cores))
-  } else {
-    svm_tuned <- .suppress_dup_ids_warning(
-      tune(svm, kernel = kernel, scale = FALSE,
-           train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
-           tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
-                                      stratify = isTRUE(stratify), sampleIds = sampleIds)))
-  }
+  # Always use tune_mc(): with n_cores <= 1 it delegates to the serial
+  # tune() internally, but BOTH paths build the inner CV folds with the same
+  # .svm_mc_assign_folds() helper, so stratify / sampleIds are honoured
+  # whether or not parallelization is used (leakage-proof tuning in serial).
+  svm_tuned <- .suppress_dup_ids_warning(
+    tune_mc(svm, kernel = kernel, scale = FALSE,
+            train.x = X, train.y = y, ranges = list(gamma = gamma_start * 2^(-5:5), cost = 2^(-10:8)), class.weights = wgt,
+            tunecontrol = tune.control(sampling = tunecontrol.sampling, cross = tune.cross.k, nboot = tune.boot.n,
+                                       stratify = isTRUE(stratify), sampleIds = sampleIds),
+            n_cores = n_cores))
   if (verbose) cat("DONE!\n")
 
   # svm
   if (verbose) cat("SVM modelling...")
-  if (n_cores > 1) {
-    m <- svm_mc(x = X, y = y, kernel = kernel, probability = TRUE,
-                cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-                scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-                cross = svm.cross.k, n_cores = n_cores,
-                stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
-  } else {
-    m <- svm(x = X, y = y, kernel = kernel, probability = TRUE,
-             cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
-             scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
-             cross = svm.cross.k,
-             stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
-  }
+  # Always use svm_mc(): with n_cores <= 1 it delegates to the serial svm()
+  # internally. NOTE: the final model's internal CV (svm.cross.k > 0) is only
+  # leakage-proof (stratify / sampleIds) when n_cores > 1 (R-level CV); at
+  # n_cores <= 1 it routes through the libsvm C code, which uses contiguous
+  # folds and ignores stratify / sampleIds. The nested CV wrappers set
+  # svm.cross.k = 0, so this does not affect them.
+  m <- svm_mc(x = X, y = y, kernel = kernel, probability = TRUE,
+              cost = svm_tuned$best.parameters$cost, gamma = svm_tuned$best.parameters$gamma,
+              scale = FALSE, class.weights = wgt, coef0 = ifelse(is.null(svm_tuned$coef.0), 0, svm_tuned$coef.0),
+              cross = svm.cross.k, n_cores = n_cores,
+              stratify = isTRUE(stratify), sampleIds = sampleIds, ...)
   if (verbose) cat("Done!\n")
 
   # return

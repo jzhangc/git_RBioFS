@@ -156,16 +156,21 @@ The option \code{center.scale = FALSE} is for prior center.scaled or otherwise p
 pure mathematical analysis of the data set, instead of the generalized use for SVM model evaluation and
 utility (i.e. classify unknown data).
 
-When \code{n_cores>1}, parallel computing uses \code{e1071mc::svm_mc()} and \code{e1071mc::tune_mc()}. \code{n_cores=NULL} is the same as \code{n_cores=1}, which falls back to \code{e1071mc::svm()} and \code{e1071mc::tune()}
+The model is always fit via \code{e1071mc::svm_mc()} and the parameters tuned via
+\code{e1071mc::tune_mc()}. When \code{n_cores > 1} these run in parallel; when
+\code{n_cores <= 1} (or \code{NULL}, which is treated as \code{1}) they delegate to the
+serial \code{e1071mc::svm()} / \code{e1071mc::tune()} internally. The \emph{inner tuning}
+CV folds are built by the same \code{.svm_mc_assign_folds()} helper in both paths, so
+\code{stratify} / \code{sampleIds} are honoured whether or not parallelization is used
+(leakage-proof tuning in serial mode).
 
 Note on the \emph{final} model's internal cross-validation (\code{svm.cross.k > 0}):
 with \code{n_cores > 1} the internal CV folds of the final model honour
-\code{stratify} / \code{sampleIds} (via \code{e1071mc::svm_mc()}); with
-\code{n_cores <= 1} the serial \code{e1071mc::svm()} routes its internal CV through
-the libsvm C code, which does not support stratified or group-aware folds, so
-\code{stratify} / \code{sampleIds} are silently ignored for that internal CV only
-(the fitted model itself is unaffected, and all nested CV wrappers in this package
-use \code{svm.cross.k = 0}).
+\code{stratify} / \code{sampleIds} (via the R-level \code{e1071mc} cross-validation); with
+\code{n_cores <= 1} the internal CV routes through the libsvm C code, which does not
+support stratified or group-aware folds, so \code{stratify} / \code{sampleIds} are
+silently ignored for that internal CV only (the fitted model itself is unaffected, and
+all nested CV wrappers in this package use \code{svm.cross.k = 0}).
 
 The function also supports regression study, in which case, the performance metric is \code{RMSE}.
 }
